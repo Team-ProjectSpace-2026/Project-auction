@@ -8,22 +8,20 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 22
+          cache: npm
+          cache-dependency-path: Auction-Project/package-lock.json
 
-      - name: Install dependencies
-        run: npm install
+      - run: npm ci
         working-directory: Auction-Project
 
-      - name: Build project
-        run: npm run build
+      - run: npm run lint
+        working-directory: Auction-Project
+
+      - run: npm run build
         working-directory: Auction-Project
