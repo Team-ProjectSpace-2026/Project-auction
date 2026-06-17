@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
@@ -21,6 +22,7 @@ function App() {
             Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
           </p>
         </div>
+        <h2>section</h2>
         <button
           type="button"
           className="counter"
