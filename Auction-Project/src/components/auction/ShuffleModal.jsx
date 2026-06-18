@@ -1,4 +1,4 @@
-import React from "react";
+// React import removed (JSX runtime handles it automatically)
 
 const ShuffleModal = ({ isOpen }) => {
   if (!isOpen) return null;
