@@ -1,0 +1,7 @@
+import api from "./api";
+
+export const getTeams = () => api.get("/teams");
+export const getTeam = (id) => api.get(`/teams/${id}`);
+export const createTeam = (data) => api.post("/teams", data);
+export const updateTeam = (id, data) => api.put(`/teams/${id}`, data);
+export const deleteTeam = (id) => api.delete(`/teams/${id}`);
