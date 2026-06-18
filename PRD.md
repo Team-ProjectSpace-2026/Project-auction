@@ -1,197 +1,253 @@
 # Product Requirements Document (PRD)
 
-## Document Control
-* **Project Title:** CricAuction (Cricket League Auction Management System)
-* **Document Version:** 2.0 (Design-Aligned)
-* **Date:** June 12, 2026
-* **Figma Target Node Reference:** [Figma Design Link](#)
-
----
+**Project Title:** CricAuction (Cricket League Auction Management System)
+**Document Version:** 4.0 (Comprehensive Design-Locked Specification)
+**Date:** June 18, 2026
 
 ## 1. System Overview & Branding
 
-### 1.1 Platform Purpose
-CricAuction is a highly specialized Software-as-a-Service (SaaS) platform built for cricket league administrators and team owners. The system streamlines cricket tournament management, processes player registration payloads, orchestrates real-time low-latency live bidding events, and visualizes live squad compilation matrices.
+CricAuction is an automated, real-time SaaS platform tailored for managing sports league structures, automated public registrations, team configurations, and live interactive auctions.
 
-### 1.2 Design Identity & Split Theme Scheme
-To optimize user focus and system ergonomics, CricAuction utilizes an intentional split UI theme strategy:
+### Theme & Layout Architecture
 
-* **Administrative & Configuration Interfaces (Light Theme):** Admin panels, setup wizards, profile configuration areas, and basic tabular registries utilize an intuitive, clean, crisp Light Theme. This minimizes cognitive fatigue during heavy data entry workflows.
-* **High-Stakes Live Execution Interfaces (Dark Theme):** The Live Auction Room, real-time bidding dashboards, "Sold" state overlay animations, and final transaction breakdown displays transition completely to a dark-saturated, premium, tactical Dark Theme. This visual layout is specifically styled to emulate professional sports television broadcasting networks (e.g., ESPN, Sky Sports) to maximize engagement and clarity under high-concurrency pressure.
+- **Organizer Administrative Workspace (Light Theme):** Formulated with high-contrast, structured layout components, card blocks, and explicit data-entry grids. It ensures rapid configuration and complete visibility over historical data metrics.
+- **Live Auction Control Panel (Light/Broadcast Hybrid Layout):** Operates on a structured white container canvas backed by a high-visibility real-time telemetry sidebar and state execution triggers. This hybrid approach enables low-latency auction administration directly from the tournament dashboard panel.
 
----
+## 2. User Authentication & Profile Workflows
 
-## 2. User Authentication & Core Entry Flows
+### 2.1 Organizer Portal Login Gateway
 
-### 2.1 Organizer Registration Form
-* **UI Structure:** A balanced dual-column layout configuration.
-    * **Left Panel:** Dedicated to high-fidelity platform capability marketing, containing dynamic benefit propositions and system feature highlights.
-    * **Right Panel:** Houses a standalone, elevated white card container holding the "Create Organizer Account" form.
-* **Input Fields & Validation Constraints:**
-    1.  **Full Name:** Text input field containing an inline leading user profile icon/glyph. *Constraint:* Required; alphabet characters only; maximum 70 characters.
-    2.  **Email Address:** Text entry field with a standard email verification mask regex pattern matching (`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`).
-    3.  **Mobile Number:** Numeric string input field with a dedicated international region prefix/placeholder flag dropdown component. *Constraint:* Validated against regional length rules (e.g., 10 digits for India).
-    4.  **Password:** Masked string field toggled via an interactive trailing inline "eye" icon visibility component. *Constraint:* Minimum 8 characters, including 1 uppercase letter, 1 number, and 1 special character.
-    5.  **Confirm Password:** Masked string field identical to the Password field. *Constraint:* Strict string matching with the input password before enabling form submission.
-* **CTA Element:** A primary, prominent full-width action button labeled **"Create Account"**. Beneath this container sits an anchor redirection link labeled *"Already have an account? Login Here"*.
+**UI Structure:** A dual-column layout. The left pane functions as a marketing banner presenting platform features over a stadium graphic backdrop with cricket equipment models. The right pane houses a clean, standalone white input container labeled with header text welcoming users back to their workspace.
 
-### 2.2 Portal Login Gateway
-* **UI Structure:** Standardized login interface fronted by a prominent, distinct role-selection switcher array before allowing gateway authentication.
-* **Interactive Elements:**
-    * **Role Selection Matrix:** Explicit toggle radio switch buttons differentiating between an **Organizer** entry stream and a **Team Owner** entry stream.
-    * **Credentials Entry:** Email Address text field and Password masked field.
-* **System Routing Rule:** The authentication handler must natively parse the active selection state of the role toggle. Upon credential verification, token routing must direct users strictly to their respective workspaces (**Organizer Dashboard** vs. **Team Owner Dashboard**) to guarantee complete separation of administrative privileges and prevent interface mixing.
+**Input Controls & Form Fields:**
+- Global Language Selection Dropdown: Upper right layout header bounding configuration selections.
+- Email Address Field: Accompanied by a leading mail envelope glyph icon.
+- Password Field: Accompanied by a leading padlock glyph icon and an interactive eye visibility toggle element.
+- Form Persistence Controls: A localized split row hosting a "Remember Me" checkbox and a "Forgot Password?" anchor link.
+- Execution Trigger: A primary deep blue button executing credentials validation.
+- Redirection Link: A bottom text anchor guiding non-registered users to the creation portal.
 
----
+### 2.2 Organizer Registration Workspace
 
-## 3. Administrative Workflows (Light Theme)
+**UI Structure:** Matches the layout of the login screen while modifying input content to establish database structures for new merchants.
 
-### 3.1 Tournament Creation Engine
-* **UI Layout:** Centered, structured multi-field form layout built using a clear key-value pairing alignment matrix.
-* **Form Field Specifications:**
+**Input Specifications:**
+- Full Name Text Input: Configured with a silhouette user glyph icon.
+- Email Address Input: Formatted with a localized validation mask.
+- Mobile Number Field: Integrates a dropdown country code selection menu and an adjacent text box.
+- Password / Confirm Password Parallel Inputs: Feature masking elements to prevent plain-text exposure during input.
 
-| Field Label | Component Type | Constraints & System Rules |
-| :--- | :--- | :--- |
-| **Tournament Name** | Text Input String | Must be globally unique across active entities. |
-| **Auction Date** | HTML5 Calendar Picker | Disallows past dates relative to the execution timestamp. |
-| **Number of Teams** | Numeric Integer Controller | Positive integer only. Range boundary: $2 \le N \le 20$. |
-| **Budget per Team** | Financial Decimal Input | Formatted with Indian Rupee (₹) localization symbol. Max: ₹1,000,000,000. |
-| **Min Players per Team**| Integer Input | Minimum valid roster constraint. Must be $\le$ Max Players. |
-| **Max Players per Team**| Integer Input | Hard ceiling boundary for squad completion calculations. |
-| **Tournament Logo** | File Upload Control | Multi-part image payload. Restricted to `.png` or `.jpeg` formats; max size 5MB. |
+**Execution & Navigation Triggers:**
+- Primary CTA Button: Highlighted with a high-contrast yellow/gold fill color to differentiate account onboarding from subsequent workspace access actions.
+- Redirection Footers: Anchor pathways routing existing users back to the entry gateway.
 
-### 3.2 Organizer Operational Control Dashboard
-* **KPI Metrics Strip:** A top-level responsive strip containing four lightweight data display cards pulling asynchronous, non-blocking counts from the datastore:
-    1.  **Total Players:** Counter of all database-entered player profiles.
-    2.  **Approved Players:** Count of verified, auction-eligible player records.
-    3.  **Teams:** Total count of onboarded franchise entities.
-    4.  **Auction Status:** A dynamic text state badge displaying localized system statuses (e.g., `[ Ready ]`, `[ Live ]`, `[ Paused ]`, `[ Concluded ]`) mapping to distinct state-color tokens.
-* **Data Content Splits:**
-    * **Recent Registrations Ledger:** Chronological data list rendering player full name initials as rounded avatar icons, basic registration metadata timestamp strings, and a baseline hyperlink redirection footer labeled **"View All Players"**.
-    * **Financial Budget Overview:** Visual snapshot widget comparing the global total budget allocated against the cumulative remaining balance across all participating teams.
+### 2.3 Profile & Settings Center Workspace
 
-### 3.3 Dynamic Tournament Registration Link Generation
-* **UI Layout:** Informational panel generated and presented immediately after successful tournament initialization.
-* **Component Framework Details:**
-    * **Active Info Header Block:** Context-setting banner containing key tournament variables: *Tournament Dates, Total Teams, Max Players Per Team, and Base Auction Budget*.
-    * **Active Share Core:** Read-only input field housing a secured public domain URI string formatted as: `https://cricauction.com/register/[TournamentID]`. This component includes a trailing primary interactive execution button labeled **"Copy Link"**, which saves the text string to the client clipboard device.
-    * **Instant Access Channels:** Inline iconography links mapped directly to social deep-linking API hooks for rapid forwarding: WhatsApp API, WhatsApp Groups, and Telegram channels.
-    * **System Kill Switch:** A prominent, destructive red button labeled **"Disable Link"**. Clicking this instantly flips a Boolean flag in the database, invalidating the dynamic token, closing public access, and dropping any subsequent registration HTTP requests with an error response.
-* **Linear System Stepper:** A visual workflow progress indicator row illustrating the system logic linearly to the administrator:
-    $$	ext{1. Share Link} \longrightarrow 	ext{2. Player Registration} \longrightarrow 	ext{3. Review Applications} \longrightarrow 	ext{4. Approve Players} \longrightarrow 	ext{5. Ready for Auction}$$
+**UI Layout:** Formulates administrative update panels divided into a profile picture staging canvas and an account data form grid.
 
-### 3.4 Team Management Workspace
-* **Roster Deck View:** A responsive grid layout mapping individual registered team blocks as distinct information cards.
-* **Card Element Schemas:**
-    * High-resolution circular placeholder slot showcasing unique custom franchise logos.
-    * Text string parameters: **Owner Name**, **Assigned Budget Capacity Tracker**, and an active **Headcount Index Fraction Indicator** (formatted explicitly as `Players: X / Y`).
-    * **Modifier Routing Trigger:** An inline contextual action link button labeled **"Edit Team"**, allowing modifications to team variables.
+- **Profile Picture Management:** Features a circular avatar frame containing a camera icon overlay badge. This column lists strict format limit validations (JPG, PNG or GIF. Max size of 2MB.) directly over a secondary "Change Photo" action container.
+- **Account Parameters Grid Matrix:**
+  - Full Name & Email Address Row: Top horizontally paired form fields tracking identity text data.
+  - Phone Number Text Input: Field tracking primary communication lines.
+  - Role Display Block: A disabled dropdown text field reflecting the user's platform authorization tier.
+  - Organization / Company Input Line: String box to define the parent operational entity.
+  - Password Modification Element: Form rows showcasing a masked placeholder paired to a localized "Change Password" inline action button.
+- **Save/Cancel Terminal Control Row:**
+  - Action Buttons: A generic container text button ("Cancel") positioned alongside a primary blue action trigger ("Save Changes").
+  - Informational Disclaimer Banner: A bottom blue alert card containing an informative icon that reads: "This information will be used across the platform and visible to other organizers and users."
 
----
+## 3. Administrative Operational Hub (Light Theme)
 
-## 4. Team Owner Workspace
+### 3.1 Global Organizer Dashboard
 
-### 4.1 Hub Dashboard View (Light Theme)
-* **UI Frame:** High-level dashboard interface for authenticated Team Owners to monitor team health, spending velocity, and pending requirements before or during the auction event.
-* **Key Components:**
-    * **Summary Header Cards:** Three analytical widgets rendering real-time metrics:
-        1.  **Budget Left:** Numerical currency text bound to an inline horizontal colored progress bar asset representing total consumption depth. The bar shifts color as spending approaches maximum capacity (Green $	o$ Amber $	o$ Red).
-        2.  **Players Bought:** Integer count tracking successfully won lots against the maximum team roster cap.
-        3.  **Auction Status:** A flashing status marker containing a real-time pulse animation signaling `● LIVE` when the event loop is active.
-    * **Primary Gateway Interaction:** A large, prominent call-to-action button labeled **"Join Auction Room"**, engineered to transition the user experience into the dark-theme layout while executing low-latency WebSocket initialization handshakes.
-    * **Recent Purchases Ledger:** A clean data table tracking recent acquisitions made exclusively by the local client's franchise:
+- **Empty State Canvas:** Promotes a clean center-aligned card with a clipboard trophy illustration and a primary `+ Create New Tournament` interaction trigger.
+- **Active Telemetry Ribbon:** A row of four metrics summary cards tracking live data across lifecycle states: Total Tournaments (All time), Active Tournaments (Currently running), Upcoming Tournaments (Starting soon), and Completed Tournaments (Finished).
+- **Recent Tournaments Workspace Ledger:** A data table mapping system instances with an upper "View All" navigation anchor. Columns match the following structure: Tournament Name (with branding logo) | Status Pill Badge | Auction Date | Teams Count | Action Button (View Details)
+- **Permanent Progress Timeline Footer:** A fixed horizontal step layout establishing system usage pathways: 1. Create Tournament ➔ 2. Generate Registration Link ➔ 3. Manage Players ➔ 4. Start Auction
 
-| Photo | Player Name | Position Type Badge | Purchase Price | Time Elapsed |
-| :---: | :--- | :---: | :--- | :---: |
-| `[Avatar]` | Suresh Raina | `WK - Batter` | ₹5,50,00,000 | 2 mins ago |
-| `[Avatar]` | Jasprit Bumrah | `Bowler` | ₹12,00,00,000 | 14 mins ago |
+### 3.2 Tournament Creation Engine
 
----
+**UI Grid Matrix:** Input fields arranged into a two-column layout framework. Required entry markers are designated with red asterisks (*).
 
-## 5. Live Auction Room (Dark Theme Broadcast Interface)
+**Input Component Parameters:**
+- Tournament Name: Unique text lookups box.
+- Number of Teams: Numeric limit constraint box.
+- Budget Per Team (₹): Field pairing with a static localized currency symbol display.
+- Maximum Players Per Team: Integer validation limit input.
+- Venue: Text string input to establish physical staging parameters.
+- Auction Date & Time: Integrated calendar selector component.
 
-The real-time live execution workspace completely overrides the standard interface configuration, dropping light layouts for an immersive, highly tactical dark broadcast console optimized for real-time visual clarity during extreme-concurrency event handling.
+**Alert Panels & Terminal Layout Actions:**
+- Informative Alert Block: A blue alert strip with an info glyph reminding users: "Please review the details before creating the tournament. You can edit these details anytime from the tournament overview page."
+- Form Action Footers: Balanced inline buttons splitting commands between a white container ("Cancel") and a primary blue trigger button ("Create Tournament").
 
-### 5.1 Profile Showcasing & Core State Block
-* **Active View Profile Structure:** Left/Center stage focal area presenting a high-contrast background mask displaying the active player's high-resolution portrait photograph. Directly adjacent to the image are contextual demographic labels (*Age, Country of Origin*) and physical/technical trait metrics (*Batting Style, Bowling Variant*).
-* **Active Marketplace Metric States:** Highly prominent, split side-by-side indicator layout block designed for immediate scanning:
-    * **Base Price Panel:** Static structural minimum asset value field displaying the initial opening cost string of the active lot.
-    * **Current Bid Panel:** A dynamic, mutable currency field that auto-flashes and updates its values via real-time WebSocket payload events without UI redraw latency.
-    * **Highest Bidder Badge:** A centrally placed, stylized badge component displaying the leading team's identity name string and structural icon placeholder, marking who currently controls the lot contract.
+### 3.3 Tournaments List View Panel
 
-### 5.2 Interactive Bidding Interface
-* **Multi-Tier Preset Raise Controls:** To facilitate rapid, speed-of-light bidding interaction without manual typing errors, the interface provides five discrete incremental interaction buttons. These buttons calculate absolute bid values inline based on pre-defined system bidding rules:
-    * Button: `+ ₹1,000` $\longrightarrow$ *Subtext dynamically renders calculated target: (e.g., ₹11,000)*
-    * Button: `+ ₹2,000` $\longrightarrow$ *Subtext dynamically renders calculated target*
-    * Button: `+ ₹5,000` $\longrightarrow$ *Subtext dynamically renders calculated target*
-    * Button: `+ ₹10,000` $\longrightarrow$ *Subtext dynamically renders calculated target*
-    * Button: `+ ₹20,000` $\longrightarrow$ *Subtext dynamically renders calculated target*
-* **Custom Bid Option:** A manual entry text wrapper field with an absolute input validator constraint checking that inputs exceed the `Current Bid + Minimum Allowable Step`.
-* **Execution Interaction Trigger:** A prominent, primary, high-visibility action call-to-action button labeled **"RAISE BID"**. On click, this dispatches atomic transaction payloads directly to the WebSocket server layer.
+**UI Layout Frame:** Aggregates competing properties into workspace cards.
 
-### 5.3 Live Sidebar Monitors
-* **Real-Time Team Budgets Registry:** A clean, continuously updated matrix listing all participating teams in the tournament alongside their precise remaining financial reserves and current roster fractions (formatted as `Taken Players: X / 15`).
-* **Live Bidding Feed Log:** A terminal-style stream pipeline rendering every successful message block received from the auction server. Each log item displays an immutable server execution timestamp, team identity string, event action marker (e.g., *RAISED BID*), and transaction currency value.
+- **Search & Sorting Mechanics:** Top row houses a text parser reading `Search tournament by name...`, a center status dropdown reading `All Status`, and a right-aligned `+ New Tournament` execution element.
+- **Card Specifications:** Each card renders a vertical three-dot overflow context menu and structural rows summarizing parameter specs (Auction Date, Teams, Format), finishing at a clear blue forward arrow icon container (`View Details >`).
+- **Pagination Suite Footer:** Tracks list dimension readouts ("Showing X to Y of Z tournaments") mapped to an active step pagination row (Previous | Page Index | Next).
 
-### 5.4 Host Control Panel Row (Organizer View Specification Only)
-Visible exclusively to the authenticated League Organizer at the bottom of the live auction interface to control the underlying state machine:
-* **[ START AUCTION ]**: Triggers the global countdown timer initialization and flags the player lot as open for public bidding over WebSockets.
-* **[ SOLD ]**: Halts the incoming WebSocket bidding loop, freezes active values, and triggers winning transaction ledger routine pipelines to bind the player to the highest bidder's roster.
-* **[ UNSOLD ]**: Invalidates the active lot placement, logs an unsold state index flag against the player record, and advances the room state to prompt the next asset choice.
-* **[ NEXT PLAYER ]**: Advances the active pointer index value sequentially to fetch the next player profile in the registry queue.
-* **Player Direct Lookup Input:** A numeric text entry field labeled `Enter Player No.` paired to an explicit manual overwrite execution trigger button labeled **"SHOW PLAYER"**, enabling non-sequential lot overrides.
+## 4. Tournament Control Center Hub & Lifecycle Management
 
-### 5.5 State Transition Overlays
-* **Sold Banner Interstitial Modal:** A full-screen background-blurring promotional modal container that pops over the active workspace instantly upon a positive lot closure event (`[ SOLD ]`).
-* **Component Metrics Rendered:**
-    * Large, high-impact typography headline banner string: **"SOLD"**.
-    * Winning franchise team logo badge asset centered alongside the player name.
-    * Finalized Sold Price record value text string.
-    * The updated destination team's post-transaction financial metric state (*Remaining Budget*).
-    * **Primary Interaction Button:** A right-aligned action element labeled **"NEXT PLAYER ➔"** to step the admin forward into the next live loop.
+### 4.1 Hub Workspace Frame & Tab Navigation
 
----
+**Operational Navigation Switcher:** Groups individual tournament variables into sub-views managed via an upper tab bar row: Overview, Registration Link, Teams, Players, and Live Auction.
 
-## 6. Comprehensive Final Analytics Suite
+**Overview Tab Data Components Layout:**
+- Tournament Information Panel: Left-aligned summary block showing the details of active database entities (Tournament Name, Number of Teams, Budget Per Team, Maximum Players Per Team, Venue, Auction Date & Time, Tournament Format, Tournament Status).
+- Quick Actions Router Card: Right-aligned quick-navigation menu pointing to View Registration Link, Manage Teams, and Manage Players.
+- Summary Telemetry Panel: Compact tracking card recording operational counts (Total Teams, Total Registered Players, Players Sold, Auction Status, and Created On).
+- Workspace Action Footer: Displays an informative notification strip combined with an explicit wireframe Edit Tournament button component.
 
-### 6.1 Final Squad Matrix Dashboard View
-* **Global Layout Workspace:** A deep data frame dashboard displaying rich tabular data visualizations and compiled post-event transaction records.
-* **All Teams Carousel Row Selector:** Located at the top of the workspace, this horizontal grid component details high-level team summary cards (*Franchise Logo, Owner Name, Final Headcount Fractions, Cumulative Expenditures*). Clicking a card dynamically focuses the entire parent analytical dashboard data frame on that specific team's dataset.
+### 4.2 Dynamic Registration Link Hub
 
-### 6.2 Target Roster Output Table Layout
-A highly structured data grid tracking team player acquisition components row by row:
+**Link Status Module:** Handles access properties for incoming candidate pipelines.
 
-| # | Player Identity Details | Role Type Designation | Bought Price | Bought At Location Reference |
-| :---: | :--- | :--- | :--- | :--- |
-| **01** | `[Avatar]` Virat Kohli | `[ Batsman ]` | ₹15,00,00,000 | Player No. 18 |
-| **02** | `[Avatar]` KL Rahul | `[ WK - Batsman ]` | ₹9,50,00,000 | Player No. 04 |
-| **03** | `[Avatar]` Hardik Pandya | `[ All Rounder ]` | ₹11,00,00,000 | Player No. 33 |
-| **04** | `[Avatar]` Rashid Khan | `[ Bowler ]` | ₹8,00,00,000 | Player No. 12 |
+**Component Architecture:**
+- Phase Banner Container: A green alert box reflecting live availability states (e.g., Registration Status: Open).
+- Registration URL Field Wrapper: Displays an immutable string reflecting the registration pathway, flanked by an explicit "Copy Link" clipboard button and an external "Open Link" redirect tab indicator.
+- Registration Settings Summary Rows: Renders structural variables tracing lifecycle gates: Registration Start Date, Registration End Date, Allow Player Registration, Require Player Profile, Maximum Players, and Players Can Edit Profile.
+- Instructional Overlay Card: A pale warning container displaying timeline notifications regarding upcoming registration closures.
 
-### 6.3 Aggregated Insights & Charts Panels (Right-Side Content Columns)
-* **Squad Composition Radial Graph:** An interactive SVG donut/radial chart component illustrating player distribution density across roster role categories (*Batter, Bowler, All-Rounder, Wicketkeeper*).
-* **Role-Wise Breakdown Metric Blocks:** Individual data summary rows explicitly tracking exact integer counts per type category to validate roster rules (e.g., `Batters: 5`, `Bowlers: 6`, `All-Rounders: 3`, `WK: 1`).
-* **Financial Summary Ledger Card:** An analytical financial breakdown widget displaying:
-    * **Total Budget** (Base allocation ceiling)
-    * **Total Spent** (Sum of all winning bids)
-    * **Remaining Budget** (Leftover unspent reserves)
-    * **Average Spent Per Player:** Evaluated dynamically using the system formula:
-    
-    $$	ext{Average Spent Per Player} = rac{	ext{Total Spent}}{	ext{Players Bought}}$$
+### 4.3 Public Registration App Interface
 
-* **Top Buys Leaderboard:** A visually distinct, ranked podium component parsing, sorting, and displaying the three highest financial player investments made by the focused team franchise.
+**Form Structure:** An asynchronous candidate intake form mapped for external user registration.
 
----
+**Personal Information Panel Layout:**
+- Media Upload Block: Floating box (Upload Photo) detailing file constraints (JPG, PNG up to 2MB).
+- Identity Vectors: Text inputs tracking required fields (Full Name, Age, Mobile Number, City) along with a field labeled Email (Optional).
 
-## 7. Non-Functional Requirements (NFRs)
+**Cricket Information Segment Layout:**
+- Primary Role Grid Matrix: Selected-state block grid capturing performance specializations (Batsman, Bowler, All Rounder, Wicket Keeper).
+- Style Options Controls: Horizontally aligned input dropdowns for choosing batting and bowling positions.
+- Bowling Type Radio Array: A radio selection matrix listing granular traits (Right Arm Fast, Right Arm Medium, Right Arm Spin, Left Arm Fast, Left Arm Medium, Left Arm Spin, Not Applicable).
 
-### 7.1 Performance & Latency
-* **Bid Broadcast Distribution:** Every valid incoming bid transaction payload dispatched from an interactive client room must execute, process, and propagate to all active WebSocket connections globally within **< 200ms**. This ensures complete parity and absolute structural fairness during high-velocity bidding wars.
-* **UI Frame Rates:** Complex state transitions and live countdown timer updates must render at a consistent **60fps** across consumer browsers, preventing layout stuttering during rapid updates.
+**Sidebar Instructional Blocks:** Displays checklist items with validation recommendations, adjacent to a "Need Help?" call center link card. The panel finishes at a primary registration button.
 
-### 7.2 Concurrency & Scalability
-* **High-Volume Real-Time Handshaking:** The backend infrastructure layer must safely support simultaneous multi-device API pooling and maintain active concurrent WebSocket links without memory allocation dropouts or transaction deadlocks during intense last-second countdown sequences.
+### 4.4 Teams Configuration Panel
 
-### 7.3 Security & Data Integrity
-* **Request Sanitization & Verification:** The API gateway and WebSocket connection controller must run strict atomic server-side authorization checks on all inbound payload variables. 
-* **Validation Rules:** The system must reject and discard any bidding events where a Team Owner attempts to spoof a transaction, execute a bid beneath the allowable calculated threshold, or submit a financial allocation value that exceeds their team's real-time remaining wallet balance.
+**Roster Grid Framework:** Aggregates competing team profiles. Includes contextual filters for parsing text strings (`Search teams...`) and managing presentation sorting steps (`Sort by: Team Name (A-Z)`).
+
+**Team Franchise Card Schema:** Displays circular emblem assets, title labels, and a split parameters footer tracking exact database values side-by-side (Players Purchased counts and Remaining Budget currency). Core pathways terminate at a bottom wireframe button container labeled `View Team`.
+
+### 4.5 Team Detail View & Squad Roster Table
+
+**UI Structure:** Custom workspace dashboard presenting an isolated overview of a franchise's composition. Displays the core brand icon shield, owner identity indicators, active squad volume counters, and an upper "Export Squad" action button.
+
+**Roster Output Table Layout:** Renders real-time transaction rosters row-by-row mapping exact player attributes: Column Index Number (#) | Column Player Name | Column Role (Icon + Pill Badge) | Column Purchase Price
+
+### 4.6 Global Players Directory Workspace
+
+**Roster Ledger Frame:** Houses the primary operational spreadsheet table for managing candidate eligibility states. Includes keyword lines (`Search players...`), selection boxes (`All Roles`), and an explicit shortcut link button: `+ Add Player`.
+
+**Roster Matrix Column Layout:** Processes system database entries row-by-row tracking: Index Number (#) | Player Name | Role Pill Badge | Player Style Compound Attributes | Keeper State Flag (Green Checkmark vs Red Cross) | Action Rows (Pencil Edit Icon + Trash Disposal Icon)
+
+## 5. Live Auction State Machine & Interface Logic
+
+### 5.1 Pre-Start Dashboard View
+
+**Main Control Panel Canvas Layout:** Staged before the live state engine is officially active. It provides a centered activation canvas containing a prominent container button: `Start Auction`. An explicit notice icon warning message is permanently affixed beneath the trigger row: "You can't pause or reset the auction once it has started."
+
+**Side Analytics Splitting Cards:**
+- Current Auction Monitoring Block: Features an explicit `Not Started` pill container layout badge. Renders a silhouette profile placeholder stating "No Player Selected: The auction will begin once you start." alongside empty state counters for Base Price, Current Bid, and Highest Bidder.
+- Auction Activity Monitor Feed: Staged log container showing an illustrative layout asset labeled: "No activity yet: Auction activity will appear here once the auction begins."
+
+### 5.2 Dynamic Randomizer Selection Modal
+
+**Shuffling Overlay UI Mechanism:** Triggered instantly upon firing the state machine sequence. A modal container card pops over a completely blurred dashboard background matrix.
+
+**Visual Requirements:**
+- Header Core Text: Displaying Title strings reading: "Revealing Next Player: Please wait while we reveal the next player..."
+- Carousel Animation Track: A horizontal layout depicting mystery profile card silhouettes scrolling behind a center-positioned card containing a query icon (?) and sliding tracking indicators.
+- Status Execution Caption: Bottom data lines listing real-time processing messages: "Shuffling players... This will only take a few seconds."
+- Security Lock Footers: Affixes a secure blue icon note certifying internal logic integrity: "The next player is selected randomly from the pool."
+
+### 5.3 Player Revealed Control Panel Modal
+
+**Lot Exposure Form Workspace:** Appears once the shuffling engine finishes index selection.
+
+**Component Composition Layout:**
+- Left Image Staging Column: Houses the selected candidate's profile illustration within a clean bordered frame container.
+- Right Attribute Matrix Rows: Displays identity text labels, role pill badges, and precise icon-supplemented detail parameters tracking: Batting Style, Bowling Style, Nationality, and Base Price.
+- Staging Execution Footer Block: High-contrast bordered card showing a large numeric visualization display tracking Starting Bid: [Currency Value] directly over a high-visibility primary CTA button labeled: `Start Bidding`.
+- System Validation Subtext: Displays an inline warning message layout card line: "Bidding will begin once you click on Start Bidding."
+
+## 6. Live Bidding Workspace & Resolution Control Room
+
+The real-time live execution view provides administrators with immediate transactional control, increment modifiers, and state resolution actions.
+
+```
++---------------------------------------------------------------------------------------------------------+
+| SUMMER LEAGUE 2027                                                            [LIVE AUCTION TABS]        |
++---------------------------------------------------------------------------------------------------------+
+| [CURRENT PLAYER STAGING PANEL]      | [REAL-TIME BID METRICS]        | [LATEST 5 BIDS LEDGER SIDER]      |
+| +-------------------------------+   | +------------------------------+ | - Franchise Alpha  ₹1,00,000    |
+| |                               |   | | Current Bid: ₹1,00,000        | | - Franchise Beta   ₹95,000      |
+| |   [PLAYER PORTRAIT IMAGE]     |   | | (Base Price)                  | | - Franchise Alpha   ₹90,000     |
+| |                               |   | +------------------------------+ |                                  |
+| +-------------------------------+   | | HIGHEST BIDDER:               | +----------------------------------------+
+| Name: Candidate Identity            | | [FRANCHISE EMBLEM SHIELD]      | [AUCTION REAL-TIME LOG FEED]            |
+| Role: Pill State Badge              | | Franchise Branding Label       | 11:45 AM - [Live Tag] ₹1,00,000          |
+| Attributes: Style / Nationality     | +------------------------------+ | 11:44 AM - [Live Tag] ₹95,000            |
++------------------------------------+--------------------------+-----------------------------------------+
+                                                                          11:43 AM - [Live Tag] ₹90,000
+| [QUICK BID INCREMENT TRIGGERS]      | [CUSTOM BID DIRECT ENTRY FIELD]                                    |
+| [ +₹1K ] [ +₹2K ] [ +₹5K ]           | [ Input Text Box Line ]                                            |
+| [ +₹10K ] [ +₹20K ] [ +₹50K ]        | >> [ PLACE BID ] <<                                                |
++------------------------------------+--------------------------------------------------------------------+
+| [ALL TEAMS SELECTION WRAPPER MATRIX - CHOOSE FRANCHISE SHIELD ICON EMBLEM OBJECTS TO FORCE MANUAL BID]    |
++-------------------------------------------------------------------------------------------------------+
+| [ADMIN ACTION ROW FOOTER]   [v MARK SOLD (Green)]   [x MARK UNSOLD (Red)]   [-> NEXT PLAYER (Blue)]      |
++-------------------------------------------------------------------------------------------------------+
+```
+
+### 6.1 Active Live Auction Room Panel Layout
+
+- **Current Player Showcase Card Panel:** Left-positioned layout grouping candidate profile media containers with text descriptions detailing the active player's performance attributes and base price floors.
+- **Real-Time Bid Telemetry Metrics:** Central card block providing absolute data-binding reads for:
+  - Current Bid Display: Bold numeric readout indicating active financial values. Labels beneath transition dynamically to register context (e.g., matching the Base Price text string if no higher entries exist).
+  - Highest Bidder Badge Container: Displays large centered layouts housing the leading franchise's emblem shield design and brand text title.
+  - Quick Bid Increment Triggers Container: A grid block containing six rapid modification buttons mapped to default pricing step rules: +₹1,000, +₹2,000, +₹5,000, +₹10,000, +₹20,000, and +₹50,000.
+  - Custom Bid Entry Field: An inline input block text line enabling manual value input overrides, paired to a subtext reminder mapping the current baseline (Minimum bid increment: ₹1,000), positioned over a primary `Place Bid` shortcut layout trigger.
+- **All Teams Proxy Interaction Grid:** A horizontal selection row spanning the lower center field that aggregates all participating franchise emblems. Clicking an individual shield proxy icon instantly forces a manual bid event on behalf of that selected organization.
+
+### 6.2 Monitoring Sidebars & Logs Feed Suite
+
+- **Latest 5 Bids Ledger:** Right-aligned vertical card streaming the five most recent server events. Rows match data fields tracking: Franchise Logo | Team Title Label | Received Bid Value | Server Timestamp (HH:MM AM/PM). The ledger finishes at a "View All Bids" tabular tracking window shortcut button.
+- **Auction Activity Flow Timeline:** Positioned under the ledger sidebar, this live timeline tracks transaction actions sequentially using colored dot nodes on a vertical link bar. Each node displays specific metadata tags tracking the exact time, currency amounts, and participating team properties, anchored to a bottom "View All Activity" workflow button.
+
+### 6.3 Administrative Resolution Command Row
+
+A bottom-pinned control row providing administrators with explicit command overrides to manage active lot execution states:
+
+- **Mark Sold (Success Green Button):** Freezes the live bidding stream loop and triggers winning transaction pipeline routines for the highest bidder. Subtext caption layout notes: "Player will be sold to highest bidder".
+- **Mark Unsold (Danger Red Button):** Invalidates active lot placement, logs transaction data states, and marks the player entity index as unacquired. Subtext caption layout notes: "Player will go unsold".
+- **Next Player (Primary Blue Button):** Advances active pointer indexes sequentially to invoke the next player lot. Subtext caption layout notes: "Reveal and start auction for next player".
+
+### 6.4 Successful Close Transaction Interstitial Overlay
+
+**Sold Resolution Modal:** Appears on clicking Mark Sold. Blurs the active live auction room background and launches a centered confirmation card with a celebratory green checkmark icon.
+
+**Visual Layout Components:**
+- Headline Proclamation Text: Boldly displays the confirmation string: "PLAYER SOLD!".
+- Lot Profile Block: Renders the player photo portrait stamped with a skewed green graphic label reading "SOLD".
+- Acquisition Metadata Readout: Explicitly lists the destination franchise identity (SOLD TO: [Franchise Logo + Team Name]) alongside a bold numeric summary text mapping the terminal cost line (FINAL BID: [Currency Value]).
+
+**State Machine Overrides & Automated Time Loop:**
+- Manual Trigger Override: A primary blue CTA button labeled `Reveal Next Player ➔` to advance data sets manually.
+- Automated Action Countdown Loop: A localized footer message mapping a low-latency system timer clock instance (e.g., "Auto closing in 4 sec") that automatically triggers database saves and advances the active lot pointer to the next lottery item upon timeout.
+
+## 7. Non-Functional Requirements & Real-Time Logic Rules
+
+### 7.1 Performance & Sync Latency
+
+- Bid Telemetry Broadcasts: Bid events from administrative triggers or team client entries must stream across the WebSocket cluster to synchronize all connected screens within < 200ms.
+- UI Update Transitions: The active workspace panels must process real-time status updates smoothly without requiring browser window reloads. Bidding values should flash visually on update to emphasize new inputs.
+
+### 7.2 Concurrency Handling & Transaction Protection
+
+- Atomic Bid Validation Blocks: In the event of near-simultaneous bid submissions, the backend database engine must prioritize inputs by true server arrival sequence. Slower conflicting entries must be rejected automatically, triggering a real-time validation error broadcast that refreshes client viewports with the correct floor price.
+- Financial Limit Checks: Financial fields must perform automated checks to block invalid transactions, ensuring that incoming bids do not fall below established step parameters or exceed a franchise's remaining budget.
+- Cross-Tenant Isolation Routing: Role selection gates and token definitions must secure the workspace, preventing non-authorized accounts from accessing or spoofing administrative command parameters.
