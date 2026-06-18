@@ -1,5 +1,3 @@
-import React from "react";
-
 const PlayerRevealModal = ({ isOpen }) => {
   if (!isOpen) return null;
   return <div className="player-reveal-modal">PlayerRevealModal</div>;
