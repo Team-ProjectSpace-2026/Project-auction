@@ -23,7 +23,12 @@ export default defineConfig([
       globals: globals.browser,
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
-    rules: {}, // No custom top‑level rules needed.
+    settings: {
+      react: { version: "19" },
+    },
+    rules: {
+      "react/jsx-uses-vars": "error",
+    },
   },
 
   // Disable the react‑refresh rule for files that only export contexts.
