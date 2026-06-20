@@ -10,10 +10,10 @@
 
 /* LEFT PANEL — dark blue branding side */
 .login-left {
-  flex: 1;
+  flex: 4;
   background:
     linear-gradient(180deg, rgba(30, 58, 138, 0.55) 0%, rgba(30, 42, 94, 0.65) 100%),
-    url("https://plus.unsplash.com/premium_photo-1679917366426-345d3509e604?q=80&w=735&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D");
+    url("https://plus.unsplash.com/premium_photo-1679917489673-b952cee5857a?q=80&w=735&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D");
   background-size: cover;
   background-position: center;
   color: #fff;
@@ -107,7 +107,7 @@
 
 /* RIGHT PANEL — white card side */
 .login-right {
-  flex: 1;
+  flex: 7;
   background: #f1f5f9;
   display: flex;
   align-items: center;

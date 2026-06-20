@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import InputField from "../../components/common/InputField";
 import Button from "../../components/common/Button";
 import "./LoginPage.css";
+import batsmanLogo from "../../assets/batsman.png";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -22,16 +23,7 @@ const LoginPage = () => {
       <div className="login-left">
         <div className="login-left-content">
           <div className="brand">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M5 21l8-8M16 3l5 5-5 5-5-5 5-5z"
-                stroke="#fff"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <circle cx="6" cy="20" r="2" fill="#FBBF24" />
-            </svg>
+            <img src={batsmanLogo} alt="CricAuction logo" width="78" height="78" />
             <div>
               <h1>
                 Cric<span className="accent">Auction</span>
@@ -88,14 +80,8 @@ const LoginPage = () => {
       <div className="login-right">
         <div className="login-card">
           <div className="login-card-icon">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"
-                fill="#1E3A8A"
-              />
-              <path d="M9 11l2 2 4-4" stroke="#FBBF24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
+  <img src={batsmanLogo} alt="CricAuction logo" width="78" height="78" />
+</div>
 
           <h2 className="welcome-title">Welcome Back!</h2>
           <p className="welcome-subtitle">Login to your organizer account</p>
