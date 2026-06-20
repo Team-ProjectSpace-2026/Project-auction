@@ -14,7 +14,7 @@ const RegisterPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log({ fullName, email, mobile, password, confirmPassword });
+    console.log("Registration form submitted.");
     // Backend call will go here later
   };
 
