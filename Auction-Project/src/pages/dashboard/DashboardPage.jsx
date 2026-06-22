@@ -1,5 +1,6 @@
 // src/pages/dashboard/DashboardPage.jsx
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/layout/Sidebar';
 import TopBar from '../../components/layout/TopBar';
 import ProgressFooter from '../../components/layout/ProgressFooter';
@@ -58,6 +59,7 @@ const metricCards = [
 ];
 
 const DashboardPage = () => {
+  const navigate = useNavigate();
   const [activePage, setActivePage] = useState('dashboard');
 
   return (
@@ -138,7 +140,7 @@ const DashboardPage = () => {
                     <TournamentRow
                       key={t.id}
                       tournament={t}
-                      onView={tournament => console.log('View:', tournament)}
+                      onView={tournament => navigate(`/tournament/${tournament.id}`)}
                     />
                   ))}
                 </tbody>
@@ -172,6 +174,7 @@ const DashboardPage = () => {
                   Create your first tournament to get started.
                 </p>
                 <button
+                  onClick={() => navigate('/create-tournament')}
                   style={{
                     background: '#2563eb', color: '#fff', border: 'none',
                     borderRadius: '10px', padding: '13px 28px',

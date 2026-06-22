@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import InputField from "../../components/common/InputField";
 import Button from "../../components/common/Button";
 import "./RegisterPage.css";
@@ -14,7 +15,13 @@ const RegisterPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log({ fullName, email, mobile, password, confirmPassword });
+    // Validate password match
+    if (password !== confirmPassword) {
+      alert('Passwords do not match');
+      return;
+    }
+    // Log non-sensitive fields only
+    console.log({ fullName, email, mobile });
     // Backend call will go here later
   };
 
@@ -110,7 +117,7 @@ const RegisterPage = () => {
           <p className="welcome-subtitle">Fill in the details below to get started</p>
 
           <form onSubmit={handleSubmit}>
-            <label className="field-label">Full Name</label>
+            <label className="field-label" htmlFor="fullName">Full Name</label>
             <div className="input-wrapper">
               <span className="input-icon">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -119,6 +126,7 @@ const RegisterPage = () => {
                 </svg>
               </span>
               <InputField
+                id="fullName"
                 type="text"
                 placeholder="Enter your full name"
                 value={fullName}
@@ -128,7 +136,7 @@ const RegisterPage = () => {
               />
             </div>
 
-            <label className="field-label">Email Address</label>
+            <label className="field-label" htmlFor="email">Email Address</label>
             <div className="input-wrapper">
               <span className="input-icon">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -137,6 +145,7 @@ const RegisterPage = () => {
                 </svg>
               </span>
               <InputField
+                id="email"
                 type="email"
                 placeholder="Enter your email address"
                 value={email}
@@ -146,7 +155,7 @@ const RegisterPage = () => {
               />
             </div>
 
-            <label className="field-label">Mobile Number</label>
+            <label className="field-label" htmlFor="mobile">Mobile Number</label>
             <div className="phone-wrapper">
               <span className="country-code">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -159,6 +168,7 @@ const RegisterPage = () => {
                 +91
               </span>
               <InputField
+                id="mobile"
                 type="tel"
                 placeholder="Enter mobile number"
                 value={mobile}
@@ -168,7 +178,7 @@ const RegisterPage = () => {
               />
             </div>
 
-            <label className="field-label">Password</label>
+            <label className="field-label" htmlFor="password">Password</label>
             <div className="input-wrapper">
               <span className="input-icon">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -177,6 +187,7 @@ const RegisterPage = () => {
                 </svg>
               </span>
               <InputField
+                id="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter password"
                 value={password}
@@ -184,7 +195,13 @@ const RegisterPage = () => {
                 className="form-input"
                 required
               />
-              <span className="input-icon-right" onClick={() => setShowPassword(!showPassword)}>
+              <button
+                type="button"
+                className="input-icon-right"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                onClick={() => setShowPassword(!showPassword)}
+                style={{ background: 'none', border: 'none', padding: 0, margin: 0, cursor: 'pointer' }}
+              >
                 {showPassword ? (
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                     <path d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M9.5 5.1A10.6 10.6 0 0112 5c5 0 9 4 10 7-0.4 1.1-1.1 2.3-2.1 3.4M6.4 6.4C4.3 7.8 2.8 9.7 2 12c1 3 5 7 10 7 1.3 0 2.5-.2 3.6-.6" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" />
@@ -195,10 +212,10 @@ const RegisterPage = () => {
                     <circle cx="12" cy="12" r="3" stroke="#9CA3AF" strokeWidth="1.5" />
                   </svg>
                 )}
-              </span>
+              </button>
             </div>
 
-            <label className="field-label">Confirm Password</label>
+            <label className="field-label" htmlFor="confirmPassword">Confirm Password</label>
             <div className="input-wrapper">
               <span className="input-icon">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -207,6 +224,7 @@ const RegisterPage = () => {
                 </svg>
               </span>
               <InputField
+                id="confirmPassword"
                 type={showConfirmPassword ? "text" : "password"}
                 placeholder="Confirm password"
                 value={confirmPassword}
@@ -214,9 +232,12 @@ const RegisterPage = () => {
                 className="form-input"
                 required
               />
-              <span
+              <button
+                type="button"
                 className="input-icon-right"
+                aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                style={{ background: 'none', border: 'none', padding: 0, margin: 0, cursor: 'pointer' }}
               >
                 {showConfirmPassword ? (
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -228,7 +249,7 @@ const RegisterPage = () => {
                     <circle cx="12" cy="12" r="3" stroke="#9CA3AF" strokeWidth="1.5" />
                   </svg>
                 )}
-              </span>
+              </button>
             </div>
 
             <Button type="submit" className="register-btn">
@@ -237,7 +258,7 @@ const RegisterPage = () => {
           </form>
 
           <p className="login-text">
-            Already have an account? <a href="/login" className="accent-link">Login Here</a>
+            Already have an account? <Link to="/login" className="accent-link">Login Here</Link>
           </p>
         </div>
       </div>

@@ -1,5 +1,5 @@
 /* src/index.css */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap';
 
 *, *::before, *::after {
   box-sizing: border-box;
@@ -8,7 +8,7 @@
 }
 
 body {
-  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-family: Inter, 'Segoe UI', sans-serif;
   background: #f4f6fb;
   color: #1a1d2e;
   -webkit-font-smoothing: antialiased;

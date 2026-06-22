@@ -13,7 +13,6 @@ const LoginPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log({ email, password, rememberMe });
     // Backend call will go here later
   };
 
@@ -87,7 +86,7 @@ const LoginPage = () => {
           <p className="welcome-subtitle">Login to your organizer account</p>
 
           <form onSubmit={handleSubmit}>
-            <label className="field-label">Email Address</label>
+            <label className="field-label" htmlFor="email">Email Address</label>
             <div className="input-wrapper">
               <span className="input-icon">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -96,6 +95,7 @@ const LoginPage = () => {
                 </svg>
               </span>
               <InputField
+                id="email"
                 type="email"
                 placeholder="Enter your email"
                 value={email}
@@ -105,7 +105,7 @@ const LoginPage = () => {
               />
             </div>
 
-            <label className="field-label">Password</label>
+            <label className="field-label" htmlFor="password">Password</label>
             <div className="input-wrapper">
               <span className="input-icon">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -114,6 +114,7 @@ const LoginPage = () => {
                 </svg>
               </span>
               <InputField
+                id="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter your password"
                 value={password}
@@ -121,9 +122,12 @@ const LoginPage = () => {
                 className="form-input"
                 required
               />
-              <span
+              <button
+                type="button"
                 className="input-icon-right"
+                aria-label={showPassword ? "Hide password" : "Show password"}
                 onClick={() => setShowPassword(!showPassword)}
+                style={{ background: 'none', border: 'none', padding: 0, margin: 0, cursor: 'pointer' }}
               >
                 {showPassword ? (
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -135,7 +139,7 @@ const LoginPage = () => {
                     <circle cx="12" cy="12" r="3" stroke="#9CA3AF" strokeWidth="1.5" />
                   </svg>
                 )}
-              </span>
+              </button>
             </div>
 
             <div className="row-between">
@@ -147,7 +151,7 @@ const LoginPage = () => {
                 />
                 Remember Me
               </label>
-              <a href="#" className="forgot-link">Forgot Password?</a>
+              <Link to="/forgot-password" className="forgot-link">Forgot Password?</Link>
             </div>
 
             <Button type="submit" className="login-btn">

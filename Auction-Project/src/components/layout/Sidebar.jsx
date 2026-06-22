@@ -1,5 +1,4 @@
 // src/components/layout/Sidebar.jsx
-import { useState } from 'react';
 
 const navItems = [
   { key: 'dashboard',    label: 'Dashboard',    icon: '🏠' },

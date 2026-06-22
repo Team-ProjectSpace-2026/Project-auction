@@ -1,10 +1,10 @@
 // src/App.jsx
 // Temporary: renders DashboardPage directly until routing is set up
-import DashboardPage from './pages/dashboard/DashboardPage';
+import AppRouter from './router/AppRouter';
 import './index.css';
 
 function App() {
-  return <DashboardPage />;
+  return <AppRouter />;
 }
 
 export default App;
