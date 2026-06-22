@@ -3,6 +3,8 @@ import LoginPage from "../pages/auth/LoginPage";
 import RegisterPage from "../pages/auth/RegisterPage";
 import DashboardPage from "../pages/dashboard/DashboardPage";
 import CreateTournamentPage from "../pages/tournaments/CreateTournamentPage";
+import TournamentsListPage from "../pages/tournaments/TournamentsListPage";
+import TournamentHubPage from "../pages/tournaments/TournamentHubPage";
 
 const AppRouter = () => (
   <Router>

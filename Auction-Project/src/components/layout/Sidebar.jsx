@@ -7,7 +7,10 @@ const navItems = [
   { key: 'logout',       label: 'Logout',       icon: '🚪' },
 ];
 
+import { useNavigate } from "react-router-dom";
+
 const Sidebar = ({ activePage = 'dashboard', onNavigate }) => {
+  const navigate = useNavigate();
   return (
     <aside style={{
       width: '220px',
@@ -51,7 +54,29 @@ const Sidebar = ({ activePage = 'dashboard', onNavigate }) => {
           return (
             <button
               key={item.key}
-              onClick={() => onNavigate && onNavigate(item.key)}
+              onClick={() => {
+                // If a custom navigation handler is provided, call it first
+                if (onNavigate) onNavigate(item.key);
+                // Then perform route navigation based on the key
+                switch (item.key) {
+                  case 'dashboard':
+                    navigate('/dashboard');
+                    break;
+                  case 'tournaments':
+                    // Use a placeholder tournament ID; replace with real ID when available
+                    navigate('/tournaments/demo');
+                    break;
+                  case 'settings':
+                    navigate('/settings');
+                    break;
+                  case 'logout':
+                    // Placeholder logout – could clear auth state here
+                    navigate('/login');
+                    break;
+                  default:
+                    break;
+                }
+              }}
               style={{
                 display: 'flex', alignItems: 'center', gap: '12px',
                 width: '100%', padding: '12px 14px', borderRadius: '10px',
