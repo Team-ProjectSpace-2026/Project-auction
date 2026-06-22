@@ -64,7 +64,7 @@ const Sidebar = ({ activePage = 'dashboard', onNavigate }) => {
                     break;
                   case 'tournaments':
                     // Use a placeholder tournament ID; replace with real ID when available
-                    navigate('/tournaments/demo');
+                    navigate('/tournaments');
                     break;
                   case 'settings':
                     navigate('/settings');
