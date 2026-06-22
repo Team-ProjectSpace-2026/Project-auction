@@ -11,7 +11,8 @@ const AppRouter = () => (
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/dashboard" element={<DashboardPage />} />
       <Route path="/create-tournament" element={<CreateTournamentPage />} />
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      {/* Redirect root to login as default entry point; authentication guards not yet implemented */}
+      <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   </Router>
