@@ -73,9 +73,9 @@ const Sidebar = ({ activePage = 'dashboard', onNavigate }) => {
                   case 'logout':
                     // Perform logout cleanup: clear any stored auth tokens or session data
                     try {
-                      localStorage.removeItem('authToken');
-                      sessionStorage.removeItem('authToken');
-                    } catch (e) {
+                      localStorage.removeItem("authToken");
+                      sessionStorage.removeItem("authToken");
+                    } catch {
                       // ignore errors during cleanup
                     }
                     navigate('/login');
