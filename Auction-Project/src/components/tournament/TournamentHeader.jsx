@@ -1,70 +1,79 @@
+import { useNavigate } from "react-router-dom";
 const TournamentHeader = () => {
+  const navigate = useNavigate();
   return (
     <div
-      className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm"
-      style={{ marginBottom: "20px" }}
+      style={{
+        background: "#fff",
+        border: "1px solid #e5e7eb",
+        borderRadius: "16px",
+        padding: "18px 24px",
+        marginBottom: "18px",
+      }}
     >
       {/* Back Button */}
       <button
+        onClick={() => navigate("/tournaments")}
         style={{
-          border: "none",
-          background: "transparent",
-          color: "#2563eb",
-          fontWeight: 600,
-          cursor: "pointer",
-          marginBottom: "20px",
-        }}
-      >
-        ← Back to Tournaments
-      </button>
-
+        border: "none",
+        background: "transparent",
+        color: "#2563eb",
+        fontWeight: "600",
+        cursor: "pointer",
+        marginBottom: "14px",
+        fontSize: "14px",
+      }}
+    >
+    ← Back to Tournaments
+  </button>
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "flex-start",
+          alignItems: "center",
         }}
       >
-        {/* Left Section */}
+        {/* Left Side */}
         <div
           style={{
             display: "flex",
-            gap: "20px",
             alignItems: "center",
+            gap: "16px",
           }}
         >
-          {/* Tournament Logo Placeholder */}
+          {/* Tournament Logo */}
           <div
             style={{
-              width: "80px",
-              height: "80px",
-              borderRadius: "12px",
-              background: "#f3f4f6",
+              width: "90px",
+              height: "90px",
+              borderRadius: "0px",
+              background: "transparent",
+              border: "1px solid #e5e7eb",
               display: "flex",
-              alignItems: "center",
               justifyContent: "center",
-              fontSize: "40px",
+              alignItems: "center",
+              fontSize: "34px",
             }}
           >
             🏆
           </div>
 
           <div>
-            {/* Title + Badge */}
+            {/* Title */}
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "12px",
-                marginBottom: "10px",
+                gap: "10px",
+                marginBottom: "8px",
               }}
             >
               <h1
                 style={{
-                  fontSize: "42px",
-                  fontWeight: 800,
-                  color: "#111827",
                   margin: 0,
+                  fontSize: "28px",
+                  fontWeight: "800",
+                  color: "#111827",
                 }}
               >
                 Summer League 2027
@@ -73,25 +82,25 @@ const TournamentHeader = () => {
               <span
                 style={{
                   background: "#dcfce7",
-                  color: "#15803d",
-                  padding: "6px 12px",
-                  borderRadius: "999px",
-                  fontSize: "13px",
-                  fontWeight: 600,
+                  color: "#16a34a",
+                  padding: "4px 10px",
+                  borderRadius: "8px",
+                  fontSize: "12px",
+                  fontWeight: "600",
                 }}
               >
                 Active
               </span>
             </div>
 
-            {/* Tournament Info */}
+            {/* Info Row */}
             <div
               style={{
                 display: "flex",
-                gap: "28px",
+                gap: "24px",
                 color: "#6b7280",
-                fontSize: "15px",
-                fontWeight: 500,
+                fontSize: "14px",
+                fontWeight: "500",
               }}
             >
               <span>🏆 T20 League</span>
@@ -101,15 +110,15 @@ const TournamentHeader = () => {
           </div>
         </div>
 
-        {/* Right Section */}
+        {/* Right Side */}
         <button
           style={{
-            background: "#2563eb",
-            color: "#fff",
-            border: "none",
+            background: "#fff",
+            color: "#2563eb",
+            border: "1px solid #2563eb",
             borderRadius: "10px",
-            padding: "12px 22px",
-            fontWeight: 700,
+            padding: "12px 18px",
+            fontWeight: "600",
             cursor: "pointer",
             fontSize: "14px",
           }}

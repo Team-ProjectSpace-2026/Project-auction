@@ -6,6 +6,8 @@ import CreateTournamentPage from "../pages/tournaments/CreateTournamentPage";
 import TournamentsListPage from "../pages/tournaments/TournamentsListPage";
 import TournamentHubPage from "../pages/tournaments/TournamentHubPage";
 import TeamDetailsPage from "../pages/tournaments/TeamDetailsPage";
+import PlayerDetailsPage from "../pages/tournaments/PlayerDetailsPage";
+import LiveAuctionPage from "../pages/auction/LiveAuctionPage";
 
 const AppRouter = () => (
   <Router>
@@ -28,6 +30,18 @@ const AppRouter = () => (
         path="/team-details"
         element={<TeamDetailsPage />}
       />
+
+       <Route
+        path="/live-auction"
+        element={<LiveAuctionPage />}
+      />
+
+      <Route
+        path="/player-details"
+        element={<PlayerDetailsPage />}
+      />
+
+
       {/* Redirect root to login as default entry point; authentication guards not yet implemented */}
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="*" element={<Navigate to="/login" replace />} />

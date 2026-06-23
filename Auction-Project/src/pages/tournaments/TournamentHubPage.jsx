@@ -5,6 +5,9 @@ import TournamentHeader from "../../components/tournament/TournamentHeader";
 import OverviewTab from "../../components/tournament/OverviewTab";
 import RegistrationTab from "../../components/tournament/RegistrationTab";
 import TeamsTab from "../../components/tournament/TeamsTab";
+import PlayersTab from "../../components/tournament/PlayersTab";
+import LiveAuctionTab from "../../components/tournament/LiveAuctionTab";
+import { useLocation } from "react-router-dom";
 
 const MOCK_USER = {
   name: "Rahul Organizer",
@@ -13,7 +16,10 @@ const MOCK_USER = {
 
 const TournamentHubPage = () => {
   const [activePage, setActivePage] = useState("tournaments");
-  const [activeTab, setActiveTab] = useState("overview");
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState(
+  location.state?.activeTab || "overview"
+);
 
   return (
     <div
@@ -45,50 +51,50 @@ const TournamentHubPage = () => {
           <TournamentHeader />
 
           {/* Tabs */}
-          <div
-            style={{
-              display: "flex",
-              gap: "32px",
-              background: "#fff",
-              marginTop: "16px",
-              padding: "18px 24px",
-              borderRadius: "16px",
-              border: "1px solid #e8eaf0",
-            }}
-          >
-            {[
-              "overview",
-              "registration",
-              "teams",
-              "players",
-              "auction",
-            ].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                style={{
-                  border: "none",
-                  background: "transparent",
-                  cursor: "pointer",
-                  fontSize: "15px",
-                  textTransform: "capitalize",
-                  paddingBottom: "8px",
-                  fontWeight:
-                    activeTab === tab ? 700 : 500,
-                  color:
-                    activeTab === tab
-                      ? "#2563eb"
-                      : "#6b7280",
-                  borderBottom:
-                    activeTab === tab
-                      ? "2px solid #2563eb"
-                      : "2px solid transparent",
-                }}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
+         <div
+  style={{
+    display: "flex",
+    gap: "40px",
+    background: "#fff",
+    marginTop: "16px",
+    padding: "0 24px",
+    height: "64px",
+    alignItems: "center",
+    borderRadius: "16px",
+    border: "1px solid #e8eaf0",
+  }}
+>
+  {[
+    { id: "overview", label: "🕒 Overview" },
+    { id: "registration", label: "🔗 Registration Link" },
+    { id: "teams", label: "👥 Teams" },
+    { id: "players", label: "👤 Players" },
+    { id: "auction", label: "⚒ Live Auction" },
+  ].map((tab) => (
+    <button
+      key={tab.id}
+      onClick={() => setActiveTab(tab.id)}
+      style={{
+        border: "none",
+        background: "transparent",
+        cursor: "pointer",
+        height: "100%",
+        fontSize: "14px",
+        fontWeight: activeTab === tab.id ? 700 : 500,
+        color:
+          activeTab === tab.id
+            ? "#2563eb"
+            : "#6b7280",
+        borderBottom:
+          activeTab === tab.id
+            ? "3px solid #2563eb"
+            : "3px solid transparent",
+      }}
+    >
+      {tab.label}
+    </button>
+  ))}
+</div>
 
           {/* Content Area */}
           <div
@@ -102,33 +108,10 @@ const TournamentHubPage = () => {
 
             {activeTab === "teams" && <TeamsTab />}
 
-            {activeTab === "players" && (
-              <div
-                style={{
-                  background: "#fff",
-                  border: "1px solid #e8eaf0",
-                  borderRadius: "16px",
-                  padding: "24px",
-                  minHeight: "500px",
-                }}
-              >
-                Players Content
-              </div>
-            )}
+            {activeTab === "players" && <PlayersTab />}
 
-            {activeTab === "auction" && (
-              <div
-                style={{
-                  background: "#fff",
-                  border: "1px solid #e8eaf0",
-                  borderRadius: "16px",
-                  padding: "24px",
-                  minHeight: "500px",
-                }}
-              >
-                Auction Content
-              </div>
-            )}
+            {activeTab === "auction" && <LiveAuctionTab />}
+
           </div>
         </main>
       </div>
