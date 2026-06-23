@@ -63,7 +63,7 @@ const Sidebar = ({ activePage = 'dashboard', onNavigate }) => {
                     navigate('/dashboard');
                     break;
                   case 'tournaments':
-                    // Use a placeholder tournament ID; replace with real ID when available
+                    // Navigate to the tournaments list page
                     navigate('/tournaments');
                     break;
                   case 'settings':
@@ -71,7 +71,13 @@ const Sidebar = ({ activePage = 'dashboard', onNavigate }) => {
                     navigate('/dashboard');
                     break;
                   case 'logout':
-                    // Placeholder logout – could clear auth state here
+                    // Perform logout cleanup: clear any stored auth tokens or session data
+                    try {
+                      localStorage.removeItem('authToken');
+                      sessionStorage.removeItem('authToken');
+                    } catch (e) {
+                      // ignore errors during cleanup
+                    }
                     navigate('/login');
                     break;
                   default:

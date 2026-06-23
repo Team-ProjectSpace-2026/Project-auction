@@ -175,7 +175,13 @@ const PlayerDetailsModal = ({ onClose, onStartBidding }) => {
 
           <button
             onClick={() => {
-            navigate("/live-auction");
+              // Prefer the provided callback to start bidding flow
+              if (onStartBidding) {
+                onStartBidding();
+              } else {
+                // Fallback navigation if callback not supplied
+                navigate("/live-auction");
+              }
             }}
         style={{
             background: "#2563eb",
