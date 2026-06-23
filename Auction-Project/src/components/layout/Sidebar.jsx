@@ -7,7 +7,10 @@ const navItems = [
   { key: 'logout',       label: 'Logout',       icon: '🚪' },
 ];
 
+import { useNavigate } from "react-router-dom";
+
 const Sidebar = ({ activePage = 'dashboard', onNavigate }) => {
+  const navigate = useNavigate();
   return (
     <aside style={{
       width: '220px',
@@ -51,7 +54,36 @@ const Sidebar = ({ activePage = 'dashboard', onNavigate }) => {
           return (
             <button
               key={item.key}
-              onClick={() => onNavigate && onNavigate(item.key)}
+              onClick={() => {
+                // If a custom navigation handler is provided, call it first
+                if (onNavigate) onNavigate(item.key);
+                // Then perform route navigation based on the key
+                switch (item.key) {
+                  case 'dashboard':
+                    navigate('/dashboard');
+                    break;
+                  case 'tournaments':
+                    // Navigate to the tournaments list page
+                    navigate('/tournaments');
+                    break;
+                  case 'settings':
+                    // No dedicated settings page; redirect to dashboard as fallback
+                    navigate('/dashboard');
+                    break;
+                  case 'logout':
+                    // Perform logout cleanup: clear any stored auth tokens or session data
+                    try {
+                      localStorage.removeItem("authToken");
+                      sessionStorage.removeItem("authToken");
+                    } catch {
+                      // ignore errors during cleanup
+                    }
+                    navigate('/login');
+                    break;
+                  default:
+                    break;
+                }
+              }}
               style={{
                 display: 'flex', alignItems: 'center', gap: '12px',
                 width: '100%', padding: '12px 14px', borderRadius: '10px',
