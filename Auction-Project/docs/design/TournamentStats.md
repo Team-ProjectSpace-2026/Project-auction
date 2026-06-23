@@ -19,7 +19,7 @@ const [stats, setStats] = useState({
   totalBids: 0,
   budgetSpent: 0,
   playersSold: 0,
-  status: 'Pending' // 'Live' | 'Paused' | 'Completed'
+  status: 'Pending' // 'Pending' | 'Live' | 'Paused' | 'Completed'
 });
 const [loading, setLoading] = useState(false);
 ```

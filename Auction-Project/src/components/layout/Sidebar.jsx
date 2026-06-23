@@ -67,7 +67,8 @@ const Sidebar = ({ activePage = 'dashboard', onNavigate }) => {
                     navigate('/tournaments');
                     break;
                   case 'settings':
-                    navigate('/settings');
+                    // No dedicated settings page; redirect to dashboard as fallback
+                    navigate('/dashboard');
                     break;
                   case 'logout':
                     // Placeholder logout – could clear auth state here
