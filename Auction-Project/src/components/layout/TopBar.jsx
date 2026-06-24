@@ -1,51 +1,57 @@
-// src/components/layout/TopBar.jsx
+import { useLocation, Link } from 'react-router-dom';
 
 const TopBar = ({ user }) => {
-  return (
-    <header style={{
-      height: '64px',
-      background: '#fff',
-      borderBottom: '1px solid #e8eaf0',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'flex-end',
-      padding: '0 32px',
-      gap: '20px',
-      position: 'fixed',
-      top: 0,
-      left: '220px',
-      right: 0,
-      zIndex: 99,
-    }}>
-      {/* Notification bell */}
-      <button style={{
-        width: '40px', height: '40px', borderRadius: '50%',
-        border: '1px solid #e8eaf0', background: '#fff',
-        cursor: 'pointer', fontSize: '18px', display: 'flex',
-        alignItems: 'center', justifyContent: 'center',
-      }}>
-        🔔
-      </button>
+  const location = useLocation();
+  
+  // Determine if we should show the "Back" link (hide it on the main dashboard)
+  const showBackLink = location.pathname !== '/dashboard' && location.pathname !== '/';
 
-      {/* User info */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
-        <div style={{
-          width: '38px', height: '38px', borderRadius: '50%',
-          background: 'linear-gradient(135deg, #2563eb, #7c3aed)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '16px', color: '#fff', fontWeight: 700,
-        }}>
-          {user?.name?.charAt(0) || 'R'}
-        </div>
-        <div>
-          <div style={{ fontSize: '13px', fontWeight: 700, color: '#1a1d2e', lineHeight: 1.2 }}>
-            {user?.name || 'Rahul Organizer'}
+  return (
+    <header className="topbar">
+      {/* Left side: Conditional Back Link */}
+      <div className="topbar-left">
+        {showBackLink && (
+          <Link to="/dashboard" className="back-link">
+            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            Back to Dashboard
+          </Link>
+        )}
+      </div>
+
+      {/* Right side: Notifications and Profile */}
+      <div className="topbar-right">
+        <button className="notif-btn" aria-label="Notifications">
+          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          {/* Optional: Add a red notification dot here later */}
+          <span className="notif-dot"></span>
+        </button>
+
+        <div className="user-profile-menu">
+          {/* Avatar */}
+          <div className="user-avatar">
+            {user?.name?.charAt(0) || 'R'}
           </div>
-          <div style={{ fontSize: '11px', color: '#8a94a6' }}>
-            {user?.role || 'Organizer'}
+          
+          {/* User Details */}
+          <div className="user-info">
+            <div className="user-name">
+              {user?.name || 'Rahul Organizer'}
+            </div>
+            <div className="user-role">
+              {user?.role || 'Organizer'}
+            </div>
           </div>
+          
+          {/* Dropdown Chevron */}
+          <svg className="dropdown-icon" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+            <path d="M6 9l6 6 6-6"></path>
+          </svg>
         </div>
-        <span style={{ color: '#8a94a6', fontSize: '12px' }}>▾</span>
       </div>
     </header>
   );
