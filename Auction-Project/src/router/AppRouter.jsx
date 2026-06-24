@@ -1,4 +1,9 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import LoginPage from "../pages/auth/LoginPage";
 import RegisterPage from "../pages/auth/RegisterPage";
 import DashboardPage from "../pages/dashboard/DashboardPage";
@@ -8,6 +13,7 @@ import TournamentHubPage from "../pages/tournaments/TournamentHubPage";
 import TeamDetailsPage from "../pages/tournaments/TeamDetailsPage";
 import PlayerDetailsPage from "../pages/tournaments/PlayerDetailsPage";
 import LiveAuctionPage from "../pages/auction/LiveAuctionPage";
+import ProfilePage from "../pages/profile/ProfilePage";
 
 const AppRouter = () => (
   <Router>
@@ -16,31 +22,17 @@ const AppRouter = () => (
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/dashboard" element={<DashboardPage />} />
       <Route path="/create-tournament" element={<CreateTournamentPage />} />
-      <Route
-        path="/tournaments"
-        element={<TournamentsListPage />}
-      />
+      <Route path="/tournaments" element={<TournamentsListPage />} />
 
-      <Route
-        path="/tournament-details"
-        element={<TournamentHubPage />}
-      />
+      <Route path="/tournament-details" element={<TournamentHubPage />} />
 
-      <Route
-        path="/team-details"
-        element={<TeamDetailsPage />}
-      />
+      <Route path="/team-details" element={<TeamDetailsPage />} />
 
-       <Route
-        path="/live-auction"
-        element={<LiveAuctionPage />}
-      />
+      <Route path="/live-auction" element={<LiveAuctionPage />} />
 
-      <Route
-        path="/player-details"
-        element={<PlayerDetailsPage />}
-      />
+      <Route path="/player-details" element={<PlayerDetailsPage />} />
 
+      <Route path="/settings" element={<ProfilePage />} />
 
       {/* Redirect root to login as default entry point; authentication guards not yet implemented */}
       <Route path="/" element={<Navigate to="/login" replace />} />
