@@ -1,11 +1,11 @@
-# 🏏 CricAuction – Real-Time Cricket League Auction Management System
+<div align="center">
 
-<p align="center">
-  <img src="./Auction-Project/public/assets/crik_auction.png" width="100%" alt="CricAuction Banner">
-</p>
+<h1>🏏 CricAuction</h1>
+<h3>Real-Time Cricket League Auction Management System</h3>
 
-> A modern SaaS platform for orchestrating cricket league structures, live auctions, and team management.
----
+<img src="./Auction-Project/public/assets/crik_auction.png" width="100%" />
+
+</div>
 
 ## 📋 Table of Contents
 
