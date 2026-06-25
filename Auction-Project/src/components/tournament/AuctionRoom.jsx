@@ -340,7 +340,7 @@ const AuctionRoom = () => {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "1fr 1fr 1fr",
+          gridTemplateColumns: "1fr 1fr 0fr",
           gap: "8px",
         }}
       >
@@ -373,20 +373,6 @@ const AuctionRoom = () => {
         >
         ✕ Mark Unsold
     </button>
-
-        <button
-          style={{
-            background: "#2563eb",
-            color: "#fff",
-            border: "none",
-            padding: "18px",
-            borderRadius: "10px",
-            fontWeight: "600",
-            cursor: "pointer",
-          }}
-        >
-          → Next Player
-        </button>
       </div>
       {showRevealModal && (
         <PlayerRevealModal
