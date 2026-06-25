@@ -145,7 +145,7 @@ const Sidebar = ({ activePage = "dashboard", onNavigate }) => {
         })}
       </nav>
 
-      {/* Stadium image area */}
+    
       <div
         style={{
           padding: "0 0 0",
