@@ -74,7 +74,8 @@ const TournamentHubPage = () => {
     <button
       key={tab.id}
       onClick={() => setActiveTab(tab.id)}
-      style={{
+
+        style={{
         border: "none",
         background: "transparent",
         cursor: "pointer",
