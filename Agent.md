@@ -4,9 +4,28 @@
 >
 > **Rule for contributors (non-negotiable):** Every time you finish a work session, update the **Current Build Status** table AND add an entry to the **Changelog** at the bottom. This is how the next person (or AI session) knows exactly where to start.
 
----
 
 ## 1. Project Summary
+---
+
+### 2026-06-22 — Tournament Hub Tab Contents Complete (AI session)
+**Worked on:** Implemented all 5 tournament hub tab sections with real UI and mock data; fixed TournamentStats component styling issues.
+**Changed:** Updated `TournamentHubPage.jsx` with mock tournament/teams/players data; implemented all tab contents (Overview metrics grid, Registration Link copy box, Teams budget table, Players position table, Live Auction placeholder); fixed `TournamentStats.jsx` to use inline styles and display mock data correctly (340 bids, ₹85,500 budget, 112 players sold, Active status); ensured all changes persist after dev server restart; improved `TournamentCard.jsx` rendering.
+**Next step for whoever picks this up:** Connect backend API endpoints to replace mock data; add edit/delete functionality for teams and players; build remaining pages (Profile, Settings, Public Registration, Live Auction full workspace); implement real live auction interface with WebSocket integration.
+
+---
+
+### 2026-06-22 — Tournament Hub Design & List Page Complete (AI session)
+**Worked on:** Built full tournament management UI including list page and hub with tabs.
+**Changed:** Created `TournamentsListPage.jsx` with search/filter/pagination; `TournamentTabs.jsx` for tab navigation; `TournamentCard.jsx` for card layout; integrated `TournamentStats` into hub; added route `/tournaments-list`; wired Sidebar navigation to route to tournaments list on click; updated build status table.
+**Next step for whoever picks this up:** Fill out tab section contents (Overview metrics, Registration Link copy area, Teams grid, Players table, Live Auction workspace) or move on to building remaining pages (Profile, Team Detail, Player Directory, Live Auction full workspace).
+
+---
+
+### 2026-06-22 — TournamentStats component (AI session)
+**Worked on:** Added `TournamentStats` UI component, export, route, and test skeleton.
+**Changed:** Created `src/components/tournament/TournamentStats.jsx`, exported via index, inserted into `TournamentHubPage.jsx`, added route in `AppRouter.jsx`, wrote design spec markdown, and added unit test.
+**Next step for whoever picks this up:** Implement real API in `auctionService.getStats`, style the component to match design, and verify integration with live auction data.
 
 **CricAuction** is a real-time SaaS platform for managing cricket league structures: organizer authentication, tournament creation, public player registration, team configuration, and live interactive player auctions with WebSocket-driven bidding.
 
@@ -242,10 +261,13 @@ Use this when building a page or component — it maps each screen directly to w
 | Register Page | ⬜ Not started |
 | Profile & Settings | ⬜ Not started |
 | Organizer Dashboard | ⬜ Not started |
-| Create Tournament | ⬜ Not started |
-| Tournaments List | ⬜ Not started |
-| Tournament Hub (tabbed) | ⬜ Not started |
-| Registration Link Tab | ⬜ Not started |
+| Create Tournament | ✅ Done |
+| Tournaments List | ✅ Done |
+| Tournament Hub (tabbed) | ✅ Done |
+| Registration Link Tab | ✅ Done |
+| Teams Grid | ✅ Done |
+| Players Table | ✅ Done |
+| Live Auction Placeholder | ✅ Done |
 | Public Registration Form | ⬜ Not started |
 | Teams Panel | ⬜ Not started |
 | Team Detail / Squad Roster | ⬜ Not started |
@@ -260,7 +282,7 @@ Use this when building a page or component — it maps each screen directly to w
 | Area | Status |
 |---|---|
 | Frontend scaffold (Vite + React) | ✅ Initialized |
-| Routing setup (React Router) | ⬜ Not started |
+| Routing setup (React Router) | ✅ Done |
 | Auth Context + JWT handling | ⬜ Not started |
 | Axios service layer | ⬜ Not started |
 | Backend scaffold (Express) | ⬜ Not started |
