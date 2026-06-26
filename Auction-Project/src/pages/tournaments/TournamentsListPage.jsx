@@ -168,20 +168,23 @@ fontFamily: "'Inter','Segoe UI',sans-serif",
             <option>All Status</option>
           </select>
 
+
           <button
-            style={{
-              background: "#2563eb",
-              color: "#fff",
-              border: "none",
-              borderRadius: "10px",
-              padding: "14px 24px",
-              fontWeight: "700",
-              cursor: "pointer",
-            }}
-          >
-            + New Tournament
-          </button>
-        </div>
+  onClick={() => navigate("/create-tournament")}
+  style={{
+    background: "#2563eb",
+    color: "#fff",
+    border: "none",
+    borderRadius: "10px",
+    padding: "14px 24px",
+    fontWeight: "700",
+    cursor: "pointer",
+  }}
+>
+  + New Tournament
+</button>
+</div>
+
 
         {/* Cards */}
         <div
