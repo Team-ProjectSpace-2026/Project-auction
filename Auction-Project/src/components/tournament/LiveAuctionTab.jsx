@@ -1,16 +1,14 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import PlayerRevealModal from "./PlayerRevealModal";
-import AuctionRoom from "./AuctionRoom";
 import PlayerDetailsModal from "./PlayerDetailsModal";
 
 const LiveAuctionTab = () => {
-    const [showRevealModal, setShowRevealModal] = useState(false);
-    const [auctionStarted, setAuctionStarted] = useState(false);
-    const [showPlayerCard, setShowPlayerCard] = useState(false);
+  const navigate = useNavigate();
 
-    if (auctionStarted) {
-        return <AuctionRoom />;
-        }
+  const [showRevealModal, setShowRevealModal] = useState(false);
+  const [showPlayerCard, setShowPlayerCard] = useState(false);
+
   return (
     <div
       style={{
@@ -127,19 +125,19 @@ const LiveAuctionTab = () => {
           <button
             onClick={() => setShowRevealModal(true)}
             style={{
-            marginTop: "28px",
-            background: "#2563eb",
-            color: "#fff",
-            border: "none",
-            borderRadius: "10px",
-            padding: "14px 36px",
-            fontSize: "16px",
-            fontWeight: "600",
-            cursor: "pointer",
-        }}
-    >
-    ▶ Start Auction
-        </button>
+              marginTop: "28px",
+              background: "#2563eb",
+              color: "#fff",
+              border: "none",
+              borderRadius: "10px",
+              padding: "14px 36px",
+              fontSize: "16px",
+              fontWeight: "600",
+              cursor: "pointer",
+            }}
+          >
+            ▶ Start Auction
+          </button>
 
           <p
             style={{
@@ -148,8 +146,7 @@ const LiveAuctionTab = () => {
               fontSize: "13px",
             }}
           >
-            ℹ️ You can't pause or reset the auction once it has
-            started.
+            ℹ️ You can't pause or reset the auction once it has started.
           </p>
         </div>
       </div>
@@ -339,34 +336,33 @@ const LiveAuctionTab = () => {
                 fontSize: "13px",
               }}
             >
-              Auction activity will appear here once the
-              auction begins.
+              Auction activity will appear here once the auction begins.
             </p>
-                      </div>
+          </div>
         </div>
       </div>
-      {showRevealModal && (
-  <PlayerRevealModal
-    onClose={() => setShowRevealModal(false)}
-    onContinue={() => {
-      setShowRevealModal(false);
-      setShowPlayerCard(true);
-    }}
-  />
-)}
 
-{showPlayerCard && (
-  <PlayerDetailsModal
-    onClose={() => setShowPlayerCard(false)}
-    onStartBidding={() => {
-      setShowPlayerCard(false);
-      setAuctionStarted(true);
-    }}
-  />
-)}
+      {showRevealModal && (
+        <PlayerRevealModal
+          onClose={() => setShowRevealModal(false)}
+          onContinue={() => {
+            setShowRevealModal(false);
+            setShowPlayerCard(true);
+          }}
+        />
+      )}
+
+      {showPlayerCard && (
+        <PlayerDetailsModal
+          onClose={() => setShowPlayerCard(false)}
+          onStartBidding={() => {
+            setShowPlayerCard(false);
+            navigate("/live-auction");
+          }}
+        />
+      )}
     </div>
   );
 };
-
 
 export default LiveAuctionTab;
