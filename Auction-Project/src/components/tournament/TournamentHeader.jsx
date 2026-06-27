@@ -111,7 +111,7 @@ const TournamentHeader = () => {
         </div>
 
         {/* Right Side */}
-        <button
+        <button onClick={() => navigate("/edit-tournament")}
           style={{
             background: "#fff",
             color: "#2563eb",
