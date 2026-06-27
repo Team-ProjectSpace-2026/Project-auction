@@ -160,37 +160,57 @@
 }
 
 .input-wrapper {
-  position: relative;
   display: flex;
   align-items: center;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background-color: #ffffff;
+  padding: 0 12px;
+  gap: 8px;
+  transition: border-color 0.15s ease;
+}
+
+.input-wrapper:focus-within {
+  border-color: #1e3a8a;
 }
 
 .input-icon {
-  position: absolute;
-  left: 14px;
   display: flex;
   align-items: center;
   pointer-events: none;
+  flex-shrink: 0;
+  margin-right: 10px;
 }
 
+
 .input-icon-right {
-  position: absolute;
-  right: 14px;
   display: flex;
   align-items: center;
   cursor: pointer;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+.input-wrapper .input-group {
+  flex: 1;
+  border: none;
+  background: transparent;
+  margin: 0;
+  padding: 0;
+}
+
+.input-wrapper .input-control {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 14px;
+  color: #1e293b;
+  padding: 12px 0 12px 4px;
 }
 
 .form-input {
-  width: 100%;
-  padding: 12px 40px;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  font-size: 14px;
-  outline: none;
-  background-color: #ffffff;
-  color: #1e293b;
-  transition: border-color 0.15s ease;
+  border: none;
 }
 
 .form-input:focus {
@@ -225,7 +245,12 @@
 .phone-input {
   border: none;
   border-radius: 0;
-  padding: 12px 14px;
+  padding: 12px 0 12px 4px;
+  outline: none;
+  background: transparent;
+  font-size: 14px;
+  color: #1e293b;
+  width: 100%;
 }
 
 .phone-input:focus {
