@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import InputField from "../../components/common/InputField";
 import Button from "../../components/common/Button";
 import "./RegisterPage.css";
+import batsmanLogo from "../../assets/batsman.png";
 
 const RegisterPage = () => {
   const [fullName, setFullName] = useState("");
@@ -31,16 +32,7 @@ const RegisterPage = () => {
       <div className="register-left">
         <div className="register-left-content">
           <div className="brand">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M5 21l8-8M16 3l5 5-5 5-5-5 5-5z"
-                stroke="#fff"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <circle cx="6" cy="20" r="2" fill="#FBBF24" />
-            </svg>
+            <img src={batsmanLogo} alt="CricAuction logo" width="78" height="78" />
             <div>
               <h1>
                 Cric<span className="accent">Auction</span>
@@ -96,22 +88,8 @@ const RegisterPage = () => {
       <div className="register-right">
         <div className="register-card">
           <div className="register-card-icon">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"
-                fill="#1E3A8A"
-                stroke="#FBBF24"
-                strokeWidth="1"
-              />
-              <path
-                d="M8 9h8M9 9v2a3 3 0 006 0V9M11 14h2v2h-2z"
-                stroke="#FBBF24"
-                strokeWidth="1.3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
+  <img src={batsmanLogo} alt="CricAuction logo" width="78" height="78" />
+</div>
 
           <h2 className="welcome-title">Create Organizer Account</h2>
           <p className="welcome-subtitle">Fill in the details below to get started</p>
