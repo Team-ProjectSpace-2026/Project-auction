@@ -64,25 +64,6 @@ export const updatePlayer = async (req, res, next) => {
   }
 };
 
-export const updatePlayer = async (req, res, next) => {
-  try {
-    const { name, role, style, keeper, basePrice } = req.body;
-    const player = await Player.findByIdAndUpdate(
-      req.params.id,
-      { name, role, style, keeper, basePrice },
-      { new: true, runValidators: true },
-    );
-
-    if (!player) {
-      return res.status(404).json({ message: "Player not found" });
-    }
-
-    res.json(player);
-  } catch (error) {
-    next(error);
-  }
-};
-
 export const deletePlayer = async (req, res, next) => {
   try {
     const player = await Player.findById(req.params.id);
