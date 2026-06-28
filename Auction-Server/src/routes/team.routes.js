@@ -17,12 +17,11 @@ const router = express.Router();
 
 // All routes require authentication
 router.use(auth);
-router.use(apiLimiter);
 
-router.get('/', getTeams);
-router.get('/:id', getTeam);
-router.post('/', validateTeam, handleValidationErrors, createTeam);
-router.put('/:id', validateTeam, handleValidationErrors, updateTeam);
-router.delete('/:id', deleteTeam);
+router.get('/', apiLimiter, getTeams);
+router.get('/:id', apiLimiter, getTeam);
+router.post('/', apiLimiter, validateTeam, handleValidationErrors, createTeam);
+router.put('/:id', apiLimiter, validateTeam, handleValidationErrors, updateTeam);
+router.delete('/:id', apiLimiter, deleteTeam);
 
 export default router;

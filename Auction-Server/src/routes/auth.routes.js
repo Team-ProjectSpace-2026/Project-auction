@@ -12,6 +12,6 @@ router.post('/register', authLimiter, validateRegister, handleValidationErrors, 
 router.post('/login', authLimiter, validateLogin, handleValidationErrors, login);
 
 // Protected routes
-router.get('/profile', auth, getProfile);
+router.get('/profile', auth, authLimiter, getProfile);
 
 export default router;

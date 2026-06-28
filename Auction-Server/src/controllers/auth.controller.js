@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import { sanitizeObjectId } from "../utils/mongoHelpers.js";
 
 export const register = async (req, res, next) => {
   try {
@@ -87,7 +88,8 @@ export const login = async (req, res, next) => {
 
 export const getProfile = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user.id).select("-password");
+    const userId = sanitizeObjectId(req.user.id, "User");
+    const user = await User.findById(userId).select("-password");
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }

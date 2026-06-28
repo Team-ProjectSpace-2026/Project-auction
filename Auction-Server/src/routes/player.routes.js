@@ -17,12 +17,11 @@ const router = express.Router();
 
 // All routes require authentication
 router.use(auth);
-router.use(apiLimiter);
 
-router.get('/', getPlayers);
-router.post('/', validatePlayer, handleValidationErrors, createPlayer);
-router.get('/:id', getPlayer);
-router.put('/:id', validatePlayer, handleValidationErrors, updatePlayer);
-router.delete('/:id', deletePlayer);
+router.get('/', apiLimiter, getPlayers);
+router.post('/', apiLimiter, validatePlayer, handleValidationErrors, createPlayer);
+router.get('/:id', apiLimiter, getPlayer);
+router.put('/:id', apiLimiter, validatePlayer, handleValidationErrors, updatePlayer);
+router.delete('/:id', apiLimiter, deletePlayer);
 
 export default router;

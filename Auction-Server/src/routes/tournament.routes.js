@@ -17,12 +17,11 @@ const router = express.Router();
 
 // All routes require authentication
 router.use(auth);
-router.use(apiLimiter);
 
-router.get('/', getTournaments);
-router.post('/', validateTournament, handleValidationErrors, createTournament);
-router.get('/:id', getTournament);
-router.put('/:id', validateTournament, handleValidationErrors, updateTournament);
-router.delete('/:id', deleteTournament);
+router.get('/', apiLimiter, getTournaments);
+router.post('/', apiLimiter, validateTournament, handleValidationErrors, createTournament);
+router.get('/:id', apiLimiter, getTournament);
+router.put('/:id', apiLimiter, validateTournament, handleValidationErrors, updateTournament);
+router.delete('/:id', apiLimiter, deleteTournament);
 
 export default router;

@@ -2,6 +2,7 @@ import Tournament from "../models/Tournament.js";
 import Player from "../models/Player.js";
 import Team from "../models/Team.js";
 import Bid from "../models/Bid.js";
+import { sanitizeObjectId } from "../utils/mongoHelpers.js";
 
 export const getTournaments = async (req, res, next) => {
   try {
@@ -32,7 +33,8 @@ export const createTournament = async (req, res, next) => {
 
 export const getTournament = async (req, res, next) => {
   try {
-    const tournament = await Tournament.findById(req.params.id);
+    const tournamentId = sanitizeObjectId(req.params.id, "Tournament");
+    const tournament = await Tournament.findById(tournamentId);
     if (!tournament) {
       return res.status(404).json({ message: "Tournament not found" });
     }
@@ -44,9 +46,10 @@ export const getTournament = async (req, res, next) => {
 
 export const updateTournament = async (req, res, next) => {
   try {
+    const tournamentId = sanitizeObjectId(req.params.id, "Tournament");
     const { name, status, date, teams, format, description } = req.body;
     const tournament = await Tournament.findByIdAndUpdate(
-      req.params.id,
+      tournamentId,
       { name, status, date, teams, format, description },
       { new: true, runValidators: true },
     );
@@ -63,7 +66,7 @@ export const updateTournament = async (req, res, next) => {
 
 export const deleteTournament = async (req, res, next) => {
   try {
-    const tournamentId = req.params.id;
+    const tournamentId = sanitizeObjectId(req.params.id, "Tournament");
 
     // Check for dependent records
     const [playerCount, teamCount, bidCount] = await Promise.all([

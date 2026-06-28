@@ -1,12 +1,17 @@
 import Player from "../models/Player.js";
 import Bid from "../models/Bid.js";
+import { isValidObjectId, sanitizeObjectId } from "../utils/mongoHelpers.js";
 
 export const getPlayers = async (req, res, next) => {
   try {
     const { tournamentId } = req.query;
-    const filter = tournamentId
-      ? { tournamentId, deleted: false }
-      : { deleted: false };
+    let filter = { deleted: false };
+    if (tournamentId) {
+      if (!isValidObjectId(tournamentId)) {
+        return res.status(400).json({ message: "Invalid tournament ID format" });
+      }
+      filter.tournamentId = sanitizeObjectId(tournamentId, "Tournament");
+    }
 
     const players = await Player.find(filter).populate("tournamentId", "name");
     res.json(players);
@@ -35,7 +40,8 @@ export const createPlayer = async (req, res, next) => {
 
 export const getPlayer = async (req, res, next) => {
   try {
-    const player = await Player.findById(req.params.id).populate('tournamentId', 'name');
+    const playerId = sanitizeObjectId(req.params.id, "Player");
+    const player = await Player.findById(playerId).populate('tournamentId', 'name');
     if (!player || player.deleted) {
       return res.status(404).json({ message: 'Player not found' });
     }
@@ -47,9 +53,10 @@ export const getPlayer = async (req, res, next) => {
 
 export const updatePlayer = async (req, res, next) => {
   try {
+    const playerId = sanitizeObjectId(req.params.id, "Player");
     const { name, role, style, keeper, basePrice } = req.body;
     const player = await Player.findByIdAndUpdate(
-      req.params.id,
+      playerId,
       { name, role, style, keeper, basePrice },
       { new: true, runValidators: true }
     );
@@ -66,7 +73,8 @@ export const updatePlayer = async (req, res, next) => {
 
 export const deletePlayer = async (req, res, next) => {
   try {
-    const player = await Player.findById(req.params.id);
+    const playerId = sanitizeObjectId(req.params.id, "Player");
+    const player = await Player.findById(playerId);
 
     if (!player || player.deleted) {
       return res.status(404).json({ message: 'Player not found' });
