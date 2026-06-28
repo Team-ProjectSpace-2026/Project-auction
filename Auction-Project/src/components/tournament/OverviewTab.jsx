@@ -49,21 +49,6 @@ const OverviewTab = () => {
             <strong>{value}</strong>
           </div>
         ))}
-
-        <button
-          style={{
-            marginTop: "20px",
-            width: "100%",
-            padding: "12px",
-            borderRadius: "10px",
-            border: "1px solid #2563eb",
-            color: "#2563eb",
-            background: "#fff",
-            fontWeight: "700",
-          }}
-        >
-          Edit Tournament
-        </button>
       </div>
 
       {/* Right Side */}
