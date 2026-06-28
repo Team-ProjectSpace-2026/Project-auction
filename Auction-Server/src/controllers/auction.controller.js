@@ -6,8 +6,8 @@ import { validateBid, getWinningBid, processWinningBid } from '../utils/bidValid
 
 export const getAuctionState = async (req, res, next) => {
   try {
-    const { tournamentId } = req.params;
-    
+    const tournamentId = new mongoose.Types.ObjectId(req.params.tournamentId);
+
     // Get all players for this tournament
     const players = await Player.find({ tournamentId });
     
@@ -49,7 +49,7 @@ export const placeBid = async (req, res, next) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    const { tournamentId } = req.params;
+    const tournamentId = new mongoose.Types.ObjectId(req.params.tournamentId);
     const { amount, teamId, playerId } = req.body;
     
     // Get current winning bid
@@ -98,7 +98,8 @@ export const placeBid = async (req, res, next) => {
 
 export const getBidHistory = async (req, res, next) => {
   try {
-    const { tournamentId, playerId } = req.params;
+    const tournamentId = new mongoose.Types.ObjectId(req.params.tournamentId);
+    const playerId = req.params.playerId ? new mongoose.Types.ObjectId(req.params.playerId) : undefined;
     
     const bids = await Bid.find({
       tournamentId,

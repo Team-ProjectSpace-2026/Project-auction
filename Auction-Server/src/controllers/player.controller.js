@@ -1,10 +1,9 @@
-import Player from "../models/Player.js";
-import Bid from "../models/Bid.js";
 import mongoose from "mongoose";
+import Player from "../models/Player.js";
 
 export const getPlayers = async (req, res, next) => {
   try {
-    const tournamentId = req.query.tournamentId;
+    const tournamentId = req.query.tournamentId ? new mongoose.Types.ObjectId(req.query.tournamentId) : undefined;
     let filter = { deleted: false };
     if (tournamentId) {
       filter.tournamentId = tournamentId;
@@ -37,7 +36,7 @@ export const createPlayer = async (req, res, next) => {
 
 export const getPlayer = async (req, res, next) => {
   try {
-    const playerId = req.params.id;
+    const playerId = new mongoose.Types.ObjectId(req.params.id);
     const player = await Player.findById(playerId).populate('tournamentId', 'name');
     if (!player || player.deleted) {
       return res.status(404).json({ message: 'Player not found' });
@@ -50,7 +49,7 @@ export const getPlayer = async (req, res, next) => {
 
 export const updatePlayer = async (req, res, next) => {
   try {
-    const playerId = req.params.id;
+    const playerId = new mongoose.Types.ObjectId(req.params.id);
     const { name, role, style, keeper, basePrice } = req.body;
     const player = await Player.findByIdAndUpdate(
       playerId,
@@ -70,7 +69,7 @@ export const updatePlayer = async (req, res, next) => {
 
 export const deletePlayer = async (req, res, next) => {
   try {
-    const playerId = req.params.id;
+    const playerId = new mongoose.Types.ObjectId(req.params.id);
     const player = await Player.findById(playerId);
 
     if (!player || player.deleted) {

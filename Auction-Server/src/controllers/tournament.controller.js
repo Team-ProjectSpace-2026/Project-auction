@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Tournament from "../models/Tournament.js";
 import Player from "../models/Player.js";
 import Team from "../models/Team.js";
@@ -32,7 +33,7 @@ export const createTournament = async (req, res, next) => {
 
 export const getTournament = async (req, res, next) => {
   try {
-    const tournamentId = req.params.id;
+    const tournamentId = new mongoose.Types.ObjectId(req.params.id);
     const tournament = await Tournament.findById(tournamentId);
     if (!tournament) {
       return res.status(404).json({ message: "Tournament not found" });
@@ -45,7 +46,7 @@ export const getTournament = async (req, res, next) => {
 
 export const updateTournament = async (req, res, next) => {
   try {
-    const tournamentId = req.params.id;
+    const tournamentId = new mongoose.Types.ObjectId(req.params.id);
     const { name, status, date, teams, format, description } = req.body;
     const tournament = await Tournament.findByIdAndUpdate(
       tournamentId,
@@ -65,7 +66,7 @@ export const updateTournament = async (req, res, next) => {
 
 export const deleteTournament = async (req, res, next) => {
   try {
-    const tournamentId = req.params.id;
+    const tournamentId = new mongoose.Types.ObjectId(req.params.id);
 
     // Check for dependent records
     const [playerCount, teamCount, bidCount] = await Promise.all([

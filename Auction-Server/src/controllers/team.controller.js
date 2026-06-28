@@ -1,8 +1,9 @@
+import mongoose from 'mongoose';
 import Team from '../models/Team.js';
 
 export const getTeams = async (req, res, next) => {
   try {
-    const tournamentId = req.query.tournamentId;
+    const tournamentId = req.query.tournamentId ? new mongoose.Types.ObjectId(req.query.tournamentId) : undefined;
     let filter = {};
     if (tournamentId) {
       filter.tournamentId = tournamentId;
@@ -17,7 +18,7 @@ export const getTeams = async (req, res, next) => {
 
 export const getTeam = async (req, res, next) => {
   try {
-    const teamId = req.params.id;
+    const teamId = new mongoose.Types.ObjectId(req.params.id);
     const team = await Team.findById(teamId)
       .populate('tournamentId', 'name')
       .populate({
@@ -51,7 +52,7 @@ export const createTeam = async (req, res, next) => {
 
 export const updateTeam = async (req, res, next) => {
   try {
-    const teamId = req.params.id;
+    const teamId = new mongoose.Types.ObjectId(req.params.id);
     const { name, short, budget, maxPlayers, totalBudget } = req.body;
     const team = await Team.findByIdAndUpdate(
       teamId,
@@ -71,7 +72,7 @@ export const updateTeam = async (req, res, next) => {
 
 export const deleteTeam = async (req, res, next) => {
   try {
-    const teamId = req.params.id;
+    const teamId = new mongoose.Types.ObjectId(req.params.id);
     const team = await Team.findByIdAndDelete(teamId);
     
     if (!team) {

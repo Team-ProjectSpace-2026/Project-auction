@@ -9,7 +9,7 @@ import {
 } from '../utils/validators.js';
 import { handleValidationErrors } from '../middleware/errorHandler.js';
 import { apiLimiter, bidLimiter } from '../middleware/rateLimiter.js';
-import { sanitizeIdParams, sanitizeQueryIds } from '../middleware/sanitize.js';
+import { sanitizeIdParams } from '../middleware/sanitize.js';
 import auth from '../middleware/auth.middleware.js';
 
 const router = express.Router();
