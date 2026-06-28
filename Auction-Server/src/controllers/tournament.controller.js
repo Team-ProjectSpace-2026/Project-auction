@@ -15,7 +15,12 @@ export const getTournaments = async (req, res, next) => {
 
 export const createTournament = async (req, res, next) => {
   try {
-    const { name, status, date, teams, format, description } = req.body;
+    const name = String(req.body.name || "");
+    const status = String(req.body.status || "");
+    const date = String(req.body.date || "");
+    const teams = Number(req.body.teams) || 0;
+    const format = String(req.body.format || "");
+    const description = String(req.body.description || "");
     const tournament = new Tournament({
       name,
       status,
@@ -47,7 +52,12 @@ export const getTournament = async (req, res, next) => {
 export const updateTournament = async (req, res, next) => {
   try {
     const tournamentId = new mongoose.Types.ObjectId(req.params.id);
-    const { name, status, date, teams, format, description } = req.body;
+    const name = String(req.body.name || "");
+    const status = String(req.body.status || "");
+    const date = String(req.body.date || "");
+    const teams = Number(req.body.teams) || 0;
+    const format = String(req.body.format || "");
+    const description = String(req.body.description || "");
     const tournament = await Tournament.findByIdAndUpdate(
       tournamentId,
       { name, status, date, teams, format, description },

@@ -3,9 +3,11 @@ import User from "../models/User.js";
 
 export const register = async (req, res, next) => {
   try {
-    const { name, email, mobile, password } = req.body;
+    const name = String(req.body.name || "");
+    const email = String(req.body.email || "").toLowerCase().trim();
+    const mobile = String(req.body.mobile || "").trim();
+    const password = String(req.body.password || "");
 
-    // Check if user already exists
     const existingUser = await User.findOne({ $or: [{ email }, { mobile }] });
     if (existingUser) {
       return res.status(400).json({
@@ -51,9 +53,9 @@ export const register = async (req, res, next) => {
 
 export const login = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const email = String(req.body.email || "").toLowerCase().trim();
+    const password = String(req.body.password || "");
 
-    // Find user by email
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });

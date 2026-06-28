@@ -41,7 +41,12 @@ export const getTeam = async (req, res, next) => {
 
 export const createTeam = async (req, res, next) => {
   try {
-    const { name, short, budget, maxPlayers, totalBudget, tournamentId } = req.body;
+    const name = String(req.body.name || "");
+    const short = String(req.body.short || "");
+    const budget = Number(req.body.budget) || 0;
+    const maxPlayers = Number(req.body.maxPlayers) || 0;
+    const totalBudget = Number(req.body.totalBudget) || 0;
+    const tournamentId = String(req.body.tournamentId || "");
     const team = new Team({ name, short, budget, maxPlayers, totalBudget, tournamentId });
     await team.save();
     res.status(201).json(team);
@@ -53,7 +58,11 @@ export const createTeam = async (req, res, next) => {
 export const updateTeam = async (req, res, next) => {
   try {
     const teamId = new mongoose.Types.ObjectId(req.params.id);
-    const { name, short, budget, maxPlayers, totalBudget } = req.body;
+    const name = String(req.body.name || "");
+    const short = String(req.body.short || "");
+    const budget = Number(req.body.budget) || 0;
+    const maxPlayers = Number(req.body.maxPlayers) || 0;
+    const totalBudget = Number(req.body.totalBudget) || 0;
     const team = await Team.findByIdAndUpdate(
       teamId,
       { name, short, budget, maxPlayers, totalBudget },

@@ -50,7 +50,9 @@ export const placeBid = async (req, res, next) => {
   session.startTransaction();
   try {
     const tournamentId = new mongoose.Types.ObjectId(req.params.tournamentId);
-    const { amount, teamId, playerId } = req.body;
+    const amount = Number(req.body.amount) || 0;
+    const teamId = String(req.body.teamId || "");
+    const playerId = String(req.body.playerId || "");
     
     // Get current winning bid
     const currentBid = await getWinningBid(tournamentId, playerId);

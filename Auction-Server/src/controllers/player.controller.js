@@ -18,7 +18,12 @@ export const getPlayers = async (req, res, next) => {
 
 export const createPlayer = async (req, res, next) => {
   try {
-    const { name, role, style, keeper, basePrice, tournamentId } = req.body;
+    const name = String(req.body.name || "");
+    const role = String(req.body.role || "");
+    const style = String(req.body.style || "");
+    const keeper = Boolean(req.body.keeper);
+    const basePrice = Number(req.body.basePrice) || 0;
+    const tournamentId = String(req.body.tournamentId || "");
     const player = new Player({
       name,
       role,
@@ -50,7 +55,11 @@ export const getPlayer = async (req, res, next) => {
 export const updatePlayer = async (req, res, next) => {
   try {
     const playerId = new mongoose.Types.ObjectId(req.params.id);
-    const { name, role, style, keeper, basePrice } = req.body;
+    const name = String(req.body.name || "");
+    const role = String(req.body.role || "");
+    const style = String(req.body.style || "");
+    const keeper = Boolean(req.body.keeper);
+    const basePrice = Number(req.body.basePrice) || 0;
     const player = await Player.findByIdAndUpdate(
       playerId,
       { name, role, style, keeper, basePrice },
