@@ -8,9 +8,8 @@ on:
     branches: [main]
 
 jobs:
-  build:
+  frontend-build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
@@ -28,3 +27,20 @@ jobs:
 
       - run: npm run build
         working-directory: Auction-Project
+
+  backend-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: Auction-Server/package-lock.json
+
+      - run: npm ci
+        working-directory: Auction-Server
+
+      - run: npm test
+        working-directory: Auction-Server

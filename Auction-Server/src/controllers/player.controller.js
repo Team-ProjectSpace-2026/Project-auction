@@ -1,6 +1,6 @@
 import Player from '../models/Player.js';
 
-export const getPlayers = async (req, res) => {
+export const getPlayers = async (req, res, next) => {
   try {
     const { tournamentId } = req.query;
     const filter = tournamentId ? { tournamentId } : {};
@@ -8,21 +8,22 @@ export const getPlayers = async (req, res) => {
     const players = await Player.find(filter).populate('tournamentId', 'name');
     res.json(players);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-export const createPlayer = async (req, res) => {
+export const createPlayer = async (req, res, next) => {
   try {
-    const player = new Player(req.body);
+    const { name, role, style, keeper, basePrice, tournamentId } = req.body;
+    const player = new Player({ name, role, style, keeper, basePrice, tournamentId });
     await player.save();
     res.status(201).json(player);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-export const getPlayer = async (req, res) => {
+export const getPlayer = async (req, res, next) => {
   try {
     const player = await Player.findById(req.params.id).populate('tournamentId', 'name');
     if (!player) {
@@ -30,15 +31,16 @@ export const getPlayer = async (req, res) => {
     }
     res.json(player);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-export const updatePlayer = async (req, res) => {
+export const updatePlayer = async (req, res, next) => {
   try {
+    const { name, role, style, keeper, basePrice } = req.body;
     const player = await Player.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      { name, role, style, keeper, basePrice },
       { new: true, runValidators: true }
     );
     
@@ -48,11 +50,11 @@ export const updatePlayer = async (req, res) => {
     
     res.json(player);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-export const deletePlayer = async (req, res) => {
+export const deletePlayer = async (req, res, next) => {
   try {
     const player = await Player.findByIdAndDelete(req.params.id);
     
@@ -62,6 +64,6 @@ export const deletePlayer = async (req, res) => {
     
     res.json({ message: 'Player deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };

@@ -30,8 +30,11 @@ export const errorHandler = (err, req, res, next) => {
   }
 
   // Default error
-  res.status(err.statusCode || 500).json({
-    message: err.message || 'Internal Server Error'
+  const statusCode = err.statusCode || 500;
+  const message = statusCode < 500 ? err.message : 'Internal Server Error';
+  
+  res.status(statusCode).json({
+    message: message || 'Internal Server Error'
   });
 };
 
@@ -40,7 +43,10 @@ export const handleValidationErrors = (req, res, next) => {
   if (!errors.isEmpty()) {
     return res.status(400).json({
       message: 'Validation Error',
-      errors: errors.array()
+      errors: errors.array().map(err => ({
+        path: err.path,
+        msg: err.msg
+      }))
     });
   }
   next();

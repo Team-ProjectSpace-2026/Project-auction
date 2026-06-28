@@ -1,6 +1,7 @@
 {
   "name": "auction-server",
   "version": "1.0.0",
+  "type": "module",
   "description": "CricAuction backend API with real-time auction functionality",
   "main": "server.js",
   "scripts": {

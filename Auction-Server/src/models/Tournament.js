@@ -17,9 +17,9 @@ const tournamentSchema = new mongoose.Schema({
     required: [true, 'Tournament date is required']
   },
   teams: {
-    type: String,
+    type: Number,
     required: [true, 'Number of teams is required'],
-    trim: true
+    min: [1, 'At least one team is required']
   },
   format: {
     type: String,

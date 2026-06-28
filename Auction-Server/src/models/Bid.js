@@ -39,6 +39,6 @@ const bidSchema = new mongoose.Schema({
 });
 
 // Create compound index for efficient querying
-bidSchema.index({ tournamentId: 1, playerId: 1, timestamp: -1 });
+bidSchema.index({ tournamentId: 1, playerId: 1, status: 1, amount: -1, timestamp: 1 });
 
 export default mongoose.model('Bid', bidSchema);

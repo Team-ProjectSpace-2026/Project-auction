@@ -76,7 +76,13 @@ export const validatePlayer = [
   body('basePrice')
     .optional()
     .isFloat({ min: 0 })
-    .withMessage('Base price must be a positive number')
+    .withMessage('Base price must be a positive number'),
+
+  body('tournamentId')
+    .notEmpty()
+    .withMessage('Tournament ID is required')
+    .isMongoId()
+    .withMessage('Invalid Tournament ID format')
 ];
 
 export const validateTeam = [
@@ -94,7 +100,9 @@ export const validateTeam = [
   
   body('budget')
     .notEmpty()
-    .withMessage('Budget is required'),
+    .withMessage('Budget is required')
+    .isFloat({ min: 0 })
+    .withMessage('Budget must be a positive number'),
   
   body('totalBudget')
     .isFloat({ min: 0 })
@@ -103,15 +111,23 @@ export const validateTeam = [
   body('maxPlayers')
     .optional()
     .isInt({ min: 1 })
-    .withMessage('Max players must be a positive integer')
+    .withMessage('Max players must be a positive integer'),
+
+  body('tournamentId')
+    .notEmpty()
+    .withMessage('Tournament ID is required')
+    .isMongoId()
+    .withMessage('Invalid Tournament ID format')
 ];
 
 export const validateBid = [
   body('amount')
-    .isFloat({ min: 0 })
-    .withMessage('Bid amount must be a positive number'),
+    .isFloat({ min: 0.01 })
+    .withMessage('Bid amount must be a strictly positive number'),
   
   body('teamId')
     .notEmpty()
     .withMessage('Team ID is required')
+    .isMongoId()
+    .withMessage('Invalid Team ID format')
 ];

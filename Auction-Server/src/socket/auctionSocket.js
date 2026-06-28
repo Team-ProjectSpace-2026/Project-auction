@@ -1,7 +1,6 @@
 import { Server } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
-import Tournament from '../models/Tournament.js';
 
 let io;
 
@@ -82,13 +81,7 @@ export const initializeSocket = (server) => {
           currentBid.status = 'Outbid';
           await currentBid.save();
         }
-
-        // Process winning bid
-        if (amount > currentBidAmount) {
-          const { processWinningBid } = require('../utils/bidValidator.js');
-          await processWinningBid(bid);
-        }
-
+        
         // Broadcast bid to all clients in tournament room
         const populatedBid = await Bid.findById(bid._id)
           .populate('playerId', 'name')

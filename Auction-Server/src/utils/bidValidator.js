@@ -1,7 +1,8 @@
 import Bid from '../models/Bid.js';
 import Team from '../models/Team.js';
+import Player from '../models/Player.js';
 
-export const validateBid = async (bidData, currentBid = 0) => {
+export const validateBid = async (bidData, tournamentId, currentBid = 0) => {
   const { amount, teamId, playerId } = bidData;
   
   // Check if bid is higher than current bid
@@ -9,13 +10,19 @@ export const validateBid = async (bidData, currentBid = 0) => {
     throw new Error(`Bid must be higher than current bid of ₹${currentBid.toLocaleString()}`);
   }
   
-  // Check team's remaining budget
+  // Verify player belongs to tournament
+  const player = await Player.findById(playerId);
+  if (!player || player.tournamentId.toString() !== tournamentId) {
+    throw new Error('Invalid player for this tournament');
+  }
+
+  // Check team's remaining budget and tournament ownership
   const team = await Team.findById(teamId);
-  if (!team) {
-    throw new Error('Team not found');
+  if (!team || team.tournamentId.toString() !== tournamentId) {
+    throw new Error('Invalid team for this tournament');
   }
   
-  const remainingBudget = parseInt(team.remainingBudget.replace(/[₹,]/g, ''));
+  const remainingBudget = team.remainingBudget;
   if (amount > remainingBudget) {
     throw new Error(`Bid amount exceeds team's remaining budget of ₹${remainingBudget.toLocaleString()}`);
   }
@@ -40,7 +47,6 @@ export const processWinningBid = async (bid) => {
   await bid.save();
   
   // Update player as sold
-  const Player = require('../models/Player.js');
   const player = await Player.findById(bid.playerId);
   if (player) {
     player.isSold = true;
@@ -52,8 +58,8 @@ export const processWinningBid = async (bid) => {
   // Update team's remaining budget
   const team = await Team.findById(bid.teamId);
   if (team) {
-    const remaining = parseInt(team.remainingBudget.replace(/[₹,]/g, '')) - bid.amount;
-    team.remainingBudget = `₹${remaining.toLocaleString()}`;
+    const remaining = team.remainingBudget - bid.amount;
+    team.remainingBudget = remaining;
     team.players += 1;
     await team.save();
   }

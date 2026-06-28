@@ -1,9 +1,10 @@
+import mongoose from 'mongoose';
 import Bid from '../models/Bid.js';
 import Player from '../models/Player.js';
 import Team from '../models/Team.js';
 import { validateBid, getWinningBid, processWinningBid } from '../utils/bidValidator.js';
 
-export const getAuctionState = async (req, res) => {
+export const getAuctionState = async (req, res, next) => {
   try {
     const { tournamentId } = req.params;
     
@@ -24,7 +25,7 @@ export const getAuctionState = async (req, res) => {
     const totalBids = await Bid.countDocuments({ tournamentId });
     const totalPlayersSold = players.filter(p => p.isSold).length;
     const totalBudgetUsed = teams.reduce((sum, team) => {
-      const used = parseInt(team.totalBudget.replace(/[₹,]/g, '')) - parseInt(team.remainingBudget.replace(/[₹,]/g, ''));
+      const used = team.totalBudget - team.remainingBudget;
       return sum + used;
     }, 0);
     
@@ -40,11 +41,13 @@ export const getAuctionState = async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-export const placeBid = async (req, res) => {
+export const placeBid = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
     const { tournamentId } = req.params;
     const { amount, teamId, playerId } = req.body;
@@ -54,7 +57,7 @@ export const placeBid = async (req, res) => {
     const currentBidAmount = currentBid ? currentBid.amount : 0;
     
     // Validate bid
-    await validateBid({ amount, teamId, playerId }, currentBidAmount);
+    await validateBid({ amount, teamId, playerId }, tournamentId, currentBidAmount);
     
     // Create new bid
     const bid = new Bid({
@@ -65,19 +68,15 @@ export const placeBid = async (req, res) => {
       status: 'Active'
     });
     
-    await bid.save();
+    await bid.save({ session });
     
-    // Check if this is the new winning bid
+    // Mark previous bid as outbid
     if (currentBid) {
-      // Mark previous bid as outbid
       currentBid.status = 'Outbid';
-      await currentBid.save();
+      await currentBid.save({ session });
     }
     
-    // Process winning bid if this is the highest
-    if (amount > currentBidAmount) {
-      await processWinningBid(bid);
-    }
+    await session.commitTransaction();
     
     // Populate response data
     const populatedBid = await Bid.findById(bid._id)
@@ -90,11 +89,14 @@ export const placeBid = async (req, res) => {
       isWinningBid: amount > currentBidAmount
     });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    await session.abortTransaction();
+    next(error);
+  } finally {
+    session.endSession();
   }
 };
 
-export const getBidHistory = async (req, res) => {
+export const getBidHistory = async (req, res, next) => {
   try {
     const { tournamentId, playerId } = req.params;
     
@@ -108,6 +110,6 @@ export const getBidHistory = async (req, res) => {
     
     res.json(bids);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };

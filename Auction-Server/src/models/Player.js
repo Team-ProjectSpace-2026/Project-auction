@@ -11,7 +11,6 @@ const playerSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Player role is required'],
     enum: ['Batsman', 'Bowler', 'All Rounder', 'Wicket Keeper'],
-    uppercase: true
   },
   style: {
     type: String,

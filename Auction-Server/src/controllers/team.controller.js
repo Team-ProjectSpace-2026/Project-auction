@@ -1,6 +1,6 @@
 import Team from '../models/Team.js';
 
-export const getTeams = async (req, res) => {
+export const getTeams = async (req, res, next) => {
   try {
     const { tournamentId } = req.query;
     const filter = tournamentId ? { tournamentId } : {};
@@ -8,11 +8,11 @@ export const getTeams = async (req, res) => {
     const teams = await Team.find(filter).populate('tournamentId', 'name');
     res.json(teams);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-export const getTeam = async (req, res) => {
+export const getTeam = async (req, res, next) => {
   try {
     const team = await Team.findById(req.params.id)
       .populate('tournamentId', 'name')
@@ -30,25 +30,27 @@ export const getTeam = async (req, res) => {
     
     res.json(team);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-export const createTeam = async (req, res) => {
+export const createTeam = async (req, res, next) => {
   try {
-    const team = new Team(req.body);
+    const { name, short, budget, maxPlayers, totalBudget, tournamentId } = req.body;
+    const team = new Team({ name, short, budget, maxPlayers, totalBudget, tournamentId });
     await team.save();
     res.status(201).json(team);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-export const updateTeam = async (req, res) => {
+export const updateTeam = async (req, res, next) => {
   try {
+    const { name, short, budget, maxPlayers, totalBudget } = req.body;
     const team = await Team.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      { name, short, budget, maxPlayers, totalBudget },
       { new: true, runValidators: true }
     );
     
@@ -58,11 +60,11 @@ export const updateTeam = async (req, res) => {
     
     res.json(team);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-export const deleteTeam = async (req, res) => {
+export const deleteTeam = async (req, res, next) => {
   try {
     const team = await Team.findByIdAndDelete(req.params.id);
     
@@ -72,6 +74,6 @@ export const deleteTeam = async (req, res) => {
     
     res.json({ message: 'Team deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };

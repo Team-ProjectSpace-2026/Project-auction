@@ -1,5 +1,4 @@
 import { createServer } from 'http';
-import { Server } from 'socket.io';
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -24,7 +23,7 @@ const server = createServer(app);
 const PORT = process.env.PORT || 5000;
 
 // Connect to database
-connectDB();
+await connectDB();
 
 // Middleware
 app.use(cors({
