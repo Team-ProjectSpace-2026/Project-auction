@@ -41,4 +41,10 @@ const bidSchema = new mongoose.Schema({
 // Create compound index for efficient querying
 bidSchema.index({ tournamentId: 1, playerId: 1, status: 1, amount: -1, timestamp: 1 });
 
+// Enforce only one active bid per player per tournament
+bidSchema.index(
+  { tournamentId: 1, playerId: 1 },
+  { unique: true, partialFilterExpression: { status: 'Active' } }
+);
+
 export default mongoose.model('Bid', bidSchema);

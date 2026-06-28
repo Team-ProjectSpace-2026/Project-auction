@@ -35,13 +35,29 @@ export const createPlayer = async (req, res, next) => {
 
 export const getPlayer = async (req, res, next) => {
   try {
-    const player = await Player.findById(req.params.id).populate(
-      "tournamentId",
-      "name",
-    );
-    if (!player) {
-      return res.status(404).json({ message: "Player not found" });
+    const player = await Player.findById(req.params.id).populate('tournamentId', 'name');
+    if (!player || player.deleted) {
+      return res.status(404).json({ message: 'Player not found' });
     }
+    res.json(player);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updatePlayer = async (req, res, next) => {
+  try {
+    const { name, role, style, keeper, basePrice } = req.body;
+    const player = await Player.findByIdAndUpdate(
+      req.params.id,
+      { name, role, style, keeper, basePrice },
+      { new: true, runValidators: true }
+    );
+    
+    if (!player || player.deleted) {
+      return res.status(404).json({ message: 'Player not found' });
+    }
+    
     res.json(player);
   } catch (error) {
     next(error);
@@ -71,18 +87,18 @@ export const deletePlayer = async (req, res, next) => {
   try {
     const player = await Player.findById(req.params.id);
 
-    if (!player) {
-      return res.status(404).json({ message: "Player not found" });
+    if (!player || player.deleted) {
+      return res.status(404).json({ message: 'Player not found' });
     }
 
-    // Soft delete: mark as deleted and remove related bids
+    // Soft delete player
     player.deleted = true;
     await player.save();
 
-    // Clean up related bids
-    await Bid.deleteMany({ playerId: player._id });
+    // Remove associated bids (optional, depending on desired behavior)
+    // await Bid.deleteMany({ playerId: player._id });
 
-    res.json({ message: "Player deleted successfully" });
+    res.json({ message: 'Player deleted successfully' });
   } catch (error) {
     next(error);
   }

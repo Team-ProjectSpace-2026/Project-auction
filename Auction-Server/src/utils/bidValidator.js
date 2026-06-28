@@ -15,7 +15,15 @@ export const validateBid = async (bidData, tournamentId, currentBid = 0) => {
   // Verify player belongs to tournament
   const player = await Player.findById(playerId);
   if (!player || player.tournamentId.toString() !== tournamentId) {
-    throw new Error("Invalid player for this tournament");
+    throw new Error('Invalid player for this tournament');
+  }
+
+  if (player.isSold) {
+    throw new Error('Player has already been sold');
+  }
+
+  if (player.deleted) {
+    throw new Error('Player has been deleted');
   }
 
   if (player.isSold) {
@@ -79,14 +87,14 @@ export const processWinningBid = async (bid) => {
         await player.save({ session });
       }
 
-      // Update team's remaining budget
-      const team = await Team.findById(bid.teamId).session(session);
-      if (team) {
-        const remaining = team.remainingBudget - bid.amount;
-        team.remainingBudget = remaining;
-        team.players += 1;
-        await team.save({ session });
-      }
+    // Update team's remaining budget
+    const team = await Team.findById(bid.teamId);
+    if (team) {
+      const remaining = team.remainingBudget - bid.amount;
+      team.remainingBudget = remaining;
+      team.players += 1;
+      await team.save({ session });
+    }
     });
   } finally {
     await session.endSession();

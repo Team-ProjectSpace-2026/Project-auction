@@ -77,49 +77,51 @@ export const initializeSocket = (server) => {
           return;
         }
 
-        // Atomic bid creation with conditional update for active bid transition
-        const session = await Bid.startSession();
-        try {
-          await session.withTransaction(async () => {
-            // Create new bid
-            const bid = new Bid({
-              tournamentId,
-              playerId,
-              teamId,
-              amount,
-              status: "Active",
-            });
-            await bid.save({ session });
-
-            // Update previous active bid to Outbid atomically
-            if (currentBid) {
-              await Bid.updateOne(
-                { _id: currentBid._id, status: "Active" },
-                { $set: { status: "Outbid" } },
-                { session },
-              );
-            }
-
-            // Broadcast bid to all clients in tournament room
-            const populatedBid = await Bid.findById(bid._id)
-              .populate("playerId", "name")
-              .populate("teamId", "name");
-
-            io.to(`tournament-${tournamentId}`).emit("new-bid", {
-              bid: populatedBid,
-              isWinningBid: true,
-            });
-
-            // Emit success to bidder
-            socket.emit("bid-success", {
-              message: "Bid placed successfully",
-              bid: populatedBid,
-              isWinningBid: true,
-            });
-          });
-        } finally {
-          await session.endSession();
-        }
+         // Atomic bid creation with conditional update for active bid transition
+         const session = await Bid.startSession();
+         let newBidId;
+         try {
+           await session.withTransaction(async () => {
+             // Create new bid
+             const bid = new Bid({
+               tournamentId,
+               playerId,
+               teamId,
+               amount,
+               status: "Active",
+             });
+             await bid.save({ session });
+             newBidId = bid._id;
+ 
+             // Update previous active bid to Outbid atomically
+             if (currentBid) {
+               await Bid.updateOne(
+                 { _id: currentBid._id, status: "Active" },
+                 { $set: { status: "Outbid" } },
+                 { session },
+               );
+             }
+           });
+         } finally {
+           await session.endSession();
+         }
+ 
+         // Broadcast bid to all clients in tournament room after transaction resolves
+         const populatedBid = await Bid.findById(newBidId)
+           .populate("playerId", "name")
+           .populate("teamId", "name");
+ 
+         io.to(`tournament-${tournamentId}`).emit("new-bid", {
+           bid: populatedBid,
+           isWinningBid: true,
+         });
+ 
+         // Emit success to bidder
+         socket.emit("bid-success", {
+           message: "Bid placed successfully",
+           bid: populatedBid,
+           isWinningBid: true,
+         });
       } catch (error) {
         socket.emit("bid-error", { message: error.message });
       }
