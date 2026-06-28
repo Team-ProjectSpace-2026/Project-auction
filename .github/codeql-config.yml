@@ -1,9 +1,0 @@
-name: "CodeQL Config"
-
-paths:
-  include:
-    - Auction-Project/src
-    - Auction-Server/src
-  exclude:
-    - "**/node_modules"
-    - "**/package-lock.json"
