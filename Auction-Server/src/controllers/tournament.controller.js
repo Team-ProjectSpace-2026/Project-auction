@@ -1,4 +1,7 @@
-import Tournament from '../models/Tournament.js';
+import Tournament from "../models/Tournament.js";
+import Player from "../models/Player.js";
+import Team from "../models/Team.js";
+import Bid from "../models/Bid.js";
 
 export const getTournaments = async (req, res, next) => {
   try {
@@ -12,7 +15,14 @@ export const getTournaments = async (req, res, next) => {
 export const createTournament = async (req, res, next) => {
   try {
     const { name, status, date, teams, format, description } = req.body;
-    const tournament = new Tournament({ name, status, date, teams, format, description });
+    const tournament = new Tournament({
+      name,
+      status,
+      date,
+      teams,
+      format,
+      description,
+    });
     await tournament.save();
     res.status(201).json(tournament);
   } catch (error) {
@@ -24,7 +34,7 @@ export const getTournament = async (req, res, next) => {
   try {
     const tournament = await Tournament.findById(req.params.id);
     if (!tournament) {
-      return res.status(404).json({ message: 'Tournament not found' });
+      return res.status(404).json({ message: "Tournament not found" });
     }
     res.json(tournament);
   } catch (error) {
@@ -38,13 +48,13 @@ export const updateTournament = async (req, res, next) => {
     const tournament = await Tournament.findByIdAndUpdate(
       req.params.id,
       { name, status, date, teams, format, description },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
-    
+
     if (!tournament) {
-      return res.status(404).json({ message: 'Tournament not found' });
+      return res.status(404).json({ message: "Tournament not found" });
     }
-    
+
     res.json(tournament);
   } catch (error) {
     next(error);
@@ -53,13 +63,28 @@ export const updateTournament = async (req, res, next) => {
 
 export const deleteTournament = async (req, res, next) => {
   try {
-    const tournament = await Tournament.findByIdAndDelete(req.params.id);
-    
-    if (!tournament) {
-      return res.status(404).json({ message: 'Tournament not found' });
+    const tournamentId = req.params.id;
+
+    // Check for dependent records
+    const [playerCount, teamCount, bidCount] = await Promise.all([
+      Player.countDocuments({ tournamentId }),
+      Team.countDocuments({ tournamentId }),
+      Bid.countDocuments({ tournamentId }),
+    ]);
+
+    if (playerCount > 0 || teamCount > 0 || bidCount > 0) {
+      return res.status(400).json({
+        message: `Cannot delete tournament. Dependent records exist: ${playerCount} players, ${teamCount} teams, ${bidCount} bids`,
+      });
     }
-    
-    res.json({ message: 'Tournament deleted successfully' });
+
+    const tournament = await Tournament.findByIdAndDelete(tournamentId);
+
+    if (!tournament) {
+      return res.status(404).json({ message: "Tournament not found" });
+    }
+
+    res.json({ message: "Tournament deleted successfully" });
   } catch (error) {
     next(error);
   }
