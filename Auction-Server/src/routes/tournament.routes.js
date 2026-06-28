@@ -10,12 +10,14 @@ import {
   validateTournament
 } from '../utils/validators.js';
 import { handleValidationErrors } from '../middleware/errorHandler.js';
+import { apiLimiter } from '../middleware/rateLimiter.js';
 import auth from '../middleware/auth.middleware.js';
 
 const router = express.Router();
 
 // All routes require authentication
 router.use(auth);
+router.use(apiLimiter);
 
 router.get('/', getTournaments);
 router.post('/', validateTournament, handleValidationErrors, createTournament);
