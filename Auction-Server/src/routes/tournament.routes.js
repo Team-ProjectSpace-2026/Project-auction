@@ -11,17 +11,21 @@ import {
 } from '../utils/validators.js';
 import { handleValidationErrors } from '../middleware/errorHandler.js';
 import { apiLimiter } from '../middleware/rateLimiter.js';
+import { sanitizeIdParams } from '../middleware/sanitize.js';
 import auth from '../middleware/auth.middleware.js';
 
 const router = express.Router();
 
+// Rate limiting applied first
+router.use(apiLimiter);
+
 // All routes require authentication
 router.use(auth);
 
-router.get('/', apiLimiter, getTournaments);
-router.post('/', apiLimiter, validateTournament, handleValidationErrors, createTournament);
-router.get('/:id', apiLimiter, getTournament);
-router.put('/:id', apiLimiter, validateTournament, handleValidationErrors, updateTournament);
-router.delete('/:id', apiLimiter, deleteTournament);
+router.get('/', getTournaments);
+router.post('/', validateTournament, handleValidationErrors, createTournament);
+router.get('/:id', sanitizeIdParams(['id']), getTournament);
+router.put('/:id', sanitizeIdParams(['id']), validateTournament, handleValidationErrors, updateTournament);
+router.delete('/:id', sanitizeIdParams(['id']), deleteTournament);
 
 export default router;

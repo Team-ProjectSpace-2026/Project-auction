@@ -1,16 +1,13 @@
 import Player from "../models/Player.js";
 import Bid from "../models/Bid.js";
-import { isValidObjectId, sanitizeObjectId } from "../utils/mongoHelpers.js";
+import mongoose from "mongoose";
 
 export const getPlayers = async (req, res, next) => {
   try {
-    const { tournamentId } = req.query;
+    const tournamentId = req.query.tournamentId;
     let filter = { deleted: false };
     if (tournamentId) {
-      if (!isValidObjectId(tournamentId)) {
-        return res.status(400).json({ message: "Invalid tournament ID format" });
-      }
-      filter.tournamentId = sanitizeObjectId(tournamentId, "Tournament");
+      filter.tournamentId = tournamentId;
     }
 
     const players = await Player.find(filter).populate("tournamentId", "name");
@@ -40,7 +37,7 @@ export const createPlayer = async (req, res, next) => {
 
 export const getPlayer = async (req, res, next) => {
   try {
-    const playerId = sanitizeObjectId(req.params.id, "Player");
+    const playerId = req.params.id;
     const player = await Player.findById(playerId).populate('tournamentId', 'name');
     if (!player || player.deleted) {
       return res.status(404).json({ message: 'Player not found' });
@@ -53,7 +50,7 @@ export const getPlayer = async (req, res, next) => {
 
 export const updatePlayer = async (req, res, next) => {
   try {
-    const playerId = sanitizeObjectId(req.params.id, "Player");
+    const playerId = req.params.id;
     const { name, role, style, keeper, basePrice } = req.body;
     const player = await Player.findByIdAndUpdate(
       playerId,
@@ -73,7 +70,7 @@ export const updatePlayer = async (req, res, next) => {
 
 export const deletePlayer = async (req, res, next) => {
   try {
-    const playerId = sanitizeObjectId(req.params.id, "Player");
+    const playerId = req.params.id;
     const player = await Player.findById(playerId);
 
     if (!player || player.deleted) {

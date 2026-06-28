@@ -1,9 +1,20 @@
+import mongoose from "mongoose";
 import Bid from "../models/Bid.js";
 import Team from "../models/Team.js";
 import Player from "../models/Player.js";
 
+const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
+
 export const validateBid = async (bidData, tournamentId, currentBid = 0) => {
   const { amount, teamId, playerId } = bidData;
+
+  // Validate inputs are proper ObjectIds
+  if (!isValidObjectId(teamId) || !isValidObjectId(playerId) || !isValidObjectId(tournamentId)) {
+    throw new Error("Invalid ID format provided");
+  }
+
+  const sanitizedTeamId = new mongoose.Types.ObjectId(teamId);
+  const sanitizedPlayerId = new mongoose.Types.ObjectId(playerId);
 
   // Check if bid is higher than current bid
   if (amount <= currentBid) {
@@ -13,7 +24,7 @@ export const validateBid = async (bidData, tournamentId, currentBid = 0) => {
   }
 
   // Verify player belongs to tournament
-  const player = await Player.findById(playerId);
+  const player = await Player.findById(sanitizedPlayerId);
   if (!player || player.tournamentId.toString() !== tournamentId) {
     throw new Error('Invalid player for this tournament');
   }
@@ -26,12 +37,8 @@ export const validateBid = async (bidData, tournamentId, currentBid = 0) => {
     throw new Error('Player has been deleted');
   }
 
-  if (player.isSold) {
-    throw new Error("Player has already been sold");
-  }
-
   // Check team's remaining budget and tournament ownership
-  const team = await Team.findById(teamId);
+  const team = await Team.findById(sanitizedTeamId);
   if (!team || team.tournamentId.toString() !== tournamentId) {
     throw new Error("Invalid team for this tournament");
   }
@@ -47,9 +54,17 @@ export const validateBid = async (bidData, tournamentId, currentBid = 0) => {
 };
 
 export const getWinningBid = async (tournamentId, playerId) => {
+  // Validate inputs
+  if (!isValidObjectId(tournamentId) || !isValidObjectId(playerId)) {
+    throw new Error("Invalid ID format provided");
+  }
+
+  const sanitizedTournamentId = new mongoose.Types.ObjectId(tournamentId);
+  const sanitizedPlayerId = new mongoose.Types.ObjectId(playerId);
+
   const bid = await Bid.findOne({
-    tournamentId,
-    playerId,
+    tournamentId: sanitizedTournamentId,
+    playerId: sanitizedPlayerId,
     status: "Active",
   }).sort({ amount: -1, timestamp: 1 });
 

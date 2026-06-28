@@ -11,7 +11,7 @@ const router = express.Router();
 router.post('/register', authLimiter, validateRegister, handleValidationErrors, register);
 router.post('/login', authLimiter, validateLogin, handleValidationErrors, login);
 
-// Protected routes
-router.get('/profile', auth, authLimiter, getProfile);
+// Protected routes - rate limiter before auth
+router.get('/profile', authLimiter, auth, getProfile);
 
 export default router;

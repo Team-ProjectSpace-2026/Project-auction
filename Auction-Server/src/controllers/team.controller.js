@@ -1,15 +1,11 @@
 import Team from '../models/Team.js';
-import { isValidObjectId, sanitizeObjectId } from '../utils/mongoHelpers.js';
 
 export const getTeams = async (req, res, next) => {
   try {
-    const { tournamentId } = req.query;
+    const tournamentId = req.query.tournamentId;
     let filter = {};
     if (tournamentId) {
-      if (!isValidObjectId(tournamentId)) {
-        return res.status(400).json({ message: "Invalid tournament ID format" });
-      }
-      filter.tournamentId = sanitizeObjectId(tournamentId, "Tournament");
+      filter.tournamentId = tournamentId;
     }
     
     const teams = await Team.find(filter).populate('tournamentId', 'name');
@@ -21,7 +17,7 @@ export const getTeams = async (req, res, next) => {
 
 export const getTeam = async (req, res, next) => {
   try {
-    const teamId = sanitizeObjectId(req.params.id, "Team");
+    const teamId = req.params.id;
     const team = await Team.findById(teamId)
       .populate('tournamentId', 'name')
       .populate({
@@ -55,7 +51,7 @@ export const createTeam = async (req, res, next) => {
 
 export const updateTeam = async (req, res, next) => {
   try {
-    const teamId = sanitizeObjectId(req.params.id, "Team");
+    const teamId = req.params.id;
     const { name, short, budget, maxPlayers, totalBudget } = req.body;
     const team = await Team.findByIdAndUpdate(
       teamId,
@@ -75,7 +71,7 @@ export const updateTeam = async (req, res, next) => {
 
 export const deleteTeam = async (req, res, next) => {
   try {
-    const teamId = sanitizeObjectId(req.params.id, "Team");
+    const teamId = req.params.id;
     const team = await Team.findByIdAndDelete(teamId);
     
     if (!team) {

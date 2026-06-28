@@ -9,16 +9,19 @@ import {
 } from '../utils/validators.js';
 import { handleValidationErrors } from '../middleware/errorHandler.js';
 import { apiLimiter, bidLimiter } from '../middleware/rateLimiter.js';
+import { sanitizeIdParams, sanitizeQueryIds } from '../middleware/sanitize.js';
 import auth from '../middleware/auth.middleware.js';
 
 const router = express.Router();
 
-// All routes require authentication
-router.use(auth);
+// Rate limiting applied first
 router.use(apiLimiter);
 
-router.get('/:tournamentId', getAuctionState);
-router.post('/:tournamentId/bid', bidLimiter, validateBid, handleValidationErrors, placeBid);
-router.get('/:tournamentId/bids/:playerId?', getBidHistory);
+// All routes require authentication
+router.use(auth);
+
+router.get('/:tournamentId', sanitizeIdParams(['tournamentId']), getAuctionState);
+router.post('/:tournamentId/bid', bidLimiter, sanitizeIdParams(['tournamentId']), validateBid, handleValidationErrors, placeBid);
+router.get('/:tournamentId/bids/:playerId?', sanitizeIdParams(['tournamentId', 'playerId']), getBidHistory);
 
 export default router;
