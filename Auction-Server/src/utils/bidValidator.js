@@ -16,6 +16,10 @@ export const validateBid = async (bidData, tournamentId, currentBid = 0) => {
     throw new Error('Invalid player for this tournament');
   }
 
+  if (player.isSold) {
+    throw new Error('Player has already been sold');
+  }
+
   // Check team's remaining budget and tournament ownership
   const team = await Team.findById(teamId);
   if (!team || team.tournamentId.toString() !== tournamentId) {
