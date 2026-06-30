@@ -21,7 +21,7 @@ const Sidebar = ({ activePage = "dashboard", onNavigate }) => {
     } catch {
       // ignore errors during cleanup
     }
-    navigate("/login");
+    navigate("/login", { replace: true });
   };
 
   return (
@@ -137,7 +137,6 @@ const Sidebar = ({ activePage = "dashboard", onNavigate }) => {
                 fontSize: "14px",
                 fontWeight: isActive ? 700 : 500,
                 textAlign: "left",
-                transition: "background 0.15s",
               }}
               onMouseEnter={(e) => {
                 if (!isActive)

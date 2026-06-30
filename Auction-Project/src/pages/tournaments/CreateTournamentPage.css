@@ -121,15 +121,11 @@
     left:18px;
     top:50%;
     transform:translateY(-50%);
-
     color:var(--input-placeholder);
-
     display:flex;
     align-items:center;
     justify-content:center;
-
     font-size:18px;
-
     pointer-events:none;
 }
 
@@ -146,68 +142,41 @@
     display:flex;
     align-items:flex-start;
     gap:18px;
-
     background:var(--info-bg);
-
     border:1px solid var(--info-border);
-
     border-radius:12px;
-
     padding:18px 20px;
-
     margin-top:10px;
-
     margin-bottom:35px;
-
     transition:background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .info-icon{
-
     width:28px;
-
     height:28px;
-
     border-radius:50%;
-
     background:var(--info-icon-bg);
-
     color:white;
-
     display:flex;
-
     justify-content:center;
-
     align-items:center;
-
     font-weight:700;
-
     font-size:16px;
-
     flex-shrink:0;
 }
 
 .info-content h4{
-
     font-size:15px;
-
     font-weight:700;
-
     color:var(--info-title-color);
-
     margin-bottom:5px;
-
     transition:color 0.2s ease;
 }
 
 .info-content p{
-
     font-size:13px;
-
     color:var(--breadcrumb-current);
-
     line-height:1.5;
-
     transition:color 0.2s ease;
 }
 
@@ -216,74 +185,45 @@
 ========================== */
 
 .button-section{
-
     display:flex;
-
     justify-content:flex-end;
-
     align-items:center;
-
     gap:18px;
-
     margin-top:32px;
 }
 
 .cancel-btn{
-
     width:110px;
-
     height:48px;
-
     border-radius:10px;
-
     border:1px solid var(--border-light);
-
     background:var(--card-bg-light);
-
     color:var(--input-text);
-
     font-size:15px;
-
     font-weight:600;
-
     cursor:pointer;
-
     transition:background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .cancel-btn:hover{
-
     background:var(--bg-secondary-light);
 }
 
 .create-btn{
-
     width:180px;
-
     height:48px;
-
     border:none;
-
     border-radius:10px;
-
     background:var(--accent-light);
-
     color:white;
-
     font-size:15px;
-
     font-weight:600;
-
     cursor:pointer;
-
     box-shadow:0 8px 20px rgba(37,99,235,.25);
-
     transition:background-color 0.2s ease, transform 0.25s;
 }
 
 .create-btn:hover{
-
     background:var(--accent-hover-light);
-
     transform:translateY(-1px);
 }

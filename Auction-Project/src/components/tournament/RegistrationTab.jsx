@@ -98,6 +98,9 @@ const RegistrationTab = () => {
               border: "1px solid var(--border-light)",
               borderRadius: "10px",
               fontSize: "14px",
+              background: "var(--input-bg)",
+              color: "var(--input-text)",
+              transition: "background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease",
             }}
           />
 

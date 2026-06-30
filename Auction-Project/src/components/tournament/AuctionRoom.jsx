@@ -77,7 +77,7 @@ const AuctionRoom = () => {
               <span
                 style={{
                   background: "var(--role-batsman-bg)",
-                  color: "var(--accent-light)",
+                  color: "var(--role-batsman-text)",
                   padding: "6px 12px",
                   borderRadius: "8px",
                   fontSize: "12px",
@@ -250,8 +250,13 @@ const AuctionRoom = () => {
               width: "100%",
               marginTop: "16px",
               padding: "12px",
-              border: "1px solid #d1d5db",
+              border: "1px solid var(--input-border)",
               borderRadius: "8px",
+              background: "var(--input-bg)",
+              color: "var(--input-text)",
+              fontSize: "14px",
+              outline: "none",
+              transition: "background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease",
             }}
           />
 

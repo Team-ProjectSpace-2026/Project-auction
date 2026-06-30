@@ -8,6 +8,11 @@ export const ThemeProvider = ({ children }) => {
     return saved === 'dark' ? 'dark' : 'light';
   });
 
+  // Synchronous initialization - apply class before first paint to prevent flash
+  if (typeof document !== 'undefined') {
+    document.body.classList.toggle('dark-mode', theme === 'dark');
+  }
+
   useEffect(() => {
     document.body.classList.toggle('dark-mode', theme === 'dark');
     localStorage.setItem('theme', theme);

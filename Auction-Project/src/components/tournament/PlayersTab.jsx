@@ -155,7 +155,9 @@ const PlayersTab = () => {
             borderRadius: "12px",
             fontSize: "14px",
             background: "var(--input-bg)",
+            color: "var(--input-text)",
             outline: "none",
+            transition: "background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease",
           }}
         />
 
@@ -172,7 +174,9 @@ const PlayersTab = () => {
               border: "1px solid var(--border-light)",
               borderRadius: "12px",
               background: "var(--input-bg)",
+              color: "var(--input-text)",
               cursor: "pointer",
+              transition: "background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease",
             }}
           >
             <option>All Roles</option>

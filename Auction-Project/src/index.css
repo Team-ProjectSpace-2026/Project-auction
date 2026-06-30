@@ -127,6 +127,10 @@ body.dark-mode {
   --role-bowler-bg: #4a3728;
   --role-allrounder-bg: #2d1f5e;
   --role-keeper-bg: #1a3d2a;
+  --role-batsman-text: #93c5fd;
+  --role-bowler-text: #fbbf24;
+  --role-allrounder-text: #c4b5fd;
+  --role-keeper-text: #86efac;
   --info-bg: #1a2744;
   --info-border: rgba(59, 130, 246, 0.2);
   --info-icon-bg: #2563eb;
@@ -634,6 +638,11 @@ button {
 
 .theme-toggle input:checked + .theme-toggle-slider::before {
   transform: translateX(22px);
+}
+
+.theme-toggle input:focus-visible + .theme-toggle-slider {
+  outline: 2px solid var(--accent-light);
+  outline-offset: 2px;
 }
 
 .theme-toggle-icons {
