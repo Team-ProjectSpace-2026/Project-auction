@@ -1,22 +1,27 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const PlayerRevealModal = ({ onClose, onContinue }) => {
   const [step, setStep] = useState(1);
+  const timersRef = useRef([]);
 
   useEffect(() => {
-    const timers = [
+    timersRef.current = [
       setTimeout(() => setStep(2), 800),
       setTimeout(() => setStep(3), 2200),
       setTimeout(() => setStep(4), 3600),
       setTimeout(() => setStep(5), 4600),
     ];
-    return () => timers.forEach(clearTimeout);
+    return () => timersRef.current.forEach(clearTimeout);
   }, []);
 
   const isShuffling = step >= 2 && step <= 3;
   const isRevealed = step >= 4;
+  const isFullyRevealed = step === 5;
 
   const handleRevealClick = () => {
+    timersRef.current.forEach(clearTimeout);
+    timersRef.current = [];
+    
     if (step < 5) {
       setStep(step + 1);
     } else {
@@ -231,9 +236,10 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
               marginBottom: "24px",
             }}
           >
-            {isRevealed
+            {isFullyRevealed
               ? "Click below to continue."
               : "This will only take a few seconds."}
+
           </p>
 
           <button
@@ -248,7 +254,8 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
               cursor: "pointer",
             }}
           >
-            {isRevealed ? "Continue" : "Reveal Player"}
+            {isFullyRevealed ? "Continue" : "Reveal Player"}
+
           </button>
         </div>
       </div>
