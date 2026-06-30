@@ -1,15 +1,15 @@
 import Sidebar from "../../components/layout/Sidebar";
-import TopBar from "../../components/layout/TopBar";
+// import TopBar from "../../components/layout/TopBar";
 import SuccessModal from "../../components/common/SuccessModal";
 import { FiMapPin, FiCalendar } from "react-icons/fi";
 import "./EditTournment.css";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
-const MOCK_USER = {
-  name: "Rahul Organizer",
-  role: "Organizer",
-};
+// const MOCK_USER = {
+//   name: "Rahul Organizer",
+//   role: "Organizer",
+// };
 
 const EditTournamentPage = () => {
     const [showSuccess, setShowSuccess] = useState(false);
@@ -26,7 +26,7 @@ const EditTournamentPage = () => {
       {/* Main Container */}
       <div className="create-container">
         {/* Top Navigation */}
-        <TopBar user={MOCK_USER} />
+        {/* <TopBar user={MOCK_USER} /> */}
 
         {/* Main Content */}
         <main className="create-main">

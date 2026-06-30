@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Sidebar from "../../components/layout/Sidebar";
-import TopBar from "../../components/layout/TopBar";
+// import TopBar from "../../components/layout/TopBar";
 import TournamentHeader from "../../components/tournament/TournamentHeader";
 import OverviewTab from "../../components/tournament/OverviewTab";
 import RegistrationTab from "../../components/tournament/RegistrationTab";
@@ -9,10 +9,10 @@ import PlayersTab from "../../components/tournament/PlayersTab";
 import LiveAuctionTab from "../../components/tournament/LiveAuctionTab";
 import { useLocation } from "react-router-dom";
 
-const MOCK_USER = {
-  name: "Rahul Organizer",
-  role: "Organizer",
-};
+// const MOCK_USER = {
+//   name: "Rahul Organizer",
+//   role: "Organizer",
+// };
 
 const TournamentHubPage = () => {
   const [activePage, setActivePage] = useState("tournaments");
@@ -40,11 +40,11 @@ const TournamentHubPage = () => {
           flex: 1,
         }}
       >
-        <TopBar user={MOCK_USER} />
+        {/* <TopBar user={MOCK_USER} /> */}
 
         <main
           style={{
-            padding: "96px 32px 32px",
+            padding: "28px 32px 32px",
           }}
         >
           {/* Tournament Header */}

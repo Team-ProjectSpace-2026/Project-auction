@@ -1,14 +1,42 @@
 import Sidebar from "../../components/layout/Sidebar";
-import TopBar from "../../components/layout/TopBar";
+// import TopBar from "../../components/layout/TopBar";
+import SuccessModal from "../../components/common/SuccessModal";
 import { FiMapPin, FiCalendar } from "react-icons/fi";
 import "./CreateTournamentPage.css";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
-const MOCK_USER = {
-  name: "Rahul Organizer",
-  role: "Organizer",
-};
+// const MOCK_USER = {
+//   name: "Rahul Organizer",
+//   role: "Organizer",
+// };
 
 const CreateTournamentPage = () => {
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [formData, setFormData] = useState({
+    tournamentName: "",
+    numTeams: "",
+    budgetPerTeam: "",
+    maxPlayersPerTeam: "",
+    venue: "",
+    auctionDateTime: "",
+  });
+  const navigate = useNavigate();
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleCreate = () => {
+    const { tournamentName, numTeams, budgetPerTeam, maxPlayersPerTeam, venue, auctionDateTime } = formData;
+    if (!tournamentName || !numTeams || !budgetPerTeam || !maxPlayersPerTeam || !venue || !auctionDateTime) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+    setShowSuccess(true);
+  };
+
   return (
     <div className="create-page">
       {/* Sidebar */}
@@ -17,7 +45,7 @@ const CreateTournamentPage = () => {
       {/* Main Container */}
       <div className="create-container">
         {/* Top Navigation */}
-        <TopBar user={MOCK_USER} />
+        {/* <TopBar user={MOCK_USER} /> */}
 
         {/* Main Content */}
         <main className="create-main">
@@ -52,10 +80,13 @@ const CreateTournamentPage = () => {
                 Tournament Name <span>*</span>
             </label>
 
-            <input
-                type="text"
-                placeholder="Enter tournament name"
-            />
+                <input
+                    type="text"
+                    name="tournamentName"
+                    value={formData.tournamentName}
+                    onChange={handleInputChange}
+                    placeholder="Enter tournament name"
+                />
         </div>
 
         <div className="form-group">
@@ -63,10 +94,13 @@ const CreateTournamentPage = () => {
                 Number of Teams <span>*</span>
             </label>
 
-            <input
-                type="number"
-                placeholder="Enter number of teams"
-            />
+                <input
+                    type="number"
+                    name="numTeams"
+                    value={formData.numTeams}
+                    onChange={handleInputChange}
+                    placeholder="Enter number of teams"
+                />
         </div>
 
     </div>
@@ -80,10 +114,13 @@ const CreateTournamentPage = () => {
                 Budget Per Team (₹) <span>*</span>
             </label>
 
-            <input
-                type="number"
-                placeholder="Enter budget per team"
-            />
+                <input
+                    type="number"
+                    name="budgetPerTeam"
+                    value={formData.budgetPerTeam}
+                    onChange={handleInputChange}
+                    placeholder="Enter budget per team"
+                />
         </div>
 
         <div className="form-group">
@@ -91,10 +128,13 @@ const CreateTournamentPage = () => {
                 Maximum Players Per Team <span>*</span>
             </label>
 
-            <input
-                type="number"
-                placeholder="Enter maximum players per team"
-            />
+                <input
+                    type="number"
+                    name="maxPlayersPerTeam"
+                    value={formData.maxPlayersPerTeam}
+                    onChange={handleInputChange}
+                    placeholder="Enter maximum players per team"
+                />
         </div>
 
     </div>
@@ -114,10 +154,13 @@ const CreateTournamentPage = () => {
     <FiMapPin />
 </span>
 
-        <input
-            type="text"
-            placeholder="Enter tournament venue"
-        />
+                <input
+                    type="text"
+                    name="venue"
+                    value={formData.venue}
+                    onChange={handleInputChange}
+                    placeholder="Enter tournament venue"
+                />
 
     </div>
 
@@ -137,10 +180,13 @@ const CreateTournamentPage = () => {
     <FiCalendar />
 </span>
 
-        <input
-            type="text"
-            placeholder="Select auction date and time"
-        />
+                <input
+                    type="text"
+                    name="auctionDateTime"
+                    value={formData.auctionDateTime}
+                    onChange={handleInputChange}
+                    placeholder="Select auction date and time"
+                />
 
     </div>
 
@@ -174,7 +220,7 @@ const CreateTournamentPage = () => {
 
 <div className="button-section">
 
-    <button
+    <button onClick={() => navigate("/tournaments")}
         className="cancel-btn"
         type="button"
     >
@@ -182,6 +228,7 @@ const CreateTournamentPage = () => {
     </button>
 
     <button
+        onClick={handleCreate}
         className="create-btn"
         type="submit"
     >
@@ -198,6 +245,16 @@ const CreateTournamentPage = () => {
 </div>
         </main>
       </div>
+      {showSuccess && (
+  <SuccessModal
+    title="Tournament Created!"
+    message="Tournament has been created successfully."
+    onClose={() => {
+      setShowSuccess(false);
+      navigate("/tournaments");
+    }}
+  />
+)}
     </div>
   );
 };

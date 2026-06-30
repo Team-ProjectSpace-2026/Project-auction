@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/layout/Sidebar";
-import TopBar from "../../components/layout/TopBar";
+// import TopBar from "../../components/layout/TopBar";
 
-const MOCK_USER = {
-name: "Rahul Organizer",
-role: "Organizer",
-};
+// const MOCK_USER = {
+// name: "Rahul Organizer",
+// role: "Organizer",
+// };
 
 const tournaments = [
 {
@@ -98,13 +98,12 @@ fontFamily: "'Inter','Segoe UI',sans-serif",
       flexDirection: "column",
     }}
   >
-    <TopBar user={MOCK_USER} />
+    {/* <TopBar user={MOCK_USER} /> */}
   
 
     <main
   style={{
-    marginTop: "64px",
-    padding: "16px 28px 28px"
+    padding: "28px 28px 28px"
   }}
 >
   <h1
