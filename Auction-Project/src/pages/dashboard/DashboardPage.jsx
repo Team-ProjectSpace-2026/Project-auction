@@ -63,7 +63,7 @@ const DashboardPage = () => {
   const [activePage, setActivePage] = useState('dashboard');
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#f4f6fb', fontFamily: "'Inter', 'Segoe UI', sans-serif" }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-primary-light)', fontFamily: "'Inter', 'Segoe UI', sans-serif", transition: 'background-color 0.2s ease' }}>
       {/* Sidebar */}
       <Sidebar activePage={activePage} onNavigate={setActivePage} />
 
@@ -77,10 +77,10 @@ const DashboardPage = () => {
 
           {/* Welcome */}
           <div>
-            <h1 style={{ fontSize: '22px', fontWeight: 800, color: '#1a1d2e', margin: 0 }}>
+            <h1 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-primary-light)', margin: 0 }}>
               Welcome, {MOCK_USER.name} 👋
             </h1>
-            <p style={{ color: '#8a94a6', fontSize: '14px', margin: '4px 0 0' }}>
+            <p style={{ color: 'var(--text-secondary-light)', fontSize: '14px', margin: '4px 0 0', transition: 'color 0.2s ease' }}>
               Let's create and manage amazing cricket tournaments.
             </p>
           </div>
@@ -101,20 +101,22 @@ const DashboardPage = () => {
           {/* Tournaments section */}
           {HAS_TOURNAMENTS ? (
             <div style={{
-              background: '#fff', borderRadius: '16px',
-              border: '1px solid #e8eaf0', overflow: 'hidden',
+              background: 'var(--card-bg-light)', borderRadius: '16px',
+              border: '1px solid var(--border-light)', overflow: 'hidden',
+              transition: 'background-color 0.2s ease, border-color 0.2s ease',
             }}>
               {/* Table header */}
               <div style={{
                 display: 'flex', justifyContent: 'space-between',
                 alignItems: 'center', padding: '18px 20px',
-                borderBottom: '1px solid #f0f1f5',
+                borderBottom: '1px solid var(--border-light)',
+                transition: 'border-color 0.2s ease',
               }}>
-                <span style={{ fontWeight: 700, color: '#1a1d2e', fontSize: '15px' }}>
+                <span style={{ fontWeight: 700, color: 'var(--text-primary-light)', fontSize: '15px', transition: 'color 0.2s ease' }}>
                   Recent Tournaments
                 </span>
                 <button style={{
-                  background: 'none', border: 'none', color: '#2563eb',
+                  background: 'none', border: 'none', color: 'var(--accent-light)',
                   fontWeight: 600, fontSize: '13px', cursor: 'pointer',
                 }}>
                   View All →
@@ -123,11 +125,11 @@ const DashboardPage = () => {
 
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
-                  <tr style={{ background: '#f8f9fb' }}>
+                  <tr style={{ background: 'var(--table-header-bg)', transition: 'background-color 0.2s ease' }}>
                     {['Tournament Name', 'Status', 'Auction Date', 'Teams', 'Action'].map((col, i) => (
                       <th key={col} style={{
                         padding: '12px 16px', textAlign: i === 3 ? 'center' : 'left',
-                        fontSize: '12px', fontWeight: 700, color: '#8a94a6',
+                        fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary-light)',
                         letterSpacing: '0.5px', textTransform: 'uppercase',
                       }}>
                         {col}
@@ -149,10 +151,11 @@ const DashboardPage = () => {
           ) : (
             /* Empty state */
             <div style={{
-              background: '#fff', borderRadius: '16px',
-              border: '1px solid #e8eaf0', flex: 1,
+              background: 'var(--card-bg-light)', borderRadius: '16px',
+              border: '1px solid var(--border-light)', flex: 1,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               minHeight: '320px',
+              transition: 'background-color 0.2s ease, border-color 0.2s ease',
             }}>
               <div style={{ textAlign: 'center', padding: '40px 20px' }}>
                 {/* Trophy + clipboard illustration */}
@@ -166,10 +169,10 @@ const DashboardPage = () => {
                     fontWeight: 900, boxShadow: '0 2px 8px rgba(37,99,235,0.4)',
                   }}>+</div>
                 </div>
-                <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#1a1d2e', margin: '0 0 8px' }}>
+                <h2 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-primary-light)', margin: '0 0 8px', transition: 'color 0.2s ease' }}>
                   No Tournaments Yet!
                 </h2>
-                <p style={{ color: '#8a94a6', fontSize: '14px', margin: '0 0 24px', lineHeight: 1.6 }}>
+                <p style={{ color: 'var(--text-secondary-light)', fontSize: '14px', margin: '0 0 24px', lineHeight: 1.6, transition: 'color 0.2s ease' }}>
                   You haven't created any tournaments yet.<br />
                   Create your first tournament to get started.
                 </p>

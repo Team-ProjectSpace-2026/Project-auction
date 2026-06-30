@@ -37,10 +37,11 @@ const AuctionRoom = () => {
         {/* Current Player */}
         <div
           style={{
-            background: "#fff",
-            border: "1px solid #e8eaf0",
+            background: "var(--card-bg-light)",
+            border: "1px solid var(--border-light)",
             borderRadius: "16px",
             padding: "20px",
+            transition: 'background-color 0.2s ease, border-color 0.2s ease',
           }}
         >
           <h3 style={{ marginBottom: "16px" }}>Current Player</h3>
@@ -75,8 +76,8 @@ const AuctionRoom = () => {
 
               <span
                 style={{
-                  background: "#dbeafe",
-                  color: "#2563eb",
+                  background: "var(--role-batsman-bg)",
+                  color: "var(--accent-light)",
                   padding: "6px 12px",
                   borderRadius: "8px",
                   fontSize: "12px",
@@ -99,18 +100,19 @@ const AuctionRoom = () => {
         {/* Current Bid */}
         <div
           style={{
-            background: "#fff",
-            border: "1px solid #e8eaf0",
+            background: "var(--card-bg-light)",
+            border: "1px solid var(--border-light)",
             borderRadius: "16px",
             padding: "20px",
             textAlign: "center",
+            transition: 'background-color 0.2s ease, border-color 0.2s ease',
           }}
         >
           <h3>Current Bid</h3>
 
           <h1
             style={{
-              color: "#2563eb",
+              color: "var(--accent-light)",
               fontSize: "42px",
               marginTop: "20px",
             }}
@@ -118,13 +120,13 @@ const AuctionRoom = () => {
             ₹50,000
           </h1>
 
-          <p style={{ color: "#6b7280" }}>(Base Price)</p>
+          <p style={{ color: "var(--text-secondary-light)" }}>(Base Price)</p>
 
           <hr
             style={{
               margin: "20px 0",
               border: "none",
-              borderTop: "1px solid #e8eaf0",
+              borderTop: "1px solid var(--border-light)",
             }}
           />
 
@@ -145,10 +147,11 @@ const AuctionRoom = () => {
         {/* Latest Bids */}
         <div
           style={{
-            background: "#fff",
-            border: "1px solid #e8eaf0",
+            background: "var(--card-bg-light)",
+            border: "1px solid var(--border-light)",
             borderRadius: "16px",
             padding: "20px",
+            transition: 'background-color 0.2s ease, border-color 0.2s ease',
           }}
         >
           <h3 style={{ marginBottom: "16px" }}>Latest 5 Bids</h3>
@@ -166,7 +169,7 @@ const AuctionRoom = () => {
                 display: "flex",
                 justifyContent: "space-between",
                 padding: "12px 0",
-                borderBottom: "1px solid #f1f5f9",
+                borderBottom: "1px solid var(--border-light)",
               }}
             >
               <span>{bid[0]}</span>
@@ -187,10 +190,11 @@ const AuctionRoom = () => {
         {/* Quick Bid */}
         <div
           style={{
-            background: "#fff",
-            border: "1px solid #e8eaf0",
+            background: "var(--card-bg-light)",
+            border: "1px solid var(--border-light)",
             borderRadius: "16px",
             padding: "20px",
+            transition: 'background-color 0.2s ease, border-color 0.2s ease',
           }}
         >
           <h3>Quick Bid Amounts</h3>
@@ -215,10 +219,10 @@ const AuctionRoom = () => {
                 key={amount}
                 style={{
                   padding: "12px",
-                  border: "1px solid #2563eb",
+                  border: "1px solid var(--accent-light)",
                   borderRadius: "8px",
-                  background: "#fff",
-                  color: "#2563eb",
+                  background: "var(--card-bg-light)",
+                  color: "var(--accent-light)",
                   cursor: "pointer",
                 }}
               >
@@ -231,10 +235,11 @@ const AuctionRoom = () => {
         {/* Custom Bid */}
         <div
           style={{
-            background: "#fff",
-            border: "1px solid #e8eaf0",
+            background: "var(--card-bg-light)",
+            border: "1px solid var(--border-light)",
             borderRadius: "16px",
             padding: "20px",
+            transition: 'background-color 0.2s ease, border-color 0.2s ease',
           }}
         >
           <h3>Custom Bid</h3>
@@ -254,7 +259,7 @@ const AuctionRoom = () => {
             style={{
               width: "100%",
               marginTop: "14px",
-              background: "#2563eb",
+              background: "var(--accent-light)",
               color: "#fff",
               border: "none",
               padding: "12px",
@@ -269,10 +274,11 @@ const AuctionRoom = () => {
         {/* Activity */}
         <div
           style={{
-            background: "#fff",
-            border: "1px solid #e8eaf0",
+            background: "var(--card-bg-light)",
+            border: "1px solid var(--border-light)",
             borderRadius: "16px",
             padding: "20px",
+            transition: 'background-color 0.2s ease, border-color 0.2s ease',
           }}
         >
           <h3>Auction Activity</h3>
@@ -290,10 +296,11 @@ const AuctionRoom = () => {
       {/* Teams */}
       <div
         style={{
-          background: "#fff",
-          border: "1px solid #e8eaf0",
+          background: "var(--card-bg-light)",
+          border: "1px solid var(--border-light)",
           borderRadius: "16px",
           padding: "16px",
+          transition: 'background-color 0.2s ease, border-color 0.2s ease',
         }}
       >
         <h3>All Teams</h3>
@@ -310,12 +317,12 @@ const AuctionRoom = () => {
             <div
               key={team}
               style={{
-                border: "1px solid #dbe1ea",
+                border: "1px solid var(--border-light)",
                 borderRadius: "10px",
                 padding: "8px",
                 textAlign: "center",
                 cursor: "pointer",
-                background: "#fff",
+                background: "var(--card-bg-light)",
                 minHeight: "70px",
                 display: "flex",
                 flexDirection: "column",

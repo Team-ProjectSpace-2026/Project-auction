@@ -10,10 +10,11 @@ const RegistrationTab = () => {
       {/* Left Panel */}
       <div
         style={{
-          background: "#fff",
-          border: "1px solid #e8eaf0",
+          background: "var(--card-bg-light)",
+          border: "1px solid var(--border-light)",
           borderRadius: "16px",
           padding: "30px",
+          transition: "background-color 0.2s ease, border-color 0.2s ease",
         }}
       >
         <h2
@@ -21,7 +22,7 @@ const RegistrationTab = () => {
             fontSize: "24px",
             fontWeight: "700",
             marginBottom: "24px",
-            color: "#1a1d2e",
+            color: "var(--text-primary-light)",
           }}
         >
           Registration Link
@@ -30,8 +31,8 @@ const RegistrationTab = () => {
         {/* Status Box */}
         <div
           style={{
-            background: "#ecfdf3",
-            border: "1px solid #bbf7d0",
+            background: "var(--status-active-bg)",
+            border: "1px solid var(--status-active-text)",
             borderRadius: "12px",
             padding: "22px",
             marginBottom: "24px",
@@ -40,7 +41,7 @@ const RegistrationTab = () => {
           <div
             style={{
               fontSize: "14px",
-              color: "#15803d",
+              color: "var(--status-active-text)",
               marginBottom: "6px",
             }}
           >
@@ -51,7 +52,7 @@ const RegistrationTab = () => {
             style={{
               fontSize: "30px",
               fontWeight: "700",
-              color: "#16a34a",
+              color: "var(--status-active-text)",
             }}
           >
             Open
@@ -60,7 +61,7 @@ const RegistrationTab = () => {
 
         <p
           style={{
-            color: "#6b7280",
+            color: "var(--text-secondary-light)",
             fontSize: "15px",
             marginBottom: "20px",
           }}
@@ -94,7 +95,7 @@ const RegistrationTab = () => {
               flex: 1,
               height: "50px",
               padding: "0 16px",
-              border: "1px solid #dbe1ea",
+              border: "1px solid var(--border-light)",
               borderRadius: "10px",
               fontSize: "14px",
             }}
@@ -104,10 +105,10 @@ const RegistrationTab = () => {
             style={{
               width: "130px",
               height: "50px",
-              border: "1px solid #2563eb",
+              border: "1px solid var(--accent-light)",
               borderRadius: "10px",
-              background: "#fff",
-              color: "#2563eb",
+              background: "var(--card-bg-light)",
+              color: "var(--accent-light)",
               fontWeight: "700",
               cursor: "pointer",
             }}
@@ -119,10 +120,10 @@ const RegistrationTab = () => {
         <button
           style={{
             padding: "12px 28px",
-            border: "1px solid #2563eb",
+            border: "1px solid var(--accent-light)",
             borderRadius: "10px",
-            background: "#fff",
-            color: "#2563eb",
+            background: "var(--card-bg-light)",
+            color: "var(--accent-light)",
             fontWeight: "700",
             cursor: "pointer",
             marginBottom: "28px",
@@ -134,7 +135,7 @@ const RegistrationTab = () => {
         <hr
           style={{
             border: "none",
-            borderTop: "1px solid #e8eaf0",
+            borderTop: "1px solid var(--border-light)",
             marginBottom: "28px",
           }}
         />
@@ -144,7 +145,7 @@ const RegistrationTab = () => {
             fontSize: "22px",
             fontWeight: "700",
             marginBottom: "24px",
-            color: "#1a1d2e",
+            color: "var(--text-primary-light)",
           }}
         >
           Registration Settings
@@ -190,11 +191,12 @@ const RegistrationTab = () => {
       {/* Right Panel */}
       <div
         style={{
-          background: "#fff",
-          border: "1px solid #e8eaf0",
+          background: "var(--card-bg-light)",
+          border: "1px solid var(--border-light)",
           borderRadius: "16px",
           padding: "28px",
           height: "fit-content",
+          transition: "background-color 0.2s ease, border-color 0.2s ease",
         }}
       >
         <h3
@@ -202,7 +204,7 @@ const RegistrationTab = () => {
             fontSize: "22px",
             fontWeight: "700",
             marginBottom: "24px",
-            color: "#1a1d2e",
+            color: "var(--text-primary-light)",
           }}
         >
           Note
@@ -210,11 +212,11 @@ const RegistrationTab = () => {
 
         <div
           style={{
-            background: "#fff7ed",
-            border: "1px solid #fed7aa",
+            background: "var(--warning-bg)",
+            border: "1px solid var(--warning-border)",
             borderRadius: "12px",
             padding: "22px",
-            color: "#9a3412",
+            color: "var(--warning-text)",
             lineHeight: "1.9",
           }}
         >
@@ -238,14 +240,14 @@ const SettingRow = ({ label, value, green, last }) => {
         display: "flex",
         justifyContent: "space-between",
         padding: "14px 0",
-        borderBottom: last ? "none" : "1px solid #f1f5f9",
+        borderBottom: last ? "none" : "1px solid var(--border-light)",
       }}
     >
-      <span style={{ color: "#64748b" }}>{label}</span>
+      <span style={{ color: "var(--text-secondary-light)" }}>{label}</span>
 
       <strong
         style={{
-          color: green ? "#16a34a" : "#1a1d2e",
+          color: green ? "var(--status-active-text)" : "var(--text-primary-light)",
         }}
       >
         {value}

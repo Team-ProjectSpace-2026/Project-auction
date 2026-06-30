@@ -26,7 +26,8 @@ const TournamentHubPage = () => {
       style={{
         display: "flex",
         minHeight: "100vh",
-        background: "#f4f6fb",
+        background: "var(--bg-primary-light)",
+        transition: "background-color 0.2s ease",
       }}
     >
       <Sidebar
@@ -55,13 +56,14 @@ const TournamentHubPage = () => {
   style={{
     display: "flex",
     gap: "40px",
-    background: "#fff",
+    background: "var(--card-bg-light)",
     marginTop: "16px",
     padding: "0 24px",
     height: "64px",
     alignItems: "center",
     borderRadius: "16px",
-    border: "1px solid #e8eaf0",
+    border: "1px solid var(--border-light)",
+    transition: "background-color 0.2s ease, border-color 0.2s ease",
   }}
 >
   {[
@@ -84,12 +86,13 @@ const TournamentHubPage = () => {
         fontWeight: activeTab === tab.id ? 700 : 500,
         color:
           activeTab === tab.id
-            ? "#2563eb"
-            : "#6b7280",
+            ? "var(--accent-light)"
+            : "var(--text-secondary-light)",
         borderBottom:
           activeTab === tab.id
-            ? "3px solid #2563eb"
+            ? "3px solid var(--accent-light)"
             : "3px solid transparent",
+        transition: "color 0.2s ease, border-color 0.2s ease",
       }}
     >
       {tab.label}

@@ -7,7 +7,8 @@ const PlayerDetailsPage = () => {
       style={{
         display: "flex",
         minHeight: "100vh",
-        background: "#f4f6fb",
+        background: "var(--bg-primary-light)",
+        transition: "background-color 0.2s ease",
       }}
     >
       <Sidebar activePage="tournaments" />
@@ -33,7 +34,7 @@ const PlayerDetailsPage = () => {
           {/* Back Button */}
           <div
             style={{
-              color: "#2563eb",
+              color: "var(--accent-light)",
               fontWeight: "600",
               marginBottom: "24px",
               cursor: "pointer",
@@ -45,14 +46,15 @@ const PlayerDetailsPage = () => {
           {/* Player Header */}
           <div
             style={{
-              background: "#fff",
-              border: "1px solid #e8eaf0",
+              background: "var(--card-bg-light)",
+              border: "1px solid var(--border-light)",
               borderRadius: "16px",
               padding: "24px",
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
               marginBottom: "24px",
+              transition: "background-color 0.2s ease, border-color 0.2s ease",
             }}
           >
             <div
@@ -67,13 +69,13 @@ const PlayerDetailsPage = () => {
                   width: "100px",
                   height: "100px",
                   borderRadius: "50%",
-                  background: "#dbeafe",
+                   background: "var(--role-batsman-bg)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   fontSize: "36px",
                   fontWeight: "700",
-                  color: "#2563eb",
+                  color: "var(--role-batsman-text)",
                 }}
               >
                 VK
@@ -84,7 +86,7 @@ const PlayerDetailsPage = () => {
                   style={{
                     fontSize: "40px",
                     fontWeight: "800",
-                    color: "#111827",
+                    color: "var(--text-primary-light)",
                     marginBottom: "12px",
                   }}
                 >
@@ -102,8 +104,8 @@ const PlayerDetailsPage = () => {
                     style={{
                       padding: "6px 12px",
                       borderRadius: "8px",
-                      background: "#dbeafe",
-                      color: "#2563eb",
+                       background: "var(--role-batsman-bg)",
+                      color: "var(--role-batsman-text)",
                       fontWeight: "600",
                     }}
                   >
@@ -112,7 +114,7 @@ const PlayerDetailsPage = () => {
 
                   <span
                     style={{
-                      color: "#6b7280",
+                      color: "var(--text-secondary-light)",
                     }}
                   >
                     Team: Mangalore Warriors
@@ -123,7 +125,7 @@ const PlayerDetailsPage = () => {
 
             <button
               style={{
-                background: "#2563eb",
+                background: "var(--accent-light)",
                 color: "#fff",
                 border: "none",
                 borderRadius: "10px",
@@ -147,16 +149,17 @@ const PlayerDetailsPage = () => {
             {/* Player Information */}
             <div
               style={{
-                background: "#fff",
-                border: "1px solid #e8eaf0",
+                background: "var(--card-bg-light)",
+                border: "1px solid var(--border-light)",
                 borderRadius: "16px",
                 padding: "24px",
+                transition: "background-color 0.2s ease, border-color 0.2s ease",
               }}
             >
               <h2
                 style={{
                   marginBottom: "20px",
-                  color: "#111827",
+                  color: "var(--text-primary-light)",
                 }}
               >
                 Player Information
@@ -192,16 +195,17 @@ const PlayerDetailsPage = () => {
             {/* Auction Information */}
             <div
               style={{
-                background: "#fff",
-                border: "1px solid #e8eaf0",
+                background: "var(--card-bg-light)",
+                border: "1px solid var(--border-light)",
                 borderRadius: "16px",
                 padding: "24px",
+                transition: "background-color 0.2s ease, border-color 0.2s ease",
               }}
             >
               <h2
                 style={{
                   marginBottom: "20px",
-                  color: "#111827",
+                  color: "var(--text-primary-light)",
                 }}
               >
                 Auction Information
@@ -221,7 +225,7 @@ const PlayerDetailsPage = () => {
                 <strong>₹85,00,000</strong>
 
                 <span>Status</span>
-                <strong style={{ color: "#16a34a" }}>
+                <strong style={{ color: "var(--status-active-text)" }}>
                   Sold
                 </strong>
 
@@ -235,17 +239,18 @@ const PlayerDetailsPage = () => {
           <div
             style={{
               marginTop: "24px",
-              background: "#fff",
-              border: "1px solid #e8eaf0",
+              background: "var(--card-bg-light)",
+              border: "1px solid var(--border-light)",
               borderRadius: "16px",
               padding: "24px",
+              transition: "background-color 0.2s ease, border-color 0.2s ease",
             }}
           >
-            <h2
-              style={{
-                marginBottom: "24px",
-                color: "#111827",
-              }}
+              <h2
+                style={{
+                  marginBottom: "20px",
+                  color: "var(--text-primary-light)",
+                }}
             >
               Player Statistics
             </h2>
@@ -267,7 +272,7 @@ const PlayerDetailsPage = () => {
                 <div
                   key={stat[0]}
                   style={{
-                    background: "#f8fafc",
+                    background: "var(--table-header-bg)",
                     borderRadius: "12px",
                     padding: "20px",
                     textAlign: "center",
@@ -275,7 +280,7 @@ const PlayerDetailsPage = () => {
                 >
                   <div
                     style={{
-                      color: "#6b7280",
+                       color: "var(--text-secondary-light)",
                       marginBottom: "8px",
                     }}
                   >
@@ -286,7 +291,7 @@ const PlayerDetailsPage = () => {
                     style={{
                       fontSize: "24px",
                       fontWeight: "700",
-                      color: "#111827",
+                       color: "var(--text-primary-light)",
                     }}
                   >
                     {stat[1]}

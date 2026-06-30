@@ -1,3 +1,5 @@
+import './common.css';
+
 const InputField = ({
   label,
   type = "text",
