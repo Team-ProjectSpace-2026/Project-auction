@@ -3,8 +3,10 @@ import Sidebar from '../../components/layout/Sidebar';
 import Avatar from '../../components/common/Avatar';
 import InputField from '../../components/common/InputField';
 import Button from '../../components/common/Button';
+import { useTheme } from '../../context/ThemeContext';
 
 const ProfilePage = () => {
+  const { theme, toggleTheme } = useTheme();
   const [formData, setFormData] = useState({
     fullName: 'Rahul Organizer',
     email: 'rahul.organizer@cricauction.com',
@@ -22,8 +24,7 @@ const ProfilePage = () => {
   };
 
   return (
-    /* --- ADDED THE LAYOUT WRAPPER TO MATCH DASHBOARD --- */
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#f4f7fe', fontFamily: "'Inter', sans-serif" }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-primary-light)', fontFamily: "'Inter', sans-serif", transition: 'background-color 0.2s ease' }}>
       
       {/* 1. Add the Sidebar and lock it to 'settings' */}
       <Sidebar activePage="settings" />
@@ -39,6 +40,35 @@ const ProfilePage = () => {
           <div className="page-header">
             <h1>Profile Settings</h1>
             <p>Update your personal and organization details.</p>
+          </div>
+
+          {/* Theme Toggle Section */}
+          <div style={{
+            background: 'var(--card-bg-light)',
+            border: '1px solid var(--border-light)',
+            borderRadius: '8px',
+            padding: '20px 32px',
+            marginBottom: '24px',
+            transition: 'background-color 0.2s ease, border-color 0.2s ease',
+          }}>
+            <div className="theme-toggle-wrapper">
+              <div className="theme-toggle-label">
+                <span className="theme-toggle-label-text">Dark Mode</span>
+                <span className="theme-toggle-label-desc">Switch between light and dark themes</span>
+              </div>
+              <label className="theme-toggle">
+                <input
+                  type="checkbox"
+                  checked={theme === 'dark'}
+                  onChange={toggleTheme}
+                />
+                <span className="theme-toggle-slider"></span>
+                <span className="theme-toggle-icons">
+                  <span></span>
+                  <span></span>
+                </span>
+              </label>
+            </div>
           </div>
 
           <div className="settings-card">

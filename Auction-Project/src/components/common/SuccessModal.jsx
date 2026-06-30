@@ -18,11 +18,12 @@ const SuccessModal = ({
       <div
         style={{
           width: "420px",
-          background: "#fff",
+          background: "var(--card-bg-light)",
           borderRadius: "20px",
           padding: "40px",
           textAlign: "center",
           boxShadow: "0 20px 60px rgba(0,0,0,.2)",
+          transition: 'background-color 0.2s ease',
         }}
       >
         <div
@@ -30,8 +31,8 @@ const SuccessModal = ({
             width: "90px",
             height: "90px",
             borderRadius: "50%",
-            background: "#dcfce7",
-            color: "#16a34a",
+            background: "var(--status-active-bg)",
+            color: "var(--status-active-text)",
             fontSize: "48px",
             display: "flex",
             justifyContent: "center",
@@ -45,7 +46,7 @@ const SuccessModal = ({
         <h2
           style={{
             marginBottom: "12px",
-            color: "#111827",
+            color: "var(--text-primary-light)",
           }}
         >
           {title}
@@ -53,7 +54,7 @@ const SuccessModal = ({
 
         <p
           style={{
-            color: "#6b7280",
+            color: "var(--text-secondary-light)",
             marginBottom: "28px",
           }}
         >
@@ -63,7 +64,7 @@ const SuccessModal = ({
         <button
           onClick={onClose}
           style={{
-            background: "#2563eb",
+            background: "var(--accent-light)",
             color: "#fff",
             border: "none",
             padding: "12px 28px",

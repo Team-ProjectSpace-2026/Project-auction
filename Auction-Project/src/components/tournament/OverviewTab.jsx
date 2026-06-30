@@ -10,10 +10,11 @@ const OverviewTab = () => {
       {/* Left Card */}
       <div
         style={{
-          background: "#fff",
-          border: "1px solid #e8eaf0",
+          background: "var(--card-bg-light)",
+          border: "1px solid var(--border-light)",
           borderRadius: "16px",
           padding: "24px",
+          transition: "background-color 0.2s ease, border-color 0.2s ease",
         }}
       >
         <h3
@@ -42,7 +43,7 @@ const OverviewTab = () => {
               display: "flex",
               justifyContent: "space-between",
               padding: "16px 0",
-              borderBottom: "1px solid #eef1f5",
+               borderBottom: "1px solid var(--border-light)",
             }}
           >
             <span>{label}</span>
@@ -61,10 +62,11 @@ const OverviewTab = () => {
       >
         <div
           style={{
-            background: "#fff",
-            border: "1px solid #e8eaf0",
+            background: "var(--card-bg-light)",
+            border: "1px solid var(--border-light)",
             borderRadius: "16px",
             padding: "20px",
+            transition: "background-color 0.2s ease, border-color 0.2s ease",
           }}
         >
           <h3 style={{ marginBottom: "16px" }}>
@@ -106,10 +108,11 @@ const OverviewTab = () => {
 
         <div
           style={{
-            background: "#fff",
-            border: "1px solid #e8eaf0",
+            background: "var(--card-bg-light)",
+            border: "1px solid var(--border-light)",
             borderRadius: "16px",
             padding: "20px",
+            transition: "background-color 0.2s ease, border-color 0.2s ease",
           }}
         >
           <h3 style={{ marginBottom: "16px" }}>

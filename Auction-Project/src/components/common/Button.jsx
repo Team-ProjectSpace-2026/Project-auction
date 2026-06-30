@@ -1,4 +1,4 @@
-// import './common.css'; // Uncomment if you create a specific CSS file
+import './common.css';
 
 const Button = ({
   children,

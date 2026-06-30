@@ -4,11 +4,12 @@ const TournamentHeader = () => {
   return (
     <div
       style={{
-        background: "#fff",
-        border: "1px solid #e5e7eb",
+        background: "var(--card-bg-light)",
+        border: "1px solid var(--border-light)",
         borderRadius: "16px",
         padding: "18px 24px",
         marginBottom: "18px",
+        transition: "background-color 0.2s ease, border-color 0.2s ease",
       }}
     >
       {/* Back Button */}
@@ -17,7 +18,7 @@ const TournamentHeader = () => {
         style={{
         border: "none",
         background: "transparent",
-        color: "#2563eb",
+        color: "var(--accent-light)",
         fontWeight: "600",
         cursor: "pointer",
         marginBottom: "14px",
@@ -48,7 +49,7 @@ const TournamentHeader = () => {
               height: "90px",
               borderRadius: "0px",
               background: "transparent",
-              border: "1px solid #e5e7eb",
+              border: "1px solid var(--border-light)",
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
@@ -73,7 +74,7 @@ const TournamentHeader = () => {
                   margin: 0,
                   fontSize: "28px",
                   fontWeight: "800",
-                  color: "#111827",
+                   color: "var(--text-primary-light)",
                 }}
               >
                 Summer League 2027
@@ -81,8 +82,8 @@ const TournamentHeader = () => {
 
               <span
                 style={{
-                  background: "#dcfce7",
-                  color: "#16a34a",
+                  background: "var(--status-active-bg)",
+                  color: "var(--status-active-text)",
                   padding: "4px 10px",
                   borderRadius: "8px",
                   fontSize: "12px",
@@ -98,7 +99,7 @@ const TournamentHeader = () => {
               style={{
                 display: "flex",
                 gap: "24px",
-                color: "#6b7280",
+                color: "var(--text-secondary-light)",
                 fontSize: "14px",
                 fontWeight: "500",
               }}
@@ -113,9 +114,9 @@ const TournamentHeader = () => {
         {/* Right Side */}
         <button onClick={() => navigate("/edit-tournament")}
           style={{
-            background: "#fff",
-            color: "#2563eb",
-            border: "1px solid #2563eb",
+            background: "var(--card-bg-light)",
+            color: "var(--accent-light)",
+            border: "1px solid var(--accent-light)",
             borderRadius: "10px",
             padding: "12px 18px",
             fontWeight: "600",

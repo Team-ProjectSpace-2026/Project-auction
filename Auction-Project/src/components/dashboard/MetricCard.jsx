@@ -3,8 +3,8 @@
 const MetricCard = ({ icon, iconBg, label, value }) => {
   return (
     <div style={{
-      background: '#fff',
-      border: '1px solid #e8eaf0',
+      background: 'var(--card-bg-light)',
+      border: '1px solid var(--border-light)',
       borderRadius: '12px',
       padding: '20px 24px',
       display: 'flex',
@@ -12,6 +12,7 @@ const MetricCard = ({ icon, iconBg, label, value }) => {
       gap: '16px',
       flex: 1,
       minWidth: '160px',
+      transition: 'background-color 0.2s ease, border-color 0.2s ease',
     }}>
       <div style={{
         width: '48px',
@@ -27,8 +28,8 @@ const MetricCard = ({ icon, iconBg, label, value }) => {
         {icon}
       </div>
       <div>
-        <div style={{ fontSize: '13px', color: '#8a94a6', fontWeight: 500, marginBottom: '4px' }}>{label}</div>
-        <div style={{ fontSize: '28px', fontWeight: 700, color: '#1a1d2e', lineHeight: 1 }}>{value}</div>
+        <div style={{ fontSize: '13px', color: 'var(--text-secondary-light)', fontWeight: 500, marginBottom: '4px', transition: 'color 0.2s ease' }}>{label}</div>
+        <div style={{ fontSize: '28px', fontWeight: 700, color: 'var(--text-primary-light)', lineHeight: 1, transition: 'color 0.2s ease' }}>{value}</div>
       </div>
     </div>
   );

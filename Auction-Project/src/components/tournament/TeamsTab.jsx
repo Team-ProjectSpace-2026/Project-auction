@@ -85,10 +85,11 @@ const TeamsTab = () => {
           <div
             key={team.id}
             style={{
-              background: "#fff",
-              border: "1px solid #e8eaf0",
+              background: "var(--card-bg-light)",
+              border: "1px solid var(--border-light)",
               borderRadius: "18px",
               padding: "18px",
+              transition: "background-color 0.2s ease, border-color 0.2s ease",
             }}
           >
             <div
@@ -97,13 +98,13 @@ const TeamsTab = () => {
                 height: "80px",
                 margin: "0 auto 18px",
                 borderRadius: "16px",
-                background: "#eff6ff",
+                background: "var(--info-bg)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 fontSize: "26px",
                 fontWeight: "700",
-                color: "#2563eb",
+                color: "var(--accent-light)",
               }}
             >
               {team.short}
@@ -128,7 +129,7 @@ const TeamsTab = () => {
               }}
             >
               <div>
-                <div style={{ fontSize: "12px", color: "#6b7280" }}>
+                <div style={{ fontSize: "12px", color: "var(--text-secondary-light)" }}>
                   Players Purchased
                 </div>
                 <div style={{ fontWeight: "700" }}>
@@ -137,7 +138,7 @@ const TeamsTab = () => {
               </div>
 
               <div style={{ textAlign: "right" }}>
-                <div style={{ fontSize: "12px", color: "#6b7280" }}>
+                <div style={{ fontSize: "12px", color: "var(--text-secondary-light)" }}>
                   Remaining Budget
                 </div>
                 <div style={{ fontWeight: "700" }}>
@@ -152,9 +153,9 @@ const TeamsTab = () => {
                 width: "100%",
                 padding: "12px",
                 borderRadius: "10px",
-                border: "1px solid #2563eb",
-                background: "#fff",
-                color: "#2563eb",
+                border: "1px solid var(--accent-light)",
+                background: "var(--card-bg-light)",
+                color: "var(--accent-light)",
                 fontWeight: "600",
                 cursor: "pointer",
               }}

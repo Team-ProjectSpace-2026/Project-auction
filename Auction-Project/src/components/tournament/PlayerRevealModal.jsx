@@ -82,14 +82,15 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
           style={{
             position: 'relative',
             width: "560px",
-            background: "#fff",
+            background: "var(--card-bg-light)",
             borderRadius: "20px",
             padding: "32px",
             textAlign: "center",
             boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
+            transition: 'background-color 0.2s ease',
           }}
         >
-          <button onClick={onClose} style={{ position: 'absolute', top: '15px', right: '15px', background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#6b7280' }}>
+          <button onClick={onClose} style={{ position: 'absolute', top: '15px', right: '15px', background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: 'var(--text-secondary-light)' }}>
             ×
           </button>
           <h2
@@ -97,7 +98,7 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
               fontSize: "30px",
               fontWeight: "700",
               marginBottom: "10px",
-              color: "#111827",
+              color: "var(--text-primary-light)",
             }}
           >
             Revealing Next Player
@@ -105,7 +106,7 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
 
           <p
             style={{
-              color: "#6b7280",
+              color: "var(--text-secondary-light)",
               marginBottom: "30px",
             }}
           >
@@ -223,7 +224,7 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
               fontSize: "22px",
               fontWeight: "700",
               marginBottom: "8px",
-              color: isRevealed ? "#f59e0b" : "#111827",
+              color: isRevealed ? "#f59e0b" : "var(--text-primary-light)",
               transition: "color 0.3s ease",
             }}
           >
@@ -232,7 +233,7 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
 
           <p
             style={{
-              color: "#6b7280",
+              color: "var(--text-secondary-light)",
               marginBottom: "24px",
             }}
           >
@@ -245,7 +246,7 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
           <button
             onClick={handleRevealClick}
             style={{
-              background: "#2563eb",
+              background: "var(--accent-light)",
               color: "#fff",
               border: "none",
               borderRadius: "10px",

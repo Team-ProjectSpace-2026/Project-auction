@@ -1,6 +1,94 @@
 /* src/index.css */
 @import "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap";
 
+:root {
+  /* Light theme variables */
+  --bg-primary-light: #f4f6fb;
+  --bg-secondary-light: #ffffff;
+  --text-primary-light: #1a1d2e;
+  --text-secondary-light: #8a94a6;
+  --border-light: #e8eaf0;
+  --accent-light: #2563eb;
+  --accent-hover-light: #0b5ed7;
+  --card-bg-light: #ffffff;
+  
+  /* Dark theme variables */
+  --bg-primary-dark: #1a1d2e;
+  --bg-secondary-dark: #1f2330;
+  --text-primary-dark: #e2e8f0;
+  --text-secondary-dark: #9ca3af;
+  --border-dark: #2d3748;
+  --accent-dark: #3b82f6;
+  --accent-hover-dark: #60a5fa;
+  --card-bg-dark: #1f2330;
+  
+  /* Common variables */
+  --sidebar-bg: #0f1535;
+  --sidebar-text: #9db0d4;
+  --sidebar-active: #2563eb;
+  --sidebar-hover: rgba(255,255,255,0.06);
+  --topbar-bg: #ffffff;
+  --topbar-bg-dark: #1a1d2e;
+  --topbar-text: #1a1d2e;
+  --topbar-text-dark: #e2e8f0;
+  --notif-dot: #0d6efd;
+  
+  /* Role badge colors */
+  --role-batsman-bg: #dbeafe;
+  --role-batsman-text: #2563eb;
+  --role-bowler-bg: #fef3c7;
+  --role-bowler-text: #d97706;
+  --role-allrounder-bg: #ede9fe;
+  --role-allrounder-text: #7c3aed;
+  --role-keeper-bg: #dcfce7;
+  --role-keeper-text: #16a34a;
+
+  /* Status colors */
+  --status-active-bg: #dcfce7;
+  --status-active-text: #16a34a;
+
+  /* Info/Warning boxes */
+  --info-bg: #F3F7FF;
+  --info-border: #D7E5FF;
+  --info-icon-bg: #2563EB;
+  --info-title-color: #1E3A8A;
+  --warning-bg: #fff7ed;
+  --warning-border: #fed7aa;
+  --warning-text: #9a3412;
+
+  /* Table */
+  --table-header-bg: #f8fafc;
+  --table-row-border: #eef2f7;
+
+  /* Breadcrumb */
+  --breadcrumb-active: #2563eb;
+  --breadcrumb-current: #64748B;
+
+  /* Form inputs */
+  --input-bg: #ffffff;
+  --input-border: #DCE3EE;
+  --input-text: #1F2937;
+  --input-placeholder: #98A2B3;
+
+  /* Avatar */
+  --avatar-bg: #f3f4f6;
+  --avatar-border: #ffffff;
+
+  /* Section titles */
+  --section-title: #111827;
+
+  /* Settings */
+  --settings-footer-border: #eaeaea;
+
+  /* Page header */
+  --page-header-color: #111827;
+  --page-subtitle-color: #667085;
+
+  /* Shadows */
+  --shadow-light: 0 2px 4px rgba(0, 0, 0, 0.02);
+  --shadow-dark: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
 *,
 *::before,
 *::after {
@@ -11,9 +99,63 @@
 
 body {
   font-family: Inter, "Segoe UI", sans-serif;
-  background: #f4f6fb;
-  color: #1a1d2e;
+  background: var(--bg-primary-light);
+  color: var(--text-primary-light);
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+body.dark-mode {
+  background: var(--bg-primary-dark);
+  color: var(--text-primary-dark);
+}
+
+body.dark-mode {
+  --bg-primary-light: #0b1223;
+  --bg-secondary-light: #111827;
+  --text-primary-light: #e2e8f0;
+  --text-secondary-light: #9ca3af;
+  --border-light: #1f2937;
+  --accent-light: #3b82f6;
+  --accent-hover-light: #60a5fa;
+  --card-bg-light: #111827;
+  --topbar-bg: #0b1223;
+  --topbar-text: #e2e8f0;
+  --topbar-bg-dark: #0b1223;
+  --topbar-text-dark: #e2e8f0;
+  --role-batsman-bg: #1e3a5f;
+  --role-bowler-bg: #4a3728;
+  --role-allrounder-bg: #2d1f5e;
+  --role-keeper-bg: #1a3d2a;
+  --role-batsman-text: #93c5fd;
+  --role-bowler-text: #fbbf24;
+  --role-allrounder-text: #c4b5fd;
+  --role-keeper-text: #86efac;
+  --info-bg: #1a2744;
+  --info-border: rgba(59, 130, 246, 0.2);
+  --info-icon-bg: #2563eb;
+  --info-title-color: #93c5fd;
+  --warning-bg: #3d2a1a;
+  --warning-border: rgba(217, 119, 6, 0.2);
+  --warning-text: #fbbf24;
+  --status-active-bg: #1a3d2a;
+  --status-active-text: #4ade80;
+  --table-header-bg: #1a2332;
+  --table-row-border: #1f2937;
+  --breadcrumb-active: #60a5fa;
+  --breadcrumb-current: #9ca3af;
+  --input-bg: #1a2332;
+  --input-border: #374151;
+  --input-text: #e2e8f0;
+  --input-placeholder: #6b7280;
+  --avatar-bg: #1f2937;
+  --avatar-border: #374151;
+  --section-title: #e2e8f0;
+  --settings-footer-border: #1f2937;
+  --page-header-color: #e2e8f0;
+  --page-subtitle-color: #9ca3af;
+  --modal-bg: #111827;
+  --modal-border: #1f2937;
 }
 
 button {
@@ -67,17 +209,17 @@ button {
   margin-bottom: 6px;
   font-size: 14px;
   font-weight: 600;
-  color: #333333;
+  color: var(--text-primary-light);
 }
 
 .input-control {
   padding: 10px 12px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--input-border);
   border-radius: 6px;
   font-size: 14px;
-  color: #333333;
+  color: var(--input-text);
   outline: none;
-  background-color: #ffffff;
+  background-color: var(--input-bg);
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease;
@@ -89,10 +231,10 @@ button {
 }
 
 .input-disabled {
-  background-color: #f9f9f9;
-  color: #888888;
+  background-color: var(--bg-secondary-light);
+  color: var(--text-secondary-light);
   cursor: not-allowed;
-  border-color: #eeeeee;
+  border-color: var(--border-light);
 }
 
 /* --- Page Layout & Containers --- */
@@ -105,23 +247,24 @@ button {
 
 .page-header h1 {
   font-size: 24px;
-  color: #111;
+  color: var(--page-header-color);
   margin-bottom: 4px;
 }
 
 .page-header p {
-  color: #666;
+  color: var(--page-subtitle-color);
   font-size: 14px;
   margin-bottom: 24px;
 }
 
 .settings-card {
-  background: #fff;
-  border: 1px solid #eaeaea;
+  background: var(--card-bg-light);
+  border: 1px solid var(--border-light);
   border-radius: 8px;
   padding: 32px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
   margin-bottom: 24px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .settings-grid {
@@ -159,6 +302,7 @@ button {
   font-size: 16px;
   margin-bottom: 24px;
   text-align: left;
+  color: var(--section-title);
 }
 
 .avatar-wrapper {
@@ -172,12 +316,12 @@ button {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background-color: #f3f4f6;
+  background-color: var(--avatar-bg);
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 4px solid #fff;
+  border: 4px solid var(--avatar-border);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -248,15 +392,15 @@ button {
   justify-content: flex-end;
   gap: 16px;
   padding-top: 24px;
-  border-top: 1px solid #eaeaea;
+  border-top: 1px solid var(--settings-footer-border);
 }
 
 .cancel-btn {
-  color: #333;
+  color: var(--text-primary-light);
   border-color: transparent;
 }
 .cancel-btn:hover {
-  background: #f3f4f6;
+  background: var(--bg-secondary-light);
   border-color: transparent;
 }
 
@@ -265,8 +409,8 @@ button {
   display: flex;
   align-items: flex-start;
   gap: 16px;
-  background-color: #f8fbff;
-  border: 1px solid #cce3ff;
+  background-color: var(--info-bg);
+  border: 1px solid var(--info-border);
   padding: 16px 24px;
   border-radius: 8px;
 }
@@ -275,8 +419,8 @@ button {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  border: 1.5px solid #0d6efd;
-  color: #0d6efd;
+  border: 1.5px solid var(--info-icon-bg);
+  color: var(--info-icon-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -287,13 +431,13 @@ button {
 }
 
 .info-title {
-  color: #004085;
+  color: var(--info-title-color);
   font-size: 14px;
   margin: 0 0 4px 0;
 }
 
 .info-desc {
-  color: #444;
+  color: var(--text-secondary-light);
   font-size: 13px;
   margin: 0;
 }
@@ -301,17 +445,18 @@ button {
 /* --- TopBar Architecture --- */
 .topbar {
   height: 64px;
-  background-color: #ffffff;
-  border-bottom: 1px solid #e8eaf0;
+  background-color: var(--topbar-bg);
+  border-bottom: 1px solid var(--border-light);
   display: flex;
   align-items: center;
-  justify-content: space-between; /* Spreads left and right content */
+  justify-content: space-between;
   padding: 0 32px;
   position: fixed;
   top: 0;
-  left: 250px; /* Matches our new Sidebar width exactly */
+  left: 250px;
   right: 0;
   z-index: 99;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .topbar-left {
@@ -346,20 +491,20 @@ button {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  border: 1px solid #e8eaf0;
-  background: #ffffff;
+  border: 1px solid var(--border-light);
+  background: var(--card-bg-light);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #5c6478;
+  color: var(--text-secondary-light);
   position: relative;
   transition: all 0.2s ease;
 }
 
 .notif-btn:hover {
-  background: #f8f9fa;
-  color: #1a1d2e;
+  background: var(--bg-secondary-light);
+  color: var(--text-primary-light);
 }
 
 .notif-dot {
@@ -384,7 +529,7 @@ button {
 }
 
 .user-profile-menu:hover {
-  background: #f8f9fa;
+  background: var(--bg-secondary-light);
 }
 
 .user-avatar {
@@ -408,16 +553,108 @@ button {
 .user-name {
   font-size: 13px;
   font-weight: 700;
-  color: #1a1d2e;
+  color: var(--topbar-text);
   line-height: 1.2;
 }
 
 .user-role {
   font-size: 11px;
-  color: #8a94a6;
+  color: var(--text-secondary-light);
 }
 
 .dropdown-icon {
-  color: #8a94a6;
+  color: var(--text-secondary-light);
   margin-left: 4px;
+}
+
+/* --- iOS Toggle Switch --- */
+.theme-toggle-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border-light);
+  margin-top: 16px;
+}
+
+.theme-toggle-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.theme-toggle-label-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary-light);
+}
+
+.theme-toggle-label-desc {
+  font-size: 12px;
+  color: var(--text-secondary-light);
+}
+
+.theme-toggle {
+  position: relative;
+  width: 50px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.theme-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.theme-toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #d1d5db;
+  transition: 0.3s;
+  border-radius: 28px;
+}
+
+.theme-toggle-slider::before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.theme-toggle input:checked + .theme-toggle-slider {
+  background-color: #2563eb;
+}
+
+.theme-toggle input:checked + .theme-toggle-slider::before {
+  transform: translateX(22px);
+}
+
+.theme-toggle input:focus-visible + .theme-toggle-slider {
+  outline: 2px solid var(--accent-light);
+  outline-offset: 2px;
+}
+
+.theme-toggle-icons {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 6px;
+  pointer-events: none;
+  font-size: 12px;
 }
