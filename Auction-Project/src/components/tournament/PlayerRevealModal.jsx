@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const PlayerRevealModal = ({ onContinue }) => {
+const PlayerRevealModal = ({ onClose, onContinue }) => {
   const [step, setStep] = useState(1);
 
   useEffect(() => {
@@ -15,6 +15,14 @@ const PlayerRevealModal = ({ onContinue }) => {
 
   const isShuffling = step >= 2 && step <= 3;
   const isRevealed = step >= 4;
+
+  const handleRevealClick = () => {
+    if (step < 5) {
+      setStep(step + 1);
+    } else {
+      onContinue();
+    }
+  };
 
   return (
     <>
@@ -67,6 +75,7 @@ const PlayerRevealModal = ({ onContinue }) => {
       >
         <div
           style={{
+            position: 'relative',
             width: "560px",
             background: "#fff",
             borderRadius: "20px",
@@ -75,6 +84,9 @@ const PlayerRevealModal = ({ onContinue }) => {
             boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
           }}
         >
+          <button onClick={onClose} style={{ position: 'absolute', top: '15px', right: '15px', background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#6b7280' }}>
+            ×
+          </button>
           <h2
             style={{
               fontSize: "30px",
@@ -225,7 +237,7 @@ const PlayerRevealModal = ({ onContinue }) => {
           </p>
 
           <button
-            onClick={onContinue}
+            onClick={handleRevealClick}
             style={{
               background: "#2563eb",
               color: "#fff",
@@ -236,7 +248,7 @@ const PlayerRevealModal = ({ onContinue }) => {
               cursor: "pointer",
             }}
           >
-            Reveal Player
+            {isRevealed ? "Continue" : "Reveal Player"}
           </button>
         </div>
       </div>
