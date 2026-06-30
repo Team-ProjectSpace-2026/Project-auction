@@ -1,5 +1,5 @@
 import Sidebar from "../../components/layout/Sidebar";
-import TopBar from "../../components/layout/TopBar";
+// import TopBar from "../../components/layout/TopBar";
 
 const PlayerDetailsPage = () => {
   return (
@@ -18,16 +18,16 @@ const PlayerDetailsPage = () => {
           flex: 1,
         }}
       >
-        <TopBar
+        {/* <TopBar
           user={{
             name: "Rahul Organizer",
             role: "Organizer",
           }}
-        />
+        /> */}
 
         <main
           style={{
-            padding: "96px 32px 32px",
+            padding: "28px 32px 32px",
           }}
         >
           {/* Back Button */}
