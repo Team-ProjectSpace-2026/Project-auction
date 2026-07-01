@@ -77,7 +77,7 @@ const TeamsTab = () => {
           id: data._id || data.id,
         },
       ]);
-    } catch (err) {
+    } catch {
       setTeams((prev) => [
         ...prev,
         {
