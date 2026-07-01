@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AddTeamModal from "../teams/AddTeamModal";
+import { createTeam } from "../../services/teamService";
 
 const initialTeams = [
   {
@@ -66,16 +67,25 @@ const TeamsTab = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [teams, setTeams] = useState(initialTeams);
 
-  const handleAddTeam = (newTeam) => {
-    setTeams((prev) => [
-      ...prev,
-      {
-        ...newTeam,
-        id: Date.now(),
-        players: "0/18",
-        budget: "₹0",
-      },
-    ]);
+  const handleAddTeam = async (newTeam) => {
+    try {
+      const { data } = await createTeam(newTeam);
+      setTeams((prev) => [
+        ...prev,
+        {
+          ...data,
+          id: data._id || data.id,
+        },
+      ]);
+    } catch (err) {
+      setTeams((prev) => [
+        ...prev,
+        {
+          ...newTeam,
+          id: Date.now(),
+        },
+      ]);
+    }
     setShowAddModal(false);
   };
 

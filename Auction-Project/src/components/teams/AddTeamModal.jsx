@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { FiX, FiUpload } from "react-icons/fi";
 
 const AddTeamModal = ({ isOpen, onClose, onSubmit }) => {
@@ -7,6 +7,13 @@ const AddTeamModal = ({ isOpen, onClose, onSubmit }) => {
     ownerName: "",
   });
   const [logoPreview, setLogoPreview] = useState(null);
+  const fileInputRef = useRef(null);
+
+  const handleClose = useCallback(() => {
+    setFormData({ teamName: "", ownerName: "" });
+    setLogoPreview(null);
+    onClose();
+  }, [onClose]);
 
   if (!isOpen) return null;
 
@@ -63,7 +70,7 @@ const AddTeamModal = ({ isOpen, onClose, onSubmit }) => {
 
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) {
-      onClose();
+      handleClose();
     }
   };
 
@@ -93,7 +100,8 @@ const AddTeamModal = ({ isOpen, onClose, onSubmit }) => {
             Add New Team
           </h2>
           <button
-            onClick={onClose}
+            onClick={handleClose}
+            aria-label="Close modal"
             style={{
               background: "none",
               border: "none",
@@ -128,7 +136,7 @@ const AddTeamModal = ({ isOpen, onClose, onSubmit }) => {
                 cursor: "pointer",
                 transition: "border-color 0.2s ease",
               }}
-              onClick={() => document.getElementById("logo-upload").click()}
+              onClick={() => fileInputRef.current?.click()}
             >
               {logoPreview ? (
                 <img
@@ -149,14 +157,14 @@ const AddTeamModal = ({ isOpen, onClose, onSubmit }) => {
             </div>
             <input
               type="file"
-              id="logo-upload"
+              ref={fileInputRef}
               accept="image/*"
               onChange={handleFileChange}
               style={{ display: "none" }}
             />
             <button
               type="button"
-              onClick={() => document.getElementById("logo-upload").click()}
+              onClick={() => fileInputRef.current?.click()}
               style={{
                 background: "none",
                 border: "none",
@@ -246,7 +254,7 @@ const AddTeamModal = ({ isOpen, onClose, onSubmit }) => {
           >
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleClose}
               style={{
                 padding: "10px 20px",
                 borderRadius: "8px",

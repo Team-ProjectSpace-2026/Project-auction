@@ -41,7 +41,8 @@ const teamSchema = new mongoose.Schema({
   },
   logo: {
     type: String,
-    default: null
+    default: null,
+    maxlength: [5242880, 'Logo cannot exceed 5MB']
   },
   ownerName: {
     type: String,
