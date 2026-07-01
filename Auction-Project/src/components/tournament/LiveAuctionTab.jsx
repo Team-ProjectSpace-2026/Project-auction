@@ -358,7 +358,7 @@ const LiveAuctionTab = () => {
           onStartBidding={() => {
             setShowPlayerCard(false);
             navigate("/live-auction");
-          }}
+          }}  
         />
       )}
     </div>
