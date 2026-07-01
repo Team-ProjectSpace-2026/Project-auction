@@ -30,7 +30,7 @@ app.use(cors({
   origin: process.env.CLIENT_URL || "http://localhost:5173",
   credentials: true
 }));
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // Rate limiting
@@ -46,7 +46,7 @@ app.use('/api/', limiter);
 app.use('/api/auth', authRoutes);
 app.use('/api/tournaments', tournamentRoutes);
 app.use('/api/players', playerRoutes);
-app.use('/api/teams', teamRoutes);
+app.use('/api/teams', express.json({ limit: '10mb' }), teamRoutes);
 app.use('/api/auction', auctionRoutes);
 
 // Health check endpoint

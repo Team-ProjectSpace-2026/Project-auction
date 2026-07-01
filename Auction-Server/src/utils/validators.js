@@ -117,7 +117,20 @@ export const validateTeam = [
     .notEmpty()
     .withMessage('Tournament ID is required')
     .isMongoId()
-    .withMessage('Invalid Tournament ID format')
+    .withMessage('Invalid Tournament ID format'),
+
+  body('ownerName')
+    .notEmpty()
+    .withMessage('Owner name is required')
+    .isLength({ max: 100 })
+    .withMessage('Owner name cannot exceed 100 characters'),
+
+  body('logo')
+    .optional()
+    .isString()
+    .withMessage('Logo must be a string')
+    .isLength({ max: 5242880 })
+    .withMessage('Logo cannot exceed 5MB')
 ];
 
 export const validateBid = [
