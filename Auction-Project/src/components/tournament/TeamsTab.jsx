@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import AddTeamModal from "../teams/AddTeamModal";
 
-const teams = [
+const initialTeams = [
   {
     id: 1,
     name: "Mangalore Warriors",
@@ -60,20 +62,64 @@ const teams = [
 ];
 
 const TeamsTab = () => {
-  const navigate = useNavigate(); // ✅ MUST be inside component
+  const navigate = useNavigate();
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [teams, setTeams] = useState(initialTeams);
+
+  const handleAddTeam = (newTeam) => {
+    setTeams((prev) => [
+      ...prev,
+      {
+        ...newTeam,
+        id: Date.now(),
+        players: "0/18",
+        budget: "₹0",
+      },
+    ]);
+    setShowAddModal(false);
+  };
 
   return (
     <div>
-      <h2
+      {/* Header Row */}
+      <div
         style={{
-          fontSize: "32px",
-          fontWeight: "700",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
           marginBottom: "24px",
         }}
       >
-        Teams
-      </h2>
+        <h2
+          style={{
+            fontSize: "32px",
+            fontWeight: "700",
+            margin: 0,
+          }}
+        >
+          Teams
+        </h2>
+        <button
+          onClick={() => setShowAddModal(true)}
+          style={{
+            padding: "10px 20px",
+            borderRadius: "10px",
+            border: "none",
+            background: "var(--accent-light)",
+            color: "#fff",
+            fontWeight: "600",
+            fontSize: "14px",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+          }}
+        >
+          + Add Team
+        </button>
+      </div>
 
+      {/* Teams Grid */}
       <div
         style={{
           display: "grid",
@@ -105,9 +151,22 @@ const TeamsTab = () => {
                 fontSize: "26px",
                 fontWeight: "700",
                 color: "var(--accent-light)",
+                overflow: "hidden",
               }}
             >
-              {team.short}
+              {team.logo ? (
+                <img
+                  src={team.logo}
+                  alt={team.name}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                />
+              ) : (
+                team.short
+              )}
             </div>
 
             <h3
@@ -129,21 +188,27 @@ const TeamsTab = () => {
               }}
             >
               <div>
-                <div style={{ fontSize: "12px", color: "var(--text-secondary-light)" }}>
+                <div
+                  style={{
+                    fontSize: "12px",
+                    color: "var(--text-secondary-light)",
+                  }}
+                >
                   Players Purchased
                 </div>
-                <div style={{ fontWeight: "700" }}>
-                  {team.players}
-                </div>
+                <div style={{ fontWeight: "700" }}>{team.players}</div>
               </div>
 
               <div style={{ textAlign: "right" }}>
-                <div style={{ fontSize: "12px", color: "var(--text-secondary-light)" }}>
+                <div
+                  style={{
+                    fontSize: "12px",
+                    color: "var(--text-secondary-light)",
+                  }}
+                >
                   Remaining Budget
                 </div>
-                <div style={{ fontWeight: "700" }}>
-                  {team.budget}
-                </div>
+                <div style={{ fontWeight: "700" }}>{team.budget}</div>
               </div>
             </div>
 
@@ -165,6 +230,13 @@ const TeamsTab = () => {
           </div>
         ))}
       </div>
+
+      {/* Add Team Modal */}
+      <AddTeamModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onSubmit={handleAddTeam}
+      />
     </div>
   );
 };

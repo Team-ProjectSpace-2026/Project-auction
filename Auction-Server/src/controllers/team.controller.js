@@ -47,7 +47,10 @@ export const createTeam = async (req, res, next) => {
     const maxPlayers = Number(req.body.maxPlayers) || 0;
     const totalBudget = Number(req.body.totalBudget) || 0;
     const tournamentId = String(req.body.tournamentId || "");
-    const team = new Team({ name, short, budget, maxPlayers, totalBudget, tournamentId });
+    const ownerName = String(req.body.ownerName || "");
+    const logo = String(req.body.logo || "");
+    const remainingBudget = totalBudget;
+    const team = new Team({ name, short, budget, maxPlayers, totalBudget, remainingBudget, tournamentId, ownerName, logo });
     await team.save();
     res.status(201).json(team);
   } catch (error) {
@@ -63,9 +66,11 @@ export const updateTeam = async (req, res, next) => {
     const budget = Number(req.body.budget) || 0;
     const maxPlayers = Number(req.body.maxPlayers) || 0;
     const totalBudget = Number(req.body.totalBudget) || 0;
+    const ownerName = String(req.body.ownerName || "");
+    const logo = String(req.body.logo || "");
     const team = await Team.findByIdAndUpdate(
       teamId,
-      { name, short, budget, maxPlayers, totalBudget },
+      { name, short, budget, maxPlayers, totalBudget, ownerName, logo },
       { new: true, runValidators: true }
     );
     

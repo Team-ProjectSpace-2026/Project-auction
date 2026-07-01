@@ -39,6 +39,16 @@ const teamSchema = new mongoose.Schema({
     required: [true, 'Remaining budget is required'],
     min: [0, 'Remaining budget cannot be negative']
   },
+  logo: {
+    type: String,
+    default: null
+  },
+  ownerName: {
+    type: String,
+    required: [true, 'Owner name is required'],
+    trim: true,
+    maxlength: [100, 'Owner name cannot exceed 100 characters']
+  },
   tournamentId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Tournament',

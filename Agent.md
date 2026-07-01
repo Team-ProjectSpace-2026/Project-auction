@@ -485,3 +485,26 @@ The live auction room (PRD §6) is the most complex part of the system. Key rule
 #### Build Status
 - `npm run build` ✅ passes
 - `npm run lint` ✅ 0 errors
+
+---
+
+### 2026-07-01 11:39 — Add Team Modal & Backend Integration (AI session)
+
+**Worked on:** Added "Add Team" button to the Teams tab with a modal form for registering new teams, including full backend model updates.
+
+**Changed:**
+
+*Frontend:*
+- Created `src/components/teams/AddTeamModal.jsx` — modal form with Team Name, Team Logo (file upload with preview), and Owner Name fields
+- Updated `src/components/tournament/TeamsTab.jsx` — added "+ Add Team" button in header, modal state management, renders uploaded logo on team cards with fallback to initials
+
+*Backend:*
+- Updated `Auction-Server/src/models/Team.js` — added `logo` (String, nullable) and `ownerName` (String, required) fields
+- Updated `Auction-Server/src/controllers/team.controller.js` — `createTeam` and `updateTeam` now handle `ownerName` and `logo` fields, auto-set `remainingBudget` on creation
+- Updated `Auction-Server/src/utils/validators.js` — added `ownerName` validation to `validateTeam`
+- Updated `Auction-Server/server.js` — increased `express.json()` payload limit to 10MB for base64 logo support
+
+*Earlier in session:*
+- Renamed `organizerName` → `ownerName` across all frontend and backend files (model, controller, validator, modal, teams tab)
+
+**Next step for whoever picks this up:** Wire the modal's `onSubmit` to call `teamService.createTeam()` with the current tournament ID; add logo/image storage (e.g., multer + local uploads or cloud storage); connect TeamsTab to fetch teams from the API instead of mock data.
