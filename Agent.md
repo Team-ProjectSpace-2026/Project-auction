@@ -407,3 +407,104 @@ The live auction room (PRD §6) is the most complex part of the system. Key rule
 **Worked on:** Created `AGENT.md` to replace `AI-GUIDE.md` as the team/AI onboarding doc.
 **Changed:** Documented current repo structure (frontend-only, MERN stack, React+Vite+JS), confirmed no backend exists yet, set up status table and changelog format.
 **Next step for whoever picks this up:** Fill in the placeholder sections above (env vars, CI workflow contents, root package.json purpose, first dev priority) with real project details, then start building frontend screens per `PRD.md` or scaffold the backend — whichever the team decides first.
+
+
+## Daily Work Log
+
+---
+
+### 2026-07-01 - Dark/Light Mode Implementation & Bug Fixes
+
+**Summary:** Implemented full dark mode support across the application, moved theme toggle to Settings page, added logout confirmation popup, and fixed multiple code quality issues.
+
+#### Dark/Light Mode
+- Added CSS variable system in `index.css` with `:root` (light) and `body.dark-mode` (dark) overrides
+- Replaced all hardcoded hex colors (`#fff`, `#1a1d2e`, `#e8eaf0`, etc.) with CSS variables (`var(--card-bg-light)`, `var(--text-primary-light)`, `var(--border-light)`, etc.) across 20+ files
+- Updated pages: Dashboard, TournamentsList, TournamentHub, TeamDetails, PlayerDetails, CreateTournament, EditTournament
+- Updated components: MetricCard, TournamentRow, TournamentHeader, OverviewTab, TeamsTab, PlayersTab, RegistrationTab, AuctionRoom, PlayerRevealModal, SoldPlayerModal, UnsoldPlayerModal, PlayerDetailsModal, SuccessModal
+- Updated CSS files: CreateTournamentPage.css, EditTournment.css, common.css
+- Added new CSS variables for role badges, status colors, info boxes, warning boxes, table headers, form inputs, avatars, breadcrumbs
+- Added smooth `transition` properties for color changes
+
+#### Theme Toggle
+- Removed theme toggle button from TopBar.jsx
+- Added iOS-style sliding toggle switch in ProfilePage.jsx (Settings page at `/settings`)
+- Toggle uses `useTheme()` context to switch between light/dark themes
+- Added `.theme-toggle` CSS styles with slider animation and `:focus-visible` for keyboard accessibility
+
+#### Login/Register Exclusion
+- Added CSS variable overrides inside `.login-page` and `.register-page` containers in LoginPage.css and RegisterPage.css
+- These pages force light theme colors regardless of `body.dark-mode` state
+
+#### Logout Confirmation
+- Added confirmation modal in Sidebar.jsx when Logout button is clicked
+- Modal shows "Are you sure you want to logout?" with No/Yes buttons
+- "Yes, Logout" clears auth tokens and navigates to `/login` with `replace: true` (prevents back-button navigation)
+
+#### Bug Fixes
+- Fixed duplicate `transition` key in Sidebar.jsx button style object (ESLint error)
+- Fixed logout redirect to use `navigate("/login", { replace: true })` so users can't return to protected pages after logout
+- Fixed ThemeContext flash of light theme on refresh by adding synchronous `document.body.classList` initialization before useEffect
+- Fixed PlayersTab search input and select dropdown missing `color: var(--input-text)` for dark mode
+- Fixed RegistrationTab URL input missing `background: var(--input-bg)` and `color: var(--input-text)`
+- Fixed AuctionRoom BATSMAN badge using wrong token (`var(--accent-light)` → `var(--role-batsman-text)`)
+- Fixed AuctionRoom custom bid input hardcoded border (`#d1d5db` → `var(--input-border)`)
+- Added role text dark mode overrides (`--role-batsman-text`, `--role-bowler-text`, `--role-allrounder-text`, `--role-keeper-text`) in `body.dark-mode`
+- Removed empty lines between CSS declarations in CreateTournamentPage.css and EditTournment.css (Stylelint fix)
+
+#### Files Modified
+- `src/index.css`
+- `src/context/ThemeContext.jsx`
+- `src/components/layout/TopBar.jsx`
+- `src/components/layout/Sidebar.jsx`
+- `src/components/common/common.css`
+- `src/components/common/SuccessModal.jsx`
+- `src/components/dashboard/MetricCard.jsx`
+- `src/components/dashboard/TournamentRow.jsx`
+- `src/components/tournament/TournamentHeader.jsx`
+- `src/components/tournament/OverviewTab.jsx`
+- `src/components/tournament/TeamsTab.jsx`
+- `src/components/tournament/PlayersTab.jsx`
+- `src/components/tournament/RegistrationTab.jsx`
+- `src/components/tournament/AuctionRoom.jsx`
+- `src/components/tournament/PlayerRevealModal.jsx`
+- `src/components/tournament/SoldPlayerModal.jsx`
+- `src/components/tournament/UnsoldPlayerModal.jsx`
+- `src/components/tournament/PlayerDetailsModal.jsx`
+- `src/pages/dashboard/DashboardPage.jsx`
+- `src/pages/tournaments/TournamentsListPage.jsx`
+- `src/pages/tournaments/TournamentHubPage.jsx`
+- `src/pages/tournaments/TeamDetailsPage.jsx`
+- `src/pages/tournaments/PlayerDetailsPage.jsx`
+- `src/pages/tournaments/CreateTournamentPage.css`
+- `src/pages/tournaments/EditTournment.css`
+- `src/pages/profile/ProfilePage.jsx`
+- `src/pages/auth/LoginPage.css`
+- `src/pages/auth/RegisterPage.css`
+
+#### Build Status
+- `npm run build` ✅ passes
+- `npm run lint` ✅ 0 errors
+
+---
+
+### 2026-07-01 11:39 — Add Team Modal & Backend Integration (AI session)
+
+**Worked on:** Added "Add Team" button to the Teams tab with a modal form for registering new teams, including full backend model updates.
+
+**Changed:**
+
+*Frontend:*
+- Created `src/components/teams/AddTeamModal.jsx` — modal form with Team Name, Team Logo (file upload with preview), and Owner Name fields
+- Updated `src/components/tournament/TeamsTab.jsx` — added "+ Add Team" button in header, modal state management, renders uploaded logo on team cards with fallback to initials
+
+*Backend:*
+- Updated `Auction-Server/src/models/Team.js` — added `logo` (String, nullable) and `ownerName` (String, required) fields
+- Updated `Auction-Server/src/controllers/team.controller.js` — `createTeam` and `updateTeam` now handle `ownerName` and `logo` fields, auto-set `remainingBudget` on creation
+- Updated `Auction-Server/src/utils/validators.js` — added `ownerName` validation to `validateTeam`
+- Updated `Auction-Server/server.js` — increased `express.json()` payload limit to 10MB for base64 logo support
+
+*Earlier in session:*
+- Renamed `organizerName` → `ownerName` across all frontend and backend files (model, controller, validator, modal, teams tab)
+
+**Next step for whoever picks this up:** Wire the modal's `onSubmit` to call `teamService.createTeam()` with the current tournament ID; add logo/image storage (e.g., multer + local uploads or cloud storage); connect TeamsTab to fetch teams from the API instead of mock data.

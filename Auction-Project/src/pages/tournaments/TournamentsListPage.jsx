@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/layout/Sidebar";
-import TopBar from "../../components/layout/TopBar";
+// import TopBar from "../../components/layout/TopBar";
 
-const MOCK_USER = {
-name: "Rahul Organizer",
-role: "Organizer",
-};
+// const MOCK_USER = {
+// name: "Rahul Organizer",
+// role: "Organizer",
+// };
 
 const tournaments = [
 {
@@ -78,18 +78,18 @@ const [activePage, setActivePage] = useState("tournaments");
 
 return (
 <div
-style={{
-display: "flex",
-minHeight: "100vh",
-background: "#f4f6fb",
-fontFamily: "'Inter','Segoe UI',sans-serif",
-}}
-> <Sidebar
+  style={{
+    display: "flex",
+    minHeight: "100vh",
+    background: "var(--bg-primary-light)",
+    fontFamily: "'Inter','Segoe UI',sans-serif",
+    transition: "background-color 0.2s ease",
+  }}
+   > <Sidebar
      activePage={activePage}
      onNavigate={setActivePage}
    />
 
-```
   <div
     style={{
       marginLeft: "220px",
@@ -98,20 +98,19 @@ fontFamily: "'Inter','Segoe UI',sans-serif",
       flexDirection: "column",
     }}
   >
-    <TopBar user={MOCK_USER} />
+    {/* <TopBar user={MOCK_USER} /> */}
   
 
     <main
   style={{
-    marginTop: "64px",
-    padding: "16px 28px 28px"
+    padding: "28px 28px 28px"
   }}
 >
   <h1
   style={{
     fontSize: "28px",
     fontWeight: 700,
-    color: "#111827",
+    color: "var(--text-primary-light)",
     margin: 0,
   }}
 >
@@ -120,7 +119,7 @@ fontFamily: "'Inter','Segoe UI',sans-serif",
 
 <p
   style={{
-    color: "#6b7280",
+    color: "var(--text-secondary-light)",
     fontSize: "14px",
     marginTop: "4px",
     marginBottom: "16px",
@@ -131,10 +130,11 @@ fontFamily: "'Inter','Segoe UI',sans-serif",
 
       <div
         style={{
-          background: "#fff",
+          background: "var(--card-bg-light)",
           borderRadius: "16px",
-          border: "1px solid #e8eaf0",
+          border: "1px solid var(--border-light)",
           padding: "18px",
+          transition: "background-color 0.2s ease, border-color 0.2s ease",
         }}
       >
         {/* Search Row */}
@@ -151,9 +151,12 @@ fontFamily: "'Inter','Segoe UI',sans-serif",
               flex: 1,
               padding: "14px 18px",
               borderRadius: "10px",
-              border: "1px solid #dbe1ea",
+              border: "1px solid var(--border-light)",
               fontSize: "14px",
               outline: "none",
+              backgroundColor: "var(--bg-secondary-light)",
+              color: "var(--text-primary-light)",
+              transition: "background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease",
             }}
           />
 
@@ -161,8 +164,11 @@ fontFamily: "'Inter','Segoe UI',sans-serif",
             style={{
               width: "200px",
               borderRadius: "10px",
-              border: "1px solid #dbe1ea",
+              border: "1px solid var(--border-light)",
               padding: "14px",
+              backgroundColor: "var(--bg-secondary-light)",
+              color: "var(--text-primary-light)",
+              transition: "background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease",
             }}
           >
             <option>All Status</option>
@@ -172,13 +178,14 @@ fontFamily: "'Inter','Segoe UI',sans-serif",
           <button
   onClick={() => navigate("/create-tournament")}
   style={{
-    background: "#2563eb",
+    background: "var(--accent-light)",
     color: "#fff",
     border: "none",
     borderRadius: "10px",
     padding: "14px 24px",
     fontWeight: "700",
     cursor: "pointer",
+    transition: "background-color 0.2s ease",
   }}
 >
   + New Tournament
@@ -198,13 +205,14 @@ fontFamily: "'Inter','Segoe UI',sans-serif",
             <div
               key={tournament.id}
               style={{
-                background: "#fff",
-                border: "1px solid #e8eaf0",
+                background: 'var(--card-bg-light)',
+                border: '1px solid var(--border-light)',
                 borderRadius: "14px",
                 padding: "16px",
                 position: "relative",
                 boxShadow:
                   "0 2px 8px rgba(15,23,42,0.04)",
+                transition: 'background-color 0.2s ease, border-color 0.2s ease',
               }}
             >
               <div
@@ -214,7 +222,7 @@ fontFamily: "'Inter','Segoe UI',sans-serif",
                   right: "14px",
                   fontSize: "18px",
                   cursor: "pointer",
-                  color: "#64748b",
+                  color: 'var(--text-secondary-light)',
                 }}
               >
                 ⋮
@@ -232,12 +240,13 @@ fontFamily: "'Inter','Segoe UI',sans-serif",
                     width: "68px",
                     height: "68px",
                     borderRadius: "12px",
-                    background: "#f8fafc",
-                    border: "1px solid #e8eaf0",
+                    background: "var(--bg-secondary-light)",
+                    border: "1px solid var(--border-light)",
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
                     fontSize: "32px",
+                    transition: "background-color 0.2s ease, border-color 0.2s ease",
                   }}
                 >
                   🏆
@@ -249,8 +258,9 @@ fontFamily: "'Inter','Segoe UI',sans-serif",
                       margin: 0,
                       fontSize: "20px",
                       fontWeight: "700",
-                      color: "#111827",
+                      color: 'var(--text-primary-light)',
                       marginBottom: "8px",
+                      transition: 'color 0.2s ease',
                     }}
                   >
                     {tournament.name}
@@ -274,11 +284,12 @@ fontFamily: "'Inter','Segoe UI',sans-serif",
 
               <div
                 style={{
-                  borderTop: "1px solid #f1f5f9",
+                  borderTop: '1px solid var(--border-light)',
                   paddingTop: "14px",
                   display: "flex",
                   flexDirection: "column",
                   gap: "12px",
+                  transition: 'border-color 0.2s ease',
                 }}
               >
                 <div
@@ -287,11 +298,11 @@ fontFamily: "'Inter','Segoe UI',sans-serif",
                     justifyContent: "space-between",
                   }}
                 >
-                  <span style={{ color: "#64748b" }}>
+                  <span style={{ color: 'var(--text-secondary-light)', transition: 'color 0.2s ease' }}>
                     📅 Auction Date
                   </span>
 
-                  <strong>
+                  <strong style={{ color: 'var(--text-primary-light)', transition: 'color 0.2s ease' }}>
                     {tournament.date}
                   </strong>
                 </div>
@@ -302,11 +313,11 @@ fontFamily: "'Inter','Segoe UI',sans-serif",
                     justifyContent: "space-between",
                   }}
                 >
-                  <span style={{ color: "#64748b" }}>
+                  <span style={{ color: 'var(--text-secondary-light)', transition: 'color 0.2s ease' }}>
                     👥 Teams
                   </span>
 
-                  <strong>
+                  <strong style={{ color: 'var(--text-primary-light)', transition: 'color 0.2s ease' }}>
                     {tournament.teams}
                   </strong>
                 </div>
@@ -317,11 +328,11 @@ fontFamily: "'Inter','Segoe UI',sans-serif",
                     justifyContent: "space-between",
                   }}
                 >
-                  <span style={{ color: "#64748b" }}>
+                  <span style={{ color: 'var(--text-secondary-light)', transition: 'color 0.2s ease' }}>
                     🏆 Format
                   </span>
 
-                  <strong>
+                  <strong style={{ color: 'var(--text-primary-light)', transition: 'color 0.2s ease' }}>
                     {tournament.format}
                   </strong>
                 </div>
@@ -336,11 +347,12 @@ fontFamily: "'Inter','Segoe UI',sans-serif",
                   marginTop: "16px",
                   height: "44px",
                   borderRadius: "10px",
-                  border: "1px solid #2563eb",
-                  background: "#fff",
-                  color: "#2563eb",
+                  border: '1px solid var(--accent-light)',
+                  background: 'var(--card-bg-light)',
+                  color: 'var(--accent-light)',
                   fontWeight: "700",
                   cursor: "pointer",
+                  transition: 'background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease',
                 }}
               >
                 View Details →
@@ -360,8 +372,9 @@ fontFamily: "'Inter','Segoe UI',sans-serif",
         >
           <span
             style={{
-              color: "#64748b",
+              color: 'var(--text-secondary-light)',
               fontSize: "14px",
+              transition: 'color 0.2s ease',
             }}
           >
             Showing 1 to 5 of 5 tournaments
@@ -377,8 +390,10 @@ fontFamily: "'Inter','Segoe UI',sans-serif",
               style={{
                 padding: "10px 16px",
                 borderRadius: "8px",
-                border: "1px solid #dbe1ea",
-                background: "#fff",
+                border: '1px solid var(--border-light)',
+                background: 'var(--card-bg-light)',
+                color: 'var(--text-primary-light)',
+                transition: 'background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease',
               }}
             >
               Previous
@@ -389,8 +404,9 @@ fontFamily: "'Inter','Segoe UI',sans-serif",
                 padding: "10px 16px",
                 borderRadius: "8px",
                 border: "none",
-                background: "#2563eb",
+                background: 'var(--accent-light)',
                 color: "#fff",
+                transition: 'background-color 0.2s ease',
               }}
             >
               1
@@ -400,8 +416,10 @@ fontFamily: "'Inter','Segoe UI',sans-serif",
               style={{
                 padding: "10px 16px",
                 borderRadius: "8px",
-                border: "1px solid #dbe1ea",
-                background: "#fff",
+                border: '1px solid var(--border-light)',
+                background: 'var(--card-bg-light)',
+                color: 'var(--text-primary-light)',
+                transition: 'background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease',
               }}
             >
               Next

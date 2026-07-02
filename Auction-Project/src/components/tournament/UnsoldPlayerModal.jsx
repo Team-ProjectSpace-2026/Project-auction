@@ -14,10 +14,11 @@ const UnsoldPlayerModal = ({ onClose, onNextPlayer }) => {
       <div
         style={{
           width: "500px",
-          background: "#fff",
+          background: "var(--card-bg-light)",
           borderRadius: "20px",
           padding: "40px",
           textAlign: "center",
+          transition: 'background-color 0.2s ease',
         }}
       >
         <div
@@ -41,7 +42,7 @@ const UnsoldPlayerModal = ({ onClose, onNextPlayer }) => {
 
         <h2
           style={{
-            color: "#111827",
+            color: "var(--text-primary-light)",
             marginBottom: "10px",
           }}
         >
@@ -50,7 +51,7 @@ const UnsoldPlayerModal = ({ onClose, onNextPlayer }) => {
 
         <p
           style={{
-            color: "#6b7280",
+            color: "var(--text-secondary-light)",
             marginBottom: "30px",
           }}
         >
@@ -63,7 +64,7 @@ const UnsoldPlayerModal = ({ onClose, onNextPlayer }) => {
             onNextPlayer();
           }}
           style={{
-            background: "#2563eb",
+            background: "var(--accent-light)",
             color: "#fff",
             border: "none",
             padding: "14px 30px",

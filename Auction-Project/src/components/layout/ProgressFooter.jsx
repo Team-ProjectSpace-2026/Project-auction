@@ -10,14 +10,15 @@ const steps = [
 const ProgressFooter = () => {
   return (
     <div style={{
-      background: '#fff',
-      borderTop: '1px solid #e8eaf0',
+      background: 'var(--bg-secondary-light)',
+      borderTop: '1px solid var(--border-light)',
       padding: '20px 32px',
+      transition: 'background-color 0.2s ease, border-color 0.2s ease',
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '16px' }}>
-        <span style={{ fontSize: '16px' }}>💡</span>
-        <span style={{ fontWeight: 700, color: '#1a1d2e', fontSize: '15px' }}>How it works?</span>
-      </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '16px' }}>
+          <span style={{ fontSize: '16px' }}>💡</span>
+          <span style={{ fontWeight: 700, color: 'var(--text-primary-light)', fontSize: '15px', transition: 'color 0.2s ease' }}>How it works?</span>
+        </div>
 
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0' }}>
         {steps.map((step, idx) => (
@@ -32,10 +33,10 @@ const ProgressFooter = () => {
                   {step.icon}
                 </div>
                 <div>
-                  <div style={{ fontWeight: 700, color: '#1a1d2e', fontSize: '13px' }}>
+                  <div style={{ fontWeight: 700, color: 'var(--text-primary-light)', fontSize: '13px', transition: 'color 0.2s ease' }}>
                     {step.num}. {step.label}
                   </div>
-                  <div style={{ color: '#8a94a6', fontSize: '12px', marginTop: '2px' }}>
+                  <div style={{ color: 'var(--text-secondary-light)', fontSize: '12px', marginTop: '2px', transition: 'color 0.2s ease' }}>
                     {step.desc}
                   </div>
                 </div>

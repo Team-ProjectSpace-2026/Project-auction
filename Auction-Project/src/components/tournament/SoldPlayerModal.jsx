@@ -14,26 +14,28 @@ const SoldPlayerModal = ({ onClose, onNextPlayer }) => {
       <div
         style={{
           width: "600px",
-          background: "#fff",
+          background: "var(--card-bg-light)",
           borderRadius: "20px",
           padding: "30px",
           textAlign: "center",
+          transition: 'background-color 0.2s ease',
         }}
       >
         <h1
           style={{
-            color: "#16a34a",
+            color: "var(--status-active-text)",
             marginBottom: "20px",
           }}
         >
           ✅ PLAYER SOLD!
         </h1>
 
-        <h2>Virat Kohli</h2>
+        <h2 style={{ color: "var(--text-primary-light)" }}>Virat Kohli</h2>
 
         <p
           style={{
             marginTop: "10px",
+            color: "var(--text-secondary-light)",
           }}
         >
           Sold To
@@ -41,7 +43,7 @@ const SoldPlayerModal = ({ onClose, onNextPlayer }) => {
 
         <h3
           style={{
-            color: "#2563eb",
+            color: "var(--accent-light)",
           }}
         >
           Mangalore Warriors
@@ -49,7 +51,7 @@ const SoldPlayerModal = ({ onClose, onNextPlayer }) => {
 
         <h1
           style={{
-            color: "#16a34a",
+            color: "var(--status-active-text)",
             marginTop: "20px",
           }}
         >
@@ -63,7 +65,7 @@ const SoldPlayerModal = ({ onClose, onNextPlayer }) => {
           }}
           style={{
             marginTop: "25px",
-            background: "#2563eb",
+            background: "var(--accent-light)",
             color: "#fff",
             border: "none",
             padding: "14px 28px",

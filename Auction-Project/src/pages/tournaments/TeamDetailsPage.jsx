@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/layout/Sidebar";
-import TopBar from "../../components/layout/TopBar";
+// import TopBar from "../../components/layout/TopBar";
 
 const players = [
   { id: 1, name: "Virat Kohli", role: "Batsman", price: "₹85,00,000" },
@@ -69,7 +69,8 @@ const TeamDetailsPage = () => {
       style={{
         display: "flex",
         minHeight: "100vh",
-        background: "#f4f6fb",
+        background: "var(--bg-primary-light)",
+        transition: "background-color 0.2s ease",
       }}
     >
       <Sidebar activePage="tournaments" />
@@ -80,16 +81,16 @@ const TeamDetailsPage = () => {
           flex: 1,
         }}
       >
-        <TopBar
+        {/* <TopBar
           user={{
             name: "Rahul Organizer",
             role: "Organizer",
           }}
-        />
+        /> */}
 
         <main
           style={{
-            padding: "96px 32px 32px",
+            padding: "28px 32px 32px",
           }}
         >
           {/* Back */}
@@ -102,7 +103,7 @@ const TeamDetailsPage = () => {
             style={{
             border: "none",
             background: "transparent",
-            color: "#2563eb",
+            color: "var(--accent-light)",
             fontWeight: 600,
             cursor: "pointer",
             fontSize: "14px",
@@ -114,14 +115,15 @@ const TeamDetailsPage = () => {
           {/* Header */}
           <div
             style={{
-              background: "#fff",
-              border: "1px solid #e8eaf0",
+              background: "var(--card-bg-light)",
+              border: "1px solid var(--border-light)",
               borderRadius: "20px",
               padding: "22px 24px",
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
               marginBottom: "24px",
+              transition: "background-color 0.2s ease, border-color 0.2s ease",
             }}
           >
             <div
@@ -136,43 +138,43 @@ const TeamDetailsPage = () => {
                   width: "72px",
                   height: "72px",
                   borderRadius: "18px",
-                  background: "#eff6ff",
+                   background: "var(--info-bg)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   fontSize: "28px",
                   fontWeight: "700",
-                  color: "#2563eb",
+                  color: "var(--accent-light)",
                 }}
               >
                 MW
               </div>
 
-              <div>
-                <h1
-                  style={{
-                    fontSize: "32px",
-                    fontWeight: "800",
-                    color: "#111827",
-                    marginBottom: "14px",
-                  }}
-                >
-                  Mangalore Warriors
-                </h1>
+                <div>
+                  <h1
+                    style={{
+                      fontSize: "32px",
+                      fontWeight: "800",
+                      color: "var(--text-primary-light)",
+                      marginBottom: "14px",
+                    }}
+                  >
+                    Mangalore Warriors
+                  </h1>
 
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "10px",
-                    color: "#6b7280",
-                    fontSize: "16px",
-                  }}
-                >
-                  <span>👤 Owner: Rajesh Shetty</span>
-                  <span>👥 Players Purchased: 12</span>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "10px",
+                      color: "var(--text-secondary-light)",
+                      fontSize: "16px",
+                    }}
+                  >
+                    <span>👤 Owner: Rajesh Shetty</span>
+                    <span>👥 Players Purchased: 12</span>
+                  </div>
                 </div>
-              </div>
             </div>
 
             <button
@@ -180,9 +182,9 @@ const TeamDetailsPage = () => {
                 style={{
                 padding: "12px 24px",
                 borderRadius: "12px",
-                border: "1px solid #2563eb",
-                background: "#fff",
-                color: "#2563eb",
+                border: "1px solid var(--accent-light)",
+                background: "var(--card-bg-light)",
+                color: "var(--accent-light)",
                 fontWeight: "700",
                 cursor: "pointer",
               }}
@@ -194,17 +196,18 @@ const TeamDetailsPage = () => {
           {/* Squad List */}
           <div
             style={{
-              background: "#fff",
-              border: "1px solid #e8eaf0",
+              background: "var(--card-bg-light)",
+              border: "1px solid var(--border-light)",
               borderRadius: "20px",
               padding: "24px",
+              transition: "background-color 0.2s ease, border-color 0.2s ease",
             }}
           >
             <h2
               style={{
                 fontSize: "34px",
                 fontWeight: "700",
-                color: "#111827",
+                color: "var(--text-primary-light)",
                 marginBottom: "20px",
               }}
             >
@@ -220,7 +223,7 @@ const TeamDetailsPage = () => {
               <thead>
                 <tr
                   style={{
-                    background: "#f8fafc",
+                    background: "var(--table-header-bg)",
                   }}
                 >
                   <th style={{ padding: "16px", textAlign: "left" }}>#</th>
@@ -239,7 +242,7 @@ const TeamDetailsPage = () => {
                   <tr
                     key={player.id}
                     style={{
-                      borderTop: "1px solid #eef2f7",
+                      borderTop: "1px solid var(--table-row-border)",
                     }}
                   >
                     <td style={{ padding: "16px" }}>{player.id}</td>

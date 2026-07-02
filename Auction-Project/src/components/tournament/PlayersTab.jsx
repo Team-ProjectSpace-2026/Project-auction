@@ -120,7 +120,7 @@ const PlayersTab = () => {
           style={{
             fontSize: "32px",
             fontWeight: "700",
-            color: "#111827",
+            color: "var(--text-primary-light)",
             marginBottom: "6px",
           }}
         >
@@ -129,7 +129,7 @@ const PlayersTab = () => {
 
         <p
           style={{
-            color: "#6b7280",
+            color: "var(--text-secondary-light)",
             fontSize: "14px",
           }}
         >
@@ -151,11 +151,13 @@ const PlayersTab = () => {
           style={{
             width: "320px",
             padding: "14px 16px",
-            border: "1px solid #dbe1ea",
+            border: "1px solid var(--border-light)",
             borderRadius: "12px",
             fontSize: "14px",
-            background: "#fff",
+            background: "var(--input-bg)",
+            color: "var(--input-text)",
             outline: "none",
+            transition: "background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease",
           }}
         />
 
@@ -169,10 +171,12 @@ const PlayersTab = () => {
             style={{
               width: "180px",
               padding: "14px 16px",
-              border: "1px solid #dbe1ea",
+              border: "1px solid var(--border-light)",
               borderRadius: "12px",
-              background: "#fff",
+              background: "var(--input-bg)",
+              color: "var(--input-text)",
               cursor: "pointer",
+              transition: "background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease",
             }}
           >
             <option>All Roles</option>
@@ -184,7 +188,7 @@ const PlayersTab = () => {
 
           <button
             style={{
-              background: "#2563eb",
+              background: "var(--accent-light)",
               color: "#fff",
               border: "none",
               borderRadius: "12px",
@@ -201,10 +205,11 @@ const PlayersTab = () => {
       {/* Table */}
       <div
         style={{
-          background: "#fff",
-          border: "1px solid #e8eaf0",
+          background: "var(--card-bg-light)",
+          border: "1px solid var(--border-light)",
           borderRadius: "16px",
           overflow: "hidden",
+          transition: "background-color 0.2s ease, border-color 0.2s ease",
         }}
       >
         <table
@@ -216,7 +221,7 @@ const PlayersTab = () => {
           <thead>
             <tr
               style={{
-                background: "#f8fafc",
+                background: "var(--table-header-bg)",
                 textAlign: "left",
               }}
             >
@@ -234,7 +239,7 @@ const PlayersTab = () => {
               <tr
                 key={player.id}
                 style={{
-                  borderTop: "1px solid #eef2f7",
+                  borderTop: "1px solid var(--table-row-border)",
                 }}
               >
                 <td style={{ padding: "16px" }}>
@@ -245,7 +250,7 @@ const PlayersTab = () => {
                     onClick={() => navigate("/player-details")}
                     style={{
                     fontWeight: "600",
-                    color: "#2563eb",
+                    color: "var(--accent-light)",
                     cursor: "pointer",
                 }}
          >

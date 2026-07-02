@@ -1,0 +1,99 @@
+import mongoose from "mongoose";
+import Player from "../models/Player.js";
+
+export const getPlayers = async (req, res, next) => {
+  try {
+    const tournamentId = req.query.tournamentId ? new mongoose.Types.ObjectId(req.query.tournamentId) : undefined;
+    let filter = { deleted: false };
+    if (tournamentId) {
+      filter.tournamentId = tournamentId;
+    }
+
+    const players = await Player.find(filter).populate("tournamentId", "name");
+    res.json(players);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const createPlayer = async (req, res, next) => {
+  try {
+    const name = String(req.body.name || "");
+    const role = String(req.body.role || "");
+    const style = String(req.body.style || "");
+    const keeper = Boolean(req.body.keeper);
+    const basePrice = Number(req.body.basePrice) || 0;
+    const tournamentId = String(req.body.tournamentId || "");
+    const player = new Player({
+      name,
+      role,
+      style,
+      keeper,
+      basePrice,
+      tournamentId,
+    });
+    await player.save();
+    res.status(201).json(player);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getPlayer = async (req, res, next) => {
+  try {
+    const playerId = new mongoose.Types.ObjectId(req.params.id);
+    const player = await Player.findById(playerId).populate('tournamentId', 'name');
+    if (!player || player.deleted) {
+      return res.status(404).json({ message: 'Player not found' });
+    }
+    res.json(player);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updatePlayer = async (req, res, next) => {
+  try {
+    const playerId = new mongoose.Types.ObjectId(req.params.id);
+    const name = String(req.body.name || "");
+    const role = String(req.body.role || "");
+    const style = String(req.body.style || "");
+    const keeper = Boolean(req.body.keeper);
+    const basePrice = Number(req.body.basePrice) || 0;
+    const player = await Player.findByIdAndUpdate(
+      playerId,
+      { name, role, style, keeper, basePrice },
+      { new: true, runValidators: true }
+    );
+    
+    if (!player || player.deleted) {
+      return res.status(404).json({ message: 'Player not found' });
+    }
+    
+    res.json(player);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deletePlayer = async (req, res, next) => {
+  try {
+    const playerId = new mongoose.Types.ObjectId(req.params.id);
+    const player = await Player.findById(playerId);
+
+    if (!player || player.deleted) {
+      return res.status(404).json({ message: 'Player not found' });
+    }
+
+    // Soft delete player
+    player.deleted = true;
+    await player.save();
+
+    // Remove associated bids (optional, depending on desired behavior)
+    // await Bid.deleteMany({ playerId: player._id });
+
+    res.json({ message: 'Player deleted successfully' });
+  } catch (error) {
+    next(error);
+  }
+};

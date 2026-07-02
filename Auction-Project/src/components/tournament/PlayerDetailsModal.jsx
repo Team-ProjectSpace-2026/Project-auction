@@ -16,11 +16,12 @@ const PlayerDetailsModal = ({ onClose, onStartBidding }) => {
       <div
         style={{
           width: "760px",
-          background: "#fff",
+          background: "var(--card-bg-light)",
           borderRadius: "20px",
           padding: "28px",
           position: "relative",
           boxShadow: "0 25px 60px rgba(0,0,0,0.2)",
+          transition: 'background-color 0.2s ease',
         }}
       >
         {/* Close */}
@@ -34,7 +35,7 @@ const PlayerDetailsModal = ({ onClose, onStartBidding }) => {
             background: "transparent",
             fontSize: "24px",
             cursor: "pointer",
-            color: "#6b7280",
+            color: "var(--text-secondary-light)",
           }}
         >
           ✕
@@ -94,7 +95,7 @@ const PlayerDetailsModal = ({ onClose, onStartBidding }) => {
               style={{
                 fontSize: "34px",
                 fontWeight: "800",
-                color: "#111827",
+                color: "var(--text-primary-light)",
                 marginBottom: "10px",
               }}
             >
@@ -103,8 +104,8 @@ const PlayerDetailsModal = ({ onClose, onStartBidding }) => {
 
             <span
               style={{
-                background: "#dbeafe",
-                color: "#2563eb",
+                background: "var(--role-batsman-bg)",
+                color: "var(--role-batsman-text)",
                 padding: "6px 12px",
                 borderRadius: "8px",
                 fontWeight: "600",
@@ -120,7 +121,7 @@ const PlayerDetailsModal = ({ onClose, onStartBidding }) => {
                 display: "flex",
                 flexDirection: "column",
                 gap: "14px",
-                color: "#374151",
+                color: "var(--text-primary-light)",
               }}
             >
               <div>
@@ -146,16 +147,17 @@ const PlayerDetailsModal = ({ onClose, onStartBidding }) => {
         <div
           style={{
             marginTop: "28px",
-            background: "#f8fafc",
-            border: "1px solid #e5e7eb",
+            background: "var(--table-header-bg)",
+            border: "1px solid var(--border-light)",
             borderRadius: "16px",
             padding: "28px",
             textAlign: "center",
+            transition: 'background-color 0.2s ease, border-color 0.2s ease',
           }}
         >
           <p
             style={{
-              color: "#6b7280",
+              color: "var(--text-secondary-light)",
               marginBottom: "10px",
             }}
           >
@@ -165,7 +167,7 @@ const PlayerDetailsModal = ({ onClose, onStartBidding }) => {
           <h1
             style={{
               fontSize: "44px",
-              color: "#2563eb",
+              color: "var(--accent-light)",
               fontWeight: "800",
               marginBottom: "24px",
             }}
@@ -184,7 +186,7 @@ const PlayerDetailsModal = ({ onClose, onStartBidding }) => {
               }
             }}
         style={{
-            background: "#2563eb",
+            background: "var(--accent-light)",
             color: "#fff",
             border: "none",
             borderRadius: "10px",
@@ -200,7 +202,7 @@ const PlayerDetailsModal = ({ onClose, onStartBidding }) => {
           <p
             style={{
               marginTop: "16px",
-              color: "#6b7280",
+              color: "var(--text-secondary-light)",
               fontSize: "13px",
             }}
           >

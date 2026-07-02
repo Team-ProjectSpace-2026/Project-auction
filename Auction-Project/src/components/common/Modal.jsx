@@ -1,3 +1,5 @@
+import './common.css';
+
 const Modal = ({ children, isOpen }) => {
   if (!isOpen) return null;
   return (
