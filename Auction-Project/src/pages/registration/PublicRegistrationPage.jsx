@@ -1,7 +1,8 @@
 import { useState, useRef } from "react";
 import InputField from "../../components/common/InputField.jsx";
 import Button from "../../components/common/Button.jsx";
-import playerService from "../../services/playerService.js";
+import * as playerService from "../../services/playerService.js";
+
 
 // ─── Design tokens (match TournamentRow.jsx team style guide) ───────────────
 const C = {
