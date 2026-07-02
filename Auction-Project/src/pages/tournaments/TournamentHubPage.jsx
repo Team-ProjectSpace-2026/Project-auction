@@ -17,6 +17,7 @@ import { useLocation } from "react-router-dom";
 const TournamentHubPage = () => {
   const [activePage, setActivePage] = useState("tournaments");
   const location = useLocation();
+  const tournament = location.state?.tournament;
   const [activeTab, setActiveTab] = useState(
   location.state?.activeTab || "overview"
 );
@@ -108,7 +109,7 @@ const TournamentHubPage = () => {
           >
             {activeTab === "overview" && <OverviewTab />}
 
-            {activeTab === "registration" && <RegistrationTab />}
+            {activeTab === "registration" && <RegistrationTab tournament={tournament} />}
 
             {activeTab === "teams" && <TeamsTab />}
 

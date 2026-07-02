@@ -97,3 +97,39 @@ export const deletePlayer = async (req, res, next) => {
     next(error);
   }
 };
+
+export const registerPlayer = async (req, res, next) => {
+  try {
+    const tournamentId = req.params.tournamentId;
+
+    // Verify tournament exists
+    const Tournament = mongoose.model('Tournament');
+    const tournament = await Tournament.findById(tournamentId);
+    if (!tournament) {
+      return res.status(404).json({ message: 'Tournament not found' });
+    }
+
+    const { playerName, age, mobile, countryCode, primaryRole, battingStyle, bowlingStyle, isKeeper, isAllRounder } = req.body;
+
+    const player = new Player({
+      name: playerName,
+      role: primaryRole,
+      style: battingStyle,
+      keeper: isKeeper === 'Yes',
+      age: Number(age),
+      mobile,
+      countryCode: countryCode || '+91',
+      battingStyle,
+      bowlingStyle,
+      photo: req.file ? req.file.filename : null,
+      tournamentId,
+      isRegistered: true,
+      basePrice: 0,
+    });
+
+    await player.save();
+    res.status(201).json({ message: 'Registration successful', player });
+  } catch (error) {
+    next(error);
+  }
+};

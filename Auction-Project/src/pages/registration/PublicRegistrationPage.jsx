@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useParams } from "react-router-dom";
 import InputField from "../../components/common/InputField.jsx";
 import Button from "../../components/common/Button.jsx";
 import * as playerService from "../../services/playerService.js";
@@ -145,7 +146,8 @@ function Banner({ type, message }) {
 }
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
-export default function PublicRegistrationPage({ tournamentName = "MYSORE PREMIER LEAGUE 2026" }) {
+export default function PublicRegistrationPage() {
+  const { tournamentId } = useParams();
   // ── Form state ──
   const [form, setForm] = useState({
     playerName:   "",
@@ -206,7 +208,7 @@ export default function PublicRegistrationPage({ tournamentName = "MYSORE PREMIE
 
     try {
       setLoading(true);
-      await playerService.registerPlayer(payload);
+      await playerService.registerPlayer(tournamentId, payload);
       setBanner({ type: "success", message: "Registration successful! You have been registered for the tournament." });
       // Reset
       setForm({ playerName: "", age: "", countryCode: "+91", mobile: "", primaryRole: "", battingStyle: "", bowlingStyle: "", isKeeper: "", isAllRounder: "", photo: null });
@@ -263,7 +265,7 @@ export default function PublicRegistrationPage({ tournamentName = "MYSORE PREMIE
           <h1 style={{
             margin: "0 0 10px", color: "#fff", fontSize: "clamp(22px, 4vw, 34px)",
             fontWeight: 800, letterSpacing: 1.5,
-          }}>{tournamentName}</h1>
+          }}>TOURNAMENT REGISTRATION</h1>
           <p style={{ margin: 0, color: "rgba(255,255,255,.6)", fontSize: 15 }}>
             Complete the form below to register as a player for this tournament
           </p>

@@ -47,6 +47,44 @@ const playerSchema = new mongoose.Schema(
       ref: "Tournament",
       required: true,
     },
+    // Registration fields (for public player registration)
+    age: {
+      type: Number,
+      min: [10, "Age must be at least 10"],
+      max: [60, "Age cannot exceed 60"],
+    },
+    mobile: {
+      type: String,
+      trim: true,
+    },
+    countryCode: {
+      type: String,
+      default: "+91",
+      trim: true,
+    },
+    battingStyle: {
+      type: String,
+      enum: ["Right Hand", "Left Hand"],
+    },
+    bowlingStyle: {
+      type: String,
+      enum: [
+        "Right Arm Fast",
+        "Right Arm Medium",
+        "Right Arm Spin",
+        "Left Arm Fast",
+        "Left Arm Medium",
+        "Left Arm Spin",
+        "Not Applicable",
+      ],
+    },
+    photo: {
+      type: String,
+    },
+    isRegistered: {
+      type: Boolean,
+      default: false,
+    },
     deleted: {
       type: Boolean,
       default: false,

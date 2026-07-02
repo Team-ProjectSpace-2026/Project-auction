@@ -1,4 +1,35 @@
-const RegistrationTab = () => {
+import { useState } from "react";
+
+const RegistrationTab = ({ tournament }) => {
+  const [copied, setCopied] = useState(false);
+
+  const tournamentId = tournament?.id || tournament?._id || "";
+  const registrationUrl = tournamentId
+    ? `${window.location.origin}/register/${tournamentId}`
+    : `${window.location.origin}/register/demo-tournament`;
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(registrationUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Fallback for older browsers
+      const textArea = document.createElement("textarea");
+      textArea.value = registrationUrl;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleOpenLink = () => {
+    window.open(registrationUrl, "_blank");
+  };
+
   return (
     <div
       style={{
@@ -90,7 +121,7 @@ const RegistrationTab = () => {
           <input
             type="text"
             readOnly
-            value="https://cricauction.com/register/summer-league-2027"
+            value={registrationUrl}
             style={{
               flex: 1,
               height: "50px",
@@ -105,22 +136,25 @@ const RegistrationTab = () => {
           />
 
           <button
+            onClick={handleCopyLink}
             style={{
               width: "130px",
               height: "50px",
               border: "1px solid var(--accent-light)",
               borderRadius: "10px",
-              background: "var(--card-bg-light)",
-              color: "var(--accent-light)",
+              background: copied ? "var(--status-active-bg)" : "var(--card-bg-light)",
+              color: copied ? "var(--status-active-text)" : "var(--accent-light)",
               fontWeight: "700",
               cursor: "pointer",
+              transition: "all 0.2s ease",
             }}
           >
-            Copy Link
+            {copied ? "Copied!" : "Copy Link"}
           </button>
         </div>
 
         <button
+          onClick={handleOpenLink}
           style={{
             padding: "12px 28px",
             border: "1px solid var(--accent-light)",
@@ -130,6 +164,7 @@ const RegistrationTab = () => {
             fontWeight: "700",
             cursor: "pointer",
             marginBottom: "28px",
+            transition: "background-color 0.2s ease, color 0.2s ease",
           }}
         >
           Open Link
