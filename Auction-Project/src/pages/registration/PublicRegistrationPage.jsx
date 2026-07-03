@@ -172,6 +172,12 @@ export default function PublicRegistrationPage() {
   // ── Helpers ──
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
+  function createPhotoPreviewUrl(file) {
+    if (!file) return null;
+    if (!["image/jpeg", "image/png"].includes(file.type)) return null;
+    return URL.createObjectURL(file);
+  }
+
   function handlePhoto(file) {
     if (!file) return;
     if (!["image/jpeg", "image/png"].includes(file.type)) {
@@ -183,7 +189,7 @@ export default function PublicRegistrationPage() {
       return;
     }
     setForm((f) => ({ ...f, photo: file }));
-    setPhotoPreview(URL.createObjectURL(file));
+    setPhotoPreview(createPhotoPreviewUrl(file));
     setBanner(null);
   }
 
