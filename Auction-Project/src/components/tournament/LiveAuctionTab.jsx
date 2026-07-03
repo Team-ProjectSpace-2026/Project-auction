@@ -6,7 +6,10 @@ import PlayerDetailsModal from "./PlayerDetailsModal";
 const enterFullscreen = () => {
   const el = document.documentElement;
   const fn = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
-  if (fn) fn.call(el).catch(() => {});
+  if (fn) {
+    const result = fn.call(el);
+    if (result && typeof result.catch === "function") result.catch(() => {});
+  }
 };
 
 const LiveAuctionTab = () => {
