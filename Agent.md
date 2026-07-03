@@ -508,3 +508,29 @@ The live auction room (PRD §6) is the most complex part of the system. Key rule
 - Renamed `organizerName` → `ownerName` across all frontend and backend files (model, controller, validator, modal, teams tab)
 
 **Next step for whoever picks this up:** Wire the modal's `onSubmit` to call `teamService.createTeam()` with the current tournament ID; add logo/image storage (e.g., multer + local uploads or cloud storage); connect TeamsTab to fetch teams from the API instead of mock data.
+
+---
+
+### 2026-07-03 — Code Review Fixes & Role Reassignment (AI session)
+
+**Worked on:** Verified and fixed 12 issues from code review across frontend components and backend controllers/services. Also restructured team role assignments.
+
+#### Frontend Fixes
+- **InputField.jsx** — Added `id`, `required`, `min`, `max` props and `htmlFor` binding on label (was dropping props passed by PublicRegistrationPage)
+- **Button.jsx** — Added `disabled` and `style` prop forwarding (was silently ignoring them)
+- **common.css** — Added `.cric-btn:disabled` styles for opacity and cursor
+- **PublicRegistrationPage.jsx** — Extracted `DEFAULT_FORM` constant to eliminate duplication across useState, success reset, and Reset button; added `if (loading) return` guard to prevent duplicate submissions; improved error message chain to read `err.response.data.errors[0].msg` → `err.response.data.message` → `err.message` → default; made photo dropzone keyboard-accessible with `tabIndex={0}`, `role="button"`, and `onKeyDown` for Enter/Space
+- **playerService.js** — Removed hardcoded `Content-Type: multipart/form-data` header (axios auto-detects correctly for FormData)
+- **TournamentHubPage.jsx** — Added `useParams` for `tournamentId` route param; fetches tournament from API on mount if not in location.state
+- **AppRouter.jsx** — Updated route from `/tournament-details` to `/tournament-details/:tournamentId`
+- **RegistrationTab.jsx** — Removed `demo-tournament` fallback URL; added loading state guard when tournament data is missing
+
+#### Backend Fixes
+- **player.controller.js** — Added `mongoose.Types.ObjectId.isValid()` check before `Tournament.findById` (prevents CastError → 500); removed unused `isAllRounder` from destructuring; added duplicate registration check (`Player.findOne` by mobile+tournamentId → 409 Conflict)
+- **upload.js** — Added `fs.mkdir` with `{ recursive: true }` to ensure `uploads/photos` directory exists before multer writes
+- **validators.js** — Added `countryCode` (optional, isIn known codes), `isKeeper` (optional, isBoolean), `isAllRounder` (optional, isBoolean) validators to `validatePublicRegistration`
+
+#### Role Reassignment
+- Restructured 7-person team roles: tough roles (Auction Engine, Auth & Security, Auction UI & Socket, Tournament & Dashboard) → Pratham, Karthik, Pallivi, Ashith; easy roles (Team Management, Players & Registration, Testing & DevOps) → Swaroop, Manasa, Rahul
+
+**Next step for whoever picks this up:** Test registration flow end-to-end with the new tournamentId route; verify upload directory creation works on fresh deploy; run full regression on dark/light mode after component changes.
