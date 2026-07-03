@@ -29,6 +29,12 @@
   background-color: var(--accent-hover-light);
 }
 
+.cric-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .cric-btn-outline {
   background-color: transparent;
   color: var(--accent-light);

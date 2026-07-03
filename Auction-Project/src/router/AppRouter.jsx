@@ -14,6 +14,7 @@ import TeamDetailsPage from "../pages/tournaments/TeamDetailsPage";
 import PlayerDetailsPage from "../pages/tournaments/PlayerDetailsPage";
 import LiveAuctionPage from "../pages/auction/LiveAuctionPage";
 import ProfilePage from "../pages/profile/ProfilePage";
+import PublicRegistrationPage from "../pages/registration/PublicRegistrationPage.jsx";
 import EditTournamentPage from "../pages/tournaments/EditTournamentPage";
 
 const AppRouter = () => (
@@ -25,7 +26,7 @@ const AppRouter = () => (
       <Route path="/create-tournament" element={<CreateTournamentPage />} />
       <Route path="/tournaments" element={<TournamentsListPage />} />
 
-      <Route path="/tournament-details" element={<TournamentHubPage />} />
+      <Route path="/tournament-details/:tournamentId" element={<TournamentHubPage />} />
 
       <Route path="/team-details" element={<TeamDetailsPage />} />
 
@@ -35,13 +36,14 @@ const AppRouter = () => (
 
       <Route path="/settings" element={<ProfilePage />} />
 
-      <Route
-            path="/edit-tournament"
-            element={<EditTournamentPage />}
-        />
+      <Route path="/register/:tournamentId" element={<PublicRegistrationPage />} />
 
+      <Route
+    path="/edit-tournament"
+    element={<EditTournamentPage />}
+/>
+      
       {/* Redirect root to login as default entry point; authentication guards not yet implemented */}
-      <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   </Router>

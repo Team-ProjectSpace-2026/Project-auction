@@ -340,7 +340,7 @@ return (
 
               <button
                 onClick={() =>
-                  navigate("/tournament-details")
+                  navigate("/tournament-details", { state: { tournament } })
                 }
                 style={{
                   width: "100%",

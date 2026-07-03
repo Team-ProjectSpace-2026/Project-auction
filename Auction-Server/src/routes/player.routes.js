@@ -4,22 +4,28 @@ import {
   createPlayer,
   getPlayer,
   updatePlayer,
-  deletePlayer
+  deletePlayer,
+  registerPlayer
 } from '../controllers/player.controller.js';
 import {
-  validatePlayer
+  validatePlayer,
+  validatePublicRegistration
 } from '../utils/validators.js';
 import { handleValidationErrors } from '../middleware/errorHandler.js';
 import { apiLimiter } from '../middleware/rateLimiter.js';
 import { sanitizeIdParams, sanitizeQueryIds } from '../middleware/sanitize.js';
 import auth from '../middleware/auth.middleware.js';
+import upload from '../middleware/upload.js';
 
 const router = express.Router();
 
 // Rate limiting applied first
 router.use(apiLimiter);
 
-// All routes require authentication
+// Public route - no auth required (must be before auth middleware)
+router.post('/register/:tournamentId', upload.single('photo'), validatePublicRegistration, handleValidationErrors, registerPlayer);
+
+// All routes below require authentication
 router.use(auth);
 
 router.get('/', sanitizeQueryIds(['tournamentId']), getPlayers);

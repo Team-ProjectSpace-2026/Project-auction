@@ -144,3 +144,52 @@ export const validateBid = [
     .isMongoId()
     .withMessage('Invalid Team ID format')
 ];
+
+export const validatePublicRegistration = [
+  body('playerName')
+    .notEmpty()
+    .withMessage('Player name is required')
+    .isLength({ min: 2, max: 50 })
+    .withMessage('Player name must be between 2 and 50 characters'),
+  
+  body('age')
+    .isInt({ min: 10, max: 60 })
+    .withMessage('Age must be between 10 and 60'),
+  
+  body('mobile')
+    .notEmpty()
+    .withMessage('Mobile number is required')
+    .isLength({ min: 7, max: 15 })
+    .withMessage('Enter a valid mobile number'),
+  
+  body('primaryRole')
+    .isIn(['Batsman', 'Bowler', 'All Rounder', 'Wicket Keeper'])
+    .withMessage('Role must be Batsman, Bowler, All Rounder, or Wicket Keeper'),
+  
+  body('battingStyle')
+    .isIn(['Right Hand', 'Left Hand'])
+    .withMessage('Batting style must be Right Hand or Left Hand'),
+  
+  body('bowlingStyle')
+    .isIn([
+      'Right Arm Fast', 'Right Arm Medium', 'Right Arm Spin',
+      'Left Arm Fast', 'Left Arm Medium', 'Left Arm Spin',
+      'Not Applicable'
+    ])
+    .withMessage('Invalid bowling style'),
+
+  body('countryCode')
+    .optional()
+    .isIn(['+91', '+1', '+44', '+61', '+971', '+65'])
+    .withMessage('Invalid country code'),
+
+  body('isKeeper')
+    .optional()
+    .isBoolean()
+    .withMessage('isKeeper must be a boolean value'),
+
+  body('isAllRounder')
+    .optional()
+    .isBoolean()
+    .withMessage('isAllRounder must be a boolean value'),
+];
