@@ -511,6 +511,13 @@ The live auction room (PRD §6) is the most complex part of the system. Key rule
 
 ---
 
+### 2026-07-03 — Public Registration Form Updates (Karthik)
+**Worked on:** Updated `PublicRegistrationPage.jsx` with jersey details, role-based field logic, and photo cropping.
+**Changed:** Added jersey number/size/name section; removed Wicket Keeper as primary role (now Batsman/Bowler/All Rounder only); added conditional field visibility per role; added `react-easy-crop` for 3:4 photo cropping with zoom; simplified mobile input (removed country code dropdown); simplified bowling styles (5 options).
+**Next step for whoever picks this up:** Add jersey fields to backend Player model; test full registration flow with new fields.
+
+---
+
 ### 2026-07-03 — Code Review Fixes & Role Reassignment (AI session)
 
 **Worked on:** Verified and fixed 12 issues from code review across frontend components and backend controllers/services. Also restructured team role assignments.
