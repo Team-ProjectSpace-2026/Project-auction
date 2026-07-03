@@ -26,7 +26,7 @@ const AppRouter = () => (
       <Route path="/create-tournament" element={<CreateTournamentPage />} />
       <Route path="/tournaments" element={<TournamentsListPage />} />
 
-      <Route path="/tournament-details" element={<TournamentHubPage />} />
+      <Route path="/tournament-details/:tournamentId" element={<TournamentHubPage />} />
 
       <Route path="/team-details" element={<TeamDetailsPage />} />
 

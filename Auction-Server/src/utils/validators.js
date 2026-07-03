@@ -177,4 +177,19 @@ export const validatePublicRegistration = [
       'Not Applicable'
     ])
     .withMessage('Invalid bowling style'),
+
+  body('countryCode')
+    .optional()
+    .isIn(['+91', '+1', '+44', '+61', '+971', '+65'])
+    .withMessage('Invalid country code'),
+
+  body('isKeeper')
+    .optional()
+    .isBoolean()
+    .withMessage('isKeeper must be a boolean value'),
+
+  body('isAllRounder')
+    .optional()
+    .isBoolean()
+    .withMessage('isAllRounder must be a boolean value'),
 ];

@@ -102,6 +102,10 @@ export const registerPlayer = async (req, res, next) => {
   try {
     const tournamentId = req.params.tournamentId;
 
+    if (!mongoose.Types.ObjectId.isValid(tournamentId)) {
+      return res.status(400).json({ message: 'Invalid tournament ID format' });
+    }
+
     // Verify tournament exists
     const Tournament = mongoose.model('Tournament');
     const tournament = await Tournament.findById(tournamentId);
@@ -109,7 +113,13 @@ export const registerPlayer = async (req, res, next) => {
       return res.status(404).json({ message: 'Tournament not found' });
     }
 
-    const { playerName, age, mobile, countryCode, primaryRole, battingStyle, bowlingStyle, isKeeper, isAllRounder } = req.body;
+    const { playerName, age, mobile, countryCode, primaryRole, battingStyle, bowlingStyle, isKeeper } = req.body;
+
+    // Check for duplicate registration
+    const existing = await Player.findOne({ mobile, tournamentId, deleted: false });
+    if (existing) {
+      return res.status(409).json({ message: 'This mobile number is already registered for this tournament' });
+    }
 
     const player = new Player({
       name: playerName,

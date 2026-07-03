@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Sidebar from "../../components/layout/Sidebar";
 // import TopBar from "../../components/layout/TopBar";
 import TournamentHeader from "../../components/tournament/TournamentHeader";
@@ -7,7 +7,8 @@ import RegistrationTab from "../../components/tournament/RegistrationTab";
 import TeamsTab from "../../components/tournament/TeamsTab";
 import PlayersTab from "../../components/tournament/PlayersTab";
 import LiveAuctionTab from "../../components/tournament/LiveAuctionTab";
-import { useLocation } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
+import api from "../../services/api";
 
 // const MOCK_USER = {
 //   name: "Rahul Organizer",
@@ -17,10 +18,19 @@ import { useLocation } from "react-router-dom";
 const TournamentHubPage = () => {
   const [activePage, setActivePage] = useState("tournaments");
   const location = useLocation();
-  const tournament = location.state?.tournament;
+  const { tournamentId } = useParams();
+  const [tournament, setTournament] = useState(location.state?.tournament || null);
   const [activeTab, setActiveTab] = useState(
   location.state?.activeTab || "overview"
 );
+
+  useEffect(() => {
+    if (!tournament && tournamentId) {
+      api.get(`/tournaments/${tournamentId}`)
+        .then((res) => setTournament(res.data))
+        .catch(() => {});
+    }
+  }, [tournament, tournamentId]);
 
   return (
     <div

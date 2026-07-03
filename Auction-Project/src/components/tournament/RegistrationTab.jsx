@@ -3,12 +3,21 @@ import { useState } from "react";
 const RegistrationTab = ({ tournament }) => {
   const [copied, setCopied] = useState(false);
 
+  if (!tournament) {
+    return (
+      <div style={{ padding: "40px", textAlign: "center", color: "var(--text-secondary-light)" }}>
+        Loading tournament data...
+      </div>
+    );
+  }
+
   const tournamentId = tournament?.id || tournament?._id || "";
   const registrationUrl = tournamentId
     ? `${window.location.origin}/register/${tournamentId}`
-    : `${window.location.origin}/register/demo-tournament`;
+    : "";
 
   const handleCopyLink = async () => {
+    if (!registrationUrl) return;
     try {
       await navigator.clipboard.writeText(registrationUrl);
       setCopied(true);

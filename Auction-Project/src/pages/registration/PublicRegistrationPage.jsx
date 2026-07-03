@@ -146,21 +146,23 @@ function Banner({ type, message }) {
 }
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
+const DEFAULT_FORM = {
+  playerName:   "",
+  age:          "",
+  countryCode:  "+91",
+  mobile:       "",
+  primaryRole:  "",
+  battingStyle: "",
+  bowlingStyle: "",
+  isKeeper:     "",
+  isAllRounder: "",
+  photo:        null,
+};
+
 export default function PublicRegistrationPage() {
   const { tournamentId } = useParams();
   // ── Form state ──
-  const [form, setForm] = useState({
-    playerName:   "",
-    age:          "",
-    countryCode:  "+91",
-    mobile:       "",
-    primaryRole:  "",
-    battingStyle: "",
-    bowlingStyle: "",
-    isKeeper:     "",
-    isAllRounder: "",
-    photo:        null,
-  });
+  const [form, setForm] = useState(DEFAULT_FORM);
   const [photoPreview, setPhotoPreview] = useState(null);
   const [dragOver, setDragOver]         = useState(false);
   const [loading, setLoading]           = useState(false);
@@ -193,6 +195,7 @@ export default function PublicRegistrationPage() {
 
   async function handleSubmit(e) {
     e.preventDefault();
+    if (loading) return;
     setBanner(null);
 
     // Basic validation
@@ -211,10 +214,14 @@ export default function PublicRegistrationPage() {
       await playerService.registerPlayer(tournamentId, payload);
       setBanner({ type: "success", message: "Registration successful! You have been registered for the tournament." });
       // Reset
-      setForm({ playerName: "", age: "", countryCode: "+91", mobile: "", primaryRole: "", battingStyle: "", bowlingStyle: "", isKeeper: "", isAllRounder: "", photo: null });
+      setForm(DEFAULT_FORM);
       setPhotoPreview(null);
     } catch (err) {
-      setBanner({ type: "error", message: err?.message || "Registration failed. Please try again." });
+      const msg = err?.response?.data?.errors?.[0]?.msg
+        || err?.response?.data?.message
+        || err?.message
+        || "Registration failed. Please try again.";
+      setBanner({ type: "error", message: msg });
     } finally {
       setLoading(false);
     }
@@ -436,6 +443,15 @@ export default function PublicRegistrationPage() {
               onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
               onDragLeave={() => setDragOver(false)}
               onDrop={handleDrop}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  fileRef.current?.click();
+                }
+              }}
+              tabIndex={0}
+              role="button"
+              aria-label="Upload passport size photo"
               style={{
                 border: `2px dashed ${dragOver ? C.blue : C.border}`,
                 borderRadius: 12,
@@ -489,7 +505,7 @@ export default function PublicRegistrationPage() {
               variant="secondary"
               type="button"
               onClick={() => {
-                setForm({ playerName: "", age: "", countryCode: "+91", mobile: "", primaryRole: "", battingStyle: "", bowlingStyle: "", isKeeper: "", isAllRounder: "", photo: null });
+                setForm(DEFAULT_FORM);
                 setPhotoPreview(null);
                 setBanner(null);
               }}
