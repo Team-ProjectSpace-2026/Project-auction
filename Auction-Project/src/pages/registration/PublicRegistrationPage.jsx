@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo, useCallback, useEffect } from "react";
+import { useState, useRef, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import Cropper from "react-easy-crop";
 import InputField from "../../components/common/InputField.jsx";
@@ -287,6 +287,8 @@ export default function PublicRegistrationPage() {
     }
     setForm((f) => ({ ...f, photo: file }));
     setPhotoPreview(createPhotoPreviewUrl(file));
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
     setBanner(null);
   }
 
@@ -299,11 +301,6 @@ export default function PublicRegistrationPage() {
   function onCropComplete(croppedArea, croppedAreaPx) {
     setCroppedAreaPixels(croppedAreaPx);
   }
-
-  useEffect(() => {
-    setCrop({ x: 0, y: 0 });
-    setZoom(1);
-  }, [photoPreview]);
 
   function handleRoleSelect(role) {
     setForm((f) => ({
