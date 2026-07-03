@@ -18,6 +18,7 @@ const CreateTournamentPage = () => {
     numTeams: "",
     budgetPerTeam: "",
     maxPlayersPerTeam: "",
+    playerBasePrice: "",
     venue: "",
     auctionDateTime: "",
   });
@@ -29,8 +30,8 @@ const CreateTournamentPage = () => {
   };
 
   const handleCreate = () => {
-    const { tournamentName, numTeams, budgetPerTeam, maxPlayersPerTeam, venue, auctionDateTime } = formData;
-    if (!tournamentName || !numTeams || !budgetPerTeam || !maxPlayersPerTeam || !venue || !auctionDateTime) {
+    const { tournamentName, numTeams, budgetPerTeam, maxPlayersPerTeam, playerBasePrice, venue, auctionDateTime } = formData;
+    if (!tournamentName || !numTeams || !budgetPerTeam || !maxPlayersPerTeam || !playerBasePrice || !venue || !auctionDateTime) {
       alert("Please fill in all required fields.");
       return;
     }
@@ -142,29 +143,45 @@ const CreateTournamentPage = () => {
 
     {/* Row 3 */}
 
-<div className="form-group full-width">
+    <div className="form-row">
 
-    <label>
-        Venue <span>*</span>
-    </label>
+        <div className="form-group">
+            <label>
+                Venue <span>*</span>
+            </label>
 
-    <div className="input-icon">
+            <div className="input-icon">
 
-       <span className="input-symbol">
-    <FiMapPin />
-</span>
+               <span className="input-symbol">
+            <FiMapPin />
+        </span>
+
+                        <input
+                            type="text"
+                            name="venue"
+                            value={formData.venue}
+                            onChange={handleInputChange}
+                            placeholder="Enter tournament venue"
+                        />
+
+            </div>
+        </div>
+
+        <div className="form-group">
+            <label>
+                Player Base Price (₹) <span>*</span>
+            </label>
 
                 <input
-                    type="text"
-                    name="venue"
-                    value={formData.venue}
+                    type="number"
+                    name="playerBasePrice"
+                    value={formData.playerBasePrice}
                     onChange={handleInputChange}
-                    placeholder="Enter tournament venue"
+                    placeholder="Enter player base price"
                 />
+        </div>
 
     </div>
-
-</div>
 
 {/* Row 4 */}
 
