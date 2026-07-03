@@ -111,26 +111,39 @@ const EditTournamentPage = () => {
 
     {/* Row 3 */}
 
-<div className="form-group full-width">
+    <div className="form-row">
 
-    <label>
-        Venue <span>*</span>
-    </label>
+        <div className="form-group">
+            <label>
+                Venue <span>*</span>
+            </label>
 
-    <div className="input-icon">
+            <div className="input-icon">
 
-       <span className="input-symbol">
-    <FiMapPin />
-</span>
+               <span className="input-symbol">
+            <FiMapPin />
+        </span>
 
-        <input
-            type="text"
-            placeholder="Enter tournament venue"
-        />
+                <input
+                    type="text"
+                    placeholder="Enter tournament venue"
+                />
+
+            </div>
+        </div>
+
+        <div className="form-group">
+            <label>
+                Player Base Price (₹) <span>*</span>
+            </label>
+
+            <input
+                type="number"
+                placeholder="Enter player base price"
+            />
+        </div>
 
     </div>
-
-</div>
 
 {/* Row 4 */}
 
