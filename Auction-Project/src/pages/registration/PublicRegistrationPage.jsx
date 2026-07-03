@@ -1,11 +1,12 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo, useCallback, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import Cropper from "react-easy-crop";
 import InputField from "../../components/common/InputField.jsx";
 import Button from "../../components/common/Button.jsx";
 import * as playerService from "../../services/playerService.js";
 
 
-// ─── Design tokens (match TournamentRow.jsx team style guide) ───────────────
+// ─── Design tokens ──────────────────────────────────────────────────────────
 const C = {
   blue:       "#2563eb",
   blueDark:   "#1d4ed8",
@@ -54,17 +55,19 @@ function Card({ children, style }) {
 }
 
 // ─── Radio Option (inline pill) ───────────────────────────────────────────────
-function RadioOption({ name, value, checked, onChange, label }) {
+function RadioOption({ name, value, checked, onChange, label, disabled }) {
   return (
     <label style={{
       display: "flex", alignItems: "center", gap: 10,
       padding: "10px 16px",
       border: `1.5px solid ${checked ? C.blue : C.border}`,
-      borderRadius: 8, cursor: "pointer",
+      borderRadius: 8, cursor: disabled ? "not-allowed" : "pointer",
       background: checked ? "#eff6ff" : "#fff",
       flex: "1 1 0",
       minWidth: 130,
       transition: "border-color .15s, background .15s",
+      opacity: disabled ? 0.45 : 1,
+      pointerEvents: disabled ? "none" : "auto",
     }}>
       <input
         type="radio"
@@ -72,6 +75,7 @@ function RadioOption({ name, value, checked, onChange, label }) {
         value={value}
         checked={checked}
         onChange={onChange}
+        disabled={disabled}
         style={{ accentColor: C.blue, width: 16, height: 16 }}
       />
       <span style={{ fontSize: 14, fontWeight: 500, color: C.dark }}>{label}</span>
@@ -84,7 +88,6 @@ const ROLE_ICONS = {
   Batsman:       "🏏",
   Bowler:        "⚾",
   "All Rounder": "🌟",
-  "Wicket Keeper": "🧤",
 };
 
 function RoleCard({ role, selected, onSelect }) {
@@ -145,28 +148,122 @@ function Banner({ type, message }) {
   );
 }
 
+// ─── Constants ───────────────────────────────────────────────────────────────
+const PRIMARY_ROLES = ["Batsman", "Bowler", "All Rounder"];
+
+const BOWLING_STYLES = [
+  "Right Arm Fast",
+  "Right Arm Spin",
+  "Left Arm Fast",
+  "Left Arm Spin",
+  "Not Applicable",
+];
+
+const JERSEY_SIZES = ["S", "M", "L", "XL", "XXL", "XXXL"];
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+function isFieldEnabled(primaryRole, field) {
+  if (!primaryRole) return false;
+  if (primaryRole === "Batsman") {
+    return field === "battingStyle" || field === "isKeeper";
+  }
+  if (primaryRole === "Bowler") {
+    return field === "battingStyle" || field === "bowlingStyle" || field === "isKeeper";
+  }
+  if (primaryRole === "All Rounder") {
+    return field === "battingStyle" || field === "bowlingStyle" || field === "isKeeper" || field === "isAllRounder";
+  }
+  return false;
+}
+
+// ─── Cropped image helper ─────────────────────────────────────────────────────
+function createImage(url) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.addEventListener("load", () => resolve(image));
+    image.addEventListener("error", (err) => reject(err));
+    image.setAttribute("crossOrigin", "anonymous");
+    image.src = url;
+  });
+}
+
+function getRadianAngle(degreeValue) {
+  return (degreeValue * Math.PI) / 180;
+}
+
+function rotateSize(width, height, rotation) {
+  const rotRad = getRadianAngle(rotation);
+  return {
+    width: Math.abs(Math.cos(rotRad) * width) + Math.abs(Math.sin(rotRad) * height),
+    height: Math.abs(Math.sin(rotRad) * width) + Math.abs(Math.cos(rotRad) * height),
+  };
+}
+
+async function getCroppedImg(imageSrc, pixelCrop, rotation = 0) {
+  const image = await createImage(imageSrc);
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+
+  const rotRad = getRadianAngle(rotation);
+  const { width: bBoxWidth, height: bBoxHeight } = rotateSize(image.width, image.height, rotation);
+
+  canvas.width = bBoxWidth;
+  canvas.height = bBoxHeight;
+
+  ctx.translate(bBoxWidth / 2, bBoxHeight / 2);
+  ctx.rotate(rotRad);
+  ctx.translate(-image.width / 2, -image.height / 2);
+  ctx.drawImage(image, 0, 0);
+
+  const croppedCanvas = document.createElement("canvas");
+  const croppedCtx = croppedCanvas.getContext("2d");
+
+  croppedCanvas.width = pixelCrop.width;
+  croppedCanvas.height = pixelCrop.height;
+
+  croppedCtx.drawImage(
+    canvas,
+    pixelCrop.x,
+    pixelCrop.y,
+    pixelCrop.width,
+    pixelCrop.height,
+    0,
+    0,
+    pixelCrop.width,
+    pixelCrop.height
+  );
+
+  return new Promise((resolve) => {
+    croppedCanvas.toBlob((blob) => resolve(blob), "image/jpeg", 0.9);
+  });
+}
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 const DEFAULT_FORM = {
-  playerName:   "",
-  age:          "",
-  countryCode:  "+91",
-  mobile:       "",
-  primaryRole:  "",
-  battingStyle: "",
-  bowlingStyle: "",
-  isKeeper:     "",
-  isAllRounder: "",
-  photo:        null,
+  playerName:     "",
+  age:            "",
+  mobile:         "",
+  jerseyNumber:   "",
+  jerseySize:     "",
+  jerseyName:     "",
+  primaryRole:    "",
+  battingStyle:   "",
+  bowlingStyle:   "",
+  isKeeper:       "",
+  isAllRounder:   "",
+  photo:          null,
 };
 
 export default function PublicRegistrationPage() {
   const { tournamentId } = useParams();
-  // ── Form state ──
   const [form, setForm] = useState(DEFAULT_FORM);
   const [photoPreview, setPhotoPreview] = useState(null);
   const [dragOver, setDragOver]         = useState(false);
   const [loading, setLoading]           = useState(false);
-  const [banner, setBanner]             = useState(null); // { type, message }
+  const [banner, setBanner]             = useState(null);
+  const [crop, setCrop]                 = useState({ x: 0, y: 0 });
+  const [zoom, setZoom]                 = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const fileRef = useRef(null);
 
   // ── Helpers ──
@@ -199,27 +296,65 @@ export default function PublicRegistrationPage() {
     handlePhoto(e.dataTransfer.files[0]);
   }
 
+  function onCropComplete(croppedArea, croppedAreaPx) {
+    setCroppedAreaPixels(croppedAreaPx);
+  }
+
+  useEffect(() => {
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+  }, [photoPreview]);
+
+  function handleRoleSelect(role) {
+    setForm((f) => ({
+      ...f,
+      primaryRole: role,
+      battingStyle: isFieldEnabled(role, "battingStyle") ? f.battingStyle : "",
+      bowlingStyle: isFieldEnabled(role, "bowlingStyle") ? f.bowlingStyle : "",
+      isKeeper:     isFieldEnabled(role, "isKeeper") ? f.isKeeper : "",
+      isAllRounder: isFieldEnabled(role, "isAllRounder") ? f.isAllRounder : "",
+    }));
+  }
+
+  const battingEnabled = useMemo(() => isFieldEnabled(form.primaryRole, "battingStyle"), [form.primaryRole]);
+  const bowlingEnabled = useMemo(() => isFieldEnabled(form.primaryRole, "bowlingStyle"), [form.primaryRole]);
+  const keeperEnabled  = useMemo(() => isFieldEnabled(form.primaryRole, "isKeeper"), [form.primaryRole]);
+  const allRounderEnabled = useMemo(() => isFieldEnabled(form.primaryRole, "isAllRounder"), [form.primaryRole]);
+
   async function handleSubmit(e) {
     e.preventDefault();
     if (loading) return;
     setBanner(null);
 
-    // Basic validation
     if (!form.playerName.trim()) return setBanner({ type: "error", message: "Player name is required." });
     if (!form.age || +form.age < 10 || +form.age > 60) return setBanner({ type: "error", message: "Enter a valid age (10–60)." });
     if (!form.mobile || form.mobile.length < 7) return setBanner({ type: "error", message: "Enter a valid mobile number." });
     if (!form.primaryRole) return setBanner({ type: "error", message: "Please select a primary role." });
-    if (!form.battingStyle) return setBanner({ type: "error", message: "Please select batting style." });
-    if (!form.bowlingStyle) return setBanner({ type: "error", message: "Please select bowling style." });
+    if (battingEnabled && !form.battingStyle) return setBanner({ type: "error", message: "Please select batting style." });
+    if (bowlingEnabled && !form.bowlingStyle) return setBanner({ type: "error", message: "Please select bowling style." });
 
     const payload = new FormData();
-    Object.entries(form).forEach(([k, v]) => { if (v !== null) payload.append(k, v); });
+    Object.entries(form).forEach(([k, v]) => {
+      if (v !== null && k !== "photo") payload.append(k, v);
+    });
+
+    // Crop the photo if one was uploaded
+    if (form.photo && photoPreview && croppedAreaPixels) {
+      try {
+        const croppedBlob = await getCroppedImg(photoPreview, croppedAreaPixels);
+        const croppedFile = new File([croppedBlob], "photo.jpg", { type: "image/jpeg" });
+        payload.append("photo", croppedFile);
+      } catch {
+        payload.append("photo", form.photo);
+      }
+    } else if (form.photo) {
+      payload.append("photo", form.photo);
+    }
 
     try {
       setLoading(true);
       await playerService.registerPlayer(tournamentId, payload);
       setBanner({ type: "success", message: "Registration successful! You have been registered for the tournament." });
-      // Reset
       setForm(DEFAULT_FORM);
       setPhotoPreview(null);
     } catch (err) {
@@ -244,28 +379,8 @@ export default function PublicRegistrationPage() {
         position: "relative",
         overflow: "hidden",
       }}>
-        {/* decorative circles */}
         <div style={{ position: "absolute", top: -40, right: -40, width: 200, height: 200, borderRadius: "50%", background: "rgba(37,99,235,.15)" }} />
         <div style={{ position: "absolute", bottom: -30, left: -30, width: 150, height: 150, borderRadius: "50%", background: "rgba(255,255,255,.04)" }} />
-
-        {/* Nav strip */}
-        <div style={{
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "14px 32px",
-          borderBottom: "1px solid rgba(255,255,255,.08)",
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{
-              width: 36, height: 36, borderRadius: 8, background: C.blue,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 18,
-            }}>🏏</div>
-            <span style={{ color: "#fff", fontWeight: 800, fontSize: 18, letterSpacing: ".5px" }}>CRIC AUCTION</span>
-          </div>
-          <span style={{ color: "rgba(255,255,255,.55)", fontSize: 13 }}>Powered by CricAuction v4.0</span>
-        </div>
-
-        {/* Hero content */}
         <div style={{ padding: "48px 32px 52px", textAlign: "center", position: "relative", zIndex: 1 }}>
           <div style={{
             display: "inline-flex", alignItems: "center", gap: 8,
@@ -286,7 +401,8 @@ export default function PublicRegistrationPage() {
       </div>
 
       {/* ── Body ── */}
-      <div style={{ maxWidth: 860, margin: "0 auto", padding: "36px 16px 60px" }}>
+      <div style={{ maxWidth: 920, margin: "0 auto", padding: "36px 16px 60px" }}>
+
         {banner && <Banner type={banner.type} message={banner.message} />}
 
         <form onSubmit={handleSubmit} noValidate>
@@ -314,60 +430,78 @@ export default function PublicRegistrationPage() {
                 onChange={set("age")}
                 placeholder="e.g. 24"
               />
-              {/* Mobile with country code */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                <label style={{ fontSize: 13, fontWeight: 600, color: C.dark }}>
-                  Mobile Number<span style={{ color: C.red, marginLeft: 2 }}>*</span>
-                </label>
-                <div style={{ display: "flex", gap: 8 }}>
-                  <select
-                    value={form.countryCode}
-                    onChange={set("countryCode")}
-                    style={{
-                      padding: "10px 10px", border: `1.5px solid ${C.border}`,
-                      borderRadius: 8, fontSize: 14, color: C.dark, background: "#fff",
-                      flexShrink: 0, width: 90,
-                    }}
-                  >
-                    {["+91", "+1", "+44", "+61", "+971", "+65"].map((c) => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
-                  </select>
-                  <input
-                    type="tel"
-                    value={form.mobile}
-                    onChange={set("mobile")}
-                    placeholder="Enter mobile number"
-                    style={{
-                      flex: 1, padding: "10px 14px",
-                      border: `1.5px solid ${C.border}`,
-                      borderRadius: 8, fontSize: 14, color: C.dark,
-                      outline: "none", background: "#fff",
-                    }}
-                  />
-                </div>
-              </div>
+              <InputField
+                label="Mobile Number"
+                id="mobile"
+                type="tel"
+                required
+                value={form.mobile}
+                onChange={set("mobile")}
+                placeholder="Enter mobile number"
+              />
             </div>
           </Card>
 
-          {/* Section 2 – Primary Role */}
+          {/* Section 2 – Jersey Details */}
           <Card style={{ marginBottom: 24 }}>
-            <SectionHeading number={2} title="Primary Role" />
+            <SectionHeading number={2} title="Jersey Details" />
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 20 }}>
+              <InputField
+                label="Jersey Number"
+                id="jerseyNumber"
+                type="number"
+                value={form.jerseyNumber}
+                onChange={set("jerseyNumber")}
+                placeholder="e.g. 10"
+              />
+              <div style={{ display: "flex", flexDirection: "column", marginBottom: 16 }}>
+                <label style={{ marginBottom: 6, fontSize: 14, fontWeight: 600, color: "var(--text-primary-light)" }}>
+                  Jersey Size
+                </label>
+                <select
+                  value={form.jerseySize}
+                  onChange={set("jerseySize")}
+                  className="input-control"
+                >
+                  <option value="">Select size</option>
+                  {JERSEY_SIZES.map((s) => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+              </div>
+              <InputField
+                label="Name on Jersey"
+                id="jerseyName"
+                value={form.jerseyName}
+                onChange={set("jerseyName")}
+                placeholder="e.g. VIRAT"
+              />
+            </div>
+          </Card>
+
+          {/* Section 3 – Primary Role */}
+          <Card style={{ marginBottom: 24 }}>
+            <SectionHeading number={3} title="Primary Role" />
             <div style={{ display: "flex", flexWrap: "wrap", gap: 14 }}>
-              {["Batsman", "Bowler", "All Rounder", "Wicket Keeper"].map((role) => (
+              {PRIMARY_ROLES.map((role) => (
                 <RoleCard
                   key={role}
                   role={role}
                   selected={form.primaryRole === role}
-                  onSelect={(r) => setForm((f) => ({ ...f, primaryRole: r }))}
+                  onSelect={handleRoleSelect}
                 />
               ))}
             </div>
           </Card>
 
-          {/* Section 3 – Batting Style */}
-          <Card style={{ marginBottom: 24 }}>
-            <SectionHeading number={3} title="Batting Style" />
+          {/* Section 4 – Batting Style */}
+          <Card style={{
+            marginBottom: 24,
+            opacity: battingEnabled ? 1 : 0.45,
+            pointerEvents: battingEnabled ? "auto" : "none",
+            transition: "opacity .2s",
+          }}>
+            <SectionHeading number={4} title="Batting Style" />
             <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
               {["Right Hand", "Left Hand"].map((v) => (
                 <RadioOption
@@ -377,24 +511,22 @@ export default function PublicRegistrationPage() {
                   checked={form.battingStyle === v}
                   onChange={set("battingStyle")}
                   label={v}
+                  disabled={!battingEnabled}
                 />
               ))}
             </div>
           </Card>
 
-          {/* Section 4 – Bowling Style */}
-          <Card style={{ marginBottom: 24 }}>
-            <SectionHeading number={4} title="Bowling Style" />
+          {/* Section 5 – Bowling Style */}
+          <Card style={{
+            marginBottom: 24,
+            opacity: bowlingEnabled ? 1 : 0.45,
+            pointerEvents: bowlingEnabled ? "auto" : "none",
+            transition: "opacity .2s",
+          }}>
+            <SectionHeading number={5} title="Bowling Style" />
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-              {[
-                "Right Arm Fast",
-                "Right Arm Medium",
-                "Right Arm Spin",
-                "Left Arm Fast",
-                "Left Arm Medium",
-                "Left Arm Spin",
-                "Not Applicable",
-              ].map((v) => (
+              {BOWLING_STYLES.map((v) => (
                 <RadioOption
                   key={v}
                   name="bowlingStyle"
@@ -402,14 +534,20 @@ export default function PublicRegistrationPage() {
                   checked={form.bowlingStyle === v}
                   onChange={set("bowlingStyle")}
                   label={v}
+                  disabled={!bowlingEnabled}
                 />
               ))}
             </div>
           </Card>
 
-          {/* Section 5 – Wicket Keeper */}
-          <Card style={{ marginBottom: 24 }}>
-            <SectionHeading number={5} title="Are you a Wicket Keeper?" />
+          {/* Section 6 – Wicket Keeper */}
+          <Card style={{
+            marginBottom: 24,
+            opacity: keeperEnabled ? 1 : 0.45,
+            pointerEvents: keeperEnabled ? "auto" : "none",
+            transition: "opacity .2s",
+          }}>
+            <SectionHeading number={6} title="Are you a Wicket Keeper?" />
             <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
               {["Yes", "No"].map((v) => (
                 <RadioOption
@@ -419,14 +557,20 @@ export default function PublicRegistrationPage() {
                   checked={form.isKeeper === v}
                   onChange={set("isKeeper")}
                   label={v}
+                  disabled={!keeperEnabled}
                 />
               ))}
             </div>
           </Card>
 
-          {/* Section 6 – All Rounder */}
-          <Card style={{ marginBottom: 24 }}>
-            <SectionHeading number={6} title="Are you an All Rounder?" />
+          {/* Section 7 – All Rounder */}
+          <Card style={{
+            marginBottom: 24,
+            opacity: allRounderEnabled ? 1 : 0.45,
+            pointerEvents: allRounderEnabled ? "auto" : "none",
+            transition: "opacity .2s",
+          }}>
+            <SectionHeading number={7} title="Are you an All Rounder?" />
             <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
               {["Yes", "No"].map((v) => (
                 <RadioOption
@@ -436,66 +580,125 @@ export default function PublicRegistrationPage() {
                   checked={form.isAllRounder === v}
                   onChange={set("isAllRounder")}
                   label={v}
+                  disabled={!allRounderEnabled}
                 />
               ))}
             </div>
           </Card>
 
-          {/* Section 7 – Upload Photo */}
+          {/* Section 8 – Upload Photo (3:4 ratio) */}
           <Card style={{ marginBottom: 32 }}>
-            <SectionHeading number={7} title="Upload Passport Size Photo" />
-            <div
-              onClick={() => fileRef.current?.click()}
-              onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-              onDragLeave={() => setDragOver(false)}
-              onDrop={handleDrop}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  fileRef.current?.click();
-                }
-              }}
-              tabIndex={0}
-              role="button"
-              aria-label="Upload passport size photo"
-              style={{
-                border: `2px dashed ${dragOver ? C.blue : C.border}`,
-                borderRadius: 12,
-                padding: "36px 24px",
-                textAlign: "center",
-                cursor: "pointer",
-                background: dragOver ? "#eff6ff" : "#fafbfc",
-                transition: "border-color .15s, background .15s",
-              }}
-            >
-              {photoPreview ? (
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
-                  <img
-                    src={photoPreview}
-                    alt="Preview"
-                    style={{ width: 110, height: 110, borderRadius: 8, objectFit: "cover", border: `2px solid ${C.border}` }}
-                  />
-                  <span style={{ fontSize: 13, color: C.muted }}>Click or drag to replace photo</span>
+            <SectionHeading number={8} title="Upload Player Photo" />
+
+            {!photoPreview ? (
+              /* ── Upload zone (shown before photo is selected) ── */
+              <div
+                onClick={() => fileRef.current?.click()}
+                onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                onDragLeave={() => setDragOver(false)}
+                onDrop={handleDrop}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    fileRef.current?.click();
+                  }
+                }}
+                tabIndex={0}
+                role="button"
+                aria-label="Upload player photo in 3:4 ratio"
+                style={{
+                  border: `2px dashed ${dragOver ? C.blue : C.border}`,
+                  borderRadius: 12,
+                  padding: "40px 24px",
+                  textAlign: "center",
+                  cursor: "pointer",
+                  background: dragOver ? "#eff6ff" : "#fafbfc",
+                  transition: "border-color .15s, background .15s",
+                }}
+              >
+                <div style={{ fontSize: 40, marginBottom: 10 }}>📸</div>
+                <p style={{ margin: "0 0 6px", fontWeight: 600, color: C.dark, fontSize: 15 }}>
+                  Drag & drop your photo here
+                </p>
+                <p style={{ margin: "0 0 16px", color: C.muted, fontSize: 13 }}>
+                  or click to browse files
+                </p>
+                <div style={{
+                  display: "inline-flex", alignItems: "center", gap: 6,
+                  background: "#f0f1f5", border: `1px solid ${C.border}`,
+                  borderRadius: 6, padding: "6px 14px", fontSize: 12, color: C.muted,
+                }}>
+                  JPG / PNG &nbsp;·&nbsp; 3:4 ratio &nbsp;·&nbsp; Max 2 MB
                 </div>
-              ) : (
-                <>
-                  <div style={{ fontSize: 40, marginBottom: 10 }}>📸</div>
-                  <p style={{ margin: "0 0 6px", fontWeight: 600, color: C.dark, fontSize: 15 }}>
-                    Drag & drop your photo here
-                  </p>
-                  <p style={{ margin: "0 0 16px", color: C.muted, fontSize: 13 }}>
-                    or click to browse files
-                  </p>
-                  <div style={{
-                    display: "inline-flex", alignItems: "center", gap: 6,
-                    background: "#f0f1f5", border: `1px solid ${C.border}`,
-                    borderRadius: 6, padding: "6px 14px", fontSize: 12, color: C.muted,
-                  }}>
-                    📄 JPG / PNG &nbsp;·&nbsp; Max 2 MB &nbsp;·&nbsp; Passport size
-                  </div>
-                </>
-              )}
-            </div>
+              </div>
+            ) : (
+              /* ── Cropper (shown after photo is selected) ── */
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
+                <div style={{
+                  position: "relative",
+                  width: 300,
+                  height: 400,
+                  borderRadius: 8,
+                  overflow: "hidden",
+                  border: `2px solid ${C.border}`,
+                }}>
+                  <Cropper
+                    image={photoPreview}
+                    aspect={3 / 4}
+                    crop={crop}
+                    zoom={zoom}
+                    onCropChange={setCrop}
+                    onZoomChange={setZoom}
+                    onCropComplete={onCropComplete}
+                    cropShape="rect"
+                    showGrid={false}
+                  />
+                </div>
+
+                {/* Zoom slider */}
+                <div style={{ display: "flex", alignItems: "center", gap: 12, width: 300 }}>
+                  <span style={{ fontSize: 13, color: C.muted, flexShrink: 0 }}>🔍</span>
+                  <input
+                    type="range"
+                    min={1}
+                    max={3}
+                    step={0.1}
+                    value={zoom}
+                    onChange={(e) => setZoom(Number(e.target.value))}
+                    style={{ flex: 1, accentColor: C.blue }}
+                  />
+                  <span style={{ fontSize: 12, color: C.muted, width: 36, textAlign: "right" }}>
+                    {zoom.toFixed(1)}x
+                  </span>
+                </div>
+
+                <p style={{ margin: 0, color: C.muted, fontSize: 13, textAlign: "center" }}>
+                  Drag the image to reposition. Use the slider to zoom.
+                </p>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPhotoPreview(null);
+                    setForm((f) => ({ ...f, photo: null }));
+                    setCrop({ x: 0, y: 0 });
+                    setZoom(1);
+                  }}
+                  style={{
+                    background: "none",
+                    border: `1px solid ${C.border}`,
+                    borderRadius: 6,
+                    padding: "6px 14px",
+                    fontSize: 13,
+                    color: C.muted,
+                    cursor: "pointer",
+                  }}
+                >
+                  Choose a different photo
+                </button>
+              </div>
+            )}
+
             <input
               ref={fileRef}
               type="file"
