@@ -113,7 +113,14 @@ export const registerPlayer = async (req, res, next) => {
       return res.status(404).json({ message: 'Tournament not found' });
     }
 
-    const { playerName, age, mobile, countryCode, primaryRole, battingStyle, bowlingStyle, isKeeper } = req.body;
+    const playerName = String(req.body.playerName || "").trim();
+    const age = Number(req.body.age) || 0;
+    const mobile = String(req.body.mobile || "").trim();
+    const countryCode = String(req.body.countryCode || "+91").trim();
+    const primaryRole = String(req.body.primaryRole || "").trim();
+    const battingStyle = String(req.body.battingStyle || "").trim();
+    const bowlingStyle = String(req.body.bowlingStyle || "").trim();
+    const isKeeper = String(req.body.isKeeper || "").trim();
 
     // Check for duplicate registration
     const existing = await Player.findOne({ mobile, tournamentId, deleted: false });
