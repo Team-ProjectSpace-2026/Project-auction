@@ -236,7 +236,7 @@ const AuctionRoom = () => {
           {/* --- LEFT: Quick Bids + Action Cards + All Teams --- */}
           <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
 
-            {/* --- QUICK BID AMOUNTS --- */}
+            {/* --- ACTION BUTTONS + CUSTOM BID --- */}
             <div style={{
               background: "var(--card-bg-light)",
               borderRadius: "16px",
@@ -245,35 +245,50 @@ const AuctionRoom = () => {
               boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
               transition: "background-color 0.2s ease, border-color 0.2s ease",
             }}>
-              <h3 style={{ fontSize: "14px", fontWeight: "700", color: "var(--text-primary-light)", margin: 0, textTransform: "uppercase", letterSpacing: "0.3px" }}>
-                Quick Bid Amounts <span style={{ fontWeight: "400", color: "var(--text-secondary-light)", textTransform: "none", fontSize: "12px" }}>(According to Base Price &#8377;50,000)</span>
-              </h3>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: "10px", marginTop: "16px" }}>
-                {[
-                  { inc: "\u20B91,000", total: "\u20B951,000" },
-                  { inc: "\u20B92,000", total: "\u20B952,000" },
-                  { inc: "\u20B95,000", total: "\u20B955,000" },
-                  { inc: "\u20B910,000", total: "\u20B960,000" },
-                  { inc: "\u20B920,000", total: "\u20B970,000" },
-                ].map((bid) => (
-                  <button
-                    key={bid.inc}
-                    className="auction-quick-bid"
-                    style={{
-                      padding: "14px 8px",
-                      border: "1.5px solid var(--border-light)",
-                      borderRadius: "10px",
-                      background: "var(--card-bg-light)",
-                      color: "var(--text-primary-light)",
-                      cursor: "pointer",
-                      textAlign: "center",
-                      transition: "all 0.2s ease",
-                    }}
-                  >
-                    <div style={{ fontSize: "14px", fontWeight: "700" }}>+ {bid.inc}</div>
-                    <div style={{ fontSize: "11px", fontWeight: "500", color: "var(--text-secondary-light)", marginTop: "2px" }}>({bid.total})</div>
-                  </button>
-                ))}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "10px" }}>
+                {/* Sold */}
+                <button
+                  onClick={() => setShowSoldModal(true)}
+                  className="auction-action-card"
+                  style={{
+                    background: "#fef9e7",
+                    border: "1.5px solid #f5e6a3",
+                    borderRadius: "10px",
+                    padding: "10px 12px",
+                    cursor: "pointer",
+                    textAlign: "left",
+                    transition: "all 0.2s ease",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "2px",
+                  }}
+                >
+                  <div style={{ fontSize: "16px" }}>&#128296;</div>
+                  <div style={{ fontSize: "12px", fontWeight: "800", color: "#b8860b" }}>SOLD</div>
+                  <div style={{ fontSize: "9px", color: "#8a7a4a", fontWeight: "500" }}>Player sold to highest bidder</div>
+                </button>
+
+                {/* Unsold */}
+                <button
+                  onClick={() => setShowUnsoldModal(true)}
+                  className="auction-action-card"
+                  style={{
+                    background: "var(--card-bg-light)",
+                    border: "1.5px solid var(--border-light)",
+                    borderRadius: "10px",
+                    padding: "10px 12px",
+                    cursor: "pointer",
+                    textAlign: "left",
+                    transition: "all 0.2s ease",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "2px",
+                  }}
+                >
+                  <div style={{ fontSize: "16px" }}>&#10060;</div>
+                  <div style={{ fontSize: "12px", fontWeight: "800", color: "#dc2626" }}>UNSOLD</div>
+                  <div style={{ fontSize: "9px", color: "var(--text-secondary-light)", fontWeight: "500" }}>Player goes unsold</div>
+                </button>
 
                 {/* Custom Bid Card */}
                 <button
@@ -292,75 +307,28 @@ const AuctionRoom = () => {
                   <div style={{ fontSize: "13px", fontWeight: "700" }}>Custom Bid</div>
                   <div style={{ fontSize: "11px", fontWeight: "500", marginTop: "2px" }}>Enter Amount</div>
                 </button>
+
+                {/* Raise Bid */}
+                <button
+                  className="auction-action-card"
+                  style={{
+                    background: "var(--accent-light)",
+                    border: "1.5px solid var(--accent-light)",
+                    borderRadius: "10px",
+                    padding: "10px 12px",
+                    cursor: "pointer",
+                    textAlign: "left",
+                    transition: "all 0.2s ease",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "2px",
+                  }}
+                >
+                  <div style={{ fontSize: "16px" }}>&#128296;</div>
+                  <div style={{ fontSize: "12px", fontWeight: "800", color: "#fff" }}>RAISE BID</div>
+                  <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.8)", fontWeight: "500" }}>Increase the bid</div>
+                </button>
               </div>
-            </div>
-
-            {/* --- ACTION CARDS (Sold / Unsold / Raise Bid) --- */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px" }}>
-              {/* Sold */}
-              <button
-                onClick={() => setShowSoldModal(true)}
-                className="auction-action-card"
-                style={{
-                  background: "#fef9e7",
-                  border: "1.5px solid #f5e6a3",
-                  borderRadius: "10px",
-                  padding: "10px 12px",
-                  cursor: "pointer",
-                  textAlign: "left",
-                  transition: "all 0.2s ease",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "2px",
-                }}
-              >
-                <div style={{ fontSize: "16px" }}>&#128296;</div>
-                <div style={{ fontSize: "12px", fontWeight: "800", color: "#b8860b" }}>SOLD</div>
-                <div style={{ fontSize: "9px", color: "#8a7a4a", fontWeight: "500" }}>Player sold to highest bidder</div>
-              </button>
-
-              {/* Unsold */}
-              <button
-                onClick={() => setShowUnsoldModal(true)}
-                className="auction-action-card"
-                style={{
-                  background: "var(--card-bg-light)",
-                  border: "1.5px solid var(--border-light)",
-                  borderRadius: "10px",
-                  padding: "10px 12px",
-                  cursor: "pointer",
-                  textAlign: "left",
-                  transition: "all 0.2s ease",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "2px",
-                }}
-              >
-                <div style={{ fontSize: "16px" }}>&#10060;</div>
-                <div style={{ fontSize: "12px", fontWeight: "800", color: "#dc2626" }}>UNSOLD</div>
-                <div style={{ fontSize: "9px", color: "var(--text-secondary-light)", fontWeight: "500" }}>Player goes unsold</div>
-              </button>
-
-              {/* Raise Bid */}
-              <button
-                className="auction-action-card"
-                style={{
-                  background: "var(--accent-light)",
-                  border: "1.5px solid var(--accent-light)",
-                  borderRadius: "10px",
-                  padding: "10px 12px",
-                  cursor: "pointer",
-                  textAlign: "left",
-                  transition: "all 0.2s ease",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "2px",
-                }}
-              >
-                <div style={{ fontSize: "16px" }}>&#128296;</div>
-                <div style={{ fontSize: "12px", fontWeight: "800", color: "#fff" }}>RAISE BID</div>
-                <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.8)", fontWeight: "500" }}>Increase the bid</div>
-              </button>
             </div>
 
             {/* --- ALL TEAMS --- */}

@@ -3,6 +3,15 @@ import { useNavigate } from "react-router-dom";
 import PlayerRevealModal from "./PlayerRevealModal";
 import PlayerDetailsModal from "./PlayerDetailsModal";
 
+const enterFullscreen = () => {
+  const el = document.documentElement;
+  const fn = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+  if (fn) {
+    const result = fn.call(el);
+    if (result && typeof result.catch === "function") result.catch(() => {});
+  }
+};
+
 const LiveAuctionTab = () => {
   const navigate = useNavigate();
 
@@ -123,7 +132,7 @@ const LiveAuctionTab = () => {
           </p>
 
           <button
-            onClick={() => setShowRevealModal(true)}
+            onClick={() => { enterFullscreen(); setShowRevealModal(true); }}
             style={{
               marginTop: "28px",
               background: "#2563eb",
