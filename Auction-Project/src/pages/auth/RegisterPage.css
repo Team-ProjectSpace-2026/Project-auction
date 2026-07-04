@@ -35,8 +35,9 @@
   background-position: center;
   color: #fff;
   display: flex;
-  align-items: center;
-  padding: 60px 50px;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 60px 50px 40px;
   position: relative;
 }
 
@@ -146,8 +147,8 @@
 }
 
 .register-card-icon {
-  width: 110px;
-  height: 110px;
+  width: 100px;
+  height: 100px;
   background: transparent;
   border-radius: 50%;
   display: flex;

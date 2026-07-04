@@ -32,7 +32,9 @@ const RegisterPage = () => {
       <div className="register-left">
         <div className="register-left-content">
           <div className="brand">
-            <img src={batsmanLogo} alt="CricAuction logo" width="120" height="120" />
+            <img src={batsmanLogo} alt="CricAuction logo" style={{
+              width: "120px", height: "120px", borderRadius: "50%", objectFit: "cover",
+            }} />
             <div>
               <h1>
                 Cric<span className="accent">Auction</span>
@@ -88,7 +90,9 @@ const RegisterPage = () => {
       <div className="register-right">
         <div className="register-card">
           <div className="register-card-icon">
-  <img src={batsmanLogo} alt="CricAuction logo" width="110" height="110" />
+  <img src={batsmanLogo} alt="CricAuction logo" style={{
+    width: "100px", height: "100px", borderRadius: "50%", objectFit: "cover",
+  }} />
 </div>
 
           <h2 className="welcome-title">Create Organizer Account</h2>
