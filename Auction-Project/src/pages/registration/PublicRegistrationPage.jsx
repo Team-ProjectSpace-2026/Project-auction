@@ -4,6 +4,9 @@ import Cropper from "react-easy-crop";
 import InputField from "../../components/common/InputField.jsx";
 import Button from "../../components/common/Button.jsx";
 import * as playerService from "../../services/playerService.js";
+import roleBatsman from "../../assets/Batsman_Logo1.png";
+import roleBowler from "../../assets/Bowler_logo1.png";
+import roleAllrounder from "../../assets/AllRounder_Logo1.png";
 
 
 // ─── Design tokens ──────────────────────────────────────────────────────────
@@ -85,9 +88,9 @@ function RadioOption({ name, value, checked, onChange, label, disabled }) {
 
 // ─── Role Card (grid card radio) ──────────────────────────────────────────────
 const ROLE_ICONS = {
-  Batsman:       "🏏",
-  Bowler:        "⚾",
-  "All Rounder": "🌟",
+  Batsman:       roleBatsman,
+  Bowler:        roleBowler,
+  "All Rounder": roleAllrounder,
 };
 
 function RoleCard({ role, selected, onSelect }) {
@@ -108,7 +111,7 @@ function RoleCard({ role, selected, onSelect }) {
         position: "relative",
       }}
     >
-      <span style={{ fontSize: 30 }}>{ROLE_ICONS[role]}</span>
+      <img src={ROLE_ICONS[role]} alt={role} style={{ width: 80, height: 80, objectFit: "contain" }} />
       <span style={{ fontSize: 13, fontWeight: 600, color: selected ? C.blue : C.dark, textAlign: "center" }}>
         {role}
       </span>
@@ -367,7 +370,10 @@ export default function PublicRegistrationPage() {
 
   // ── Layout ──
   return (
-    <div style={{ minHeight: "100vh", background: C.bg, fontFamily: "'Inter', 'Segoe UI', sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: C.bg, fontFamily: "'Inter', 'Segoe UI', sans-serif",
+      "--input-bg": "#ffffff", "--input-border": "#DCE3EE",
+      "--input-text": "#1F2937", "--input-placeholder": "#98A2B3"
+    }}>
 
       {/* ── Hero Header ── */}
       <div style={{
