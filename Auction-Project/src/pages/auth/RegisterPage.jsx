@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import InputField from "../../components/common/InputField";
 import Button from "../../components/common/Button";
 import "./RegisterPage.css";
-import batsmanLogo from "../../assets/batsman.png";
+import batsmanLogo from "../../assets/cricauctionlogo1.png";
 
 const RegisterPage = () => {
   const [fullName, setFullName] = useState("");
@@ -32,7 +32,7 @@ const RegisterPage = () => {
       <div className="register-left">
         <div className="register-left-content">
           <div className="brand">
-            <img src={batsmanLogo} alt="CricAuction logo" width="78" height="78" />
+            <img src={batsmanLogo} alt="CricAuction logo" width="120" height="120" />
             <div>
               <h1>
                 Cric<span className="accent">Auction</span>
@@ -88,7 +88,7 @@ const RegisterPage = () => {
       <div className="register-right">
         <div className="register-card">
           <div className="register-card-icon">
-  <img src={batsmanLogo} alt="CricAuction logo" width="78" height="78" />
+  <img src={batsmanLogo} alt="CricAuction logo" width="110" height="110" />
 </div>
 
           <h2 className="welcome-title">Create Organizer Account</h2>

@@ -1,5 +1,6 @@
 // src/components/layout/Sidebar.jsx
 import { useState } from "react";
+import cricauctionLogo from "../../assets/cricauctionlogo1.png";
 
 const navItems = [
   { key: "dashboard", label: "Dashboard", icon: "🏠" },
@@ -55,20 +56,9 @@ const Sidebar = ({ activePage = "dashboard", onNavigate }) => {
             marginBottom: "4px",
           }}
         >
-          <div
-            style={{
-              width: "36px",
-              height: "36px",
-              borderRadius: "8px",
-              background: "linear-gradient(135deg, var(--accent-light), var(--accent-hover-light))",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "18px",
-              transition: "all 0.2s ease",
-            }}>
-            🏏
-          </div>
+          <img src={cricauctionLogo} alt="CricAuction" style={{
+            width: "50px", height: "50px", borderRadius: "50%", objectFit: "cover",
+          }} />
           <span style={{ fontSize: "20px", fontWeight: 800 }}>
             <span style={{ color: "#fff" }}>Cric</span>
             <span style={{ color: "#f59e0b" }}>Auction</span>
@@ -80,7 +70,7 @@ const Sidebar = ({ activePage = "dashboard", onNavigate }) => {
             fontSize: "10px",
             letterSpacing: "1.5px",
             fontWeight: 600,
-            paddingLeft: "46px",
+            paddingLeft: "60px",
             transition: "color 0.2s ease",
           }}
         >

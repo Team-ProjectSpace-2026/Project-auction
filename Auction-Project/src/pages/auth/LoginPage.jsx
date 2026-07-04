@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import InputField from "../../components/common/InputField";
 import Button from "../../components/common/Button";
 import "./LoginPage.css";
-import batsmanLogo from "../../assets/batsman.png";
+import batsmanLogo from "../../assets/cricauctionlogo1.png";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -22,7 +22,7 @@ const LoginPage = () => {
       <div className="login-left">
         <div className="login-left-content">
           <div className="brand">
-            <img src={batsmanLogo} alt="CricAuction logo" width="78" height="78" />
+            <img src={batsmanLogo} alt="CricAuction logo" width="120" height="120" />
             <div>
               <h1>
                 Cric<span className="accent">Auction</span>
@@ -79,7 +79,7 @@ const LoginPage = () => {
       <div className="login-right">
         <div className="login-card">
           <div className="login-card-icon">
-  <img src={batsmanLogo} alt="CricAuction logo" width="78" height="78" />
+  <img src={batsmanLogo} alt="CricAuction logo" width="110" height="110" />
 </div>
 
           <h2 className="welcome-title">Welcome Back!</h2>

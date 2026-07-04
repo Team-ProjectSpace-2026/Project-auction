@@ -144,10 +144,10 @@
 }
 
 .login-card-icon {
-  width: 64px;
-  height: 64px;
-  background: #fef3c7;
-  border-radius: 14px;
+  width: 110px;
+  height: 110px;
+  background: transparent;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
