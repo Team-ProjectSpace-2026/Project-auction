@@ -1,6 +1,5 @@
 // src/components/layout/Sidebar.jsx
 import { useState } from "react";
-import cricauctionLogo from "../../assets/cricauctionlogo1.png";
 
 const navItems = [
   { key: "dashboard", label: "Dashboard", icon: "🏠" },
@@ -46,20 +45,11 @@ const Sidebar = ({ activePage = "dashboard", onNavigate }) => {
         style={{
           padding: "24px 20px 20px",
           borderBottom: "1px solid rgba(255,255,255,0.08)",
+          textAlign: "center",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            marginBottom: "4px",
-          }}
-        >
-          <img src={cricauctionLogo} alt="CricAuction" style={{
-            width: "50px", height: "50px", borderRadius: "50%", objectFit: "cover",
-          }} />
-          <span style={{ fontSize: "20px", fontWeight: 800 }}>
+        <div style={{ marginBottom: "4px" }}>
+          <span style={{ fontSize: "22px", fontWeight: 800 }}>
             <span style={{ color: "#fff" }}>Cric</span>
             <span style={{ color: "#f59e0b" }}>Auction</span>
           </span>
@@ -67,11 +57,11 @@ const Sidebar = ({ activePage = "dashboard", onNavigate }) => {
         <div
           style={{
             color: "#6b7db3",
-            fontSize: "10px",
-            letterSpacing: "1.5px",
+            fontSize: "9px",
+            letterSpacing: "1.2px",
             fontWeight: 600,
-            paddingLeft: "60px",
             transition: "color 0.2s ease",
+            lineHeight: "1.4",
           }}
         >
           CRICKET LEAGUE AUCTION

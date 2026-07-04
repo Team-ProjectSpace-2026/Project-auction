@@ -541,3 +541,36 @@ The live auction room (PRD §6) is the most complex part of the system. Key rule
 - Restructured 7-person team roles: tough roles (Auction Engine, Auth & Security, Auction UI & Socket, Tournament & Dashboard) → Pratham, Karthik, Pallivi, Ashith; easy roles (Team Management, Players & Registration, Testing & DevOps) → Swaroop, Manasa, Rahul
 
 **Next step for whoever picks this up:** Test registration flow end-to-end with the new tournamentId route; verify upload directory creation works on fresh deploy; run full regression on dark/light mode after component changes.
+
+---
+
+### 2026-07-04 14:30 — CricAuction Logo Visibility & Alignment Fixes (AI session)
+
+**Worked on:** Fixed CricAuction logo visibility, alignment, and styling issues across the sidebar, login, and registration pages based on user-reported UI problems.
+
+**Changed:**
+
+*Sidebar (`Sidebar.jsx`):*
+- Removed logo image from sidebar header entirely
+- Centered "CricAuction" heading and "CRICKET LEAGUE AUCTION MANAGEMENT" subtitle with `textAlign: "center"`
+- Adjusted font sizing (`22px` heading, `9px` subtitle) and letter spacing (`1.2px`) for proper alignment within sidebar width
+- Removed unused `cricauctionLogo` import
+
+*Login Page (`LoginPage.jsx` + `LoginPage.css`):*
+- Updated left panel logo to 120x120px circular with `objectFit: "cover"`
+- Updated right panel card logo to 100x100px circular with consistent styling
+- Changed `.login-card-icon` wrapper to `width: 100px; height: 100px` with `background: transparent` (removed gradient background)
+- Fixed left panel alignment: `align-items: flex-start` with `padding: 60px 50px 40px` to prevent content from pushing downward
+- Added `justify-content: center` for horizontal centering
+
+*Register Page (`RegisterPage.jsx` + `RegisterPage.css`):*
+- Applied same logo fixes as Login page for consistency
+- Changed `.register-card-icon` wrapper to match login (`100x100px`, transparent background)
+- Fixed left panel alignment with same padding/alignment adjustments
+
+*All Pages:*
+- Removed all `boxShadow` properties from logos (eliminated outer glow ring extending beyond logo circle)
+- Removed all `border` properties from logos (eliminated visible white circle artifact around logos)
+- Ensured no wrapper backgrounds create unwanted circle effects
+
+**Next step for whoever picks this up:** Test logo rendering across different screen sizes and browser zoom levels; verify sidebar text doesn't overflow on narrow viewports; consider adding responsive breakpoints for sidebar collapse on mobile.
