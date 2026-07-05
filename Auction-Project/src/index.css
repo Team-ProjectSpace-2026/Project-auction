@@ -22,6 +22,15 @@
   --accent-hover-dark: #60a5fa;
   --card-bg-dark: #1f2330;
   
+  /* Landing Page Colors */
+  --accent-gold: #fbbf24;
+  --accent-blue: #3b82f6;
+  --accent-green: #22c55e;
+  --accent-purple: #8b5cf6;
+  --accent-red: #ef4444;
+  --accent-cyan: #06b6d4;
+  --accent-orange: #f97316;
+
   /* Common variables */
   --sidebar-bg: #0f1535;
   --sidebar-text: #9db0d4;

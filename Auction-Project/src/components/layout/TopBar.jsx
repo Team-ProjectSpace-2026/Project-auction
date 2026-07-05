@@ -1,14 +1,20 @@
 import { useLocation, Link } from 'react-router-dom';
+import { FiHome, FiLayout, FiUser, FiSettings, FiLogOut } from 'react-icons/fi';
+import { useAuth } from '../../hooks/useAuth';
+import batsmanLogo from '../../assets/cricauctionlogo1.png';
 
 const TopBar = ({ user }) => {
   const location = useLocation();
+  const { logout } = useAuth();
 
   const showBackLink = location.pathname !== '/dashboard' && location.pathname !== '/';
 
+  const handleLogout = () => {
+    logout();
+  };
+
   return (
-    <header
-      className="topbar"
-    >
+    <header className="topbar">
       <div className="topbar-left">
         {showBackLink && (
           <Link to="/dashboard" className="back-link">
@@ -16,6 +22,14 @@ const TopBar = ({ user }) => {
               <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
             Back to Dashboard
+          </Link>
+        )}
+        
+        {/* Logo link to landing page - always visible except on landing page itself */}
+        {location.pathname !== '/' && (
+          <Link to="/" className="topbar-brand" aria-label="Go to Landing Page">
+            <img src={batsmanLogo} alt="CricAuction logo" className="topbar-logo" />
+            <span className="brand-text">Cric<span className="accent">Auction</span></span>
           </Link>
         )}
       </div>

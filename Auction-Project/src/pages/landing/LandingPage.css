@@ -1,0 +1,32 @@
+/* Landing Page Styles */
+.landing-page-wrapper {
+  overflow-x: hidden; /* Prevent horizontal scroll */
+  background-color: var(--bg-primary-light); /* Base background color */
+  color: var(--text-primary-light);
+  font-family: 'Inter', sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+main {
+  position: relative;
+  z-index: 1; /* Ensure main content is above the fixed NavBar */
+}
+
+/* Dark Mode adjustments for landing page */
+.dark-mode .landing-page-wrapper {
+  background-color: var(--bg-primary-dark);
+  color: var(--text-primary-dark);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .landing-page-wrapper {
+    /* Adjustments for mobile if needed */
+  }
+}
+
+@media (max-width: 480px) {
+  .landing-page-wrapper {
+    /* Further adjustments for smaller screens */
+  }
+}
