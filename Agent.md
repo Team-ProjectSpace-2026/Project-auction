@@ -413,6 +413,27 @@ The live auction room (PRD §6) is the most complex part of the system. Key rule
 
 ---
 
+### 2026-07-05 — ESLint Lint Error Fixes (AI session)
+
+**Worked on:** Resolved all 30 ESLint errors across 9 files in the landing page and layout components.
+
+**Changed:**
+- Removed unused `React` imports from `AboutSection.jsx`, `FeaturesSection.jsx`, `Footer.jsx`, `HeroSection.jsx`, `NavBar.jsx`, `OurAuctions.jsx`, `RecentAuctions.jsx`, `LandingPage.jsx`
+- Removed unused icon imports (`FiCompass`, `FiGlobe`, `FiClock`, `FiHome`, `FiLayout`, `FiUser`, `FiSettings`, `FiLogOut`) from `FeaturesSection.jsx`, `RecentAuctions.jsx`, `TopBar.jsx`
+- Removed unused variables (`location`, `handleLogout`) from `NavBar.jsx` and `TopBar.jsx`
+- Removed unused `useAuth` import from `TopBar.jsx`
+- Moved `Math.random()` particle/gavel arrays to module scope in `HeroSection.jsx` to satisfy `react-hooks/purity` rule
+- Merged duplicate `animate`/`transition` props on scroll indicator in `HeroSection.jsx`
+- Removed unused `index` prop from `AuctionCard` in `RecentAuctions.jsx`
+- Added `useCallback` for `nextSlide` and fixed `useEffect` dependency array in `RecentAuctions.jsx`
+
+**Build Status:**
+- `npm run lint` — 0 errors, 0 warnings
+
+**Next step for whoever picks this up:** Continue building remaining pages per PRD, or address any of the inline code review comments noted in previous sessions.
+
+---
+
 ### 2026-07-01 - Dark/Light Mode Implementation & Bug Fixes
 
 **Summary:** Implemented full dark mode support across the application, moved theme toggle to Settings page, added logout confirmation popup, and fixed multiple code quality issues.

@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { FiTwitter, FiLinkedin, FiInstagram, FiYoutube, FiFacebook } from 'react-icons/fi';
 import './Footer.css';

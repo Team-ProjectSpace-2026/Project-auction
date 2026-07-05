@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { FiMenu, FiX, FiHome, FiClock, FiAward, FiInfo, FiStar, FiLogIn } from 'react-icons/fi';
 import batsmanLogo from '../../assets/cricauctionlogo1.png';
 import './NavBar.css';
@@ -16,7 +16,6 @@ const navItems = [
 const NavBar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {

@@ -1,6 +1,6 @@
-import React from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiClock, FiUsers, FiChevronLeft, FiChevronRight, FiExternalLink, FiCalendar } from 'react-icons/fi';
+import { FiUsers, FiChevronLeft, FiChevronRight, FiExternalLink, FiCalendar } from 'react-icons/fi';
 import Button from '../../components/common/Button';
 import './RecentAuctions.css';
 
@@ -79,13 +79,13 @@ const statusStyles = {
 };
 
 const RecentAuctions = () => {
-  const [currentIndex, setCurrentIndex] = React.useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const cardsPerView = 3;
   const maxIndex = Math.max(0, mockAuctions.length - cardsPerView);
 
-  const nextSlide = () => {
+  const nextSlide = useCallback(() => {
     setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
-  };
+  }, [maxIndex]);
 
   const prevSlide = () => {
     setCurrentIndex((prev) => (prev <= 0 ? maxIndex : prev - 1));
@@ -94,10 +94,10 @@ const RecentAuctions = () => {
   const visibleAuctions = mockAuctions.slice(currentIndex, currentIndex + cardsPerView);
 
   // Auto-slide
-  React.useEffect(() => {
+  useEffect(() => {
     const interval = setInterval(nextSlide, 5000);
     return () => clearInterval(interval);
-  }, [currentIndex]);
+  }, [nextSlide]);
 
   return (
     <section id="recent-auctions" className="recent-auctions" aria-labelledby="recent-auctions-title">
@@ -142,7 +142,7 @@ const RecentAuctions = () => {
                   transition={{ duration: 0.4, delay: index * 0.1, ease: 'easeOut' }}
                   role="listitem"
                 >
-                  <AuctionCard auction={auction} index={index} />
+                  <AuctionCard auction={auction} />
                 </motion.div>
               ))}
             </AnimatePresence>
@@ -183,7 +183,7 @@ const RecentAuctions = () => {
   );
 };
 
-const AuctionCard = ({ auction, index }) => {
+const AuctionCard = ({ auction }) => {
   const status = statusStyles[auction.status] || statusStyles.upcoming;
 
   return (

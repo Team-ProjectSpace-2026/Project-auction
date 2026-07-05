@@ -1,17 +1,10 @@
 import { useLocation, Link } from 'react-router-dom';
-import { FiHome, FiLayout, FiUser, FiSettings, FiLogOut } from 'react-icons/fi';
-import { useAuth } from '../../hooks/useAuth';
 import batsmanLogo from '../../assets/cricauctionlogo1.png';
 
 const TopBar = ({ user }) => {
   const location = useLocation();
-  const { logout } = useAuth();
 
   const showBackLink = location.pathname !== '/dashboard' && location.pathname !== '/';
-
-  const handleLogout = () => {
-    logout();
-  };
 
   return (
     <header className="topbar">

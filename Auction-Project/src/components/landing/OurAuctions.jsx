@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { FiAward, FiUsers, FiCompass, FiGlobe, FiExternalLink } from 'react-icons/fi';
 import Button from '../../components/common/Button';

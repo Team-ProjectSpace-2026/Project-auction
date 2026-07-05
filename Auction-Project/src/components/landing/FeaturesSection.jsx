@@ -1,6 +1,5 @@
-import React from 'react';
 import { motion } from 'framer-motion';
-import { FiAward, FiUsers, FiCompass, FiGlobe, FiPlayCircle, FiServer, FiSliders, FiBell, FiDollarSign, FiMonitor } from 'react-icons/fi';
+import { FiAward, FiUsers, FiPlayCircle, FiServer, FiSliders, FiBell, FiDollarSign, FiMonitor } from 'react-icons/fi';
 import Button from '../../components/common/Button';
 import './FeaturesSection.css';
 

@@ -1,31 +1,29 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { FiPlay, FiTrendingUp, FiChevronDown, FiArrowDown } from 'react-icons/fi';
 import Button from '../../components/common/Button';
 import './HeroSection.css';
 
-const HeroSection = () => {
-  // Floating particles data for background animation
-  const particles = Array.from({ length: 20 }, (_, i) => ({
-    id: i,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    size: Math.random() * 8 + 4,
-    delay: Math.random() * 5,
-    duration: Math.random() * 10 + 10,
-  }));
+const particles = Array.from({ length: 20 }, (_, i) => ({
+  id: i,
+  x: Math.random() * 100,
+  y: Math.random() * 100,
+  size: Math.random() * 8 + 4,
+  delay: Math.random() * 5,
+  duration: Math.random() * 10 + 10,
+}));
 
-  // Gavel icons floating
-  const gavels = Array.from({ length: 8 }, (_, i) => ({
-    id: i,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    size: Math.random() * 30 + 20,
-    delay: Math.random() * 3,
-    duration: Math.random() * 15 + 10,
-    rotation: Math.random() * 360,
-  }));
+const gavels = Array.from({ length: 8 }, (_, i) => ({
+  id: i,
+  x: Math.random() * 100,
+  y: Math.random() * 100,
+  size: Math.random() * 30 + 20,
+  delay: Math.random() * 3,
+  duration: Math.random() * 15 + 10,
+  rotation: Math.random() * 360,
+}));
+
+const HeroSection = () => {
 
   return (
     <section className="hero-section" aria-labelledby="hero-title">
@@ -203,11 +201,9 @@ const HeroSection = () => {
           {/* Scroll indicator */}
           <motion.div
             className="scroll-indicator"
-            animate={{ y: [0, 10, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.5 }}
+            initial={{ opacity: 0, y: 0 }}
+            animate={{ opacity: 1, y: [0, 10, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 1.5 }}
           >
             <FiChevronDown className="scroll-mouse" size={24} />
             <FiArrowDown className="scroll-arrow" size={16} />
