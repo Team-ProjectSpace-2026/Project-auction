@@ -16,10 +16,12 @@ import LiveAuctionPage from "../pages/auction/LiveAuctionPage";
 import ProfilePage from "../pages/profile/ProfilePage";
 import PublicRegistrationPage from "../pages/registration/PublicRegistrationPage.jsx";
 import EditTournamentPage from "../pages/tournaments/EditTournamentPage";
+import LandingPage from "../pages/landing/LandingPage";
 
 const AppRouter = () => (
   <Router>
     <Routes>
+      <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/dashboard" element={<DashboardPage />} />
@@ -41,10 +43,10 @@ const AppRouter = () => (
       <Route
     path="/edit-tournament"
     element={<EditTournamentPage />}
-/>
-      
-      {/* Redirect root to login as default entry point; authentication guards not yet implemented */}
-      <Route path="*" element={<Navigate to="/login" replace />} />
+ />
+       
+      {/* Fallback redirect to landing page */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   </Router>
 );
