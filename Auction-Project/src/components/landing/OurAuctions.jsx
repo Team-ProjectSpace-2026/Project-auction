@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
-import { FiAward, FiUsers, FiCompass, FiGlobe, FiExternalLink } from 'react-icons/fi';
-import Button from '../../components/common/Button';
+import { FiAward, FiUsers, FiCompass, FiGlobe } from 'react-icons/fi';
 import './OurAuctions.css';
 
 const auctionFeatures = [
@@ -21,7 +20,6 @@ const OurAuctions = () => {
           viewport={{ once: true, margin: '-100px' }}
           transition={{ duration: 0.6, ease: 'easeOut' }}
         >
-          <span className="section-badge">🌟 Our Auctions</span>
           <h2 id="our-auctions-title" className="section-title">Experience the Excitement</h2>
           <p className="section-subtitle">
             Discover the unique features that make our auction platform the best choice for your league.
@@ -46,16 +44,6 @@ const OurAuctions = () => {
               </div>
               <h3 className="feature-title">{feature.title}</h3>
               <p className="feature-description">{feature.description}</p>
-              <Button
-                variant="outline"
-                className="feature-action-btn"
-                style={{ borderColor: feature.actionColor, color: feature.actionColor }}
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                Learn More
-                <FiExternalLink size={14} className="btn-icon" />
-              </Button>
             </motion.div>
           ))}
         </motion.div>
