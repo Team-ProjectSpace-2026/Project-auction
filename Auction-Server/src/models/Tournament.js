@@ -30,6 +30,16 @@ const tournamentSchema = new mongoose.Schema({
     type: String,
     trim: true,
     maxlength: [500, 'Description cannot exceed 500 characters']
+  },
+  currentPlayerId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Player',
+    default: null
+  },
+  auctionStatus: {
+    type: String,
+    enum: ['idle', 'bidding', 'sold', 'unsold'],
+    default: 'idle'
   }
 }, {
   timestamps: true

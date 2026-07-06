@@ -117,3 +117,21 @@ export const processWinningBid = async (bid) => {
 
   return bid;
 };
+
+export const cancelActiveBids = async (tournamentId, playerId, session) => {
+  if (!isValidObjectId(tournamentId) || !isValidObjectId(playerId)) {
+    throw new Error("Invalid ID format provided");
+  }
+
+  const result = await Bid.updateMany(
+    {
+      tournamentId: new mongoose.Types.ObjectId(tournamentId),
+      playerId: new mongoose.Types.ObjectId(playerId),
+      status: "Active",
+    },
+    { $set: { status: "Cancelled" } },
+    { session },
+  );
+
+  return result.modifiedCount;
+};
