@@ -1,4 +1,4 @@
-const UnsoldPlayerModal = ({ onClose, onNextPlayer }) => {
+const UnsoldPlayerModal = ({ onClose, onNextPlayer, playerName }) => {
   return (
     <div
       style={{
@@ -46,7 +46,7 @@ const UnsoldPlayerModal = ({ onClose, onNextPlayer }) => {
             marginBottom: "10px",
           }}
         >
-          Virat Kohli
+          {playerName || "Unknown Player"}
         </h2>
 
         <p

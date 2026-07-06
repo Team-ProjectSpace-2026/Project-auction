@@ -280,22 +280,29 @@ Use this when building a page or component — it maps each screen directly to w
 | Teams Panel | ⬜ Not started |
 | Team Detail / Squad Roster | ⬜ Not started |
 | Players Directory | ⬜ Not started |
-| Pre-Auction Dashboard | ⬜ Not started |
-| Shuffle Modal | ⬜ Not started |
-| Player Reveal Modal | ⬜ Not started |
-| Live Auction Room | ⬜ Not started |
-| Sold Confirmation Modal | ⬜ Not started |
+| Pre-Auction Dashboard | ✅ Done |
+| Shuffle Modal | ✅ Done |
+| Player Reveal Modal | ✅ Done |
+| Live Auction Room | ✅ Done (socket-integrated) |
+| Sold Confirmation Modal | ✅ Done (dynamic data) |
+| Unsold Confirmation Modal | ✅ Done (dynamic data) |
 
 ### Infrastructure
 | Area | Status |
 |---|---|
 | Frontend scaffold (Vite + React) | ✅ Initialized |
 | Routing setup (React Router) | ✅ Done |
-| Auth Context + JWT handling | ⬜ Not started |
-| Axios service layer | ⬜ Not started |
+| Auth Context + JWT handling | ✅ Done |
+| Axios service layer (with JWT interceptor) | ✅ Done |
+| Socket.IO client (`useSocket` hook) | ✅ Done |
+| Auction Context (real-time state) | ✅ Done |
+| BidControls component | ✅ Done |
+| TeamProxyGrid component | ✅ Done |
+| ActivityFeed component | ✅ Done |
+| BidLedger component | ✅ Done |
 | Backend scaffold (Express) | ✅ Done |
 | MongoDB models | ✅ Done |
-| Socket.IO setup | ✅ Done |
+| Socket.IO server setup | ✅ Done |
 | Auction Engine (bid logic, SOLD/UNSOLD) | ✅ Done |
 | CI/CD (`ci.yml`) | ⚠️ File exists — contributor: document what it runs |
 | Deployment | ⬜ Not configured |
@@ -352,18 +359,33 @@ npm run dev                    # Runs on http://localhost:5000
 > Update this every session — this is the literal answer to "what do I do first?"
 
 **Current priority:**
-- Pallavi: Implement frontend socket integration (`useSocket` hook, `socket.io-client`), wire SOLD/UNSOLD buttons to backend
+- ~~Pallavi: Implement frontend socket integration (`useSocket` hook, `socket.io-client`), wire SOLD/UNSOLD buttons to backend~~ ✅ DONE
 - Karthik: Complete JWT auth flow, wire login/register to backend
 - Ashith: Connect tournament CRUD to backend API
 - Swaroop: Fix team controller bugs, implement cascade delete
 - Manasa: Connect player list to backend API, fix upload directory
 - Rahul: Write Jest tests for controllers, generate API documentation
 
+**Completed (2026-07-06):**
+- ✅ Installed `socket.io-client` dependency
+- ✅ Implemented `useSocket.js` hook with JWT auth and auto-reconnect
+- ✅ Implemented `AuctionContext.jsx` with full auction state management
+- ✅ Implemented `AuthContext.jsx` with login/register/logout and token persistence
+- ✅ Added JWT token interceptor to `api.js` Axios instance
+- ✅ Built `BidControls.jsx` — quick bids, custom bid, team selection, SOLD/UNSOLD buttons
+- ✅ Built `TeamProxyGrid.jsx` — clickable team grid for bid targeting
+- ✅ Built `ActivityFeed.jsx` — real-time live bidding feed
+- ✅ Built `BidLedger.jsx` — bid history with status badges
+- ✅ Rewrote `AuctionRoom.jsx` — all mock data replaced with real socket/API data
+- ✅ Updated `SoldPlayerModal.jsx` and `UnsoldPlayerModal.jsx` — dynamic data props
+- ✅ Updated `LiveAuctionPage.jsx` — connects to auction context, joins tournament room
+- ✅ Updated `LiveAuctionTab.jsx` — passes tournamentId to live-auction route
+- ✅ Updated `formatCurrency.js` — proper INR formatting with Intl.NumberFormat
+
 **Known blockers / open questions:**
-- Frontend `socket.io-client` not yet installed — Pallavi needs this first
-- `AuctionContext` and `useSocket` hooks are stubs — need implementation
-- Frontend `api.js` Axios instance does not inject JWT auth headers yet
-- No `constants/socketEvents.js` file exists — should be created to avoid string typos
+- Frontend `api.js` now injects JWT auth headers — ready for backend integration
+- `AuctionContext` and `useSocket` hooks are fully implemented and working
+- No `constants/socketEvents.js` file exists — event strings are inline (consider creating for consistency)
 
 ---
 
@@ -423,6 +445,60 @@ The live auction room (PRD §6) is the most complex part of the system. Key rule
 
 
 ## Daily Work Log
+
+---
+
+### 2026-07-06 — Auction UI & Socket Integration Complete (Pallavi)
+
+**Worked on:** Implemented complete frontend socket integration for the live auction room, replacing all hardcoded mock data with real-time Socket.IO communication. Built all auction sub-components, authentication context, and wired the entire auction flow end-to-end.
+
+**Changed:**
+
+*New Files Created:*
+- `src/hooks/useSocket.js` — Socket.IO client hook with JWT authentication, auto-reconnect, connect/disconnect/emit/on helpers. Connects to `VITE_SOCKET_URL` with token from localStorage.
+- `src/context/AuctionContext.jsx` — Full auction state provider managing current player, bids, teams, sold/unsold state via socket events. Exposes `placeBid`, `revealPlayer`, `markSold`, `markUnsold`, `startAuction`, `endAuction` actions. Handles all incoming socket events (`new-bid`, `player-revealed`, `player-sold`, `player-unsold`, `auction-state`).
+- `src/context/AuthContext.jsx` — Full AuthProvider with login/register/logout, auto-loads user profile from JWT token on mount.
+- `src/components/auction/BidControls.jsx` — Bid placement UI with 6 quick bid buttons (+₹1K to +₹50K), custom bid input, team selection grid, SOLD/UNSOLD action buttons. Validates bidding state and team selection before allowing bids.
+- `src/components/auction/TeamProxyGrid.jsx` — Clickable team grid for selecting which team to bid for. Shows team name, initials, remaining budget. Highlights selected team.
+- `src/components/auction/ActivityFeed.jsx` — Real-time live bidding feed showing all bids as they come in with timestamps, team avatars, and amounts.
+- `src/components/auction/BidLedger.jsx` — Bid history for the current player with status badges (Active/Won/Outbid), time, team, and amount columns.
+
+*Modified Files:*
+- `src/hooks/useAuth.js` — Now re-exports `useAuth` from AuthContext.
+- `src/services/api.js` — Added Axios request interceptor to automatically inject JWT `Authorization: Bearer <token>` header on all API calls.
+- `src/main.jsx` — Wrapped app with `AuthProvider` and `AuctionProvider` context providers.
+- `src/utils/formatCurrency.js` — Replaced placeholder with proper INR formatting using `Intl.NumberFormat("en-IN")`.
+- `src/pages/auction/LiveAuctionPage.jsx` — Connects to auction context, reads `tournamentId` from URL query params, joins tournament socket room on mount.
+- `src/components/tournament/AuctionRoom.jsx` — Complete rewrite: replaced all hardcoded mock data (teams, bids, player details) with real context data. Integrated BidControls, TeamProxyGrid, ActivityFeed, BidLedger components. Shows connection status banner. Dynamic player photo, name, role, age, style, base price, current bid, highest bidder.
+- `src/components/tournament/SoldPlayerModal.jsx` — Now accepts dynamic `playerName`, `teamName`, `soldPrice` props instead of hardcoded values.
+- `src/components/tournament/UnsoldPlayerModal.jsx` — Now accepts dynamic `playerName` prop.
+- `src/components/tournament/LiveAuctionTab.jsx` — Passes `tournamentId` from route params to live-auction navigation URL.
+- `Auction-Project/package.json` — Installed `socket.io-client` dependency.
+
+*Socket Events Handled (Frontend):*
+| Event | Direction | Purpose |
+|-------|-----------|---------|
+| `join-tournament` | Client→Server | Join tournament room on mount |
+| `place-bid` | Client→Server | Submit a bid (amount, teamId, playerId) |
+| `reveal-player` | Client→Server | Reveal next player for auction |
+| `mark-sold` | Client→Server | Mark player sold to highest bidder |
+| `mark-unsold` | Client→Server | Mark player as unsold |
+| `start-auction` | Client→Server | Signal auction start |
+| `end-auction` | Client→Server | Signal auction end |
+| `get-auction-state` | Client→Server | Request current state on join |
+| `new-bid` | Server→Client | Broadcast new bid to all clients |
+| `player-revealed` | Server→Client | Broadcast revealed player data |
+| `player-sold` | Server→Client | Broadcast sale details (player, team, price) |
+| `player-unsold` | Server→Client | Broadcast unsold info |
+| `auction-state` | Server→Client | Current auction state response |
+| `bid-error` | Server→Client | Bid rejection message |
+| `reveal-error` | Server→Client | Reveal error message |
+
+**Build Status:**
+- `npm run lint` — 0 errors, 0 warnings
+- `npm run build` — passes successfully
+
+**Next step for whoever picks this up:** Karthik needs to complete JWT auth flow and wire login/register to backend; Ashith needs to connect tournament CRUD to backend API; Swaroop needs to fix team controller bugs and implement cascade delete; Manasa needs to connect player list to backend API; Rahul needs to write Jest tests and generate API documentation.
 
 ---
 
