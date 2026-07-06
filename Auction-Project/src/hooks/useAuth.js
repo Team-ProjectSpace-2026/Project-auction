@@ -1,3 +1,1 @@
-export const useAuth = () => {
-  // TODO: implement auth hook
-};
+export { useAuth } from "../context/AuthContext";
