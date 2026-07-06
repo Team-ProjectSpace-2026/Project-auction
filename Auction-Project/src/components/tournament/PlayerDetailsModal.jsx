@@ -134,6 +134,7 @@ const PlayerDetailsModal = ({ onClose, onStartBidding }) => {
         {/* Close button */}
         <button
           onClick={onClose}
+          aria-label="Close"
           style={{
             position: "absolute",
             top: "24px",

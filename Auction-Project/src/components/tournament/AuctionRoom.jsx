@@ -456,28 +456,14 @@ const AuctionRoom = () => {
       {showSoldModal && (
         <SoldPlayerModal
           onClose={() => setShowSoldModal(false)}
-          onNextPlayer={() => {
-            setShowRevealModal(true);
-            requestAnimationFrame(() => {
-              requestAnimationFrame(() => {
-                setShowSoldModal(false);
-              });
-            });
-          }}
+          onNextPlayer={() => setShowRevealModal(true)}
         />
       )}
 
       {showUnsoldModal && (
         <UnsoldPlayerModal
           onClose={() => setShowUnsoldModal(false)}
-          onNextPlayer={() => {
-            setShowRevealModal(true);
-            requestAnimationFrame(() => {
-              requestAnimationFrame(() => {
-                setShowUnsoldModal(false);
-              });
-            });
-          }}
+          onNextPlayer={() => setShowRevealModal(true)}
         />
       )}
     </div>

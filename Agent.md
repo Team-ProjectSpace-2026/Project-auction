@@ -457,6 +457,7 @@ The live auction room (PRD §6) is the most complex part of the system. Key rule
 - Added `POST /:tournamentId/mark-unsold` route
 
 **Socket Events Summary:**
+
 | Event | Direction | Purpose |
 |-------|-----------|---------|
 | `mark-sold` | Client→Server | Organizer marks player as sold |
@@ -469,6 +470,7 @@ The live auction room (PRD §6) is the most complex part of the system. Key rule
 | `auction-state` | Server→Client | Send current state to requester |
 
 **REST Endpoints Added:**
+
 | Endpoint | Method | Purpose |
 |----------|--------|---------|
 | `/api/auction/:tournamentId/mark-sold` | POST | Mark player as sold (fallback) |
@@ -694,6 +696,7 @@ The live auction room (PRD §6) is the most complex part of the system. Key rule
 - Added `POST /:tournamentId/mark-unsold` route
 
 **Socket Events Summary:**
+
 | Event | Direction | Purpose |
 |-------|-----------|---------|
 | `mark-sold` | Client→Server | Organizer marks player as sold |
@@ -706,6 +709,7 @@ The live auction room (PRD §6) is the most complex part of the system. Key rule
 | `auction-state` | Server→Client | Send current state to requester |
 
 **REST Endpoints Added:**
+
 | Endpoint | Method | Purpose |
 |----------|--------|---------|
 | `/api/auction/:tournamentId/mark-sold` | POST | Mark player as sold (fallback) |
