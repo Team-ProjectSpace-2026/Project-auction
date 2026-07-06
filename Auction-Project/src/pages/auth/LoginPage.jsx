@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import InputField from "../../components/common/InputField";
 import Button from "../../components/common/Button";
 import "./LoginPage.css";
@@ -11,9 +11,12 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
 
+  const navigate = useNavigate();
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Backend call will go here later
+    localStorage.setItem('authToken', 'mock-token');
+    navigate('/dashboard');
   };
 
   return (
