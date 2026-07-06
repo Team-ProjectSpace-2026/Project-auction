@@ -130,7 +130,7 @@ const RecentAuctions = () => {
           </motion.button>
 
           <div className="carousel-track" role="list" aria-label="Recent auctions carousel">
-            <AnimatePresence mode="wait">
+            <AnimatePresence>
               {visibleAuctions.map((auction, index) => (
                 <motion.div
                   key={auction.id}

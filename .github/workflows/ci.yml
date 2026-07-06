@@ -1,51 +1,41 @@
-name: CI Check
-
-permissions:
-  contents: read
+name: CI
 
 on:
+  push:
+    branches: ['*']
   pull_request:
-    branches: [main]
+    branches: ['main']
 
 jobs:
-  frontend-build:
+  frontend:
+    name: Frontend (Auction-Project)
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./Auction-Project
     steps:
       - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
-          cache: npm
+          node-version: '20'
+          cache: 'npm'
           cache-dependency-path: Auction-Project/package-lock.json
-
       - run: npm ci
-        working-directory: Auction-Project
-
       - run: npm run lint
-        working-directory: Auction-Project
-
       - run: npm run build
-        working-directory: Auction-Project
 
-  backend-build:
+  backend:
+    name: Backend (Auction-Server)
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./Auction-Server
     steps:
       - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
-          cache: npm
+          node-version: '20'
+          cache: 'npm'
           cache-dependency-path: Auction-Server/package-lock.json
-
       - run: npm ci
-        working-directory: Auction-Server
-
       - run: npm test -- --passWithNoTests
-        working-directory: Auction-Server
-#ci for teh backend and frontend

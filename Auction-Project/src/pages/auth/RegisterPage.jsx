@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import InputField from "../../components/common/InputField";
 import Button from "../../components/common/Button";
 import "./RegisterPage.css";
@@ -14,16 +14,16 @@ const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  const navigate = useNavigate();
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Validate password match
     if (password !== confirmPassword) {
       alert('Passwords do not match');
       return;
     }
-    // Log non-sensitive fields only
-    console.log({ fullName, email, mobile });
-    // Backend call will go here later
+    localStorage.setItem('authToken', 'mock-token');
+    navigate('/dashboard');
   };
 
   return (

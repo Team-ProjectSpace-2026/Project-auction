@@ -462,10 +462,33 @@ button {
   padding: 0 32px;
   position: fixed;
   top: 0;
-  left: 250px;
+  left: 220px;
   right: 0;
   z-index: 99;
   transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.topbar-logo {
+  height: 40px;
+  width: auto;
+}
+
+.brand-text {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--topbar-text);
+  white-space: nowrap;
+}
+
+.brand-text .accent {
+  color: #f59e0b;
 }
 
 .topbar-left {
