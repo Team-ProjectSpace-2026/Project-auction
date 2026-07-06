@@ -17,7 +17,6 @@ const AboutSection = () => {
           viewport={{ once: true, margin: '-100px' }}
           transition={{ duration: 0.6, ease: 'easeOut' }}
         >
-          <span className="section-badge">🤝 About Us</span>
           <h2 id="about-title" className="section-title">Your Trusted Cricket Auction Platform</h2>
           <p className="section-subtitle">
             Dedicated to making cricket auctions simple, transparent, and engaging for everyone.

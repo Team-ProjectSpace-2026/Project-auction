@@ -1,6 +1,7 @@
-import { motion } from 'framer-motion';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { FiPlay, FiTrendingUp, FiChevronDown, FiArrowDown } from 'react-icons/fi';
+import { FiPlay, FiChevronDown, FiArrowDown, FiX } from 'react-icons/fi';
 import Button from '../../components/common/Button';
 import './HeroSection.css';
 
@@ -24,23 +25,201 @@ const gavels = Array.from({ length: 8 }, (_, i) => ({
 }));
 
 const HeroSection = () => {
+  const [showVideo, setShowVideo] = useState(false);
+  const canvasRef = useRef(null);
+  const animationRef = useRef(null);
+
+  // Canvas-based animated video background
+  const initCanvas = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    const resize = () => {
+      canvas.width = canvas.offsetWidth * window.devicePixelRatio;
+      canvas.height = canvas.offsetHeight * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    // Particles for the canvas animation
+    const canvasParticles = [];
+    const particleCount = 60;
+
+    for (let i = 0; i < particleCount; i++) {
+      canvasParticles.push({
+        x: Math.random() * canvas.offsetWidth,
+        y: Math.random() * canvas.offsetHeight,
+        vx: (Math.random() - 0.5) * 0.8,
+        vy: (Math.random() - 0.5) * 0.8 - 0.3,
+        radius: Math.random() * 3 + 1,
+        opacity: Math.random() * 0.5 + 0.1,
+        hue: Math.random() * 60 + 30, // golden range
+        pulse: Math.random() * Math.PI * 2,
+        pulseSpeed: Math.random() * 0.02 + 0.01,
+      });
+    }
+
+    // Light beams
+    const beams = [];
+    for (let i = 0; i < 5; i++) {
+      beams.push({
+        x: Math.random() * canvas.offsetWidth,
+        width: Math.random() * 150 + 50,
+        speed: Math.random() * 0.3 + 0.1,
+        opacity: Math.random() * 0.04 + 0.01,
+        hue: Math.random() * 40 + 30,
+      });
+    }
+
+    let time = 0;
+
+    const animate = () => {
+      const w = canvas.offsetWidth;
+      const h = canvas.offsetHeight;
+      time += 0.016;
+
+      // Clear with dark gradient
+      ctx.clearRect(0, 0, w, h);
+
+      // Gradient mesh background
+      const gradient = ctx.createRadialGradient(
+        w * 0.5, h * 0.4, 0,
+        w * 0.5, h * 0.4, w * 0.8
+      );
+      gradient.addColorStop(0, 'rgba(30, 25, 10, 0.4)');
+      gradient.addColorStop(0.5, 'rgba(15, 12, 5, 0.3)');
+      gradient.addColorStop(1, 'rgba(10, 14, 26, 0.2)');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, w, h);
+
+      // Animated light beams
+      beams.forEach((beam) => {
+        beam.x += beam.speed;
+        if (beam.x > w + beam.width) beam.x = -beam.width;
+
+        const beamGrad = ctx.createLinearGradient(beam.x, 0, beam.x, h);
+        beamGrad.addColorStop(0, `hsla(${beam.hue}, 80%, 60%, 0)`);
+        beamGrad.addColorStop(0.3, `hsla(${beam.hue}, 80%, 60%, ${beam.opacity})`);
+        beamGrad.addColorStop(0.7, `hsla(${beam.hue}, 80%, 60%, ${beam.opacity * 0.5})`);
+        beamGrad.addColorStop(1, `hsla(${beam.hue}, 80%, 60%, 0)`);
+
+        ctx.fillStyle = beamGrad;
+        ctx.fillRect(beam.x - beam.width / 2, 0, beam.width, h);
+      });
+
+      // Animated glow orbs
+      const orb1X = w * 0.3 + Math.sin(time * 0.5) * w * 0.1;
+      const orb1Y = h * 0.4 + Math.cos(time * 0.3) * h * 0.1;
+      const orbGrad1 = ctx.createRadialGradient(orb1X, orb1Y, 0, orb1X, orb1Y, w * 0.25);
+      orbGrad1.addColorStop(0, 'rgba(251, 191, 36, 0.06)');
+      orbGrad1.addColorStop(1, 'rgba(251, 191, 36, 0)');
+      ctx.fillStyle = orbGrad1;
+      ctx.fillRect(0, 0, w, h);
+
+      const orb2X = w * 0.7 + Math.cos(time * 0.4) * w * 0.12;
+      const orb2Y = h * 0.6 + Math.sin(time * 0.6) * h * 0.08;
+      const orbGrad2 = ctx.createRadialGradient(orb2X, orb2Y, 0, orb2X, orb2Y, w * 0.2);
+      orbGrad2.addColorStop(0, 'rgba(59, 130, 246, 0.04)');
+      orbGrad2.addColorStop(1, 'rgba(59, 130, 246, 0)');
+      ctx.fillStyle = orbGrad2;
+      ctx.fillRect(0, 0, w, h);
+
+      // Draw particles
+      canvasParticles.forEach((p) => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.pulse += p.pulseSpeed;
+
+        // Wrap around
+        if (p.x < 0) p.x = w;
+        if (p.x > w) p.x = 0;
+        if (p.y < 0) p.y = h;
+        if (p.y > h) p.y = 0;
+
+        const pulseOpacity = p.opacity * (0.5 + 0.5 * Math.sin(p.pulse));
+        const pulseRadius = p.radius * (0.8 + 0.2 * Math.sin(p.pulse));
+
+        // Glow
+        const glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, pulseRadius * 4);
+        glow.addColorStop(0, `hsla(${p.hue}, 90%, 65%, ${pulseOpacity * 0.6})`);
+        glow.addColorStop(1, `hsla(${p.hue}, 90%, 65%, 0)`);
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, pulseRadius * 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Core
+        ctx.fillStyle = `hsla(${p.hue}, 90%, 75%, ${pulseOpacity})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, pulseRadius, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Connection lines between close particles
+      for (let i = 0; i < canvasParticles.length; i++) {
+        for (let j = i + 1; j < canvasParticles.length; j++) {
+          const dx = canvasParticles[i].x - canvasParticles[j].x;
+          const dy = canvasParticles[i].y - canvasParticles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 120) {
+            ctx.strokeStyle = `rgba(251, 191, 36, ${0.06 * (1 - dist / 120)})`;
+            ctx.lineWidth = 0.5;
+            ctx.beginPath();
+            ctx.moveTo(canvasParticles[i].x, canvasParticles[i].y);
+            ctx.lineTo(canvasParticles[j].x, canvasParticles[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      animationRef.current = requestAnimationFrame(animate);
+    };
+
+    animate();
+
+    return () => {
+      window.removeEventListener('resize', resize);
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    const cleanup = initCanvas();
+    return cleanup;
+  }, [initCanvas]);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (showVideo) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [showVideo]);
+
+  const handleOpenVideo = () => setShowVideo(true);
+  const handleCloseVideo = () => setShowVideo(false);
 
   return (
     <section className="hero-section" aria-labelledby="hero-title">
-      {/* Video Background */}
-      <div className="hero-video-wrapper">
-        <video
-          className="hero-video"
-          autoPlay
-          muted
-          loop
-          playsInline
-          poster="/images/hero-poster.jpg"
+      {/* Canvas Animated Video Background */}
+      <canvas
+        ref={canvasRef}
+        className="hero-canvas-bg"
+        aria-hidden="true"
+      />
+
+      {/* Background Auction Image (layered behind canvas) */}
+      <div className="hero-bg-image-wrapper">
+        <img
+          className="hero-bg-image"
+          src="/assets/hero-auction-bg.png"
+          alt=""
           aria-hidden="true"
-        >
-          <source src="/videos/hero-bg.mp4" type="video/mp4" />
-          <source src="/videos/hero-bg.webm" type="video/webm" />
-        </video>
+        />
         <div className="hero-overlay" />
         <div className="hero-gradient-overlay" />
       </div>
@@ -159,13 +338,16 @@ const HeroSection = () => {
               </Button>
             </Link>
             <Button
-              className="hero-btn-secondary"
+              className="hero-btn-secondary hero-btn-video"
               variant="outline"
               size="lg"
+              onClick={handleOpenVideo}
               whileHover={{ scale: 1.05, y: -3 }}
               whileTap={{ scale: 0.97 }}
             >
-              <FiTrendingUp className="btn-icon" size={20} />
+              <span className="video-play-ring" aria-hidden="true">
+                <FiPlay className="video-play-icon" size={14} />
+              </span>
               Watch Demo
             </Button>
           </motion.div>
@@ -210,6 +392,70 @@ const HeroSection = () => {
           </motion.div>
         </div>
       </div>
+
+      {/* ─── Video Modal ─── */}
+      <AnimatePresence>
+        {showVideo && (
+          <motion.div
+            className="video-modal-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.35 }}
+            onClick={handleCloseVideo}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Demo video player"
+          >
+            {/* Close button */}
+            <motion.button
+              className="video-modal-close"
+              onClick={handleCloseVideo}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{ delay: 0.2 }}
+              aria-label="Close video"
+            >
+              <FiX size={24} />
+            </motion.button>
+
+            {/* Video container */}
+            <motion.div
+              className="video-modal-container"
+              onClick={(e) => e.stopPropagation()}
+              initial={{ opacity: 0, scale: 0.85, y: 40 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.85, y: 40 }}
+              transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+            >
+              {/* Glow effect behind video */}
+              <div className="video-glow" aria-hidden="true" />
+
+              <div className="video-wrapper">
+                <iframe
+                  src="https://www.youtube.com/embed/q4vrzGTbEBs?autoplay=1&rel=0&modestbranding=1&showinfo=0"
+                  title="Platform Demo Video"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="video-iframe"
+                />
+              </div>
+
+              {/* Video info bar */}
+              <div className="video-info-bar">
+                <div className="video-info-left">
+                  <span className="video-info-badge">DEMO</span>
+                  <span className="video-info-title">How CricAuction Works</span>
+                </div>
+                <div className="video-info-right">
+                  <span className="video-info-duration">2:45</span>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 };

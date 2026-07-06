@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
 import { FiAward, FiUsers, FiPlayCircle, FiServer, FiSliders, FiBell, FiDollarSign, FiMonitor } from 'react-icons/fi';
-import Button from '../../components/common/Button';
 import './FeaturesSection.css';
 
 const features = [
@@ -25,7 +24,6 @@ const FeaturesSection = () => {
           viewport={{ once: true, margin: '-100px' }}
           transition={{ duration: 0.6, ease: 'easeOut' }}
         >
-          <span className="section-badge">🚀 Key Features</span>
           <h2 id="features-title" className="section-title">All-In-One Cricket Auction Suite</h2>
           <p className="section-subtitle">
             Packed with powerful tools to manage every aspect of your cricket tournament and player auctions.
@@ -48,9 +46,6 @@ const FeaturesSection = () => {
               </div>
               <h3 className="feature-title">{feature.title}</h3>
               <p className="feature-description">{feature.description}</p>
-              <Button variant="link" className="feature-learn-more">
-                Learn More →
-              </Button>
             </motion.div>
           ))}
         </motion.div>

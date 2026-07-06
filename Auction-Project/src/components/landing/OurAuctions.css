@@ -1,26 +1,22 @@
 /* Our Auctions Section Styles */
 .our-auctions {
   padding: 100px 0;
-  background: var(--bg-primary-light);
-  overflow: hidden; /* Prevents content overlap with background effect */
+  background: #0a0e1a;
+  overflow: hidden;
 }
 
 .our-auctions .section-header {
   margin-bottom: 64px;
 }
 
-.our-auctions .section-badge {
-  background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(245, 158, 11, 0.15));
-  color: var(--accent-gold);
-  border: 1px solid rgba(251, 191, 36, 0.3);
-}
-
 .our-auctions .section-title {
-  color: var(--text-primary-light);
+  color: #ffffff;
+  text-align: center;
 }
 
 .our-auctions .section-subtitle {
-  color: var(--text-secondary-light);
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
 }
 
 /* Features Grid */
@@ -31,8 +27,8 @@
 }
 
 .feature-card {
-  background: var(--card-bg-light);
-  border: 1px solid var(--border-light);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 20px;
   padding: 40px 32px;
   display: flex;
@@ -40,12 +36,13 @@
   align-items: center;
   text-align: center;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
 .feature-card:hover {
   transform: translateY(-10px);
-  box-shadow: 0 25px 45px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 25px 45px rgba(251, 191, 36, 0.08);
+  border-color: rgba(251, 191, 36, 0.2);
 }
 
 .feature-icon-container {
@@ -56,36 +53,23 @@
   align-items: center;
   justify-content: center;
   margin-bottom: 24px;
-  background: var(--accent-light); /* Default, will be overridden by inline style */
+  background: var(--accent-gold);
 }
 
 .feature-title {
   font-size: 20px;
   font-weight: 700;
-  color: var(--text-primary-light);
+  color: #ffffff;
   margin: 0 0 16px;
 }
 
 .feature-description {
   font-size: 15px;
-  color: var(--text-secondary-light);
+  color: rgba(255, 255, 255, 0.55);
   line-height: 1.7;
-  margin: 0 auto 32px;
-  flex-grow: 1; /* Allow description to take available space */
+  margin: 0 auto 0;
+  flex-grow: 1;
   max-width: 350px;
-}
-
-.feature-action-btn {
-  padding: 12px 28px;
-  border-radius: 10px;
-  font-weight: 600;
-  border-color: var(--accent-light); /* Default, overridden by inline style */
-  color: var(--accent-light); /* Default, overridden by inline style */
-}
-
-.feature-action-btn:hover {
-  background: var(--accent-light);
-  color: #fff !important; /* Ensure text color changes on hover */
 }
 
 /* Responsive */
@@ -115,7 +99,7 @@
   }
   
   .feature-description {
-    margin-bottom: 24px;
+    margin-bottom: 0;
   }
 }
 

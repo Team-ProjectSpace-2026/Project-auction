@@ -106,10 +106,11 @@ CricAuction is an automated, real-time SaaS platform tailored for managing sport
 **Link Status Module:** Handles access properties for incoming candidate pipelines.
 
 **Component Architecture:**
-- Phase Banner Container: A green alert box reflecting live availability states (e.g., Registration Status: Open).
-- Registration URL Field Wrapper: Displays an immutable string reflecting the registration pathway, flanked by an explicit "Copy Link" clipboard button and an external "Open Link" redirect tab indicator.
-- Registration Settings Summary Rows: Renders structural variables tracing lifecycle gates: Registration Start Date, Registration End Date, Allow Player Registration, Require Player Profile, Maximum Players, and Players Can Edit Profile.
-- Instructional Overlay Card: A pale warning container displaying timeline notifications regarding upcoming registration closures.
+- Phase Banner Container: A green alert box reflecting live availability status (e.g., Active / Paused).
+- Shareable Link Field: A non-editable text entry row displaying the unique public registration URL, complete with a leading link icon and an interactive, right-aligned "Copy Link" clipboard action trigger.
+- Access Control Toggle: A localized sliding toggle switch element enabling organizers to manually open or close the public registration pathway at will.
+- QR Code Canvas Generator: A central block containing a dynamically rendered QR code mapping directly to the recruitment link, paired with a secondary download trigger button ("Download QR Code").
+
 
 ### 4.3 Public Registration App Interface
 

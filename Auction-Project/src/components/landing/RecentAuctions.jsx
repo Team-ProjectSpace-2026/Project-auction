@@ -110,7 +110,6 @@ const RecentAuctions = () => {
           viewport={{ once: true, margin: '-100px' }}
           transition={{ duration: 0.6, ease: 'easeOut' }}
         >
-          <span className="section-badge">📊 Recent Activity</span>
           <h2 id="recent-auctions-title" className="section-title">Recent Auctions</h2>
           <p className="section-subtitle">
             Explore the latest cricket league auctions and their results
