@@ -659,3 +659,17 @@ The live auction room (PRD §6) is the most complex part of the system. Key rule
 - Ensured no wrapper backgrounds create unwanted circle effects
 
 **Next step for whoever picks this up:** Test logo rendering across different screen sizes and browser zoom levels; verify sidebar text doesn't overflow on narrow viewports; consider adding responsive breakpoints for sidebar collapse on mobile.
+
+---
+
+### 2026-07-06 13:40 — Hero Section Video Background & Demo Modal Complete (AI session)
+
+**Worked on:** Implemented the hero section video background feature, including a cinematic canvas animation and a full-screen interactive YouTube video modal for the demo.
+
+**Changed:**
+
+*Frontend:*
+- Updated `src/components/landing/HeroSection.jsx` — Replaced static background with an interactive `<canvas>` with custom high-performance particle flows, glowing orbs, light beams, and particle connection lines. Added `showVideo` modal state, body scroll-lock side-effects, and a responsive video popup overlay featuring a YouTube player embed (`q4vrzGTbEBs` cricket auction highlights), close logic, and title info bar.
+- Updated `src/components/landing/HeroSection.css` — Styled the absolute-positioned `.hero-canvas-bg`, created pulsing rings/animations for the "Watch Demo" play button, designed the video modal overlay (`.video-modal-overlay`, `.video-modal-container`, `.video-glow` border gradient-shimmer, and responsive metadata bar), and optimized layout for mobile devices.
+
+**Next step for whoever picks this up:** Replace the placeholder YouTube video ID with the final production platform overview video URL if needed; integrate lazy loading/suspend logic on the canvas container when scrolling past the fold to optimize rendering performance.

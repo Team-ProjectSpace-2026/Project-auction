@@ -1,8 +1,8 @@
 /* Landing Page Styles */
 .landing-page-wrapper {
   overflow-x: hidden; /* Prevent horizontal scroll */
-  background-color: var(--bg-primary-light); /* Base background color */
-  color: var(--text-primary-light);
+  background-color: #0a0e1a; /* Dark cricket auction theme */
+  color: #e2e8f0;
   font-family: 'Inter', sans-serif;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
