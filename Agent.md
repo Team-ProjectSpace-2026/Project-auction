@@ -275,6 +275,7 @@ Use this when building a page or component — it maps each screen directly to w
 | Teams Grid | ✅ Done |
 | Players Table | ✅ Done |
 | Live Auction Placeholder | ✅ Done |
+| Landing Page | ✅ Done |
 | Public Registration Form | ⬜ Not started |
 | Teams Panel | ⬜ Not started |
 | Team Detail / Squad Roster | ⬜ Not started |
@@ -532,6 +533,7 @@ The live auction room (PRD §6) is the most complex part of the system. Key rule
 - Added `POST /:tournamentId/mark-unsold` route
 
 **Socket Events Summary:**
+
 | Event | Direction | Purpose |
 |-------|-----------|---------|
 | `mark-sold` | Client→Server | Organizer marks player as sold |
@@ -544,6 +546,7 @@ The live auction room (PRD §6) is the most complex part of the system. Key rule
 | `auction-state` | Server→Client | Send current state to requester |
 
 **REST Endpoints Added:**
+
 | Endpoint | Method | Purpose |
 |----------|--------|---------|
 | `/api/auction/:tournamentId/mark-sold` | POST | Mark player as sold (fallback) |
@@ -735,6 +738,60 @@ The live auction room (PRD §6) is the most complex part of the system. Key rule
 - Ensured no wrapper backgrounds create unwanted circle effects
 
 **Next step for whoever picks this up:** Test logo rendering across different screen sizes and browser zoom levels; verify sidebar text doesn't overflow on narrow viewports; consider adding responsive breakpoints for sidebar collapse on mobile.
+
+---
+
+### 2026-07-06 13:29 — Auction Engine Backend Complete (Pratham)
+
+**Worked on:** Completed the full auction engine backend implementation with SOLD/UNSOLD socket events, auction state tracking, and REST fallback endpoints.
+
+**Changed:**
+
+*Backend — Tournament Model (`Auction-Server/src/models/Tournament.js`):*
+- Added `currentPlayerId` field (ObjectId ref Player, default null) to track which player is currently being auctioned
+- Added `auctionStatus` field (enum: idle, bidding, sold, unsold, default idle) to track auction state
+
+*Backend — Bid Validator (`Auction-Server/src/utils/bidValidator.js`):*
+- Added `cancelActiveBids(tournamentId, playerId, session)` helper function to cancel all active bids for a player (used in UNSOLD flow)
+- Returns count of cancelled bids
+
+*Backend — Socket Events (`Auction-Server/src/socket/auctionSocket.js`):*
+- Added `mark-sold` event: finds active bid → calls `processWinningBid()` → updates Tournament state → broadcasts `player-sold` to all clients
+- Added `mark-unsold` event: calls `cancelActiveBids()` → updates Tournament state → broadcasts `player-unsold` to all clients
+- Added `get-auction-state` event: returns current player, bid, and auction status to requester (for new client sync)
+- Modified `reveal-player` event: now verifies player exists, updates Tournament `currentPlayerId` and `auctionStatus = "bidding"`, broadcasts populated player data
+- Added bid rejection guard in `place-bid`: rejects bids if `auctionStatus !== "bidding"` or wrong player
+
+*Backend — Controllers (`Auction-Server/src/controllers/auction.controller.js`):*
+- Added `markSold` controller: REST endpoint for marking player as sold
+- Added `markUnsold` controller: REST endpoint for marking player as unsold
+- Added bid rejection guard in `placeBid` controller
+
+*Backend — Routes (`Auction-Server/src/routes/auction.routes.js`):*
+- Added `POST /:tournamentId/mark-sold` route
+- Added `POST /:tournamentId/mark-unsold` route
+
+**Socket Events Summary:**
+
+| Event | Direction | Purpose |
+|-------|-----------|---------|
+| `mark-sold` | Client→Server | Organizer marks player as sold |
+| `mark-sold-success` | Server→Client | Confirmation to sender |
+| `player-sold` | Server→Client | Broadcast sale to all clients |
+| `mark-unsold` | Client→Server | Organizer marks player as unsold |
+| `mark-unsold-success` | Server→Client | Confirmation to sender |
+| `player-unsold` | Server→Client | Broadcast unsold to all clients |
+| `get-auction-state` | Client→Server | Request current auction state |
+| `auction-state` | Server→Client | Send current state to requester |
+
+**REST Endpoints Added:**
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/auction/:tournamentId/mark-sold` | POST | Mark player as sold (fallback) |
+| `/api/auction/:tournamentId/mark-unsold` | POST | Mark player as unsold (fallback) |
+
+**Next step for whoever picks this up:** Pallavi needs to implement frontend socket integration (`useSocket` hook, install `socket.io-client`), wire SOLD/UNSOLD buttons to emit `mark-sold`/`mark-unsold`, and listen for `player-sold`, `player-unsold`, `new-bid`, `player-revealed` events.
 
 ---
 
