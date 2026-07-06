@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { FiPlay, FiTrendingUp, FiChevronDown, FiArrowDown, FiX } from 'react-icons/fi';
+import { FiPlay, FiChevronDown, FiArrowDown, FiX } from 'react-icons/fi';
 import Button from '../../components/common/Button';
 import './HeroSection.css';
 
