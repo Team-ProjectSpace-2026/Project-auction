@@ -355,8 +355,12 @@ const LiveAuctionTab = () => {
         <PlayerRevealModal
           onClose={() => setShowRevealModal(false)}
           onContinue={() => {
-            setShowRevealModal(false);
             setShowPlayerCard(true);
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                setShowRevealModal(false);
+              });
+            });
           }}
         />
       )}
@@ -365,7 +369,6 @@ const LiveAuctionTab = () => {
         <PlayerDetailsModal
           onClose={() => setShowPlayerCard(false)}
           onStartBidding={() => {
-            setShowPlayerCard(false);
             navigate("/live-auction");
           }}  
         />

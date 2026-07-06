@@ -457,8 +457,12 @@ const AuctionRoom = () => {
         <SoldPlayerModal
           onClose={() => setShowSoldModal(false)}
           onNextPlayer={() => {
-            setShowSoldModal(false);
             setShowRevealModal(true);
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                setShowSoldModal(false);
+              });
+            });
           }}
         />
       )}
@@ -467,8 +471,12 @@ const AuctionRoom = () => {
         <UnsoldPlayerModal
           onClose={() => setShowUnsoldModal(false)}
           onNextPlayer={() => {
-            setShowUnsoldModal(false);
             setShowRevealModal(true);
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                setShowUnsoldModal(false);
+              });
+            });
           }}
         />
       )}
