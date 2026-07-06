@@ -1,4 +1,8 @@
 export const formatCurrency = (value) => {
-  // Simple placeholder – real implementation should format INR
-  return `₹${value}`;
+  if (value == null) return "₹0";
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(value);
 };

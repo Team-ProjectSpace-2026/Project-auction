@@ -1,4 +1,6 @@
-const SoldPlayerModal = ({ onClose, onNextPlayer }) => {
+import { formatCurrency } from "../../utils/formatCurrency";
+
+const SoldPlayerModal = ({ onClose, onNextPlayer, playerName, teamName, soldPrice }) => {
   return (
     <div
       style={{
@@ -27,10 +29,10 @@ const SoldPlayerModal = ({ onClose, onNextPlayer }) => {
             marginBottom: "20px",
           }}
         >
-          ✅ PLAYER SOLD!
+          PLAYER SOLD!
         </h1>
 
-        <h2 style={{ color: "var(--text-primary-light)" }}>Virat Kohli</h2>
+        <h2 style={{ color: "var(--text-primary-light)" }}>{playerName || "Unknown Player"}</h2>
 
         <p
           style={{
@@ -46,7 +48,7 @@ const SoldPlayerModal = ({ onClose, onNextPlayer }) => {
             color: "var(--accent-light)",
           }}
         >
-          Mangalore Warriors
+          {teamName || "Unknown Team"}
         </h3>
 
         <h1
@@ -55,7 +57,7 @@ const SoldPlayerModal = ({ onClose, onNextPlayer }) => {
             marginTop: "20px",
           }}
         >
-          ₹85,000
+          {formatCurrency(soldPrice)}
         </h1>
 
         <button

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import PlayerRevealModal from "./PlayerRevealModal";
 import PlayerDetailsModal from "./PlayerDetailsModal";
 
@@ -14,6 +14,7 @@ const enterFullscreen = () => {
 
 const LiveAuctionTab = () => {
   const navigate = useNavigate();
+  const { tournamentId } = useParams();
 
   const [showRevealModal, setShowRevealModal] = useState(false);
   const [showPlayerCard, setShowPlayerCard] = useState(false);
@@ -369,7 +370,12 @@ const LiveAuctionTab = () => {
         <PlayerDetailsModal
           onClose={() => setShowPlayerCard(false)}
           onStartBidding={() => {
+<<<<<<< HEAD
             navigate("/live-auction");
+=======
+            setShowPlayerCard(false);
+            navigate(`/live-auction?tournamentId=${tournamentId}`);
+>>>>>>> origin/Pallavi
           }}  
         />
       )}
