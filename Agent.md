@@ -15,6 +15,13 @@
 
 ---
 
+### 2026-07-05 — Auction Engine Backend Complete (Pratham)
+**Worked on:** Implemented complete auction engine with SOLD/UNSOLD socket events, auction state tracking, and REST fallback endpoints.
+**Changed:** Added `currentPlayerId` and `auctionStatus` to Tournament model; added `cancelActiveBids` helper; added `mark-sold`, `mark-unsold`, `get-auction-state` socket events; modified `reveal-player` to update state; added bid rejection guard in `place-bid`; added `markSold`/`markUnsold` REST controllers and routes.
+**Next step for whoever picks this up:** Pallavi needs to implement frontend socket integration (`useSocket` hook, `socket.io-client`), wire SOLD/UNSOLD buttons to emit backend events.
+
+---
+
 ### 2026-06-22 — Tournament Hub Design & List Page Complete (AI session)
 **Worked on:** Built full tournament management UI including list page and hub with tabs.
 **Changed:** Created `TournamentsListPage.jsx` with search/filter/pagination; `TournamentTabs.jsx` for tab navigation; `TournamentCard.jsx` for card layout; integrated `TournamentStats` into hub; added route `/tournaments-list`; wired Sidebar navigation to route to tournaments list on click; updated build status table.
@@ -285,9 +292,10 @@ Use this when building a page or component — it maps each screen directly to w
 | Routing setup (React Router) | ✅ Done |
 | Auth Context + JWT handling | ⬜ Not started |
 | Axios service layer | ⬜ Not started |
-| Backend scaffold (Express) | ⬜ Not started |
-| MongoDB models | ⬜ Not started |
-| Socket.IO setup | ⬜ Not started |
+| Backend scaffold (Express) | ✅ Done |
+| MongoDB models | ✅ Done |
+| Socket.IO setup | ✅ Done |
+| Auction Engine (bid logic, SOLD/UNSOLD) | ✅ Done |
 | CI/CD (`ci.yml`) | ⚠️ File exists — contributor: document what it runs |
 | Deployment | ⬜ Not configured |
 
@@ -343,14 +351,18 @@ npm run dev                    # Runs on http://localhost:5000
 > Update this every session — this is the literal answer to "what do I do first?"
 
 **Current priority:**
-*(contributor: fill this in — e.g. "Build Login + Register pages per PRD §2.1–2.2" or "Scaffold Auction-Server/ with Express + Mongoose")*
+- Pallavi: Implement frontend socket integration (`useSocket` hook, `socket.io-client`), wire SOLD/UNSOLD buttons to backend
+- Karthik: Complete JWT auth flow, wire login/register to backend
+- Ashith: Connect tournament CRUD to backend API
+- Swaroop: Fix team controller bugs, implement cascade delete
+- Manasa: Connect player list to backend API, fix upload directory
+- Rahul: Write Jest tests for controllers, generate API documentation
 
 **Known blockers / open questions:**
-- Root `package.json` purpose not yet confirmed — does it run scripts or is it boilerplate?
-- `ci.yml` contents not yet documented — what does it actually run?
-- Node version not locked — add `.nvmrc` when decided
-- State management decision pending — Context API is the default assumption; switch to Zustand if complexity grows (decide and document before building auction logic)
-- Socket.IO room strategy not yet designed — each tournament gets its own room? Confirm before building `auctionSocket.js`
+- Frontend `socket.io-client` not yet installed — Pallavi needs this first
+- `AuctionContext` and `useSocket` hooks are stubs — need implementation
+- Frontend `api.js` Axios instance does not inject JWT auth headers yet
+- No `constants/socketEvents.js` file exists — should be created to avoid string typos
 
 ---
 
@@ -364,7 +376,7 @@ Document every team decision here. The goal: no one re-debates the same thing tw
 - **Currency formatting:** Always render INR amounts in Indian numbering format (e.g. ₹1,00,000). Use `utils/formatCurrency.js` — do not inline format logic in components.
 - **Player roles:** Use the constants in `constants/roles.js` (Batsman, Bowler, All Rounder, Wicket Keeper). Do not hardcode role strings in components.
 - **API calls:** All HTTP calls go through `services/` — never write `fetch`/`axios` calls directly inside components or pages.
-- **Socket events:** All Socket.IO event names must be defined as constants (add a `constants/socketEvents.js` file when backend work begins) to avoid string typos across client and server.
+- **Socket events:** All Socket.IO event names must be defined as constants (add a `constants/socketEvents.js` file when backend work begins) to avoid string typos across client and server. Current events: `join-tournament`, `place-bid`, `reveal-player`, `start-auction`, `end-auction`, `mark-sold`, `mark-unsold`, `get-auction-state`.
 - **Auth guards:** Protected routes are wrapped in a guard component inside `router/AppRouter.jsx` — do not implement auth checks inside individual page components.
 - *(add more as decisions are made)*
 
@@ -410,6 +422,58 @@ The live auction room (PRD §6) is the most complex part of the system. Key rule
 
 
 ## Daily Work Log
+
+---
+
+### 2026-07-05 — Auction Engine: SOLD/UNSOLD Flow & State Management (Pratham)
+
+**Worked on:** Implemented complete auction engine backend with SOLD/UNSOLD socket events, auction state tracking, and REST API fallback endpoints.
+
+**Changed:**
+
+*Backend — Tournament Model (`Auction-Server/src/models/Tournament.js`):*
+- Added `currentPlayerId` field (ObjectId ref Player, default null) to track which player is currently being auctioned
+- Added `auctionStatus` field (enum: idle, bidding, sold, unsold, default idle) to track auction state
+
+*Backend — Bid Validator (`Auction-Server/src/utils/bidValidator.js`):*
+- Added `cancelActiveBids(tournamentId, playerId, session)` helper function to cancel all active bids for a player (used in UNSOLD flow)
+- Returns count of cancelled bids
+
+*Backend — Socket Events (`Auction-Server/src/socket/auctionSocket.js`):*
+- Added `mark-sold` event: finds active bid → calls `processWinningBid()` → updates Tournament state → broadcasts `player-sold` to all clients
+- Added `mark-unsold` event: calls `cancelActiveBids()` → updates Tournament state → broadcasts `player-unsold` to all clients
+- Added `get-auction-state` event: returns current player, bid, and auction status to requester (for new client sync)
+- Modified `reveal-player` event: now verifies player exists, updates Tournament `currentPlayerId` and `auctionStatus = "bidding"`, broadcasts populated player data
+- Added bid rejection guard in `place-bid`: rejects bids if `auctionStatus !== "bidding"` or wrong player
+
+*Backend — Controllers (`Auction-Server/src/controllers/auction.controller.js`):*
+- Added `markSold` controller: REST endpoint for marking player as sold
+- Added `markUnsold` controller: REST endpoint for marking player as unsold
+- Added bid rejection guard in `placeBid` controller
+
+*Backend — Routes (`Auction-Server/src/routes/auction.routes.js`):*
+- Added `POST /:tournamentId/mark-sold` route
+- Added `POST /:tournamentId/mark-unsold` route
+
+**Socket Events Summary:**
+| Event | Direction | Purpose |
+|-------|-----------|---------|
+| `mark-sold` | Client→Server | Organizer marks player as sold |
+| `mark-sold-success` | Server→Client | Confirmation to sender |
+| `player-sold` | Server→Client | Broadcast sale to all clients |
+| `mark-unsold` | Client→Server | Organizer marks player as unsold |
+| `mark-unsold-success` | Server→Client | Confirmation to sender |
+| `player-unsold` | Server→Client | Broadcast unsold to all clients |
+| `get-auction-state` | Client→Server | Request current auction state |
+| `auction-state` | Server→Client | Send current state to requester |
+
+**REST Endpoints Added:**
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/auction/:tournamentId/mark-sold` | POST | Mark player as sold (fallback) |
+| `/api/auction/:tournamentId/mark-unsold` | POST | Mark player as unsold (fallback) |
+
+**Next step for whoever picks this up:** Pallavi needs to implement frontend socket integration (`useSocket` hook, install `socket.io-client`), wire SOLD/UNSOLD buttons to emit `mark-sold`/`mark-unsold`, and listen for `player-sold`, `player-unsold`, `new-bid`, `player-revealed` events.
 
 ---
 

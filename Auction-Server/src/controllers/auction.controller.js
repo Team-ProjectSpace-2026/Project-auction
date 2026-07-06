@@ -2,7 +2,8 @@ import mongoose from 'mongoose';
 import Bid from '../models/Bid.js';
 import Player from '../models/Player.js';
 import Team from '../models/Team.js';
-import { validateBid, getWinningBid, processWinningBid } from '../utils/bidValidator.js';
+import Tournament from '../models/Tournament.js';
+import { validateBid, getWinningBid, processWinningBid, cancelActiveBids } from '../utils/bidValidator.js';
 
 export const getAuctionState = async (req, res, next) => {
   try {
@@ -53,6 +54,19 @@ export const placeBid = async (req, res, next) => {
     const amount = Number(req.body.amount) || 0;
     const teamId = String(req.body.teamId || "");
     const playerId = String(req.body.playerId || "");
+
+    // Check auction status
+    const tournament = await Tournament.findById(tournamentId);
+    if (!tournament) {
+      return res.status(404).json({ message: "Tournament not found" });
+    }
+    if (
+      tournament.auctionStatus !== "bidding" ||
+      !tournament.currentPlayerId ||
+      tournament.currentPlayerId.toString() !== playerId
+    ) {
+      return res.status(400).json({ message: "No active auction for this player" });
+    }
     
     // Get current winning bid
     const currentBid = await getWinningBid(tournamentId, playerId);
@@ -112,6 +126,95 @@ export const getBidHistory = async (req, res, next) => {
     .populate('teamId', 'name');
     
     res.json(bids);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const markSold = async (req, res, next) => {
+  try {
+    const tournamentId = new mongoose.Types.ObjectId(req.params.tournamentId);
+    const { playerId } = req.body;
+
+    if (!playerId || !mongoose.Types.ObjectId.isValid(playerId)) {
+      return res.status(400).json({ message: "Valid player ID is required" });
+    }
+
+    // Verify tournament exists
+    const tournament = await Tournament.findById(tournamentId);
+    if (!tournament) {
+      return res.status(404).json({ message: "Tournament not found" });
+    }
+
+    // Find active bid for this player
+    const activeBid = await getWinningBid(tournamentId, playerId);
+    if (!activeBid) {
+      return res.status(400).json({ message: "No active bid found for this player" });
+    }
+
+    // Process winning bid
+    await processWinningBid(activeBid);
+
+    // Update tournament state
+    tournament.currentPlayerId = null;
+    tournament.auctionStatus = "sold";
+    await tournament.save();
+
+    // Populate response
+    const populatedBid = await Bid.findById(activeBid._id)
+      .populate('playerId', 'name')
+      .populate('teamId', 'name');
+
+    res.json({
+      message: "Player marked as sold",
+      bid: populatedBid,
+      soldPrice: populatedBid.amount,
+      teamName: populatedBid.teamId.name,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const markUnsold = async (req, res, next) => {
+  try {
+    const tournamentId = new mongoose.Types.ObjectId(req.params.tournamentId);
+    const { playerId } = req.body;
+
+    if (!playerId || !mongoose.Types.ObjectId.isValid(playerId)) {
+      return res.status(400).json({ message: "Valid player ID is required" });
+    }
+
+    // Verify tournament exists
+    const tournament = await Tournament.findById(tournamentId);
+    if (!tournament) {
+      return res.status(404).json({ message: "Tournament not found" });
+    }
+
+    // Cancel active bids for this player
+    const session = await mongoose.startSession();
+    let cancelledCount = 0;
+    try {
+      await session.withTransaction(async () => {
+        cancelledCount = await cancelActiveBids(tournamentId, playerId, session);
+      });
+    } finally {
+      await session.endSession();
+    }
+
+    // Update tournament state
+    tournament.currentPlayerId = null;
+    tournament.auctionStatus = "unsold";
+    await tournament.save();
+
+    // Get player name
+    const player = await Player.findById(playerId);
+
+    res.json({
+      message: "Player marked as unsold",
+      playerName: player ? player.name : "Unknown",
+      cancelledBids: cancelledCount,
+    });
   } catch (error) {
     next(error);
   }
