@@ -2,18 +2,18 @@ import { createServer } from 'http';
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import connectDB from './config/db.js';
-import { initializeSocket } from './socket/auctionSocket.js';
+import connectDB from './src/config/db.js';
+import { initializeSocket } from './src/socket/auctionSocket.js';
 
 // Import routes
-import authRoutes from './routes/auth.routes.js';
-import tournamentRoutes from './routes/tournament.routes.js';
-import playerRoutes from './routes/player.routes.js';
-import teamRoutes from './routes/team.routes.js';
-import auctionRoutes from './routes/auction.routes.js';
+import authRoutes from './src/routes/auth.routes.js';
+import tournamentRoutes from './src/routes/tournament.routes.js';
+import playerRoutes from './src/routes/player.routes.js';
+import teamRoutes from './src/routes/team.routes.js';
+import auctionRoutes from './src/routes/auction.routes.js';
 
 // Import middleware
-import { errorHandler } from './middleware/errorHandler.js';
+import { errorHandler } from './src/middleware/errorHandler.js';
 
 // Load environment variables
 dotenv.config();
