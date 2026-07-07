@@ -272,29 +272,19 @@ const AuctionRoom = () => {
 
       {soldInfo && (
         <SoldPlayerModal
-<<<<<<< HEAD
-          onClose={() => setShowSoldModal(false)}
-          onNextPlayer={() => setShowRevealModal(true)}
-=======
           onClose={clearSoldInfo}
           onNextPlayer={handleRevealNext}
           playerName={soldInfo.playerName}
           teamName={soldInfo.teamName}
           soldPrice={soldInfo.soldPrice}
->>>>>>> origin/Pallavi
         />
       )}
 
       {unsoldInfo && (
         <UnsoldPlayerModal
-<<<<<<< HEAD
-          onClose={() => setShowUnsoldModal(false)}
-          onNextPlayer={() => setShowRevealModal(true)}
-=======
           onClose={clearUnsoldInfo}
           onNextPlayer={handleRevealNext}
           playerName={unsoldInfo.playerName}
->>>>>>> origin/Pallavi
         />
       )}
     </div>

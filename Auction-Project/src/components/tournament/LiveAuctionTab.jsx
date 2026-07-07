@@ -370,12 +370,8 @@ const LiveAuctionTab = () => {
         <PlayerDetailsModal
           onClose={() => setShowPlayerCard(false)}
           onStartBidding={() => {
-<<<<<<< HEAD
-            navigate("/live-auction");
-=======
             setShowPlayerCard(false);
             navigate(`/live-auction?tournamentId=${tournamentId}`);
->>>>>>> origin/Pallavi
           }}  
         />
       )}
