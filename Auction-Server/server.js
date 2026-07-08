@@ -27,6 +27,8 @@ const PORT = process.env.PORT || 5000;
 await connectDB();
 
 // Middleware
+// Note: CSRF protection is handled by sameSite:'strict' cookies (set in auth.controller.js)
+// This prevents cross-site request forgery without requiring additional middleware
 app.use(cors({
   origin: process.env.CLIENT_URL || "http://localhost:5173",
   credentials: true

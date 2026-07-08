@@ -107,7 +107,9 @@ const TurnstileWidget = forwardRef(({ onVerify, onExpire, siteKey }, ref) => {
       if (widgetIdRef.current && window.turnstile) {
         try {
           window.turnstile.remove(widgetIdRef.current);
-        } catch (e) {}
+        } catch {
+          // Widget already removed, ignore error
+        }
       }
     };
   }, [siteKey, onVerify, onExpire]);
