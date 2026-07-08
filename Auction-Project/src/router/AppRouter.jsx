@@ -4,6 +4,7 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+import ProtectedRoute from "../components/common/ProtectedRoute";
 import LoginPage from "../pages/auth/LoginPage";
 import RegisterPage from "../pages/auth/RegisterPage";
 import DashboardPage from "../pages/dashboard/DashboardPage";
@@ -21,34 +22,90 @@ import LandingPage from "../pages/landing/LandingPage";
 const AppRouter = () => (
   <Router>
     <Routes>
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
-      <Route path="/dashboard" element={<DashboardPage />} />
-      <Route path="/create-tournament" element={<CreateTournamentPage />} />
-      <Route path="/tournaments" element={<TournamentsListPage />} />
+        {/* Public routes */}
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/register/:tournamentId" element={<PublicRegistrationPage />} />
 
-      <Route path="/tournament-details/:tournamentId?" element={<TournamentHubPage />} />
+        {/* Protected routes */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/create-tournament"
+          element={
+            <ProtectedRoute>
+              <CreateTournamentPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/tournaments"
+          element={
+            <ProtectedRoute>
+              <TournamentsListPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/tournament-details/:tournamentId?"
+          element={
+            <ProtectedRoute>
+              <TournamentHubPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/team-details"
+          element={
+            <ProtectedRoute>
+              <TeamDetailsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/live-auction"
+          element={
+            <ProtectedRoute>
+              <LiveAuctionPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/player-details"
+          element={
+            <ProtectedRoute>
+              <PlayerDetailsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/edit-tournament"
+          element={
+            <ProtectedRoute>
+              <EditTournamentPage />
+            </ProtectedRoute>
+          }
+        />
 
-      <Route path="/team-details" element={<TeamDetailsPage />} />
-
-      <Route path="/live-auction" element={<LiveAuctionPage />} />
-
-      <Route path="/player-details" element={<PlayerDetailsPage />} />
-
-      <Route path="/settings" element={<ProfilePage />} />
-
-      <Route path="/register/:tournamentId" element={<PublicRegistrationPage />} />
-
-      <Route
-    path="/edit-tournament"
-    element={<EditTournamentPage />}
- />
-       
-      {/* Fallback redirect to landing page */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
-  </Router>
+        {/* Fallback redirect to landing page */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Router>
 );
 
 export default AppRouter;

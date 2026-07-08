@@ -1,6 +1,7 @@
 import { createServer } from 'http';
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import connectDB from './src/config/db.js';
 import { initializeSocket } from './src/socket/auctionSocket.js';
@@ -26,10 +27,13 @@ const PORT = process.env.PORT || 5000;
 await connectDB();
 
 // Middleware
+// Note: CSRF protection is handled by sameSite:'strict' cookies (set in auth.controller.js)
+// This prevents cross-site request forgery without requiring additional middleware
 app.use(cors({
   origin: process.env.CLIENT_URL || "http://localhost:5173",
   credentials: true
 }));
+app.use(cookieParser());
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 

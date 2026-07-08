@@ -1,9 +1,13 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import InputField from "../../components/common/InputField";
 import Button from "../../components/common/Button";
+import TurnstileWidget from "../../components/common/TurnstileWidget";
 import "./RegisterPage.css";
 import batsmanLogo from "../../assets/cricauctionlogo1.png";
+
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 
 const RegisterPage = () => {
   const [fullName, setFullName] = useState("");
@@ -13,17 +17,60 @@ const RegisterPage = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState(null);
 
+  const { register } = useAuth();
   const navigate = useNavigate();
+  const turnstileRef = useRef(null);
 
-  const handleSubmit = (e) => {
+  const handleTurnstileVerify = (token) => {
+    setTurnstileToken(token);
+    setError("");
+  };
+
+  const handleTurnstileExpire = () => {
+    setTurnstileToken(null);
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+
     if (password !== confirmPassword) {
-      alert('Passwords do not match');
+      setError("Passwords do not match");
       return;
     }
-    localStorage.setItem('authToken', 'mock-token');
-    navigate('/dashboard');
+
+    if (!turnstileToken && TURNSTILE_SITE_KEY) {
+      setError("Please complete the security verification");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      await register({
+        name: fullName,
+        email,
+        mobile,
+        password,
+        turnstileToken,
+      });
+      navigate("/dashboard");
+    } catch (err) {
+      const message =
+        err.response?.data?.message || "Registration failed. Please try again.";
+      setError(message);
+      // Reset turnstile on error
+      if (turnstileRef.current?.resetWidget) {
+        turnstileRef.current.resetWidget();
+      }
+      setTurnstileToken(null);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -32,9 +79,16 @@ const RegisterPage = () => {
       <div className="register-left">
         <div className="register-left-content">
           <div className="brand">
-            <img src={batsmanLogo} alt="CricAuction logo" style={{
-              width: "120px", height: "120px", borderRadius: "50%", objectFit: "cover",
-            }} />
+            <img
+              src={batsmanLogo}
+              alt="CricAuction logo"
+              style={{
+                width: "120px",
+                height: "120px",
+                borderRadius: "50%",
+                objectFit: "cover",
+              }}
+            />
             <div>
               <h1>
                 Cric<span className="accent">Auction</span>
@@ -49,8 +103,8 @@ const RegisterPage = () => {
           </h2>
 
           <p className="subtext">
-            Join CricAuction and manage your cricket tournaments, players,
-            and live auctions all in one powerful platform.
+            Join CricAuction and manage your cricket tournaments, players, and
+            live auctions all in one powerful platform.
           </p>
 
           <ul className="feature-list">
@@ -90,21 +144,50 @@ const RegisterPage = () => {
       <div className="register-right">
         <div className="register-card">
           <div className="register-card-icon">
-  <img src={batsmanLogo} alt="CricAuction logo" style={{
-    width: "100px", height: "100px", borderRadius: "50%", objectFit: "cover",
-  }} />
-</div>
+            <img
+              src={batsmanLogo}
+              alt="CricAuction logo"
+              style={{
+                width: "100px",
+                height: "100px",
+                borderRadius: "50%",
+                objectFit: "cover",
+              }}
+            />
+          </div>
 
           <h2 className="welcome-title">Create Organizer Account</h2>
           <p className="welcome-subtitle">Fill in the details below to get started</p>
 
+          {error && (
+            <div
+              style={{
+                padding: "10px 14px",
+                marginBottom: "16px",
+                backgroundColor: "#fef2f2",
+                border: "1px solid #fecaca",
+                borderRadius: "8px",
+                color: "#dc2626",
+                fontSize: "14px",
+              }}
+            >
+              {error}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit}>
-            <label className="field-label" htmlFor="fullName">Full Name</label>
+            <label className="field-label" htmlFor="fullName">
+              Full Name
+            </label>
             <div className="input-wrapper">
               <span className="input-icon">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                   <circle cx="12" cy="8" r="4" stroke="#9CA3AF" strokeWidth="1.5" />
-                  <path d="M4 20c0-4 3.5-7 8-7s8 3 8 7" stroke="#9CA3AF" strokeWidth="1.5" />
+                  <path
+                    d="M4 20c0-4 3.5-7 8-7s8 3 8 7"
+                    stroke="#9CA3AF"
+                    strokeWidth="1.5"
+                  />
                 </svg>
               </span>
               <InputField
@@ -118,12 +201,22 @@ const RegisterPage = () => {
               />
             </div>
 
-            <label className="field-label" htmlFor="email">Email Address</label>
+            <label className="field-label" htmlFor="email">
+              Email Address
+            </label>
             <div className="input-wrapper">
               <span className="input-icon">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                   <path d="M3 6l9 6 9-6" stroke="#9CA3AF" strokeWidth="1.5" />
-                  <rect x="3" y="5" width="18" height="14" rx="2" stroke="#9CA3AF" strokeWidth="1.5" />
+                  <rect
+                    x="3"
+                    y="5"
+                    width="18"
+                    height="14"
+                    rx="2"
+                    stroke="#9CA3AF"
+                    strokeWidth="1.5"
+                  />
                 </svg>
               </span>
               <InputField
@@ -137,7 +230,9 @@ const RegisterPage = () => {
               />
             </div>
 
-            <label className="field-label" htmlFor="mobile">Mobile Number</label>
+            <label className="field-label" htmlFor="mobile">
+              Mobile Number
+            </label>
             <div className="phone-wrapper">
               <span className="country-code">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -160,12 +255,26 @@ const RegisterPage = () => {
               />
             </div>
 
-            <label className="field-label" htmlFor="password">Password</label>
+            <label className="field-label" htmlFor="password">
+              Password
+            </label>
             <div className="input-wrapper">
               <span className="input-icon">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                  <rect x="5" y="11" width="14" height="9" rx="2" stroke="#9CA3AF" strokeWidth="1.5" />
-                  <path d="M8 11V7a4 4 0 018 0v4" stroke="#9CA3AF" strokeWidth="1.5" />
+                  <rect
+                    x="5"
+                    y="11"
+                    width="14"
+                    height="9"
+                    rx="2"
+                    stroke="#9CA3AF"
+                    strokeWidth="1.5"
+                  />
+                  <path
+                    d="M8 11V7a4 4 0 018 0v4"
+                    stroke="#9CA3AF"
+                    strokeWidth="1.5"
+                  />
                 </svg>
               </span>
               <InputField
@@ -182,27 +291,62 @@ const RegisterPage = () => {
                 className="input-icon-right"
                 aria-label={showPassword ? "Hide password" : "Show password"}
                 onClick={() => setShowPassword(!showPassword)}
-                style={{ background: 'none', border: 'none', padding: 0, margin: 0, cursor: 'pointer' }}
+                style={{
+                  background: "none",
+                  border: "none",
+                  padding: 0,
+                  margin: 0,
+                  cursor: "pointer",
+                }}
               >
                 {showPassword ? (
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <path d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M9.5 5.1A10.6 10.6 0 0112 5c5 0 9 4 10 7-0.4 1.1-1.1 2.3-2.1 3.4M6.4 6.4C4.3 7.8 2.8 9.7 2 12c1 3 5 7 10 7 1.3 0 2.5-.2 3.6-.6" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" />
+                    <path
+                      d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M9.5 5.1A10.6 10.6 0 0112 5c5 0 9 4 10 7-0.4 1.1-1.1 2.3-2.1 3.4M6.4 6.4C4.3 7.8 2.8 9.7 2 12c1 3 5 7 10 7 1.3 0 2.5-.2 3.6-.6"
+                      stroke="#9CA3AF"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                    />
                   </svg>
                 ) : (
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z" stroke="#9CA3AF" strokeWidth="1.5" />
-                    <circle cx="12" cy="12" r="3" stroke="#9CA3AF" strokeWidth="1.5" />
+                    <path
+                      d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"
+                      stroke="#9CA3AF"
+                      strokeWidth="1.5"
+                    />
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="3"
+                      stroke="#9CA3AF"
+                      strokeWidth="1.5"
+                    />
                   </svg>
                 )}
               </button>
             </div>
 
-            <label className="field-label" htmlFor="confirmPassword">Confirm Password</label>
+            <label className="field-label" htmlFor="confirmPassword">
+              Confirm Password
+            </label>
             <div className="input-wrapper">
               <span className="input-icon">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                  <rect x="5" y="11" width="14" height="9" rx="2" stroke="#9CA3AF" strokeWidth="1.5" />
-                  <path d="M8 11V7a4 4 0 018 0v4" stroke="#9CA3AF" strokeWidth="1.5" />
+                  <rect
+                    x="5"
+                    y="11"
+                    width="14"
+                    height="9"
+                    rx="2"
+                    stroke="#9CA3AF"
+                    strokeWidth="1.5"
+                  />
+                  <path
+                    d="M8 11V7a4 4 0 018 0v4"
+                    stroke="#9CA3AF"
+                    strokeWidth="1.5"
+                  />
                 </svg>
               </span>
               <InputField
@@ -217,30 +361,69 @@ const RegisterPage = () => {
               <button
                 type="button"
                 className="input-icon-right"
-                aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                aria-label={
+                  showConfirmPassword ? "Hide password" : "Show password"
+                }
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                style={{ background: 'none', border: 'none', padding: 0, margin: 0, cursor: 'pointer' }}
+                style={{
+                  background: "none",
+                  border: "none",
+                  padding: 0,
+                  margin: 0,
+                  cursor: "pointer",
+                }}
               >
                 {showConfirmPassword ? (
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <path d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M9.5 5.1A10.6 10.6 0 0112 5c5 0 9 4 10 7-0.4 1.1-1.1 2.3-2.1 3.4M6.4 6.4C4.3 7.8 2.8 9.7 2 12c1 3 5 7 10 7 1.3 0 2.5-.2 3.6-.6" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" />
+                    <path
+                      d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M9.5 5.1A10.6 10.6 0 0112 5c5 0 9 4 10 7-0.4 1.1-1.1 2.3-2.1 3.4M6.4 6.4C4.3 7.8 2.8 9.7 2 12c1 3 5 7 10 7 1.3 0 2.5-.2 3.6-.6"
+                      stroke="#9CA3AF"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                    />
                   </svg>
                 ) : (
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z" stroke="#9CA3AF" strokeWidth="1.5" />
-                    <circle cx="12" cy="12" r="3" stroke="#9CA3AF" strokeWidth="1.5" />
+                    <path
+                      d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"
+                      stroke="#9CA3AF"
+                      strokeWidth="1.5"
+                    />
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="3"
+                      stroke="#9CA3AF"
+                      strokeWidth="1.5"
+                    />
                   </svg>
                 )}
               </button>
             </div>
 
-            <Button type="submit" className="register-btn">
-              Create Account
+            {TURNSTILE_SITE_KEY && (
+              <TurnstileWidget
+                ref={turnstileRef}
+                siteKey={TURNSTILE_SITE_KEY}
+                onVerify={handleTurnstileVerify}
+                onExpire={handleTurnstileExpire}
+              />
+            )}
+
+            <Button
+              type="submit"
+              className="register-btn"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Creating Account..." : "Create Account"}
             </Button>
           </form>
 
           <p className="login-text">
-            Already have an account? <Link to="/login" className="accent-link">Login Here</Link>
+            Already have an account?{" "}
+            <Link to="/login" className="accent-link">
+              Login Here
+            </Link>
           </p>
         </div>
       </div>

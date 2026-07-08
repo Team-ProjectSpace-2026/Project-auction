@@ -1,17 +1,12 @@
 // src/pages/dashboard/DashboardPage.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import Sidebar from '../../components/layout/Sidebar';
 import TopBar from '../../components/layout/TopBar';
 import ProgressFooter from '../../components/layout/ProgressFooter';
 import MetricCard from '../../components/dashboard/MetricCard';
 import TournamentRow from '../../components/dashboard/TournamentRow';
-
-// ─── Mock data (replace with API calls once backend is ready) ───────────────
-const MOCK_USER = {
-  name: 'Rahul Organizer',
-  role: 'Organizer',
-};
 
 const MOCK_METRICS = {
   total: 0,
@@ -60,6 +55,7 @@ const metricCards = [
 
 const DashboardPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [activePage, setActivePage] = useState('dashboard');
 
   return (
@@ -70,7 +66,7 @@ const DashboardPage = () => {
       {/* Main area */}
       <div style={{ marginLeft: '220px', flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         {/* Top bar */}
-        <TopBar user={MOCK_USER} />
+        <TopBar user={user} />
 
         {/* Scrollable content */}
         <main style={{ flex: 1, padding: '96px 32px 0', display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -78,7 +74,7 @@ const DashboardPage = () => {
           {/* Welcome */}
           <div>
             <h1 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-primary-light)', margin: 0 }}>
-              Welcome, {MOCK_USER.name} 👋
+              Welcome, {user?.name || 'User'} 👋
             </h1>
             <p style={{ color: 'var(--text-secondary-light)', fontSize: '14px', margin: '4px 0 0', transition: 'color 0.2s ease' }}>
               Let's create and manage amazing cricket tournaments.
