@@ -1,22 +1,62 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import InputField from "../../components/common/InputField";
 import Button from "../../components/common/Button";
+import TurnstileWidget from "../../components/common/TurnstileWidget";
 import "./LoginPage.css";
 import batsmanLogo from "../../assets/cricauctionlogo1.png";
+
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState(null);
 
+  const { login } = useAuth();
   const navigate = useNavigate();
+  const turnstileRef = useRef(null);
 
-  const handleSubmit = (e) => {
+  const handleTurnstileVerify = (token) => {
+    setTurnstileToken(token);
+    setError("");
+  };
+
+  const handleTurnstileExpire = () => {
+    setTurnstileToken(null);
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    localStorage.setItem('authToken', 'mock-token');
-    navigate('/dashboard');
+    setError("");
+
+    if (!turnstileToken && TURNSTILE_SITE_KEY) {
+      setError("Please complete the security verification");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      await login({ email, password, turnstileToken });
+      navigate("/dashboard");
+    } catch (err) {
+      const message =
+        err.response?.data?.message || "Login failed. Please try again.";
+      setError(message);
+      // Reset turnstile on error
+      if (turnstileRef.current?.resetWidget) {
+        turnstileRef.current.resetWidget();
+      }
+      setTurnstileToken(null);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -25,9 +65,16 @@ const LoginPage = () => {
       <div className="login-left">
         <div className="login-left-content">
           <div className="brand">
-            <img src={batsmanLogo} alt="CricAuction logo" style={{
-              width: "120px", height: "120px", borderRadius: "50%", objectFit: "cover",
-            }} />
+            <img
+              src={batsmanLogo}
+              alt="CricAuction logo"
+              style={{
+                width: "120px",
+                height: "120px",
+                borderRadius: "50%",
+                objectFit: "cover",
+              }}
+            />
             <div>
               <h1>
                 Cric<span className="accent">Auction</span>
@@ -43,8 +90,7 @@ const LoginPage = () => {
 
           <p className="subtext">
             CricAuction is a complete platform to manage cricket tournaments,
-            player registrations, live auctions and squad management with
-            ease.
+            player registrations, live auctions and squad management with ease.
           </p>
 
           <ul className="feature-list">
@@ -84,21 +130,54 @@ const LoginPage = () => {
       <div className="login-right">
         <div className="login-card">
           <div className="login-card-icon">
-  <img src={batsmanLogo} alt="CricAuction logo" style={{
-    width: "100px", height: "100px", borderRadius: "50%", objectFit: "cover",
-  }} />
-</div>
+            <img
+              src={batsmanLogo}
+              alt="CricAuction logo"
+              style={{
+                width: "100px",
+                height: "100px",
+                borderRadius: "50%",
+                objectFit: "cover",
+              }}
+            />
+          </div>
 
           <h2 className="welcome-title">Welcome Back!</h2>
           <p className="welcome-subtitle">Login to your organizer account</p>
 
+          {error && (
+            <div
+              style={{
+                padding: "10px 14px",
+                marginBottom: "16px",
+                backgroundColor: "#fef2f2",
+                border: "1px solid #fecaca",
+                borderRadius: "8px",
+                color: "#dc2626",
+                fontSize: "14px",
+              }}
+            >
+              {error}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit}>
-            <label className="field-label" htmlFor="email">Email Address</label>
+            <label className="field-label" htmlFor="email">
+              Email Address
+            </label>
             <div className="input-wrapper">
               <span className="input-icon">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                   <path d="M3 6l9 6 9-6" stroke="#9CA3AF" strokeWidth="1.5" />
-                  <rect x="3" y="5" width="18" height="14" rx="2" stroke="#9CA3AF" strokeWidth="1.5" />
+                  <rect
+                    x="3"
+                    y="5"
+                    width="18"
+                    height="14"
+                    rx="2"
+                    stroke="#9CA3AF"
+                    strokeWidth="1.5"
+                  />
                 </svg>
               </span>
               <InputField
@@ -112,12 +191,26 @@ const LoginPage = () => {
               />
             </div>
 
-            <label className="field-label" htmlFor="password">Password</label>
+            <label className="field-label" htmlFor="password">
+              Password
+            </label>
             <div className="input-wrapper">
               <span className="input-icon">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                  <rect x="5" y="11" width="14" height="9" rx="2" stroke="#9CA3AF" strokeWidth="1.5" />
-                  <path d="M8 11V7a4 4 0 018 0v4" stroke="#9CA3AF" strokeWidth="1.5" />
+                  <rect
+                    x="5"
+                    y="11"
+                    width="14"
+                    height="9"
+                    rx="2"
+                    stroke="#9CA3AF"
+                    strokeWidth="1.5"
+                  />
+                  <path
+                    d="M8 11V7a4 4 0 018 0v4"
+                    stroke="#9CA3AF"
+                    strokeWidth="1.5"
+                  />
                 </svg>
               </span>
               <InputField
@@ -134,16 +227,37 @@ const LoginPage = () => {
                 className="input-icon-right"
                 aria-label={showPassword ? "Hide password" : "Show password"}
                 onClick={() => setShowPassword(!showPassword)}
-                style={{ background: 'none', border: 'none', padding: 0, margin: 0, cursor: 'pointer' }}
+                style={{
+                  background: "none",
+                  border: "none",
+                  padding: 0,
+                  margin: 0,
+                  cursor: "pointer",
+                }}
               >
                 {showPassword ? (
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <path d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M9.5 5.1A10.6 10.6 0 0112 5c5 0 9 4 10 7-0.4 1.1-1.1 2.3-2.1 3.4M6.4 6.4C4.3 7.8 2.8 9.7 2 12c1 3 5 7 10 7 1.3 0 2.5-.2 3.6-.6" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" />
+                    <path
+                      d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M9.5 5.1A10.6 10.6 0 0112 5c5 0 9 4 10 7-0.4 1.1-1.1 2.3-2.1 3.4M6.4 6.4C4.3 7.8 2.8 9.7 2 12c1 3 5 7 10 7 1.3 0 2.5-.2 3.6-.6"
+                      stroke="#9CA3AF"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                    />
                   </svg>
                 ) : (
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z" stroke="#9CA3AF" strokeWidth="1.5" />
-                    <circle cx="12" cy="12" r="3" stroke="#9CA3AF" strokeWidth="1.5" />
+                    <path
+                      d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"
+                      stroke="#9CA3AF"
+                      strokeWidth="1.5"
+                    />
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="3"
+                      stroke="#9CA3AF"
+                      strokeWidth="1.5"
+                    />
                   </svg>
                 )}
               </button>
@@ -158,22 +272,39 @@ const LoginPage = () => {
                 />
                 Remember Me
               </label>
-              <Link to="/forgot-password" className="forgot-link">Forgot Password?</Link>
+              <Link to="/forgot-password" className="forgot-link">
+                Forgot Password?
+              </Link>
             </div>
 
-            <Button type="submit" className="login-btn">
-              Login
+            {TURNSTILE_SITE_KEY && (
+              <TurnstileWidget
+                ref={turnstileRef}
+                siteKey={TURNSTILE_SITE_KEY}
+                onVerify={handleTurnstileVerify}
+                onExpire={handleTurnstileExpire}
+              />
+            )}
+
+            <Button
+              type="submit"
+              className="login-btn"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Logging in..." : "Login"}
             </Button>
           </form>
 
-          <div className="divider"><span>OR</span></div>
+          <div className="divider">
+            <span>OR</span>
+          </div>
 
           <p className="register-text">
-  Don't have an account?{" "}
-  <Link to="/register" className="accent-link">
-    Register Here
-  </Link>
-</p>
+            Don't have an account?{" "}
+            <Link to="/register" className="accent-link">
+              Register Here
+            </Link>
+          </p>
         </div>
       </div>
     </div>
