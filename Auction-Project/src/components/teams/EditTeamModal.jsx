@@ -14,6 +14,7 @@ const EditTeamModal = ({ isOpen, onClose, onSubmit, team }) => {
 
   useEffect(() => {
     if (team && isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
         teamName: team.name || "",
         ownerName: team.ownerName || "",

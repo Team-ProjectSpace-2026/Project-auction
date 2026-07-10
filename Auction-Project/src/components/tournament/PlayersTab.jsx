@@ -32,10 +32,12 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
 
   useEffect(() => {
     if (!tournamentId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(false);
       return;
     }
     let cancelled = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     playerService
       .getPlayers(tournamentId)

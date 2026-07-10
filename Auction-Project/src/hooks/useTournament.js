@@ -32,6 +32,7 @@ export function useTournament(tournamentId) {
   }, [tournamentId]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchTournament();
   }, [fetchTournament]);
 

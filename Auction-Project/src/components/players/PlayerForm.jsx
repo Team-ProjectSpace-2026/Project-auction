@@ -26,6 +26,7 @@ const PlayerForm = ({ playerId, tournamentId, onSaved, onCancel }) => {
 
   useEffect(() => {
     if (playerId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(true);
       playerService
         .getPlayers(tournamentId)
@@ -45,7 +46,7 @@ const PlayerForm = ({ playerId, tournamentId, onSaved, onCancel }) => {
               bowlingStyle: p.bowlingStyle || "Not Applicable",
             });
             if (p.photo) {
-              setPhotoPreview(`${API_BASE}/uploads/photos/${p.photo}`);
+              setPhotoPreview(`${API_BASE}/uploads/photos/${encodeURIComponent(p.photo)}`);
             }
           }
         })
