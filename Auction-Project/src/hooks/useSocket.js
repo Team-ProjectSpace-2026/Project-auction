@@ -7,20 +7,17 @@ export const useSocket = () => {
   const socketRef = useRef(null);
   const [isConnected, setIsConnected] = useState(false);
   const [connectionError, setConnectionError] = useState(null);
+  const joinedTournamentsRef = useRef(new Set());
 
   const connect = useCallback(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setConnectionError("No authentication token found");
-      return null;
-    }
-
     if (socketRef.current?.connected) {
       return socketRef.current;
     }
 
+    // Use httpOnly cookie auth — withCredentials sends cookies automatically
+    // No need for localStorage token
     const socket = io(SOCKET_URL, {
-      auth: { token },
+      withCredentials: true,
       transports: ["websocket", "polling"],
       reconnection: true,
       reconnectionAttempts: 10,
@@ -31,6 +28,10 @@ export const useSocket = () => {
     socket.on("connect", () => {
       setIsConnected(true);
       setConnectionError(null);
+      // Re-join tournaments after reconnection
+      for (const tournamentId of joinedTournamentsRef.current) {
+        socket.emit("join-tournament", tournamentId);
+      }
     });
 
     socket.on("disconnect", () => {
@@ -51,11 +52,18 @@ export const useSocket = () => {
       socketRef.current.disconnect();
       socketRef.current = null;
       setIsConnected(false);
+      joinedTournamentsRef.current.clear();
     }
   }, []);
 
   const joinTournament = useCallback((tournamentId) => {
+    joinedTournamentsRef.current.add(tournamentId);
     socketRef.current?.emit("join-tournament", tournamentId);
+  }, []);
+
+  const leaveTournament = useCallback((tournamentId) => {
+    joinedTournamentsRef.current.delete(tournamentId);
+    socketRef.current?.emit("leave-tournament", tournamentId);
   }, []);
 
   const emit = useCallback((event, data) => {
@@ -81,6 +89,7 @@ export const useSocket = () => {
     connect,
     disconnect,
     joinTournament,
+    leaveTournament,
     emit,
     on,
   };

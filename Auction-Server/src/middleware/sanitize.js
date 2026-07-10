@@ -1,6 +1,38 @@
 import mongoose from "mongoose";
+import sanitizeHtml from "sanitize-html";
 
 const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
+
+// Strip all HTML tags and dangerous content from a string to prevent XSS
+const stripHtml = (str) => {
+  if (typeof str !== "string") return str;
+  return sanitizeHtml(str, {
+    allowedTags: [],
+    allowedAttributes: {},
+    disallowedTagsMode: "discard",
+  }).trim();
+};
+
+// Deep-sanitize an object: strip HTML from all string values
+export const sanitizeStrings = (obj) => {
+  if (!obj || typeof obj !== "object") return obj;
+  for (const key of Object.keys(obj)) {
+    if (typeof obj[key] === "string") {
+      obj[key] = stripHtml(obj[key]);
+    } else if (typeof obj[key] === "object" && obj[key] !== null) {
+      sanitizeStrings(obj[key]);
+    }
+  }
+  return obj;
+};
+
+// Middleware: strip HTML tags from all req.body string fields
+export const xssSanitize = (req, res, next) => {
+  if (req.body && typeof req.body === "object") {
+    sanitizeStrings(req.body);
+  }
+  next();
+};
 
 export const sanitizeIdParams = (paramNames) => {
   return (req, res, next) => {

@@ -3,14 +3,35 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const connectDB = async () => {
+const MAX_RETRIES = 5;
+const RETRY_DELAY_MS = 3000;
+
+const connectDB = async (retryCount = 0) => {
   try {
-    const conn = await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/cricauction');
+    const conn = await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/cricauction', {
+      serverSelectionTimeoutMS: 5000,
+      heartbeatFrequencyMS: 10000,
+    });
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
-    console.error('Error connecting to MongoDB:', error.message);
+    if (retryCount < MAX_RETRIES) {
+      console.warn(`MongoDB connection attempt ${retryCount + 1}/${MAX_RETRIES} failed: ${error.message}`);
+      console.warn(`Retrying in ${RETRY_DELAY_MS / 1000}s...`);
+      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+      return connectDB(retryCount + 1);
+    }
+    console.error(`FATAL: MongoDB connection failed after ${MAX_RETRIES} retries: ${error.message}`);
     process.exit(1);
   }
 };
+
+// Monitor connection health after initial connect
+mongoose.connection.on('disconnected', () => {
+  console.warn('MongoDB disconnected');
+});
+
+mongoose.connection.on('error', (err) => {
+  console.error('MongoDB error:', err.message);
+});
 
 export default connectDB;

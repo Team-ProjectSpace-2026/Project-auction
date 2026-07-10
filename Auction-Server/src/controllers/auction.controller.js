@@ -116,16 +116,34 @@ export const getBidHistory = async (req, res, next) => {
   try {
     const tournamentId = new mongoose.Types.ObjectId(req.params.tournamentId);
     const playerId = req.params.playerId ? new mongoose.Types.ObjectId(req.params.playerId) : undefined;
-    
-    const bids = await Bid.find({
-      tournamentId,
-      ...(playerId && { playerId })
-    })
-    .sort({ timestamp: -1 })
-    .populate('playerId', 'name')
-    .populate('teamId', 'name');
-    
-    res.json(bids);
+
+    // Pagination params
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 20));
+    const skip = (page - 1) * limit;
+
+    const filter = { tournamentId };
+    if (playerId) filter.playerId = playerId;
+
+    const [bids, total] = await Promise.all([
+      Bid.find(filter)
+        .sort({ timestamp: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate('playerId', 'name')
+        .populate('teamId', 'name'),
+      Bid.countDocuments(filter),
+    ]);
+
+    res.json({
+      bids,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
   } catch (error) {
     next(error);
   }

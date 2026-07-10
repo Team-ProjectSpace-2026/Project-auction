@@ -40,6 +40,11 @@ const tournamentSchema = new mongoose.Schema({
     type: String,
     enum: ['idle', 'bidding', 'sold', 'unsold'],
     default: 'idle'
+  },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null
   }
 }, {
   timestamps: true

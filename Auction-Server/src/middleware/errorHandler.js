@@ -1,7 +1,13 @@
 import { validationResult } from 'express-validator';
+import logger from '../utils/logger.js';
 
 export const errorHandler = (err, req, res, next) => {
-  console.error(err.stack);
+  logger.error(err.message, {
+    stack: err.stack,
+    method: req.method,
+    url: req.url,
+    userId: req.user?.id,
+  });
 
   // Mongoose validation error
   if (err.name === 'ValidationError') {

@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import Player from "../models/Player.js";
+import Bid from "../models/Bid.js";
 
 export const getPlayers = async (req, res, next) => {
   try {
@@ -89,8 +90,11 @@ export const deletePlayer = async (req, res, next) => {
     player.deleted = true;
     await player.save();
 
-    // Remove associated bids (optional, depending on desired behavior)
-    // await Bid.deleteMany({ playerId: player._id });
+    // Cancel any active bids for this player to prevent orphaned references
+    await Bid.updateMany(
+      { playerId: player._id, status: "Active" },
+      { $set: { status: "Cancelled" } }
+    );
 
     res.json({ message: 'Player deleted successfully' });
   } catch (error) {

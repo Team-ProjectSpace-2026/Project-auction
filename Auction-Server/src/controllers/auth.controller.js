@@ -44,6 +44,7 @@ export const register = async (req, res, next) => {
     const token = generateToken(user._id);
     res.cookie("token", token, cookieOptions);
 
+    // Do NOT return token in response body — httpOnly cookie is sufficient
     res.status(201).json({
       message: "User registered successfully",
       user: {
@@ -85,6 +86,7 @@ export const login = async (req, res, next) => {
     const token = generateToken(user._id);
     res.cookie("token", token, cookieOptions);
 
+    // Do NOT return token in response body — httpOnly cookie is sufficient
     res.json({
       message: "Login successful",
       user: {

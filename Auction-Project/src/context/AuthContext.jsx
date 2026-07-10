@@ -40,12 +40,14 @@ export const AuthProvider = ({ children }) => {
 
   const login = useCallback(async (credentials) => {
     const res = await apiLogin(credentials);
+    // Token is stored as httpOnly cookie by server — do NOT store in localStorage
     setUser(res.data.user);
     return res.data;
   }, []);
 
   const register = useCallback(async (data) => {
     const res = await apiRegister(data);
+    // Token is stored as httpOnly cookie by server — do NOT store in localStorage
     setUser(res.data.user);
     return res.data;
   }, []);
@@ -54,6 +56,7 @@ export const AuthProvider = ({ children }) => {
     try {
       await apiLogout();
     } finally {
+      // httpOnly cookie is cleared by server; no localStorage to clean
       setUser(null);
     }
   }, []);
