@@ -150,7 +150,7 @@ const TournamentHubPage = () => {
 
             {activeTab === "teams" && <TeamsTab tournamentId={tournamentId} />}
 
-            {activeTab === "players" && <PlayersTab />}
+            {activeTab === "players" && <PlayersTab tournamentId={tournament?._id || tournamentId} />}
 
             {activeTab === "auction" && <LiveAuctionTab />}
 

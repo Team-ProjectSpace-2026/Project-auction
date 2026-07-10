@@ -194,14 +194,16 @@ export const validatePublicRegistration = [
     .withMessage('Role must be Batsman, Bowler, All Rounder, or Wicket Keeper'),
   
   body('battingStyle')
+    .optional({ values: 'falsy' })
     .isIn(['Right Hand', 'Left Hand'])
     .withMessage('Batting style must be Right Hand or Left Hand'),
   
   body('bowlingStyle')
+    .optional({ values: 'falsy' })
     .isIn([
       'Right Arm Fast', 'Right Arm Medium', 'Right Arm Spin',
       'Left Arm Fast', 'Left Arm Medium', 'Left Arm Spin',
-      'Not Applicable'
+      'Not Applicable', ''
     ])
     .withMessage('Invalid bowling style'),
 
@@ -211,12 +213,12 @@ export const validatePublicRegistration = [
     .withMessage('Invalid country code'),
 
   body('isKeeper')
-    .optional()
-    .isBoolean()
-    .withMessage('isKeeper must be a boolean value'),
+    .optional({ values: 'falsy' })
+    .isIn(['Yes', 'No', 'true', 'false'])
+    .withMessage('isKeeper must be Yes or No'),
 
   body('isAllRounder')
-    .optional()
-    .isBoolean()
-    .withMessage('isAllRounder must be a boolean value'),
+    .optional({ values: 'falsy' })
+    .isIn(['Yes', 'No', 'true', 'false'])
+    .withMessage('isAllRounder must be Yes or No'),
 ];

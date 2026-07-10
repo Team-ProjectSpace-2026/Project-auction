@@ -1,5 +1,7 @@
 import { createServer } from 'http';
 import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
@@ -7,8 +9,6 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import connectDB from './src/config/db.js';
 import { initializeSocket } from './src/socket/auctionSocket.js';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -55,7 +55,7 @@ app.use(helmet({
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "blob:"],
+      imgSrc: ["'self'", "data:", "blob:", "http://localhost:5000", "http://localhost:5173"],
       connectSrc: ["'self'"],
       fontSrc: ["'self'"],
       objectSrc: ["'none'"],
@@ -101,6 +101,9 @@ app.use('/api/', limiter);
 // Request logging
 app.use(logger.requestMiddleware);
 
+// Serve uploaded files (player photos)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/tournaments', tournamentRoutes);
@@ -108,9 +111,6 @@ app.use('/api/players', playerRoutes);
 app.use('/api/teams', teamRoutes);
 app.use('/api/auction', auctionRoutes);
 app.use('/api/dashboard', dashboardRoutes);
-
-// Serve uploaded files
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Health check endpoint with dependency checks
 app.get('/api/health', async (req, res) => {
