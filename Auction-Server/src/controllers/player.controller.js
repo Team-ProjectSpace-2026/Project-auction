@@ -1,13 +1,35 @@
 import mongoose from "mongoose";
+import fs from "fs/promises";
+import path from "path";
+import { fileURLToPath } from "url";
 import Player from "../models/Player.js";
 import Bid from "../models/Bid.js";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 export const getPlayers = async (req, res, next) => {
   try {
-    const tournamentId = req.query.tournamentId ? new mongoose.Types.ObjectId(req.query.tournamentId) : undefined;
+    const tournamentId = req.query.tournamentId
+      ? new mongoose.Types.ObjectId(req.query.tournamentId)
+      : undefined;
+    const { search, role } = req.query;
+
     let filter = { deleted: false };
+
     if (tournamentId) {
       filter.tournamentId = tournamentId;
+    }
+
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { mobile: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    if (role && role !== "All Roles") {
+      filter.role = role;
     }
 
     const players = await Player.find(filter).populate("tournamentId", "name");
@@ -56,22 +78,40 @@ export const getPlayer = async (req, res, next) => {
 export const updatePlayer = async (req, res, next) => {
   try {
     const playerId = new mongoose.Types.ObjectId(req.params.id);
-    const name = String(req.body.name || "");
-    const role = String(req.body.role || "");
-    const style = String(req.body.style || "");
-    const keeper = Boolean(req.body.keeper);
-    const basePrice = Number(req.body.basePrice) || 0;
-    const player = await Player.findByIdAndUpdate(
-      playerId,
-      { name, role, style, keeper, basePrice },
-      { new: true, runValidators: true }
-    );
-    
+    const player = await Player.findById(playerId);
+
     if (!player || player.deleted) {
       return res.status(404).json({ message: 'Player not found' });
     }
-    
-    res.json(player);
+
+    const updateData = {};
+
+    if (req.body.name !== undefined) updateData.name = String(req.body.name);
+    if (req.body.role !== undefined) updateData.role = String(req.body.role);
+    if (req.body.style !== undefined) updateData.style = String(req.body.style);
+    if (req.body.keeper !== undefined) updateData.keeper = req.body.keeper === "true" || req.body.keeper === true;
+    if (req.body.basePrice !== undefined) updateData.basePrice = Number(req.body.basePrice) || 0;
+    if (req.body.age !== undefined) updateData.age = Number(req.body.age) || undefined;
+    if (req.body.mobile !== undefined) updateData.mobile = String(req.body.mobile);
+    if (req.body.countryCode !== undefined) updateData.countryCode = String(req.body.countryCode);
+    if (req.body.battingStyle !== undefined) updateData.battingStyle = String(req.body.battingStyle);
+    if (req.body.bowlingStyle !== undefined) updateData.bowlingStyle = String(req.body.bowlingStyle);
+
+    if (req.file) {
+      if (player.photo) {
+        const oldPhotoPath = path.join(__dirname, "../../uploads/photos", player.photo);
+        await fs.unlink(oldPhotoPath).catch(() => {});
+      }
+      updateData.photo = req.file.filename;
+    }
+
+    const updatedPlayer = await Player.findByIdAndUpdate(
+      playerId,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    );
+
+    res.json(updatedPlayer);
   } catch (error) {
     next(error);
   }
@@ -86,11 +126,9 @@ export const deletePlayer = async (req, res, next) => {
       return res.status(404).json({ message: 'Player not found' });
     }
 
-    // Soft delete player
     player.deleted = true;
     await player.save();
 
-    // Cancel any active bids for this player to prevent orphaned references
     await Bid.updateMany(
       { playerId: player._id, status: "Active" },
       { $set: { status: "Cancelled" } }
@@ -110,7 +148,6 @@ export const registerPlayer = async (req, res, next) => {
       return res.status(400).json({ message: 'Invalid tournament ID format' });
     }
 
-    // Verify tournament exists
     const Tournament = mongoose.model('Tournament');
     const tournament = await Tournament.findById(tournamentId);
     if (!tournament) {
@@ -126,7 +163,6 @@ export const registerPlayer = async (req, res, next) => {
     const bowlingStyle = String(req.body.bowlingStyle || "").trim();
     const isKeeper = String(req.body.isKeeper || "").trim();
 
-    // Check for duplicate registration
     const existing = await Player.findOne({ mobile, tournamentId, deleted: false });
     if (existing) {
       return res.status(409).json({ message: 'This mobile number is already registered for this tournament' });
@@ -150,6 +186,26 @@ export const registerPlayer = async (req, res, next) => {
 
     await player.save();
     res.status(201).json({ message: 'Registration successful', player });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getRegisteredPlayers = async (req, res, next) => {
+  try {
+    const { tournamentId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(tournamentId)) {
+      return res.status(400).json({ message: 'Invalid tournament ID format' });
+    }
+
+    const players = await Player.find({
+      tournamentId,
+      isRegistered: true,
+      deleted: false,
+    }).populate('tournamentId', 'name');
+
+    res.json(players);
   } catch (error) {
     next(error);
   }
