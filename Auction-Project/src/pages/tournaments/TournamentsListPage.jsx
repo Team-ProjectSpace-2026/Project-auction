@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/layout/Sidebar";
 import { getTournaments, deleteTournament } from "../../services/tournamentService";
-import { Search, Pencil, Trash2, Trophy, Calendar, Users, MapPin, IndianRupee } from "lucide-react";
+import { Pencil, Trash2, Trophy, Calendar, Users, MapPin, IndianRupee } from "lucide-react";
 
 const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
 

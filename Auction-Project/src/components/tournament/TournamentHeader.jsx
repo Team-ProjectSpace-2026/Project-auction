@@ -27,8 +27,6 @@ const TournamentHeader = ({ tournament }) => {
   const status = getDynamicStatus(tournament?.date);
   const teams = tournament?.teams || 0;
   const date = tournament?.date || "";
-  const venue = tournament?.venue || "";
-
   const getStatusStyle = (s) => {
     if (s === "Active") return { background: "var(--status-active-bg)", color: "var(--status-active-text)" };
     if (s === "Upcoming") return { background: "#dbeafe", color: "#2563eb" };

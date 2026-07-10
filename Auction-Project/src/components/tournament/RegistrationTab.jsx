@@ -1,9 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import * as tournamentService from "../../services/tournamentService.js";
 
 const RegistrationTab = ({ tournament }) => {
   const [copied, setCopied] = useState(false);
-  const [deadline, setDeadline] = useState("");
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState(null);
   const [now, setNow] = useState(new Date());
@@ -13,15 +12,18 @@ const RegistrationTab = ({ tournament }) => {
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
+  const [deadlineOverride, setDeadlineOverride] = useState(null);
+
+  const deadline = useMemo(() => {
+    if (deadlineOverride !== null) return deadlineOverride;
     if (tournament?.registrationEndDate) {
       const d = new Date(tournament.registrationEndDate);
-      const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000)
+      return new Date(d.getTime() - d.getTimezoneOffset() * 60000)
         .toISOString()
         .slice(0, 16);
-      setDeadline(local);
     }
-  }, [tournament]);
+    return "";
+  }, [deadlineOverride, tournament]);
 
   if (!tournament) {
     return (
@@ -304,7 +306,7 @@ const RegistrationTab = ({ tournament }) => {
             value={deadline}
             min={localMin}
             max={auctionDateLocal}
-            onChange={(e) => setDeadline(e.target.value)}
+            onChange={(e) => setDeadlineOverride(e.target.value)}
             style={{
               width: "100%",
               height: "46px",
@@ -342,7 +344,7 @@ const RegistrationTab = ({ tournament }) => {
 
           {deadline && (
             <button
-              onClick={() => { setDeadline(""); setSaveMsg(null); }}
+              onClick={() => { setDeadlineOverride(""); setSaveMsg(null); }}
               style={{
                 padding: "11px 18px",
                 border: "1px solid var(--border-light)",

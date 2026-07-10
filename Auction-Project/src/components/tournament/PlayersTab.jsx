@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Search, Pencil, Trash2, Check, X } from "lucide-react";
+import { Pencil, Trash2, Check, X } from "lucide-react";
 const players = [
   {
     id: 1,

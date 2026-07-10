@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Hammer, Info, User } from "lucide-react";
+import { Hammer, User } from "lucide-react";
 import PlayerRevealModal from "./PlayerRevealModal";
 import PlayerDetailsModal from "./PlayerDetailsModal";
 
