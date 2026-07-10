@@ -14,3 +14,5 @@ export const deletePlayer = (id) => api.delete(`/players/${id}`);
 
 export const registerPlayer = (tournamentId, data) =>
   api.post(`/players/register/${tournamentId}`, data);
+export const getPublicTournament = (tournamentId) =>
+  api.get(`/players/public/${tournamentId}`);

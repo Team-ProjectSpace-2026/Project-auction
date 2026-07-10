@@ -1,10 +1,10 @@
 import Sidebar from "../../components/layout/Sidebar";
-// import TopBar from "../../components/layout/TopBar";
 import SuccessModal from "../../components/common/SuccessModal";
-import { FiMapPin, FiCalendar } from "react-icons/fi";
+import { FiMapPin, FiCalendar, FiUpload } from "react-icons/fi";
 import "./CreateTournamentPage.css";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { createTournament } from "../../services/tournamentService";
 
 // const MOCK_USER = {
 //   name: "Rahul Organizer",
@@ -13,6 +13,10 @@ import { useState } from "react";
 
 const CreateTournamentPage = () => {
   const [showSuccess, setShowSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [logoFile, setLogoFile] = useState(null);
+  const [logoPreview, setLogoPreview] = useState(null);
+  const fileInputRef = useRef(null);
   const [formData, setFormData] = useState({
     tournamentName: "",
     numTeams: "",
@@ -29,13 +33,52 @@ const CreateTournamentPage = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleCreate = () => {
+  const handleLogoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (!["image/jpeg", "image/png"].includes(file.type)) {
+        alert("Only JPG and PNG files are allowed");
+        return;
+      }
+      if (file.size > 2 * 1024 * 1024) {
+        alert("File size must be less than 2MB");
+        return;
+      }
+      setLogoFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => setLogoPreview(reader.result);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleCreate = async () => {
     const { tournamentName, numTeams, budgetPerTeam, maxPlayersPerTeam, playerBasePrice, venue, auctionDateTime } = formData;
     if (!tournamentName || !numTeams || !budgetPerTeam || !maxPlayersPerTeam || !playerBasePrice || !venue || !auctionDateTime) {
       alert("Please fill in all required fields.");
       return;
     }
-    setShowSuccess(true);
+    setLoading(true);
+    try {
+      const payload = new FormData();
+      payload.append("name", tournamentName);
+      payload.append("status", "Upcoming");
+      payload.append("date", auctionDateTime);
+      payload.append("teams", Number(numTeams));
+      payload.append("venue", venue);
+      payload.append("budgetPerTeam", Number(budgetPerTeam));
+      payload.append("maxPlayersPerTeam", Number(maxPlayersPerTeam));
+      payload.append("playerBasePrice", Number(playerBasePrice));
+      if (logoFile) {
+        payload.append("logo", logoFile);
+      }
+      await createTournament(payload);
+      setShowSuccess(true);
+    } catch (err) {
+      console.error("Failed to create tournament:", err);
+      alert(err.response?.data?.message || "Failed to create tournament. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -72,6 +115,57 @@ const CreateTournamentPage = () => {
 
           {/* Main White Card */}
           <div className="create-card">
+
+    {/* Logo Upload */}
+    <div style={{ marginBottom: "24px", textAlign: "center" }}>
+      <label style={{ display: "block", marginBottom: "10px", fontWeight: "600" }}>
+        Tournament Logo
+      </label>
+      <div
+        style={{
+          width: "120px",
+          height: "120px",
+          borderRadius: "16px",
+          background: "var(--info-bg)",
+          border: "2px dashed var(--border-light)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          margin: "0 auto 12px",
+          overflow: "hidden",
+          cursor: "pointer",
+          transition: "border-color 0.2s ease",
+        }}
+        onClick={() => fileInputRef.current?.click()}
+      >
+        {logoPreview ? (
+          <img src={logoPreview} alt="Tournament Logo" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        ) : (
+          <FiUpload size={28} style={{ color: "var(--text-secondary-light)" }} />
+        )}
+      </div>
+      <input
+        type="file"
+        ref={fileInputRef}
+        accept="image/jpeg,image/png"
+        onChange={handleLogoChange}
+        style={{ display: "none" }}
+      />
+      <button
+        type="button"
+        onClick={() => fileInputRef.current?.click()}
+        style={{
+          background: "none",
+          border: "none",
+          color: "var(--accent-light)",
+          cursor: "pointer",
+          fontSize: "13px",
+          fontWeight: "600",
+        }}
+      >
+        {logoPreview ? "Change Logo" : "Upload Tournament Logo"}
+      </button>
+    </div>
 
     {/* Row 1 */}
     <div className="form-row">
@@ -198,11 +292,10 @@ const CreateTournamentPage = () => {
 </span>
 
                 <input
-                    type="text"
+                    type="datetime-local"
                     name="auctionDateTime"
                     value={formData.auctionDateTime}
                     onChange={handleInputChange}
-                    placeholder="Select auction date and time"
                 />
 
     </div>
@@ -248,8 +341,9 @@ const CreateTournamentPage = () => {
         onClick={handleCreate}
         className="create-btn"
         type="submit"
+        disabled={loading}
     >
-        Create Tournament
+        {loading ? "Creating..." : "Create Tournament"}
     </button>
 
 </div>

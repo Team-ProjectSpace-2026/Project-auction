@@ -1,5 +1,6 @@
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { Check, X } from "lucide-react";
 import Cropper from "react-easy-crop";
 import InputField from "../../components/common/InputField.jsx";
 import Button from "../../components/common/Button.jsx";
@@ -121,8 +122,8 @@ function RoleCard({ role, selected, onSelect }) {
           top: "12px",
           left: "12px",
           width: 20, height: 20, borderRadius: "50%", background: C.blue, color: "#fff",
-          display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: "bold"
-        }}>✓</span>
+          display: "flex", alignItems: "center", justifyContent: "center"
+        }}><Check size={12} strokeWidth={3} /></span>
       )}
     </button>
   );
@@ -146,7 +147,10 @@ function Banner({ type, message }) {
       fontWeight: 500,
       marginBottom: 20,
     }}>
-      {type === "success" ? "✅ " : "❌ "}{message}
+      <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+        {type === "success" ? <Check size={16} strokeWidth={3} /> : <X size={16} strokeWidth={3} />}
+        {message}
+      </span>
     </div>
   );
 }
@@ -267,7 +271,44 @@ export default function PublicRegistrationPage() {
   const [crop, setCrop]                 = useState({ x: 0, y: 0 });
   const [zoom, setZoom]                 = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+  const [tournamentData, setTournamentData] = useState(null);
+  const [tournamentLoading, setTournamentLoading] = useState(true);
+  const [now, setNow] = useState(new Date());
   const fileRef = useRef(null);
+
+  useEffect(() => {
+    const interval = setInterval(() => setNow(new Date()), 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const fetchTournament = async () => {
+      try {
+        const res = await playerService.getPublicTournament(tournamentId);
+        setTournamentData(res.data);
+      } catch {
+        setTournamentData(null);
+      } finally {
+        setTournamentLoading(false);
+      }
+    };
+    fetchTournament();
+  }, [tournamentId]);
+
+  const isClosed = tournamentData?.registrationEndDate && now > new Date(tournamentData.registrationEndDate);
+
+  const formatDeadline = (dateStr) => {
+    if (!dateStr) return "";
+    const d = new Date(dateStr);
+    return d.toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
 
   // ── Helpers ──
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
@@ -358,14 +399,100 @@ export default function PublicRegistrationPage() {
       setForm(DEFAULT_FORM);
       setPhotoPreview(null);
     } catch (err) {
-      const msg = err?.response?.data?.errors?.[0]?.msg
-        || err?.response?.data?.message
-        || err?.message
-        || "Registration failed. Please try again.";
+      const serverErrors = err?.response?.data?.errors;
+      let msg;
+      if (serverErrors && serverErrors.length > 0) {
+        msg = serverErrors.map(e => e.msg).join(", ");
+      } else {
+        msg = err?.response?.data?.message
+          || err?.message
+          || "Registration failed. Please try again.";
+      }
       setBanner({ type: "error", message: msg });
     } finally {
       setLoading(false);
     }
+  }
+
+  // ── Loading state ──
+  if (tournamentLoading) {
+    return (
+      <div style={{ minHeight: "100vh", background: C.bg, fontFamily: "'Inter', 'Segoe UI', sans-serif",
+        display: "flex", alignItems: "center", justifyContent: "center"
+      }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: 40, marginBottom: 12 }}>⏳</div>
+          <p style={{ color: C.muted, fontSize: 15 }}>Loading registration...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Closed state ──
+  if (isClosed) {
+    return (
+      <div style={{ minHeight: "100vh", background: C.bg, fontFamily: "'Inter', 'Segoe UI', sans-serif" }}>
+        <div style={{
+          background: `linear-gradient(135deg, ${C.heroTop} 0%, ${C.heroBott} 100%)`,
+          padding: "0",
+          position: "relative",
+          overflow: "hidden",
+        }}>
+          <div style={{ position: "absolute", top: -40, right: -40, width: 200, height: 200, borderRadius: "50%", background: "rgba(37,99,235,.15)" }} />
+          <div style={{ position: "absolute", bottom: -30, left: -30, width: 150, height: 150, borderRadius: "50%", background: "rgba(255,255,255,.04)" }} />
+          <div style={{ padding: "48px 32px 52px", textAlign: "center", position: "relative", zIndex: 1 }}>
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: 8,
+              background: "rgba(239,68,68,.25)", border: "1px solid rgba(239,68,68,.4)",
+              borderRadius: 20, padding: "5px 16px", marginBottom: 18,
+            }}>
+              <span style={{ width: 8, height: 8, borderRadius: "50%", background: C.red, display: "inline-block" }} />
+              <span style={{ color: "rgba(255,255,255,.85)", fontSize: 12, fontWeight: 600, letterSpacing: 1 }}>REGISTRATION CLOSED</span>
+            </div>
+            <h1 style={{
+              margin: "0 0 10px", color: "#fff", fontSize: "clamp(22px, 4vw, 34px)",
+              fontWeight: 800, letterSpacing: 1.5,
+            }}>TOURNAMENT REGISTRATION</h1>
+            <p style={{ margin: 0, color: "rgba(255,255,255,.6)", fontSize: 15 }}>
+              {tournamentData?.name || "This tournament"}
+            </p>
+          </div>
+        </div>
+
+        <div style={{ maxWidth: 600, margin: "0 auto", padding: "60px 16px", textAlign: "center" }}>
+          <div style={{
+            background: C.cardBg,
+            border: `1px solid ${C.border}`,
+            borderRadius: 16,
+            padding: "48px 36px",
+            boxShadow: "0 2px 8px rgba(0,0,0,.06)",
+          }}>
+            <div style={{ fontSize: 56, marginBottom: 16 }}>🔒</div>
+            <h2 style={{ margin: "0 0 12px", fontSize: 22, fontWeight: 700, color: C.dark }}>
+              Registration Has Ended
+            </h2>
+            <p style={{ margin: "0 0 8px", color: C.muted, fontSize: 15, lineHeight: 1.6 }}>
+              The registration deadline for this tournament has passed.
+            </p>
+            {tournamentData?.registrationEndDate && (
+              <p style={{ margin: 0, color: C.red, fontSize: 14, fontWeight: 600 }}>
+                Deadline was: {formatDeadline(tournamentData.registrationEndDate)}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div style={{
+          background: C.heroTop,
+          padding: "18px 32px",
+          textAlign: "center",
+          color: "rgba(255,255,255,.45)",
+          fontSize: 13,
+        }}>
+          © {new Date().getFullYear()} CricAuction · All rights reserved &nbsp;|&nbsp; Secure Registration Portal
+        </div>
+      </div>
+    );
   }
 
   // ── Layout ──
@@ -391,7 +518,11 @@ export default function PublicRegistrationPage() {
             borderRadius: 20, padding: "5px 16px", marginBottom: 18,
           }}>
             <span style={{ width: 8, height: 8, borderRadius: "50%", background: C.green, display: "inline-block" }} />
-            <span style={{ color: "rgba(255,255,255,.85)", fontSize: 12, fontWeight: 600, letterSpacing: 1 }}>REGISTRATION OPEN</span>
+            <span style={{ color: "rgba(255,255,255,.85)", fontSize: 12, fontWeight: 600, letterSpacing: 1 }}>
+              {tournamentData?.registrationEndDate
+                ? `REGISTRATION OPEN · ENDS ${formatDeadline(tournamentData.registrationEndDate)}`
+                : "REGISTRATION OPEN"}
+            </span>
           </div>
           <h1 style={{
             margin: "0 0 10px", color: "#fff", fontSize: "clamp(22px, 4vw, 34px)",

@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { Pencil, Trash2, Check, X } from "lucide-react";
 import * as playerService from "../../services/playerService";
 
 const getRoleStyle = (role) => {
@@ -17,9 +18,10 @@ const getRoleStyle = (role) => {
   }
 };
 
-const PlayersTab = () => {
+const PlayersTab = ({ tournamentId: propTournamentId }) => {
   const navigate = useNavigate();
-  const { id: tournamentId } = useParams();
+  const { tournamentId: paramTournamentId } = useParams();
+  const tournamentId = propTournamentId || paramTournamentId;
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -27,7 +29,10 @@ const PlayersTab = () => {
   const [roleFilter, setRoleFilter] = useState("All Roles");
 
   useEffect(() => {
-    if (!tournamentId) return;
+    if (!tournamentId) {
+      setLoading(false);
+      return;
+    }
     let cancelled = false;
     setLoading(true);
     playerService
@@ -184,20 +189,20 @@ const PlayersTab = () => {
                     fontSize: "18px", fontWeight: "700",
                     color: player.keeper ? "#16a34a" : "#ef4444",
                   }}>
-                    {player.keeper ? "✓" : "✕"}
+                    {player.keeper ? <Check size={14} strokeWidth={3} /> : <X size={14} strokeWidth={3} />}
                   </td>
                   <td>
                     <button
                       onClick={() => navigate(`/player-details/${player._id}`)}
                       style={{ border: "none", background: "transparent", cursor: "pointer", marginRight: "12px", fontSize: "16px" }}
                     >
-                      ✏️
+                      <Pencil size={16} strokeWidth={2} />
                     </button>
                     <button
                       onClick={() => handleDelete(player._id)}
                       style={{ border: "none", background: "transparent", cursor: "pointer", fontSize: "16px" }}
                     >
-                      🗑️
+                      <Trash2 size={16} strokeWidth={2} />
                     </button>
                   </td>
                 </tr>

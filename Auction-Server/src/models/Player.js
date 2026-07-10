@@ -15,9 +15,9 @@ const playerSchema = new mongoose.Schema(
     },
     style: {
       type: String,
-      required: [true, "Playing style is required"],
       trim: true,
       maxlength: [100, "Playing style cannot exceed 100 characters"],
+      default: "",
     },
     keeper: {
       type: Boolean,
@@ -64,7 +64,7 @@ const playerSchema = new mongoose.Schema(
     },
     battingStyle: {
       type: String,
-      enum: ["Right Hand", "Left Hand"],
+      enum: ["Right Hand", "Left Hand", ""],
     },
     bowlingStyle: {
       type: String,
@@ -76,6 +76,7 @@ const playerSchema = new mongoose.Schema(
         "Left Arm Medium",
         "Left Arm Spin",
         "Not Applicable",
+        "",
       ],
     },
     photo: {

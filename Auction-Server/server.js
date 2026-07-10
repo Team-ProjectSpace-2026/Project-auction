@@ -19,6 +19,7 @@ import tournamentRoutes from './src/routes/tournament.routes.js';
 import playerRoutes from './src/routes/player.routes.js';
 import teamRoutes from './src/routes/team.routes.js';
 import auctionRoutes from './src/routes/auction.routes.js';
+import dashboardRoutes from './src/routes/dashboard.routes.js';
 
 // Import middleware
 import { errorHandler } from './src/middleware/errorHandler.js';
@@ -109,6 +110,7 @@ app.use('/api/tournaments', tournamentRoutes);
 app.use('/api/players', playerRoutes);
 app.use('/api/teams', express.json({ limit: '10mb' }), teamRoutes);
 app.use('/api/auction', auctionRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Health check endpoint with dependency checks
 app.get('/api/health', async (req, res) => {

@@ -11,7 +11,10 @@ export const errorHandler = (err, req, res, next) => {
 
   // Mongoose validation error
   if (err.name === 'ValidationError') {
-    const errors = Object.values(err.errors).map(error => error.message);
+    const errors = Object.values(err.errors).map(error => ({
+      path: error.path,
+      msg: error.message
+    }));
     return res.status(400).json({
       message: 'Validation Error',
       errors

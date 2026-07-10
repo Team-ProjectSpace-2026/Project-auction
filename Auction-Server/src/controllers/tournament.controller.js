@@ -19,15 +19,24 @@ export const createTournament = async (req, res, next) => {
     const status = String(req.body.status || "");
     const date = String(req.body.date || "");
     const teams = Number(req.body.teams) || 0;
-    const format = String(req.body.format || "");
+    const venue = String(req.body.venue || "");
+    const budgetPerTeam = Number(req.body.budgetPerTeam) || 0;
+    const maxPlayersPerTeam = Number(req.body.maxPlayersPerTeam) || 0;
+    const playerBasePrice = Number(req.body.playerBasePrice) || 0;
     const description = String(req.body.description || "");
+    const logo = req.file ? `/uploads/photos/${req.file.filename}` : "";
     const tournament = new Tournament({
       name,
       status,
       date,
       teams,
-      format,
+      venue,
+      budgetPerTeam,
+      maxPlayersPerTeam,
+      playerBasePrice,
       description,
+      logo,
+      owner: req.user._id,
       createdBy: req.user._id,
     });
     await tournament.save();
@@ -57,11 +66,21 @@ export const updateTournament = async (req, res, next) => {
     const status = String(req.body.status || "");
     const date = String(req.body.date || "");
     const teams = Number(req.body.teams) || 0;
-    const format = String(req.body.format || "");
+    const venue = String(req.body.venue || "");
+    const budgetPerTeam = Number(req.body.budgetPerTeam) || 0;
+    const maxPlayersPerTeam = Number(req.body.maxPlayersPerTeam) || 0;
+    const playerBasePrice = Number(req.body.playerBasePrice) || 0;
     const description = String(req.body.description || "");
+    const updateData = { name, status, date, teams, venue, budgetPerTeam, maxPlayersPerTeam, playerBasePrice, description };
+    if (req.body.registrationEndDate !== undefined) {
+      updateData.registrationEndDate = req.body.registrationEndDate ? new Date(req.body.registrationEndDate) : null;
+    }
+    if (req.file) {
+      updateData.logo = `/uploads/photos/${req.file.filename}`;
+    }
     const tournament = await Tournament.findByIdAndUpdate(
       tournamentId,
-      { name, status, date, teams, format, description },
+      updateData,
       { new: true, runValidators: true },
     );
 
@@ -78,20 +97,6 @@ export const updateTournament = async (req, res, next) => {
 export const deleteTournament = async (req, res, next) => {
   try {
     const tournamentId = new mongoose.Types.ObjectId(req.params.id);
-
-    // Check for dependent records
-    const [playerCount, teamCount, bidCount] = await Promise.all([
-      Player.countDocuments({ tournamentId }),
-      Team.countDocuments({ tournamentId }),
-      Bid.countDocuments({ tournamentId }),
-    ]);
-
-    if (playerCount > 0 || teamCount > 0 || bidCount > 0) {
-      return res.status(400).json({
-        message: `Cannot delete tournament. Dependent records exist: ${playerCount} players, ${teamCount} teams, ${bidCount} bids`,
-      });
-    }
-
     const tournament = await Tournament.findByIdAndDelete(tournamentId);
 
     if (!tournament) {
@@ -99,6 +104,29 @@ export const deleteTournament = async (req, res, next) => {
     }
 
     res.json({ message: "Tournament deleted successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateRegistrationDeadline = async (req, res, next) => {
+  try {
+    const tournamentId = new mongoose.Types.ObjectId(req.params.id);
+    const registrationEndDate = req.body.registrationEndDate
+      ? new Date(req.body.registrationEndDate)
+      : null;
+
+    const tournament = await Tournament.findByIdAndUpdate(
+      tournamentId,
+      { registrationEndDate },
+      { new: true, runValidators: true },
+    );
+
+    if (!tournament) {
+      return res.status(404).json({ message: "Tournament not found" });
+    }
+
+    res.json(tournament);
   } catch (error) {
     next(error);
   }

@@ -5,4 +5,6 @@ export const getTournament = (id) => api.get(`/tournaments/${id}`);
 export const createTournament = (data) => api.post("/tournaments", data);
 export const updateTournament = (id, data) =>
   api.put(`/tournaments/${id}`, data);
+export const updateRegistrationDeadline = (id, data) =>
+  api.put(`/tournaments/${id}/deadline`, data);
 export const deleteTournament = (id) => api.delete(`/tournaments/${id}`);

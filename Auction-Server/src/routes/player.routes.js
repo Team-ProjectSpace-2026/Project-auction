@@ -6,7 +6,8 @@ import {
   updatePlayer,
   deletePlayer,
   registerPlayer,
-  getRegisteredPlayers
+  getRegisteredPlayers,
+  getPublicTournament
 } from '../controllers/player.controller.js';
 import {
   validatePlayer,
@@ -23,6 +24,7 @@ const router = express.Router();
 router.use(apiLimiter);
 
 // Public routes - no auth required (must be before auth middleware)
+router.get('/public/:tournamentId', sanitizeIdParams(['tournamentId']), getPublicTournament);
 router.post('/register/:tournamentId', upload.single('photo'), validatePublicRegistration, handleValidationErrors, registerPlayer);
 router.get('/registered/:tournamentId', getRegisteredPlayers);
 

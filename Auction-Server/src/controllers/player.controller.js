@@ -3,6 +3,7 @@ import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
 import Player from "../models/Player.js";
+import Tournament from "../models/Tournament.js";
 import Bid from "../models/Bid.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -140,6 +141,25 @@ export const deletePlayer = async (req, res, next) => {
   }
 };
 
+export const getPublicTournament = async (req, res, next) => {
+  try {
+    const tournamentId = req.params.tournamentId;
+
+    if (!mongoose.Types.ObjectId.isValid(tournamentId)) {
+      return res.status(400).json({ message: 'Invalid tournament ID format' });
+    }
+
+    const tournament = await Tournament.findById(tournamentId).select('name registrationEndDate');
+    if (!tournament) {
+      return res.status(404).json({ message: 'Tournament not found' });
+    }
+
+    res.json(tournament);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const registerPlayer = async (req, res, next) => {
   try {
     const tournamentId = req.params.tournamentId;
@@ -152,6 +172,11 @@ export const registerPlayer = async (req, res, next) => {
     const tournament = await Tournament.findById(tournamentId);
     if (!tournament) {
       return res.status(404).json({ message: 'Tournament not found' });
+    }
+
+    // Check registration deadline
+    if (tournament.registrationEndDate && new Date() > new Date(tournament.registrationEndDate)) {
+      return res.status(403).json({ message: 'Registration deadline has passed' });
     }
 
     const playerName = String(req.body.playerName || "").trim();
