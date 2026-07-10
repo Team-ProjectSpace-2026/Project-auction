@@ -1,6 +1,38 @@
 import { useNavigate } from "react-router-dom";
-const TournamentHeader = () => {
+import { Trophy, Users, Calendar, Pencil } from "lucide-react";
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return "—";
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+};
+
+const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+
+const getDynamicStatus = (date) => {
+  if (!date) return "Upcoming";
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const auctionDate = new Date(date);
+  auctionDate.setHours(0, 0, 0, 0);
+  if (auctionDate < today) return "Completed";
+  if (auctionDate.getTime() === today.getTime()) return "Active";
+  return "Upcoming";
+};
+
+const TournamentHeader = ({ tournament }) => {
   const navigate = useNavigate();
+
+  const name = tournament?.name || "Tournament";
+  const status = getDynamicStatus(tournament?.date);
+  const teams = tournament?.teams || 0;
+  const date = tournament?.date || "";
+  const getStatusStyle = (s) => {
+    if (s === "Active") return { background: "var(--status-active-bg)", color: "var(--status-active-text)" };
+    if (s === "Upcoming") return { background: "#dbeafe", color: "#2563eb" };
+    return { background: "#e5e7eb", color: "#4b5563" };
+  };
+
   return (
     <div
       style={{
@@ -16,17 +48,18 @@ const TournamentHeader = () => {
       <button
         onClick={() => navigate("/tournaments")}
         style={{
-        border: "none",
-        background: "transparent",
-        color: "var(--accent-light)",
-        fontWeight: "600",
-        cursor: "pointer",
-        marginBottom: "14px",
-        fontSize: "14px",
-      }}
-    >
-    ← Back to Tournaments
-  </button>
+          border: "none",
+          background: "transparent",
+          color: "var(--accent-light)",
+          fontWeight: "600",
+          cursor: "pointer",
+          marginBottom: "14px",
+          fontSize: "14px",
+        }}
+      >
+        ← Back to Tournaments
+      </button>
+
       <div
         style={{
           display: "flex",
@@ -54,9 +87,18 @@ const TournamentHeader = () => {
               justifyContent: "center",
               alignItems: "center",
               fontSize: "34px",
+              overflow: "hidden",
             }}
           >
-            🏆
+            {tournament?.logo ? (
+              <img
+                src={`${API_BASE}${tournament.logo}`}
+                alt={tournament.name}
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
+            ) : (
+              <Trophy size={34} strokeWidth={1.5} style={{ color: "var(--text-secondary-light)" }} />
+            )}
           </div>
 
           <div>
@@ -74,23 +116,22 @@ const TournamentHeader = () => {
                   margin: 0,
                   fontSize: "28px",
                   fontWeight: "800",
-                   color: "var(--text-primary-light)",
+                  color: "var(--text-primary-light)",
                 }}
               >
-                Summer League 2027
+                {name}
               </h1>
 
               <span
                 style={{
-                  background: "var(--status-active-bg)",
-                  color: "var(--status-active-text)",
+                  ...getStatusStyle(status),
                   padding: "4px 10px",
                   borderRadius: "8px",
                   fontSize: "12px",
                   fontWeight: "600",
                 }}
               >
-                Active
+                {status}
               </span>
             </div>
 
@@ -104,15 +145,20 @@ const TournamentHeader = () => {
                 fontWeight: "500",
               }}
             >
-              <span>🏆 T20 League</span>
-              <span>👥 12 Teams</span>
-              <span>📅 Auction on 20 Jun 2027</span>
+              <span style={{ display: "flex", alignItems: "center", gap: "6px" }}><Users size={15} strokeWidth={2} /> {teams} Teams</span>
+              <span style={{ display: "flex", alignItems: "center", gap: "6px" }}><Calendar size={15} strokeWidth={2} /> Auction on {formatDate(date)}</span>
             </div>
           </div>
         </div>
 
         {/* Right Side */}
-        <button onClick={() => navigate("/edit-tournament")}
+        <button
+          onClick={() =>
+            navigate("/edit-tournament", {
+              state: { tournament },
+              params: { tournamentId: tournament?._id },
+            })
+          }
           style={{
             background: "var(--card-bg-light)",
             color: "var(--accent-light)",
@@ -124,7 +170,7 @@ const TournamentHeader = () => {
             fontSize: "14px",
           }}
         >
-          ✏ Edit Tournament
+          <span style={{ display: "flex", alignItems: "center", gap: "6px" }}><Pencil size={15} strokeWidth={2} /> Edit Tournament</span>
         </button>
       </div>
     </div>

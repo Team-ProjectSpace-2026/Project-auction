@@ -5,7 +5,8 @@ import {
   getPlayer,
   updatePlayer,
   deletePlayer,
-  registerPlayer
+  registerPlayer,
+  getPublicTournament
 } from '../controllers/player.controller.js';
 import {
   validatePlayer,
@@ -22,7 +23,8 @@ const router = express.Router();
 // Rate limiting applied first
 router.use(apiLimiter);
 
-// Public route - no auth required (must be before auth middleware)
+// Public routes - no auth required (must be before auth middleware)
+router.get('/public/:tournamentId', sanitizeIdParams(['tournamentId']), getPublicTournament);
 router.post('/register/:tournamentId', upload.single('photo'), validatePublicRegistration, handleValidationErrors, registerPlayer);
 
 // All routes below require authentication
