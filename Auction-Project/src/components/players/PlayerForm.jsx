@@ -292,6 +292,7 @@ const PlayerForm = ({ playerId, tournamentId, onSaved, onCancel }) => {
           </p>
           {photoPreview && (
             <img
+              // lgtm[js/dom/xss] React auto-escapes JSX attribute values; blob: and API URLs only
               src={photoPreview.startsWith("blob:") || photoPreview.startsWith(`${API_BASE}`) ? photoPreview : undefined}
               alt="Preview"
               style={{
