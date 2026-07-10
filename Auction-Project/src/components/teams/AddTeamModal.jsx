@@ -63,6 +63,12 @@ const AddTeamModal = ({ isOpen, onClose, onSubmit, tournamentId }) => {
       return;
     }
 
+    const parsedMaxPlayers = Number(maxPlayers);
+    if (!Number.isFinite(parsedMaxPlayers) || parsedMaxPlayers < 1) {
+      alert("Max players must be a number greater than 0.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     const short = generateShort(teamName);
@@ -77,7 +83,7 @@ const AddTeamModal = ({ isOpen, onClose, onSubmit, tournamentId }) => {
         budget,
         totalBudget: budget,
         remainingBudget: budget,
-        maxPlayers: Number(maxPlayers) || 18,
+        maxPlayers: parsedMaxPlayers,
         tournamentId,
       });
 

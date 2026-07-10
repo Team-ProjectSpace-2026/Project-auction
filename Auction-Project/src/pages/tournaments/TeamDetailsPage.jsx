@@ -58,18 +58,32 @@ const TeamDetailsPage = () => {
       alert("No players to export.");
       return;
     }
+
+    const escapeCSV = (val) => {
+      const str = String(val ?? "");
+      return str.includes(",") || str.includes('"') || str.includes("\n")
+        ? `"${str.replace(/"/g, '""')}"`
+        : str;
+    };
+
     const csvContent = [
       ["Player Name", "Role", "Purchase Price"],
-      ...players.map((p) => [p.name, p.role, formatCurrency(p.soldPrice)]),
+      ...players.map((p) => [
+        escapeCSV(p.name),
+        escapeCSV(p.role),
+        escapeCSV(formatCurrency(p.soldPrice)),
+      ]),
     ]
       .map((row) => row.join(","))
       .join("\n");
 
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
+    link.href = url;
     link.download = `${(team?.name || "Team").replace(/\s+/g, "_")}_Squad.csv`;
     link.click();
+    URL.revokeObjectURL(url);
   };
 
   if (loading) {
