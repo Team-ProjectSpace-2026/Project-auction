@@ -64,7 +64,6 @@ describe('CORS Origin Validation', () => {
   });
 
   it('blocks unconfigured origins', () => {
-    // codeql[false-positive] Test case - malicious origin for CORS validation test
     expect(allowed.includes('https://evil.com')).toBe(false);
   });
 
