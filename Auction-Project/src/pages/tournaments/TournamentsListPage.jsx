@@ -1,55 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/layout/Sidebar";
-// import TopBar from "../../components/layout/TopBar";
-
-// const MOCK_USER = {
-// name: "Rahul Organizer",
-// role: "Organizer",
-// };
-
-const tournaments = [
-{
-id: 1,
-name: "Summer League 2027",
-status: "Active",
-date: "20 Jun 2027",
-teams: "12 Teams",
-format: "T20 League",
-},
-{
-id: 2,
-name: "Champions Cup 2027",
-status: "Upcoming",
-date: "05 Jul 2027",
-teams: "10 Teams",
-format: "T20 League",
-},
-{
-id: 3,
-name: "Winter League 2027",
-status: "Upcoming",
-date: "10 Aug 2027",
-teams: "8 Teams",
-format: "T10 League",
-},
-{
-id: 4,
-name: "City Premier League",
-status: "Completed",
-date: "02 Feb 2027",
-teams: "12 Teams",
-format: "T20 League",
-},
-{
-id: 5,
-name: "Rising Stars Cup",
-status: "Completed",
-date: "25 Apr 2027",
-teams: "8 Teams",
-format: "T10 League",
-},
-];
+import { getTournaments } from "../../services/tournamentService";
 
 const getStatusStyle = (status) => {
 if (status === "Active") {
@@ -75,6 +27,39 @@ color: "#4b5563",
 const TournamentsListPage = () => {
 const navigate = useNavigate();
 const [activePage, setActivePage] = useState("tournaments");
+const [tournaments, setTournaments] = useState([]);
+const [loading, setLoading] = useState(true);
+const [error, setError] = useState(null);
+
+useEffect(() => {
+  const fetchTournaments = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const { data } = await getTournaments();
+      setTournaments(data);
+    } catch (err) {
+      console.error("Failed to fetch tournaments:", err);
+      setError("Failed to load tournaments. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchTournaments();
+}, []);
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return "—";
+  try {
+    return new Date(dateStr).toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  } catch {
+    return dateStr;
+  }
+};
 
 return (
 <div
@@ -201,9 +186,27 @@ return (
             gap: "20px",
           }}
         >
-          {tournaments.map((tournament) => (
+          {loading && (
+            <div style={{ gridColumn: "1 / -1", textAlign: "center", padding: "40px", color: "var(--text-secondary-light)" }}>
+              Loading tournaments...
+            </div>
+          )}
+
+          {error && (
+            <div style={{ gridColumn: "1 / -1", textAlign: "center", padding: "40px", color: "#e74c3c" }}>
+              {error}
+            </div>
+          )}
+
+          {!loading && !error && tournaments.length === 0 && (
+            <div style={{ gridColumn: "1 / -1", textAlign: "center", padding: "40px", color: "var(--text-secondary-light)" }}>
+              No tournaments found. Click "+ New Tournament" to create one.
+            </div>
+          )}
+
+          {!loading && !error && tournaments.map((tournament) => (
             <div
-              key={tournament.id}
+              key={tournament._id}
               style={{
                 background: 'var(--card-bg-light)',
                 border: '1px solid var(--border-light)',
@@ -302,8 +305,8 @@ return (
                     📅 Auction Date
                   </span>
 
-                  <strong style={{ color: 'var(--text-primary-light)', transition: 'color 0.2s ease' }}>
-                    {tournament.date}
+                   <strong style={{ color: 'var(--text-primary-light)', transition: 'color 0.2s ease' }}>
+                    {formatDate(tournament.date)}
                   </strong>
                 </div>
 
@@ -317,8 +320,8 @@ return (
                     👥 Teams
                   </span>
 
-                  <strong style={{ color: 'var(--text-primary-light)', transition: 'color 0.2s ease' }}>
-                    {tournament.teams}
+                   <strong style={{ color: 'var(--text-primary-light)', transition: 'color 0.2s ease' }}>
+                    {tournament.teams} Teams
                   </strong>
                 </div>
 
@@ -340,7 +343,7 @@ return (
 
               <button
                 onClick={() =>
-                  navigate("/tournament-details", { state: { tournament } })
+                  navigate(`/tournament-details/${tournament._id}`, { state: { tournament } })
                 }
                 style={{
                   width: "100%",
@@ -377,7 +380,7 @@ return (
               transition: 'color 0.2s ease',
             }}
           >
-            Showing 1 to 5 of 5 tournaments
+            Showing {tournaments.length} tournament{tournaments.length !== 1 ? "s" : ""}
           </span>
 
           <div

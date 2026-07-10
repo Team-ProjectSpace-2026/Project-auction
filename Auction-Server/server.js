@@ -77,7 +77,7 @@ app.use(cors({
   credentials: true
 }));
 app.use(cookieParser());
-app.use(express.json({ limit: '1mb' }));
+app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // XSS sanitization for all API request bodies
@@ -99,7 +99,7 @@ app.use(logger.requestMiddleware);
 app.use('/api/auth', authRoutes);
 app.use('/api/tournaments', tournamentRoutes);
 app.use('/api/players', playerRoutes);
-app.use('/api/teams', express.json({ limit: '10mb' }), teamRoutes);
+app.use('/api/teams', teamRoutes);
 app.use('/api/auction', auctionRoutes);
 
 // Health check endpoint with dependency checks

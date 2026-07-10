@@ -62,7 +62,7 @@ const AppRouter = () => (
           }
         />
         <Route
-          path="/team-details"
+          path="/team-details/:teamId?"
           element={
             <ProtectedRoute>
               <TeamDetailsPage />
