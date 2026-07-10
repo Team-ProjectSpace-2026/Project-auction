@@ -24,6 +24,12 @@ const PlayerForm = ({ playerId, tournamentId, onSaved, onCancel }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const safePhotoPreview =
+    typeof photoPreview === "string" &&
+    (photoPreview.startsWith("blob:") || photoPreview.startsWith(`${API_BASE}/uploads/photos/`))
+      ? photoPreview
+      : null;
+
   useEffect(() => {
     if (playerId) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -290,10 +296,9 @@ const PlayerForm = ({ playerId, tournamentId, onSaved, onCancel }) => {
           <p style={{ marginTop: "6px", fontSize: "12px", color: "var(--text-secondary-light)" }}>
             JPG or PNG, max 2MB
           </p>
-          {photoPreview && (
-            // lgtm[js/xss-through-dom]
+          {safePhotoPreview && (
             <img
-              src={photoPreview}
+              src={safePhotoPreview}
               alt="Preview"
               onError={(e) => { e.target.style.display = "none"; }}
               style={{
