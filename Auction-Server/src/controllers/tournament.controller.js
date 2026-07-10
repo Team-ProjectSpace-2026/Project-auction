@@ -35,12 +35,9 @@ export const createTournament = async (req, res, next) => {
       maxPlayersPerTeam,
       playerBasePrice,
       description,
-<<<<<<< HEAD
       logo,
       owner: req.user._id,
-=======
       createdBy: req.user._id,
->>>>>>> 0cb2f4c3873fa197e732ed7a4e0ba6ba0d16aae1
     });
     await tournament.save();
     res.status(201).json(tournament);

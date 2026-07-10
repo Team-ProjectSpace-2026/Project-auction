@@ -1,10 +1,7 @@
 import mongoose from "mongoose";
 import Player from "../models/Player.js";
-<<<<<<< HEAD
 import Tournament from "../models/Tournament.js";
-=======
 import Bid from "../models/Bid.js";
->>>>>>> 0cb2f4c3873fa197e732ed7a4e0ba6ba0d16aae1
 
 export const getPlayers = async (req, res, next) => {
   try {
