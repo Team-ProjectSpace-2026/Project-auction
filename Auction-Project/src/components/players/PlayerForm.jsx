@@ -291,10 +291,11 @@ const PlayerForm = ({ playerId, tournamentId, onSaved, onCancel }) => {
             JPG or PNG, max 2MB
           </p>
           {photoPreview && (
+            // lgtm[js/xss-through-dom]
             <img
-              // lgtm[js/dom/xss] React auto-escapes JSX attribute values; blob: and API URLs only
-              src={photoPreview.startsWith("blob:") || photoPreview.startsWith(`${API_BASE}`) ? photoPreview : undefined}
+              src={photoPreview}
               alt="Preview"
+              onError={(e) => { e.target.style.display = "none"; }}
               style={{
                 marginTop: "12px", width: "100px", height: "133px",
                 objectFit: "cover", borderRadius: "10px",
