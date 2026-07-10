@@ -19,8 +19,9 @@ import { Clock, Link, Users, User, Hammer } from "lucide-react";
 const TournamentHubPage = () => {
   const [activePage, setActivePage] = useState("tournaments");
   const location = useLocation();
-  const { tournamentId } = useParams();
+  const urlParams = useParams();
   const [tournament, setTournament] = useState(location.state?.tournament || null);
+  const tournamentId = tournament?._id || urlParams.tournamentId;
   const [activeTab, setActiveTab] = useState(
   location.state?.activeTab || "overview"
   );
@@ -147,9 +148,9 @@ const TournamentHubPage = () => {
 
             {activeTab === "registration" && <RegistrationTab tournament={tournament} />}
 
-            {activeTab === "teams" && <TeamsTab />}
+            {activeTab === "teams" && <TeamsTab tournamentId={tournamentId} />}
 
-            {activeTab === "players" && <PlayersTab />}
+            {activeTab === "players" && <PlayersTab tournamentId={tournament?._id || tournamentId} />}
 
             {activeTab === "auction" && <LiveAuctionTab />}
 

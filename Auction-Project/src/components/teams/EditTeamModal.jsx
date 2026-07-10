@@ -1,7 +1,7 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { FiX, FiUpload } from "react-icons/fi";
 
-const AddTeamModal = ({ isOpen, onClose, onSubmit, tournamentId }) => {
+const EditTeamModal = ({ isOpen, onClose, onSubmit, team }) => {
   const [formData, setFormData] = useState({
     teamName: "",
     ownerName: "",
@@ -12,13 +12,24 @@ const AddTeamModal = ({ isOpen, onClose, onSubmit, tournamentId }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef(null);
 
+  useEffect(() => {
+    if (team && isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setFormData({
+        teamName: team.name || "",
+        ownerName: team.ownerName || "",
+        totalBudget: team.totalBudget?.toString() || "",
+        maxPlayers: (team.maxPlayers || 18).toString(),
+      });
+      setLogoPreview(team.logo || null);
+    }
+  }, [team, isOpen]);
+
   const handleClose = useCallback(() => {
-    setFormData({ teamName: "", ownerName: "", totalBudget: "", maxPlayers: "18" });
-    setLogoPreview(null);
     onClose();
   }, [onClose]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !team) return null;
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -75,20 +86,15 @@ const AddTeamModal = ({ isOpen, onClose, onSubmit, tournamentId }) => {
     const budget = Number(totalBudget);
 
     try {
-      await onSubmit({
+      await onSubmit(team._id, {
         name: teamName.trim(),
         short,
         ownerName: ownerName.trim(),
         logo: logoPreview || "",
         budget,
         totalBudget: budget,
-        remainingBudget: budget,
         maxPlayers: parsedMaxPlayers,
-        tournamentId,
       });
-
-      setFormData({ teamName: "", ownerName: "", totalBudget: "", maxPlayers: "18" });
-      setLogoPreview(null);
     } finally {
       setIsSubmitting(false);
     }
@@ -122,7 +128,7 @@ const AddTeamModal = ({ isOpen, onClose, onSubmit, tournamentId }) => {
               margin: 0,
             }}
           >
-            Add New Team
+            Edit Team
           </h2>
           <button
             onClick={handleClose}
@@ -265,7 +271,7 @@ const AddTeamModal = ({ isOpen, onClose, onSubmit, tournamentId }) => {
             />
           </div>
 
-          <div style={{ display: "flex", gap: "12px", marginBottom: "16px" }}>
+          <div style={{ display: "flex", gap: "12px", marginBottom: "24px" }}>
             <div style={{ flex: 1 }}>
               <label
                 style={{
@@ -369,7 +375,7 @@ const AddTeamModal = ({ isOpen, onClose, onSubmit, tournamentId }) => {
                 fontSize: "14px",
               }}
             >
-              {isSubmitting ? "Adding..." : "Add Team"}
+              {isSubmitting ? "Saving..." : "Save Changes"}
             </button>
           </div>
         </form>
@@ -378,4 +384,4 @@ const AddTeamModal = ({ isOpen, onClose, onSubmit, tournamentId }) => {
   );
 };
 
-export default AddTeamModal;
+export default EditTeamModal;

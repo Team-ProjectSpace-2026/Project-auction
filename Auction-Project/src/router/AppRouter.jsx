@@ -62,7 +62,7 @@ const AppRouter = () => (
           }
         />
         <Route
-          path="/team-details"
+          path="/team-details/:teamId?"
           element={
             <ProtectedRoute>
               <TeamDetailsPage />
@@ -78,7 +78,7 @@ const AppRouter = () => (
           }
         />
         <Route
-          path="/player-details"
+          path="/player-details/:playerId?"
           element={
             <ProtectedRoute>
               <PlayerDetailsPage />

@@ -55,7 +55,7 @@ const TournamentCard = ({ tournament }) => {
       </div>
 
       <button
-        onClick={() => navigate("/tournament-details")}
+        onClick={() => navigate(`/tournament-details/${tournament._id}`, { state: { tournament } })}
         style={{
         width: "100%",
         marginTop: "18px",

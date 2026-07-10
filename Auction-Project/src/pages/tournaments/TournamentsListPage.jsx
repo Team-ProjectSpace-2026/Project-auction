@@ -459,9 +459,8 @@ const TournamentsListPage = () => {
 
                         <button
                           onClick={() =>
-                            navigate("/tournament-details", {
+                            navigate(`/tournament-details/${tournament._id}`, {
                               state: { tournament },
-                              params: { tournamentId: tournament._id },
                             })
                           }
                           style={{

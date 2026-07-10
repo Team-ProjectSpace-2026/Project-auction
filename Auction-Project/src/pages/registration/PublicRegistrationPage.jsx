@@ -399,10 +399,15 @@ export default function PublicRegistrationPage() {
       setForm(DEFAULT_FORM);
       setPhotoPreview(null);
     } catch (err) {
-      const msg = err?.response?.data?.errors?.[0]?.msg
-        || err?.response?.data?.message
-        || err?.message
-        || "Registration failed. Please try again.";
+      const serverErrors = err?.response?.data?.errors;
+      let msg;
+      if (serverErrors && serverErrors.length > 0) {
+        msg = serverErrors.map(e => e.msg).join(", ");
+      } else {
+        msg = err?.response?.data?.message
+          || err?.message
+          || "Registration failed. Please try again.";
+      }
       setBanner({ type: "error", message: msg });
     } finally {
       setLoading(false);

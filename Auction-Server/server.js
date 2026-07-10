@@ -1,5 +1,7 @@
 import { createServer } from 'http';
 import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
@@ -7,8 +9,6 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import connectDB from './src/config/db.js';
 import { initializeSocket } from './src/socket/auctionSocket.js';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -44,6 +44,8 @@ if (process.env.JWT_SECRET.length < 32) {
 const app = express();
 const server = createServer(app);
 const PORT = process.env.PORT || 5000;
+const SERVER_URL = process.env.SERVER_URL || `http://localhost:${PORT}`;
+const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
 
 // Connect to database
 await connectDB();
@@ -55,7 +57,7 @@ app.use(helmet({
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "blob:"],
+      imgSrc: ["'self'", "data:", "blob:", SERVER_URL, CLIENT_URL],
       connectSrc: ["'self'"],
       fontSrc: ["'self'"],
       objectSrc: ["'none'"],
@@ -101,6 +103,9 @@ app.use('/api/', limiter);
 // Request logging
 app.use(logger.requestMiddleware);
 
+// Serve uploaded files (player photos)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/tournaments', tournamentRoutes);
@@ -108,9 +113,6 @@ app.use('/api/players', playerRoutes);
 app.use('/api/teams', express.json({ limit: '10mb' }), teamRoutes);
 app.use('/api/auction', auctionRoutes);
 app.use('/api/dashboard', dashboardRoutes);
-
-// Serve uploaded files
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Health check endpoint with dependency checks
 app.get('/api/health', async (req, res) => {
