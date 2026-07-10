@@ -1,6 +1,7 @@
 /* eslint-disable no-undef */
 // Pure logic tests — no ESM imports needed
 
+// codeql[false-positive] Test helper - intentionally simplified HTML sanitizer for testing
 const stripHtml = (str) => {
   if (typeof str !== 'string') return str;
   let cleaned = str.replace(/<script[\s\S]*?<\/script>/gi, '');
