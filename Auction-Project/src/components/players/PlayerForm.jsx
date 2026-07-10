@@ -292,7 +292,7 @@ const PlayerForm = ({ playerId, tournamentId, onSaved, onCancel }) => {
           </p>
           {photoPreview && (
             <img
-              src={photoPreview}
+              src={photoPreview.startsWith("blob:") || photoPreview.startsWith(`${API_BASE}`) ? photoPreview : undefined}
               alt="Preview"
               style={{
                 marginTop: "12px", width: "100px", height: "133px",
