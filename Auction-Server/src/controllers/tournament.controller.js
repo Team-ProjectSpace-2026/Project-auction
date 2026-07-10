@@ -28,6 +28,7 @@ export const createTournament = async (req, res, next) => {
       teams,
       format,
       description,
+      createdBy: req.user._id,
     });
     await tournament.save();
     res.status(201).json(tournament);

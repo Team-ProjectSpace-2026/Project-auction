@@ -95,4 +95,9 @@ const playerSchema = new mongoose.Schema(
   },
 );
 
+// Compound indexes for common query patterns
+playerSchema.index({ tournamentId: 1, deleted: 1 });
+playerSchema.index({ tournamentId: 1, isSold: 1, deleted: 1 });
+playerSchema.index({ mobile: 1, tournamentId: 1 }, { unique: true, partialFilterExpression: { deleted: false } });
+
 export default mongoose.model("Player", playerSchema);

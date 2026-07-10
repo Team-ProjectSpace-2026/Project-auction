@@ -115,7 +115,9 @@ export const processWinningBid = async (bid) => {
     await session.endSession();
   }
 
-  return bid;
+  // Return the updated bid, not the stale input
+  const refreshedBid = await Bid.findById(bid._id);
+  return refreshedBid || bid;
 };
 
 export const cancelActiveBids = async (tournamentId, playerId, session) => {

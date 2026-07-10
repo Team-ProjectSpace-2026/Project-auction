@@ -1,5 +1,6 @@
 import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 import User from "../models/User.js";
 import Bid from "../models/Bid.js";
 import Player from "../models/Player.js";
@@ -13,10 +14,66 @@ import {
 
 let io;
 
+// --- Socket rate limiting (per-connection) ---
+const RATE_LIMIT_WINDOW_MS = 1000; // 1 second
+const RATE_LIMIT_MAX_BIDS = 3;     // max 3 bids per second
+const RATE_LIMIT_MAX_EVENTS = 10;  // max 10 any events per second
+
+const createRateLimiter = (maxRequests, windowMs) => {
+  const timestamps = [];
+  return () => {
+    const now = Date.now();
+    // Remove expired timestamps
+    while (timestamps.length > 0 && timestamps[0] <= now - windowMs) {
+      timestamps.shift();
+    }
+    if (timestamps.length >= maxRequests) {
+      return false; // rate limited
+    }
+    timestamps.push(now);
+    return true; // allowed
+  };
+};
+
+// --- Input validation helpers ---
+const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
+const sanitizeId = (id) => {
+  if (!id || !isValidObjectId(id)) return null;
+  return new mongoose.Types.ObjectId(id);
+};
+const sanitizeNumber = (val, opts = {}) => {
+  const num = Number(val);
+  if (isNaN(num) || num < 0) return null;
+  if (opts.max !== undefined && num > opts.max) return null;
+  return num;
+};
+
+// --- Authorization helpers ---
+const checkTournamentExists = async (tournamentId) => {
+  if (!tournamentId || !isValidObjectId(tournamentId)) return null;
+  return Tournament.findById(new mongoose.Types.ObjectId(tournamentId));
+};
+
+const checkPlayerInTournament = async (playerId, tournamentId) => {
+  if (!playerId || !isValidObjectId(playerId)) return null;
+  const player = await Player.findById(new mongoose.Types.ObjectId(playerId));
+  if (!player || player.tournamentId.toString() !== tournamentId) return null;
+  return player;
+};
+
 export const initializeSocket = (server) => {
   io = new Server(server, {
     cors: {
-      origin: process.env.CLIENT_URL || "http://localhost:5173",
+      origin: (origin, callback) => {
+        const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
+          .split(',')
+          .map((o) => o.trim());
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error('Not allowed by CORS'));
+        }
+      },
       methods: ["GET", "POST"],
     },
   });
@@ -24,7 +81,15 @@ export const initializeSocket = (server) => {
   // Authentication middleware for socket connections
   io.use(async (socket, next) => {
     try {
-      const token = socket.handshake.auth.token;
+      // Try cookie first (primary auth), then fall back to handshake.auth.token
+      const cookieHeader = socket.handshake.headers?.cookie || "";
+      const cookieToken = cookieHeader
+        .split(";")
+        .map((c) => c.trim())
+        .find((c) => c.startsWith("token="))
+        ?.split("=")[1];
+      const token = cookieToken || socket.handshake.auth.token;
+
       if (!token) {
         return next(new Error("Authentication error"));
       }
@@ -37,6 +102,7 @@ export const initializeSocket = (server) => {
       }
 
       socket.user = user;
+      socket.joinedTournaments = new Set();
       next();
     } catch (error) {
       next(new Error("Authentication error"));
@@ -44,21 +110,73 @@ export const initializeSocket = (server) => {
   });
 
   io.on("connection", (socket) => {
-    console.log(`User ${socket.user.name} connected`);
+    // Create per-event rate limiters
+    const bidRateLimiter = createRateLimiter(RATE_LIMIT_MAX_BIDS, RATE_LIMIT_WINDOW_MS);
+    const eventRateLimiter = createRateLimiter(RATE_LIMIT_MAX_EVENTS, RATE_LIMIT_WINDOW_MS);
 
-    // Join tournament room
-    socket.on("join-tournament", (tournamentId) => {
-      socket.join(`tournament-${tournamentId}`);
-      console.log(`User ${socket.user.name} joined tournament ${tournamentId}`);
+    // --- join-tournament ---
+    socket.on("join-tournament", async (data) => {
+      try {
+        if (!eventRateLimiter()) {
+          socket.emit("rate-limited", { message: "Too many requests. Slow down." });
+          return;
+        }
+
+        const tournamentId = typeof data === "string" ? data : data?.tournamentId;
+        if (!tournamentId || !isValidObjectId(tournamentId)) {
+          socket.emit("join-error", { message: "Invalid tournament ID" });
+          return;
+        }
+
+        const tournament = await checkTournamentExists(tournamentId);
+        if (!tournament) {
+          socket.emit("join-error", { message: "Tournament not found" });
+          return;
+        }
+
+        socket.join(`tournament-${tournamentId}`);
+        socket.joinedTournaments.add(tournamentId);
+      } catch (error) {
+        socket.emit("join-error", { message: "Failed to join tournament" });
+      }
     });
 
-    // Handle bid placement
+    // --- leave-tournament ---
+    socket.on("leave-tournament", (data) => {
+      try {
+        const tournamentId = typeof data === "string" ? data : data?.tournamentId;
+        if (tournamentId && isValidObjectId(tournamentId)) {
+          socket.leave(`tournament-${tournamentId}`);
+          socket.joinedTournaments?.delete(tournamentId);
+        }
+      } catch (error) {
+        // Silent fail for leave
+      }
+    });
+
+    // --- place-bid ---
     socket.on("place-bid", async (data) => {
       try {
-        const { tournamentId, amount, teamId, playerId } = data;
+        if (!bidRateLimiter()) {
+          socket.emit("bid-error", { message: "Too many bids. Please wait." });
+          return;
+        }
 
-        // Verify user has tournament access
-        const tournament = await Tournament.findById(tournamentId);
+        const { tournamentId, amount, teamId, playerId } = data || {};
+
+        // Input validation
+        const sanitizedTournamentId = sanitizeId(tournamentId);
+        const sanitizedTeamId = sanitizeId(teamId);
+        const sanitizedPlayerId = sanitizeId(playerId);
+        const sanitizedAmount = sanitizeNumber(amount);
+
+        if (!sanitizedTournamentId || !sanitizedTeamId || !sanitizedPlayerId || sanitizedAmount === null) {
+          socket.emit("bid-error", { message: "Invalid input data" });
+          return;
+        }
+
+        // Verify tournament exists
+        const tournament = await Tournament.findById(sanitizedTournamentId);
         if (!tournament) {
           socket.emit("bid-error", { message: "Tournament not found" });
           return;
@@ -68,7 +186,7 @@ export const initializeSocket = (server) => {
         if (
           tournament.auctionStatus !== "bidding" ||
           !tournament.currentPlayerId ||
-          tournament.currentPlayerId.toString() !== playerId
+          tournament.currentPlayerId.toString() !== sanitizedPlayerId.toString()
         ) {
           socket.emit("bid-error", {
             message: "No active auction for this player",
@@ -78,87 +196,104 @@ export const initializeSocket = (server) => {
 
         // Validate bid using shared validator
         try {
-          await validateBid({ amount, teamId, playerId }, tournamentId);
+          await validateBid(
+            { amount: sanitizedAmount, teamId: sanitizedTeamId, playerId: sanitizedPlayerId },
+            sanitizedTournamentId
+          );
         } catch (validationError) {
           socket.emit("bid-error", { message: validationError.message });
           return;
         }
 
         // Get current winning bid atomically
-        const currentBid = await getWinningBid(tournamentId, playerId);
+        const currentBid = await getWinningBid(sanitizedTournamentId, sanitizedPlayerId);
         const currentBidAmount = currentBid ? currentBid.amount : 0;
 
-        if (amount <= currentBidAmount) {
+        if (sanitizedAmount <= currentBidAmount) {
           socket.emit("bid-error", {
             message: `Bid must be higher than current bid of ₹${currentBidAmount.toLocaleString()}`,
           });
           return;
         }
 
-         // Atomic bid creation with conditional update for active bid transition
-         const session = await Bid.startSession();
-         let newBidId;
-         try {
-           await session.withTransaction(async () => {
-             // Create new bid
-             const bid = new Bid({
-               tournamentId,
-               playerId,
-               teamId,
-               amount,
-               status: "Active",
-             });
-             await bid.save({ session });
-             newBidId = bid._id;
- 
-             // Update previous active bid to Outbid atomically
-             if (currentBid) {
-               await Bid.updateOne(
-                 { _id: currentBid._id, status: "Active" },
-                 { $set: { status: "Outbid" } },
-                 { session },
-               );
-             }
-           });
-         } finally {
-           await session.endSession();
-         }
- 
-         // Broadcast bid to all clients in tournament room after transaction resolves
-         const populatedBid = await Bid.findById(newBidId)
-           .populate("playerId", "name")
-           .populate("teamId", "name");
- 
-         io.to(`tournament-${tournamentId}`).emit("new-bid", {
-           bid: populatedBid,
-           isWinningBid: true,
-         });
- 
-         // Emit success to bidder
-         socket.emit("bid-success", {
-           message: "Bid placed successfully",
-           bid: populatedBid,
-           isWinningBid: true,
-         });
+        // Atomic bid creation with conditional update for active bid transition
+        const session = await Bid.startSession();
+        let newBidId;
+        try {
+          await session.withTransaction(async () => {
+            const bid = new Bid({
+              tournamentId: sanitizedTournamentId,
+              playerId: sanitizedPlayerId,
+              teamId: sanitizedTeamId,
+              amount: sanitizedAmount,
+              status: "Active",
+            });
+            await bid.save({ session });
+            newBidId = bid._id;
+
+            if (currentBid) {
+              await Bid.updateOne(
+                { _id: currentBid._id, status: "Active" },
+                { $set: { status: "Outbid" } },
+                { session }
+              );
+            }
+          });
+        } finally {
+          await session.endSession();
+        }
+
+        // Broadcast bid to all clients in tournament room
+        const populatedBid = await Bid.findById(newBidId)
+          .populate("playerId", "name")
+          .populate("teamId", "name");
+
+        io.to(`tournament-${tournamentId}`).emit("new-bid", {
+          bid: populatedBid,
+          isWinningBid: true,
+        });
+
+        socket.emit("bid-success", {
+          message: "Bid placed successfully",
+          bid: populatedBid,
+          isWinningBid: true,
+        });
       } catch (error) {
-        socket.emit("bid-error", { message: error.message });
+        socket.emit("bid-error", { message: "Failed to place bid" });
       }
     });
 
-    // Handle player reveal
+    // --- reveal-player (organizer-only action) ---
     socket.on("reveal-player", async (data) => {
       try {
-        const { tournamentId, playerId } = data;
+        if (!eventRateLimiter()) {
+          socket.emit("rate-limited", { message: "Too many requests." });
+          return;
+        }
 
-        const tournament = await Tournament.findById(tournamentId);
+        const { tournamentId, playerId } = data || {};
+        const sanitizedTournamentId = sanitizeId(tournamentId);
+        const sanitizedPlayerId = sanitizeId(playerId);
+
+        if (!sanitizedTournamentId || !sanitizedPlayerId) {
+          socket.emit("reveal-error", { message: "Invalid input data" });
+          return;
+        }
+
+        const tournament = await Tournament.findById(sanitizedTournamentId);
         if (!tournament) {
           socket.emit("reveal-error", { message: "Tournament not found" });
           return;
         }
 
-        // Verify player exists and belongs to tournament
-        const player = await Player.findById(playerId);
-        if (!player || player.tournamentId.toString() !== tournamentId) {
+        // Only tournament creator can reveal players
+        if (tournament.createdBy && tournament.createdBy.toString() !== socket.user._id.toString()) {
+          socket.emit("reveal-error", { message: "Not authorized to reveal players" });
+          return;
+        }
+
+        const player = await Player.findById(sanitizedPlayerId);
+        if (!player || player.tournamentId.toString() !== sanitizedTournamentId.toString()) {
           socket.emit("reveal-error", { message: "Invalid player for this tournament" });
           return;
         }
@@ -168,57 +303,133 @@ export const initializeSocket = (server) => {
           return;
         }
 
-        // Update tournament state
-        tournament.currentPlayerId = playerId;
+        if (player.deleted) {
+          socket.emit("reveal-error", { message: "Player has been deleted" });
+          return;
+        }
+
+        tournament.currentPlayerId = sanitizedPlayerId;
         tournament.auctionStatus = "bidding";
         await tournament.save();
 
-        // Broadcast revealed player to all clients
-        const populatedPlayer = await Player.findById(playerId);
+        const populatedPlayer = await Player.findById(sanitizedPlayerId);
         io.to(`tournament-${tournamentId}`).emit("player-revealed", {
-          playerId,
+          playerId: sanitizedPlayerId,
           player: populatedPlayer,
         });
       } catch (error) {
-        socket.emit("reveal-error", { message: error.message });
+        socket.emit("reveal-error", { message: "Failed to reveal player" });
       }
     });
 
-    // Handle auction start
+    // --- start-auction (organizer-only action) ---
     socket.on("start-auction", async (data) => {
-      const { tournamentId } = data;
-      // Verify user has tournament access
-      const tournament = await Tournament.findById(tournamentId);
-      if (!tournament) return;
-      io.to(`tournament-${tournamentId}`).emit("auction-started", {
-        tournamentId,
-      });
+      try {
+        if (!eventRateLimiter()) {
+          socket.emit("rate-limited", { message: "Too many requests." });
+          return;
+        }
+
+        const { tournamentId } = data || {};
+        const sanitizedTournamentId = sanitizeId(tournamentId);
+        if (!sanitizedTournamentId) {
+          socket.emit("start-error", { message: "Invalid tournament ID" });
+          return;
+        }
+
+        const tournament = await Tournament.findById(sanitizedTournamentId);
+        if (!tournament) return;
+
+        // Only tournament creator can start
+        if (tournament.createdBy && tournament.createdBy.toString() !== socket.user._id.toString()) {
+          socket.emit("start-error", { message: "Not authorized" });
+          return;
+        }
+
+        tournament.auctionStatus = "idle";
+        await tournament.save();
+
+        io.to(`tournament-${tournamentId}`).emit("auction-started", {
+          tournamentId,
+        });
+      } catch (error) {
+        socket.emit("start-error", { message: "Failed to start auction" });
+      }
     });
 
-    // Handle auction end
+    // --- end-auction (organizer-only action) ---
     socket.on("end-auction", async (data) => {
-      const { tournamentId } = data;
-      // Verify user has tournament access
-      const tournament = await Tournament.findById(tournamentId);
-      if (!tournament) return;
-      io.to(`tournament-${tournamentId}`).emit("auction-ended", {
-        tournamentId,
-      });
+      try {
+        if (!eventRateLimiter()) {
+          socket.emit("rate-limited", { message: "Too many requests." });
+          return;
+        }
+
+        const { tournamentId } = data || {};
+        const sanitizedTournamentId = sanitizeId(tournamentId);
+        if (!sanitizedTournamentId) {
+          socket.emit("end-error", { message: "Invalid tournament ID" });
+          return;
+        }
+
+        const tournament = await Tournament.findById(sanitizedTournamentId);
+        if (!tournament) return;
+
+        // Only tournament creator can end
+        if (tournament.createdBy && tournament.createdBy.toString() !== socket.user._id.toString()) {
+          socket.emit("end-error", { message: "Not authorized" });
+          return;
+        }
+
+        tournament.auctionStatus = "idle";
+        tournament.currentPlayerId = null;
+        await tournament.save();
+
+        io.to(`tournament-${tournamentId}`).emit("auction-ended", {
+          tournamentId,
+        });
+      } catch (error) {
+        socket.emit("end-error", { message: "Failed to end auction" });
+      }
     });
 
-    // Handle mark player as sold
+    // --- mark-sold (organizer-only action) ---
     socket.on("mark-sold", async (data) => {
       try {
-        const { tournamentId, playerId } = data;
+        if (!eventRateLimiter()) {
+          socket.emit("rate-limited", { message: "Too many requests." });
+          return;
+        }
 
-        const tournament = await Tournament.findById(tournamentId);
+        const { tournamentId, playerId } = data || {};
+        const sanitizedTournamentId = sanitizeId(tournamentId);
+        const sanitizedPlayerId = sanitizeId(playerId);
+
+        if (!sanitizedTournamentId || !sanitizedPlayerId) {
+          socket.emit("mark-sold-error", { message: "Invalid input data" });
+          return;
+        }
+
+        const tournament = await Tournament.findById(sanitizedTournamentId);
         if (!tournament) {
           socket.emit("mark-sold-error", { message: "Tournament not found" });
           return;
         }
 
-        // Find the active bid for this player
-        const activeBid = await getWinningBid(tournamentId, playerId);
+        // Only tournament creator can mark sold
+        if (tournament.createdBy && tournament.createdBy.toString() !== socket.user._id.toString()) {
+          socket.emit("mark-sold-error", { message: "Not authorized" });
+          return;
+        }
+
+        // Idempotent: check if already sold
+        const player = await Player.findById(sanitizedPlayerId);
+        if (player && player.isSold) {
+          socket.emit("mark-sold-success", { message: "Player already sold" });
+          return;
+        }
+
+        const activeBid = await getWinningBid(sanitizedTournamentId, sanitizedPlayerId);
         if (!activeBid) {
           socket.emit("mark-sold-error", {
             message: "No active bid found for this player",
@@ -226,91 +437,105 @@ export const initializeSocket = (server) => {
           return;
         }
 
-        // Process the winning bid (marks bid as Won, updates player and team)
         await processWinningBid(activeBid);
 
-        // Update tournament state
         tournament.currentPlayerId = null;
         tournament.auctionStatus = "sold";
         await tournament.save();
 
-        // Populate response data
         const populatedBid = await Bid.findById(activeBid._id)
           .populate("playerId", "name")
           .populate("teamId", "name");
 
-        // Broadcast to all clients
         io.to(`tournament-${tournamentId}`).emit("player-sold", {
-          playerId,
+          playerId: sanitizedPlayerId,
           playerName: populatedBid.playerId.name,
           teamId: populatedBid.teamId._id,
           teamName: populatedBid.teamId.name,
           soldPrice: populatedBid.amount,
         });
 
-        // Emit success to sender
         socket.emit("mark-sold-success", {
           message: "Player marked as sold",
           bid: populatedBid,
         });
       } catch (error) {
-        socket.emit("mark-sold-error", { message: error.message });
+        socket.emit("mark-sold-error", { message: "Failed to mark player as sold" });
       }
     });
 
-    // Handle mark player as unsold
+    // --- mark-unsold (organizer-only action) ---
     socket.on("mark-unsold", async (data) => {
       try {
-        const { tournamentId, playerId } = data;
+        if (!eventRateLimiter()) {
+          socket.emit("rate-limited", { message: "Too many requests." });
+          return;
+        }
 
-        const tournament = await Tournament.findById(tournamentId);
+        const { tournamentId, playerId } = data || {};
+        const sanitizedTournamentId = sanitizeId(tournamentId);
+        const sanitizedPlayerId = sanitizeId(playerId);
+
+        if (!sanitizedTournamentId || !sanitizedPlayerId) {
+          socket.emit("mark-unsold-error", { message: "Invalid input data" });
+          return;
+        }
+
+        const tournament = await Tournament.findById(sanitizedTournamentId);
         if (!tournament) {
           socket.emit("mark-unsold-error", { message: "Tournament not found" });
           return;
         }
 
-        // Cancel any active bids for this player
+        // Only tournament creator can mark unsold
+        if (tournament.createdBy && tournament.createdBy.toString() !== socket.user._id.toString()) {
+          socket.emit("mark-unsold-error", { message: "Not authorized" });
+          return;
+        }
+
         const session = await Bid.startSession();
         let cancelledCount = 0;
         try {
           await session.withTransaction(async () => {
-            cancelledCount = await cancelActiveBids(tournamentId, playerId, session);
+            cancelledCount = await cancelActiveBids(sanitizedTournamentId, sanitizedPlayerId, session);
           });
         } finally {
           await session.endSession();
         }
 
-        // Update tournament state
         tournament.currentPlayerId = null;
         tournament.auctionStatus = "unsold";
         await tournament.save();
 
-        // Get player name for broadcast
-        const player = await Player.findById(playerId);
+        const player = await Player.findById(sanitizedPlayerId);
 
-        // Broadcast to all clients
         io.to(`tournament-${tournamentId}`).emit("player-unsold", {
-          playerId,
+          playerId: sanitizedPlayerId,
           playerName: player ? player.name : "Unknown",
           cancelledBids: cancelledCount,
         });
 
-        // Emit success to sender
         socket.emit("mark-unsold-success", {
           message: "Player marked as unsold",
           cancelledBids: cancelledCount,
         });
       } catch (error) {
-        socket.emit("mark-unsold-error", { message: error.message });
+        socket.emit("mark-unsold-error", { message: "Failed to mark player as unsold" });
       }
     });
 
-    // Handle get auction state request
+    // --- get-auction-state ---
     socket.on("get-auction-state", async (data) => {
       try {
-        const { tournamentId } = data;
+        const { tournamentId } = data || {};
+        const sanitizedTournamentId = sanitizeId(tournamentId);
 
-        const tournament = await Tournament.findById(tournamentId)
+        if (!sanitizedTournamentId) {
+          socket.emit("auction-state-error", { message: "Invalid tournament ID" });
+          return;
+        }
+
+        const tournament = await Tournament.findById(sanitizedTournamentId)
           .populate("currentPlayerId", "name role style basePrice");
 
         if (!tournament) {
@@ -321,9 +546,8 @@ export const initializeSocket = (server) => {
         let currentBid = null;
         let highestBidder = null;
 
-        // If there's a current player, get the active bid
         if (tournament.currentPlayerId && tournament.auctionStatus === "bidding") {
-          currentBid = await getWinningBid(tournamentId, tournament.currentPlayerId._id);
+          currentBid = await getWinningBid(sanitizedTournamentId, tournament.currentPlayerId._id);
           if (currentBid) {
             const populatedBid = await Bid.findById(currentBid._id)
               .populate("teamId", "name short");
@@ -339,13 +563,14 @@ export const initializeSocket = (server) => {
           auctionStatus: tournament.auctionStatus,
         });
       } catch (error) {
-        socket.emit("auction-state-error", { message: error.message });
+        socket.emit("auction-state-error", { message: "Failed to get auction state" });
       }
     });
 
     // Handle disconnection
     socket.on("disconnect", () => {
-      console.log(`User ${socket.user.name} disconnected`);
+      // Clean up joined tournaments tracking
+      socket.joinedTournaments?.clear();
     });
   });
 

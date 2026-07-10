@@ -20,9 +20,9 @@ const teamSchema = new mongoose.Schema({
     min: [0, 'Player count cannot be negative']
   },
   budget: {
-    type: String,
+    type: Number,
     required: [true, 'Budget is required'],
-    trim: true
+    min: [0, 'Budget cannot be negative']
   },
   maxPlayers: {
     type: Number,
@@ -58,5 +58,9 @@ const teamSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
+
+// Compound indexes for common query patterns
+teamSchema.index({ tournamentId: 1 });
+teamSchema.index({ tournamentId: 1, remainingBudget: -1 });
 
 export default mongoose.model('Team', teamSchema);

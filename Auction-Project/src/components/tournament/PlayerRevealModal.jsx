@@ -1,419 +1,428 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
-import { useTheme } from "../../context/ThemeContext";
+import { motion, AnimatePresence } from "framer-motion";
+import { useAuction } from "../../context/AuctionContext";
+import StadiumBackground from "../auction/StadiumBackground";
+import "./reveal-screen.css";
+
+/**
+ * PlayerRevealModal
+ * 
+ * Three-phase auction reveal:
+ *   1. Shuffling — cards scroll rapidly across a horizontal belt
+ *   2. Selection — belt decelerates, center card locks with golden glow
+ *   3. Identity Reveal — card flips to show player, then transitions to details
+ *
+ * Uses `players` from AuctionContext. Calls `revealPlayer()` when revealing.
+ * All backend/socket logic is unchanged.
+ */
+
+// Player silhouette SVG icon
+const PlayerSilhouette = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+    <circle cx="12" cy="8" r="4.5" opacity="0.5" />
+    <ellipse cx="12" cy="21" rx="8" ry="5" opacity="0.5" />
+  </svg>
+);
+
+// Sparkle particle positions around the selected card
+const SPARKLE_POSITIONS = [
+  { top: "-12px", right: "-12px", size: 16, delay: 0 },
+  { bottom: "-10px", left: "-10px", size: 13, delay: 0.3 },
+  { top: "14px", left: "-14px", size: 11, delay: 0.6 },
+  { bottom: "20px", right: "-14px", size: 15, delay: 0.9 },
+  { top: "-8px", left: "50%", size: 9, delay: 0.4 },
+  { bottom: "-6px", left: "45%", size: 10, delay: 0.7 },
+];
+
+// Card width + gap for position calculations
+const CARD_WIDTH = 140;
+const CARD_GAP = 16;
+const CARD_STEP = CARD_WIDTH + CARD_GAP;
 
 const PlayerRevealModal = ({ onClose, onContinue }) => {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
-  const [step, setStep] = useState(1);
-  const timersRef = useRef([]);
+  const { players, revealPlayer } = useAuction();
 
-  useEffect(() => {
-    timersRef.current = [
-      setTimeout(() => setStep(2), 800),
-      setTimeout(() => setStep(3), 2200),
-      setTimeout(() => setStep(4), 3600),
-      setTimeout(() => setStep(5), 4600),
-    ];
-    return () => timersRef.current.forEach(clearTimeout);
-  }, []);
+  // ---- State ----
+  const [phase, setPhase] = useState("idle"); // idle | shuffling | selected | flipping | done
+  const [beltOffset, setBeltOffset] = useState(0);
+  const [selectedIndex, setSelectedIndex] = useState(null);
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [showSweep, setShowSweep] = useState(false);
+  const [selectedPlayer, setSelectedPlayer] = useState(null);
 
-  const isShuffling = step >= 2 && step <= 3;
-  const isRevealed = step >= 4;
-  const isFullyRevealed = step === 5;
+  const animFrameRef = useRef(null);
+  const startTimeRef = useRef(null);
+  const containerRef = useRef(null);
 
-  const handleRevealClick = () => {
-    timersRef.current.forEach(clearTimeout);
-    timersRef.current = [];
-
-    if (step < 5) {
-      setStep(step + 1);
-    } else {
-      onContinue();
+  // Build card list: use all players, repeat enough to fill the strip
+  const cardList = useMemo(() => {
+    if (!players || players.length === 0) {
+      // Fallback: generate placeholder cards
+      return Array.from({ length: 30 }, (_, i) => ({
+        _id: `placeholder-${i}`,
+        registrationNumber: i + 1,
+        name: `Player ${i + 1}`,
+        displayNumber: String(i + 1).padStart(3, "0"),
+      }));
     }
-  };
+    // Create enough copies to fill a long strip
+    const copies = Math.max(3, Math.ceil(50 / players.length));
+    const list = [];
+    for (let c = 0; c < copies; c++) {
+      players.forEach((p, i) => {
+        list.push({
+          ...p,
+          _cardKey: `${c}-${i}`,
+          displayNumber: String(p.registrationNumber || i + 1).padStart(3, "0"),
+        });
+      });
+    }
+    return list;
+  }, [players]);
 
-  // Theme-dependent colors
-  const bg = isDark ? "#0f172a" : "#f4f6fb";
-  const textPrimary = isDark ? "#fff" : "#1a1d2e";
-  const textSecondary = isDark ? "rgba(255,255,255,0.45)" : "rgba(26,29,46,0.5)";
-  const inactiveCardBg = isDark
-    ? "linear-gradient(135deg, rgba(96,165,250,0.25), rgba(147,197,253,0.15))"
-    : "linear-gradient(135deg, rgba(37,99,235,0.12), rgba(96,165,250,0.08))";
-  const inactiveDotBg = isDark ? "rgba(255,255,255,0.12)" : "rgba(26,29,46,0.1)";
-  const ringColor = isDark ? "rgba(37,99,235,0.4)" : "rgba(37,99,235,0.25)";
-  const cardShadow = isDark ? "0 8px 32px rgba(0,0,0,0.3)" : "0 8px 32px rgba(0,0,0,0.08)";
-  const radialGlow = isDark
-    ? "radial-gradient(circle, rgba(37,99,235,0.12) 0%, transparent 70%)"
-    : "radial-gradient(circle, rgba(37,99,235,0.06) 0%, transparent 70%)";
-  const closeBg = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)";
-  const closeBorder = isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)";
-  const closeColor = isDark ? "rgba(255,255,255,0.5)" : "rgba(26,29,46,0.4)";
-  const closeHoverBg = isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.1)";
-  const closeHoverColor = isDark ? "#fff" : "#1a1d2e";
+  // Pick a random unsold player for selection target (computed once on mount via useState)
+  const [targetIndex] = useState(() => {
+    if (!players || players.length === 0) {
+      // Fallback: use middle of cardList (30 elements by default)
+      return 15; 
+    }
+    const midStart = players.length;
+    const midEnd = players.length * 2;
+    return midStart + Math.floor(Math.random() * (midEnd - midStart));
+  });
+
+  // ---- Shuffle animation ----
+  const startShuffle = useCallback(() => {
+    setPhase("shuffling");
+    startTimeRef.current = performance.now();
+
+    // Calculate target offset to center the selected card
+    const containerWidth = containerRef.current?.offsetWidth || window.innerWidth;
+    const centerOffset = containerWidth / 2 - CARD_WIDTH / 2;
+    const targetOffset = -(targetIndex * CARD_STEP) + centerOffset;
+
+    // Total travel distance
+    const startOffset = centerOffset; // start with first cards visible
+    const totalDistance = Math.abs(targetOffset - startOffset);
+
+    // Animation duration phases (total ~4.5s)
+    const TOTAL_DURATION = 4500;
+
+    const animate = (now) => {
+      const elapsed = now - startTimeRef.current;
+      const progress = Math.min(elapsed / TOTAL_DURATION, 1);
+
+      // Easing: fast start, gradual slow-down (cubic ease-out)
+      const eased = 1 - Math.pow(1 - progress, 3);
+
+      const currentOffset = startOffset - (totalDistance * eased);
+      setBeltOffset(currentOffset);
+
+      if (progress < 1) {
+        animFrameRef.current = requestAnimationFrame(animate);
+      } else {
+        // Snap to exact target
+        setBeltOffset(targetOffset);
+        setSelectedIndex(targetIndex);
+        setSelectedPlayer(cardList[targetIndex]);
+        setPhase("selected");
+      }
+    };
+
+    setBeltOffset(startOffset);
+    animFrameRef.current = requestAnimationFrame(animate);
+  }, [targetIndex, cardList]);
+
+  // Auto-start shuffle on mount
+  useEffect(() => {
+    const timer = setTimeout(startShuffle, 600);
+    return () => {
+      clearTimeout(timer);
+      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+    };
+  }, [startShuffle]);
+
+  // ---- Reveal handler ----
+  const handleRevealClick = useCallback(() => {
+    if (phase !== "selected" || !selectedPlayer) return;
+
+    // Phase: flipping
+    setPhase("flipping");
+    setShowSweep(true);
+
+    // Golden sweep → card flip → transition
+    setTimeout(() => setShowSweep(false), 600);
+    setTimeout(() => setIsFlipped(true), 200);
+
+    // Emit reveal-player via existing socket logic
+    if (selectedPlayer._id && !selectedPlayer._id.startsWith("placeholder")) {
+      revealPlayer(selectedPlayer._id);
+    }
+
+    // Transition to player details
+    setTimeout(() => {
+      setPhase("done");
+      onContinue();
+    }, 900);
+  }, [phase, selectedPlayer, revealPlayer, onContinue]);
+
+  // ---- Progress dots ----
+  const progressPhase = phase === "idle" ? 0 : phase === "shuffling" ? 1 : phase === "selected" ? 2 : 3;
 
   return createPortal(
     <>
-      <style>{`
-        @keyframes revealFadeIn {
-          0% { opacity: 0; }
-          100% { opacity: 1; }
-        }
-        @keyframes titleGlow {
-          0% { text-shadow: 0 0 10px rgba(37,99,235,0.3); }
-          50% { text-shadow: 0 0 25px rgba(37,99,235,0.6), 0 0 50px rgba(37,99,235,0.2); }
-          100% { text-shadow: 0 0 10px rgba(37,99,235,0.3); }
-        }
-        @keyframes slideRightFast {
-          0% { transform: translateX(0) scale(1); filter: blur(0px); }
-          20% { transform: translateX(80px) scale(1.03); filter: blur(3px); }
-          40% { transform: translateX(60px) scale(1.01); filter: blur(2px); }
-          60% { transform: translateX(30px) scale(1.02); filter: blur(1.5px); }
-          80% { transform: translateX(50px) scale(1.01); filter: blur(1px); }
-          100% { transform: translateX(0) scale(1); filter: blur(0px); }
-        }
-        @keyframes slideRightSlow {
-          0% { transform: translateX(0) scale(1); filter: blur(0px); }
-          30% { transform: translateX(50px) scale(1.02); filter: blur(2px); }
-          60% { transform: translateX(20px) scale(1.01); filter: blur(0.5px); }
-          100% { transform: translateX(0) scale(1); filter: blur(0px); }
-        }
-        @keyframes goldenGlow {
-          0% {
-            box-shadow: 0 0 0 rgba(255,200,0,0), 0 0 0 rgba(255,200,0,0);
-            border-color: #2563eb;
-            background: linear-gradient(135deg, #1d4ed8, #2563eb);
-          }
-          50% {
-            box-shadow: 0 0 40px rgba(255,180,0,0.7), 0 0 80px rgba(255,180,0,0.3);
-            border-color: #fbbf24;
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-          }
-          100% {
-            box-shadow: 0 0 30px rgba(255,180,0,0.5), 0 0 60px rgba(255,180,0,0.2);
-            border-color: #f59e0b;
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-          }
-        }
-        @keyframes sparkle {
-          0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
-          50% { opacity: 1; transform: scale(1) rotate(180deg); }
-        }
-        @keyframes sparkle2 {
-          0%, 100% { opacity: 0; transform: scale(0) rotate(45deg); }
-          50% { opacity: 1; transform: scale(1.2) rotate(225deg); }
-        }
-        @keyframes silhouetteIn {
-          0% { opacity: 0; transform: scale(0.5); filter: blur(8px); }
-          100% { opacity: 1; transform: scale(1); filter: blur(0px); }
-        }
-        @keyframes dotPulse {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.4); }
-        }
-        @keyframes ringPulse {
-          0% { transform: scale(1); opacity: 0.6; }
-          50% { transform: scale(1.15); opacity: 0.2; }
-          100% { transform: scale(1); opacity: 0.6; }
-        }
-        @keyframes btnFadeIn {
-          0% { opacity: 0; transform: translateY(12px); }
-          100% { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes bgPulse {
-          0%, 100% { opacity: 0.3; }
-          50% { opacity: 0.5; }
-        }
-      `}</style>
+      {/* Golden light sweep overlay */}
+      <AnimatePresence>
+        {showSweep && <div className="golden-sweep" key="sweep" />}
+      </AnimatePresence>
 
-      <div
-        style={{
-          position: "fixed",
-          inset: 0,
-          zIndex: 99999,
-          background: bg,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          opacity: 1,
-          overflow: "hidden",
-        }}
-      >
-        {/* Background radial glow */}
-        <div
-          style={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: "800px",
-            height: "800px",
-            borderRadius: "50%",
-            background: radialGlow,
-            pointerEvents: "none",
-            animation: isRevealed ? "none" : "bgPulse 3s ease-in-out infinite",
-          }}
-        />
+      <div className="reveal-modal" ref={containerRef}>
+        <StadiumBackground />
 
         {/* Close button */}
         <button
+          className="reveal-modal__close"
           onClick={onClose}
-          aria-label="Close"
-          style={{
-            position: "absolute",
-            top: "24px",
-            right: "24px",
-            background: closeBg,
-            border: `1px solid ${closeBorder}`,
-            borderRadius: "10px",
-            width: "40px",
-            height: "40px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "20px",
-            cursor: "pointer",
-            color: closeColor,
-            transition: "all 0.2s ease",
-            zIndex: 10,
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = closeHoverBg;
-            e.currentTarget.style.color = closeHoverColor;
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = closeBg;
-            e.currentTarget.style.color = closeColor;
-          }}
+          aria-label="Close reveal screen"
         >
           ×
         </button>
 
         {/* Title */}
-        <h2
-          style={{
-            fontSize: "36px",
-            fontWeight: "800",
-            color: textPrimary,
-            marginBottom: "8px",
-            textAlign: "center",
-            letterSpacing: "-0.5px",
-            animation: isRevealed ? "none" : "titleGlow 2s ease-in-out infinite",
-            zIndex: 1,
-          }}
+        <motion.h2
+          className="reveal-modal__title"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
         >
-          Revealing Next Player
-        </h2>
+          {phase === "selected" ? "✨ PLAYER SELECTED! ✨" : "REVEALING NEXT PLAYER"}
+        </motion.h2>
 
-        <p
-          style={{
-            color: textSecondary,
-            fontSize: "15px",
-            marginBottom: "48px",
-            textAlign: "center",
-            zIndex: 1,
-          }}
+        <motion.p
+          className="reveal-modal__subtitle"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.4 }}
         >
-          Please wait while we reveal the next player...
-        </p>
+          {phase === "selected"
+            ? "Click below to reveal player details"
+            : "Selecting next player for auction..."}
+        </motion.p>
 
-        {/* Cards container */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: "16px",
-            marginBottom: "48px",
-            zIndex: 1,
-          }}
-        >
-          {[0, 1, 2, 3, 4].map((i) => {
-            const isCenter = i === 2;
-            const delay = `${i * 80}ms`;
+        {/* Card Strip */}
+        <div className="card-strip">
+          {/* Center selection marker */}
+          <div
+            className={`card-strip__center-marker ${
+              phase === "selected" ? "card-strip__center-marker--selected" : ""
+            }`}
+          />
 
-            return (
-              <div
-                key={i}
-                style={{
-                  width: isCenter ? "130px" : "100px",
-                  height: isCenter ? "190px" : "145px",
-                  borderRadius: "16px",
-                  background:
-                    isCenter && isRevealed
-                      ? "linear-gradient(135deg, #f59e0b, #d97706)"
-                      : !isCenter && isRevealed
-                      ? inactiveCardBg
-                      : "linear-gradient(135deg, #1d4ed8, #2563eb)",
-                  color: "#fff",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: isCenter ? "56px" : "40px",
-                  fontWeight: "700",
-                  position: "relative",
-                  animation:
-                    isCenter && isRevealed
-                      ? "goldenGlow 0.8s ease-out forwards"
-                      : isShuffling
-                      ? `slideRight${step === 2 ? "Fast" : "Slow"} 1.4s ease-in-out ${delay} infinite`
-                      : "none",
-                  opacity: !isCenter && isRevealed ? 0.3 : 1,
-                  transition: "opacity 0.6s ease, background 0.6s ease, width 0.3s ease, height 0.3s ease",
-                  boxShadow: isCenter && isRevealed
-                    ? "0 0 40px rgba(255,180,0,0.4)"
-                    : isCenter && isShuffling
-                    ? "0 0 20px rgba(37,99,235,0.3)"
-                    : cardShadow,
-                }}
-              >
-                {/* Pulsing ring during shuffle */}
-                {isCenter && isShuffling && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      inset: "-8px",
-                      borderRadius: "22px",
-                      border: `2px solid ${ringColor}`,
-                      animation: "ringPulse 1.5s ease-in-out infinite",
-                      pointerEvents: "none",
-                    }}
-                  />
-                )}
+          {/* Scrolling belt of cards */}
+          <div
+            className="card-strip__belt"
+            style={{
+              transform: `translateY(-50%) translateX(${beltOffset}px)`,
+              transition: phase === "idle" ? "none" : undefined,
+            }}
+          >
+            {cardList.map((card, idx) => {
+              const isSelected = phase === "selected" && idx === selectedIndex;
+              const isFaded = phase === "selected" && idx !== selectedIndex;
 
-                {/* Player silhouette */}
-                {isCenter && step === 5 && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      borderRadius: "14px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      animation: "silhouetteIn 0.7s ease-out forwards",
-                      overflow: "hidden",
-                    }}
-                  >
-                    <svg viewBox="0 0 100 120" style={{ width: "70px", height: "84px", opacity: 0.85 }}>
-                      <circle cx="50" cy="35" r="22" fill="rgba(0,0,0,0.45)" />
-                      <ellipse cx="50" cy="100" rx="35" ry="28" fill="rgba(0,0,0,0.45)" />
-                    </svg>
+              return (
+                <div
+                  key={card._cardKey || card._id || idx}
+                  className={`player-card ${
+                    isSelected ? "player-card--selected" : ""
+                  } ${isFaded ? "player-card--faded" : ""}`}
+                >
+                  {/* Player silhouette icon */}
+                  <div className="player-card__icon">
+                    <PlayerSilhouette />
                   </div>
-                )}
 
-                {/* Sparkle particles */}
-                {isCenter && isRevealed && (
-                  <>
-                    <span style={{ position: "absolute", top: "-10px", right: "-10px", fontSize: "18px", color: "#fbbf24", animation: "sparkle 1.2s ease-in-out infinite" }}>✦</span>
-                    <span style={{ position: "absolute", bottom: "-8px", left: "-8px", fontSize: "14px", color: "#fbbf24", animation: "sparkle2 1.4s ease-in-out infinite", animationDelay: "0.3s" }}>✦</span>
-                    <span style={{ position: "absolute", top: "12px", left: "-12px", fontSize: "12px", color: "#fbbf24", animation: "sparkle 1s ease-in-out infinite", animationDelay: "0.6s" }}>✦</span>
-                    <span style={{ position: "absolute", bottom: "18px", right: "-12px", fontSize: "16px", color: "#fbbf24", animation: "sparkle2 1.3s ease-in-out infinite", animationDelay: "0.9s" }}>✦</span>
-                    <span style={{ position: "absolute", top: "-6px", left: "50%", fontSize: "10px", color: "#fbbf24", animation: "sparkle 1.5s ease-in-out infinite", animationDelay: "0.4s" }}>✦</span>
-                    <span style={{ position: "absolute", bottom: "-4px", left: "40%", fontSize: "11px", color: "#fbbf24", animation: "sparkle2 1.1s ease-in-out infinite", animationDelay: "0.7s" }}>✦</span>
-                  </>
-                )}
+                  {/* Registration number */}
+                  <div className="player-card__number">
+                    #{card.displayNumber}
+                  </div>
 
-                {!isRevealed && "?"}
-              </div>
-            );
-          })}
+                  {/* Label */}
+                  <div className="player-card__label">PLAYER</div>
+
+                  {/* Golden sparkle particles on selected card */}
+                  {isSelected &&
+                    SPARKLE_POSITIONS.map((sp, si) => (
+                      <motion.span
+                        key={si}
+                        className="golden-particle"
+                        style={{
+                          top: sp.top,
+                          bottom: sp.bottom,
+                          left: sp.left,
+                          right: sp.right,
+                          fontSize: `${sp.size}px`,
+                        }}
+                        initial={{ opacity: 0, scale: 0 }}
+                        animate={{
+                          opacity: [0, 1, 1, 0],
+                          scale: [0, 1.2, 1, 0],
+                          rotate: [0, 180, 360],
+                        }}
+                        transition={{
+                          duration: 1.5,
+                          repeat: Infinity,
+                          delay: sp.delay,
+                          ease: "easeInOut",
+                        }}
+                      >
+                        ✦
+                      </motion.span>
+                    ))}
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {/* Progress dots */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            gap: "10px",
-            marginBottom: "24px",
-            zIndex: 1,
-          }}
-        >
-          {[1, 2, 3, 4, 5].map((dot) => (
+        <div className="reveal-progress">
+          {[0, 1, 2, 3].map((dot) => (
             <div
               key={dot}
-              style={{
-                width: dot <= step ? "12px" : "10px",
-                height: dot <= step ? "12px" : "10px",
-                borderRadius: "50%",
-                background: dot <= step
-                  ? isRevealed ? "#f59e0b" : "#2563eb"
-                  : inactiveDotBg,
-                border: "none",
-                transition: "all 0.3s ease",
-                animation: dot === step ? "dotPulse 0.6s ease-in-out" : "none",
-                boxShadow: dot <= step
-                  ? isRevealed ? "0 0 8px rgba(245,158,11,0.5)" : "0 0 8px rgba(37,99,235,0.5)"
-                  : "none",
-              }}
+              className={`reveal-progress__dot ${
+                dot <= progressPhase
+                  ? phase === "selected" || phase === "flipping"
+                    ? "reveal-progress__dot--gold"
+                    : "reveal-progress__dot--active"
+                  : ""
+              }`}
             />
           ))}
         </div>
 
         {/* Status text */}
-        <h3
-          style={{
-            fontSize: "26px",
-            fontWeight: "700",
-            marginBottom: "8px",
-            color: isRevealed ? "#f59e0b" : textPrimary,
-            transition: "color 0.4s ease",
-            zIndex: 1,
-          }}
-        >
-          {isRevealed ? "Player Revealed!" : "Shuffling Players..."}
-        </h3>
+        <div className="reveal-status">
+          <motion.div
+            className={`reveal-status__text ${
+              phase === "selected" ? "reveal-status__text--gold" : ""
+            }`}
+            key={phase}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {phase === "idle" && "Preparing..."}
+            {phase === "shuffling" && "Shuffling Players..."}
+            {phase === "selected" && `Player #${selectedPlayer?.displayNumber || "???"} Selected!`}
+            {(phase === "flipping" || phase === "done") && "Revealing Identity..."}
+          </motion.div>
+          <p className="reveal-status__hint">
+            {phase === "selected"
+              ? "Click the button below to reveal this player"
+              : phase === "shuffling"
+              ? "Please wait while we select the next player..."
+              : ""}
+          </p>
+        </div>
 
-        <p
-          style={{
-            color: textSecondary,
-            marginBottom: "32px",
-            fontSize: "14px",
-            zIndex: 1,
-          }}
-        >
-          {isFullyRevealed ? "Click below to continue." : "This will only take a few seconds."}
-        </p>
-
-        {/* Action button */}
-        <button
+        {/* Reveal button */}
+        <motion.button
+          className={`reveal-btn ${phase === "selected" ? "reveal-btn--gold" : ""}`}
+          disabled={phase !== "selected"}
           onClick={handleRevealClick}
-          style={{
-            background: isFullyRevealed
-              ? "linear-gradient(135deg, #f59e0b, #d97706)"
-              : "linear-gradient(135deg, #2563eb, #1d4ed8)",
-            color: "#fff",
-            border: "none",
-            borderRadius: "12px",
-            padding: "14px 36px",
-            fontWeight: "700",
-            fontSize: "15px",
-            cursor: "pointer",
-            zIndex: 1,
-            transition: "all 0.3s ease",
-            animation: isFullyRevealed ? "btnFadeIn 0.5s ease-out forwards" : "none",
-            boxShadow: isFullyRevealed
-              ? "0 4px 20px rgba(245,158,11,0.4)"
-              : "0 4px 20px rgba(37,99,235,0.3)",
+          initial={{ opacity: 0, y: 16 }}
+          animate={{
+            opacity: phase === "selected" ? 1 : 0.45,
+            y: 0,
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "translateY(-2px)";
-            e.currentTarget.style.boxShadow = isFullyRevealed
-              ? "0 6px 28px rgba(245,158,11,0.5)"
-              : "0 6px 28px rgba(37,99,235,0.4)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "translateY(0)";
-            e.currentTarget.style.boxShadow = isFullyRevealed
-              ? "0 4px 20px rgba(245,158,11,0.4)"
-              : "0 4px 20px rgba(37,99,235,0.3)";
-          }}
+          transition={{ delay: 0.3, duration: 0.5, type: "spring", stiffness: 120 }}
         >
-          {isFullyRevealed ? "Continue" : "Reveal Player"}
-        </button>
+          {phase === "selected" ? "⚡ REVEAL PLAYER" : "REVEAL PLAYER"}
+        </motion.button>
       </div>
+
+      {/* Card flip overlay during reveal transition */}
+      <AnimatePresence>
+        {phase === "flipping" && selectedPlayer && (
+          <motion.div
+            className="card-flip-container"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            style={{ zIndex: 100000 }}
+          >
+            {/* Background blur */}
+            <motion.div
+              style={{
+                position: "absolute",
+                inset: 0,
+                background: "rgba(247,249,252,0.85)",
+                backdropFilter: "blur(8px)",
+              }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+            />
+
+            {/* Flipping card */}
+            <motion.div
+              className="card-flip"
+              initial={{ scale: 1 }}
+              animate={{ scale: 1.5 }}
+              transition={{ delay: 0.2, duration: 0.5, type: "spring", stiffness: 80 }}
+              style={{ zIndex: 1 }}
+            >
+              <div className={`card-flip__inner ${isFlipped ? "card-flip__inner--flipped" : ""}`}>
+                {/* Front: registration number */}
+                <div className="card-flip__front">
+                  <div className="player-card__icon">
+                    <PlayerSilhouette />
+                  </div>
+                  <div className="player-card__number">
+                    #{selectedPlayer.displayNumber}
+                  </div>
+                  <div className="player-card__label">PLAYER</div>
+                </div>
+
+                {/* Back: player identity */}
+                <div className="card-flip__back">
+                  {selectedPlayer.photo ? (
+                    <img
+                      className="card-flip__back-photo"
+                      src={selectedPlayer.photo}
+                      alt={selectedPlayer.name || "Player"}
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        width: 80,
+                        height: 80,
+                        borderRadius: "50%",
+                        background: "rgba(255,255,255,0.15)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "36px",
+                      }}
+                    >
+                      🏏
+                    </div>
+                  )}
+                  <div className="card-flip__back-name">
+                    {(selectedPlayer.name || "Player").toUpperCase()}
+                  </div>
+                  <div className="card-flip__back-role">
+                    {selectedPlayer.role || "CRICKETER"}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>,
     document.body
   );

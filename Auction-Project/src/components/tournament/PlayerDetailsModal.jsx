@@ -1,418 +1,280 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { createPortal } from "react-dom";
+import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { useTheme } from "../../context/ThemeContext";
+import { useAuction } from "../../context/AuctionContext";
+import { formatCurrency } from "../../utils/formatCurrency";
+import StadiumBackground from "../auction/StadiumBackground";
+import "./reveal-screen.css";
+
+/**
+ * PlayerDetailsModal
+ *
+ * Shown after the card flip reveal. Displays real player data from AuctionContext.
+ * 
+ * Enhanced animations:
+ *   - Player image: slide from left with spring
+ *   - Player name: letter-by-letter reveal
+ *   - Role badge: pop scale animation
+ *   - Stats: staggered fade-up
+ *   - Base price: animated counter
+ *   - Start Bidding button: pulse glow
+ *
+ * Backend/socket logic: UNCHANGED. Uses existing onStartBidding callback.
+ */
+
+// Animated price counter
+const AnimatedPrice = ({ value, duration = 1200 }) => {
+  const [display, setDisplay] = useState(0);
+
+  useEffect(() => {
+    if (!value) return;
+    const start = performance.now();
+    const startVal = 0;
+    const endVal = value;
+
+    const tick = (now) => {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease-out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplay(Math.round(startVal + (endVal - startVal) * eased));
+
+      if (progress < 1) {
+        requestAnimationFrame(tick);
+      }
+    };
+
+    requestAnimationFrame(tick);
+  }, [value, duration]);
+
+  return <>{formatCurrency(display)}</>;
+};
+
+// Name with letter-by-letter animation
+const AnimatedName = ({ name, startDelay = 0.4 }) => {
+  const chars = useMemo(() => (name || "").toUpperCase().split(""), [name]);
+
+  return (
+    <span>
+      {chars.map((char, i) => (
+        <span
+          key={i}
+          className="details-card__name-char"
+          style={{
+            animationDelay: `${startDelay + i * 0.04}s`,
+            display: char === " " ? "inline" : "inline-block",
+          }}
+        >
+          {char === " " ? "\u00A0" : char}
+        </span>
+      ))}
+    </span>
+  );
+};
 
 const PlayerDetailsModal = ({ onClose, onStartBidding }) => {
   const navigate = useNavigate();
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
+  const { currentPlayer, revealedPlayer } = useAuction();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const t = setTimeout(() => setVisible(true), 50);
+    const t = setTimeout(() => setVisible(true), 80);
     return () => clearTimeout(t);
   }, []);
 
-  // Theme-dependent colors
-  const bg = isDark ? "#0f172a" : "#f4f6fb";
-  const textPrimary = isDark ? "#fff" : "#1a1d2e";
-  const textSecondary = isDark ? "rgba(255,255,255,0.45)" : "rgba(26,29,46,0.5)";
-  const cardBg = isDark ? "rgba(255,255,255,0.03)" : "rgba(255,255,255,0.8)";
-  const cardBorder = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)";
-  const statLabelColor = isDark ? "rgba(255,255,255,0.4)" : "rgba(26,29,46,0.45)";
-  const closeBg = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)";
-  const closeBorder = isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)";
-  const closeColor = isDark ? "rgba(255,255,255,0.5)" : "rgba(26,29,46,0.4)";
-  const closeHoverBg = isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.1)";
-  const closeHoverColor = isDark ? "#fff" : "#1a1d2e";
-  const photoShadow = isDark ? "0 8px 40px rgba(0,0,0,0.3)" : "0 8px 40px rgba(0,0,0,0.1)";
-  const roleBg = isDark ? "rgba(37,99,235,0.15)" : "rgba(37,99,235,0.08)";
-  const roleBorder = isDark ? "rgba(37,99,235,0.25)" : "rgba(37,99,235,0.15)";
-  const roleText = isDark ? "#60a5fa" : "#2563eb";
+  // Use revealedPlayer first (set by socket event), fallback to currentPlayer
+  const player = revealedPlayer || currentPlayer;
+
+  const playerName = player?.name || "Player";
+  const playerRole = player?.role || "";
+  const playerPhoto = player?.photo || null;
+  const basePrice = player?.basePrice || 0;
+  const battingStyle = player?.battingStyle || player?.style || "";
+  const bowlingStyle = player?.bowlingStyle || "";
+  const age = player?.age || "";
+  const nationality = player?.nationality || "";
+
+  // Build stats array dynamically from available data
+  const stats = useMemo(() => {
+    const s = [];
+    if (battingStyle) s.push({ label: "Batting Style", value: battingStyle, delay: "0.7s" });
+    if (bowlingStyle) s.push({ label: "Bowling Style", value: bowlingStyle, delay: "0.85s" });
+    if (age) s.push({ label: "Age", value: `${age} Years`, delay: "1.0s" });
+    if (nationality) s.push({ label: "Nationality", value: nationality, delay: "1.15s", flag: true });
+    if (basePrice) s.push({ label: "Base Price", value: formatCurrency(basePrice), delay: "1.3s", highlight: true });
+    // Ensure at least base price is shown
+    if (s.length === 0 && basePrice) {
+      s.push({ label: "Base Price", value: formatCurrency(basePrice), delay: "0.7s", highlight: true });
+    }
+    return s;
+  }, [battingStyle, bowlingStyle, age, nationality, basePrice]);
+
+  const handleStartBidding = useCallback(() => {
+    if (onStartBidding) {
+      onStartBidding();
+    } else {
+      navigate("/live-auction");
+    }
+  }, [onStartBidding, navigate]);
 
   return createPortal(
-    <>
-      <style>{`
-        @keyframes detailFadeIn {
-          0% { opacity: 0; }
-          100% { opacity: 1; }
-        }
-        @keyframes photoZoomIn {
-          0% { opacity: 0; transform: scale(0.7); filter: blur(8px); }
-          100% { opacity: 1; transform: scale(1); filter: blur(0px); }
-        }
-        @keyframes nameSlideIn {
-          0% { opacity: 0; transform: translateX(40px); }
-          100% { opacity: 1; transform: translateX(0); }
-        }
-        @keyframes fadeSlideUp {
-          0% { opacity: 0; transform: translateY(16px); }
-          100% { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes priceReveal {
-          0% { opacity: 0; transform: scale(0.8); }
-          100% { opacity: 1; transform: scale(1); }
-        }
-        @keyframes glowPulse {
-          0%, 100% { box-shadow: 0 0 20px rgba(37,99,235,0.15); }
-          50% { box-shadow: 0 0 35px rgba(37,99,235,0.3); }
-        }
-        @keyframes borderGlow {
-          0%, 100% { border-color: rgba(37,99,235,0.3); }
-          50% { border-color: rgba(37,99,235,0.6); }
-        }
-        @keyframes floatParticle {
-          0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.3; }
-          50% { transform: translateY(-20px) rotate(180deg); opacity: 0.6; }
-        }
-      `}</style>
+    <div className="details-modal">
+      <StadiumBackground />
 
-      <div
-        style={{
-          position: "fixed",
-          inset: 0,
-          zIndex: 99999,
-          background: bg,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          opacity: 1,
-          overflow: "hidden",
-        }}
+      {/* Close button */}
+      <button
+        className="reveal-modal__close"
+        onClick={onClose}
+        aria-label="Close player details"
       >
-        {/* Background accents */}
-        <div
-          style={{
-            position: "absolute",
-            top: "-200px",
-            right: "-200px",
-            width: "600px",
-            height: "600px",
-            borderRadius: "50%",
-            background: isDark
-              ? "radial-gradient(circle, rgba(245,158,11,0.06) 0%, transparent 70%)"
-              : "radial-gradient(circle, rgba(245,158,11,0.04) 0%, transparent 70%)",
-            pointerEvents: "none",
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            bottom: "-150px",
-            left: "-150px",
-            width: "500px",
-            height: "500px",
-            borderRadius: "50%",
-            background: isDark
-              ? "radial-gradient(circle, rgba(37,99,235,0.06) 0%, transparent 70%)"
-              : "radial-gradient(circle, rgba(37,99,235,0.04) 0%, transparent 70%)",
-            pointerEvents: "none",
-          }}
-        />
+        ×
+      </button>
 
-        {/* Floating particles */}
-        {[...Array(6)].map((_, i) => (
-          <div
-            key={i}
-            style={{
-              position: "absolute",
-              width: "4px",
-              height: "4px",
-              borderRadius: "50%",
-              background: i % 2 === 0 ? "rgba(245,158,11,0.2)" : "rgba(37,99,235,0.2)",
-              top: `${15 + i * 14}%`,
-              left: `${10 + i * 15}%`,
-              animation: `floatParticle ${2.5 + i * 0.3}s ease-in-out infinite`,
-              animationDelay: `${i * 0.4}s`,
-              pointerEvents: "none",
-            }}
-          />
-        ))}
-
-        {/* Close button */}
-        <button
-          onClick={onClose}
-          aria-label="Close"
-          style={{
-            position: "absolute",
-            top: "24px",
-            right: "24px",
-            background: closeBg,
-            border: `1px solid ${closeBorder}`,
-            borderRadius: "10px",
-            width: "40px",
-            height: "40px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "20px",
-            cursor: "pointer",
-            color: closeColor,
-            transition: "all 0.2s ease",
-            zIndex: 10,
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = closeHoverBg;
-            e.currentTarget.style.color = closeHoverColor;
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = closeBg;
-            e.currentTarget.style.color = closeColor;
-          }}
+      {/* Content */}
+      <div className="details-modal__content">
+        {/* Header */}
+        <motion.h1
+          className="details-modal__header"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: visible ? 1 : 0, y: visible ? 0 : -20 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
         >
-          ×
-        </button>
+          PLAYER REVEALED!
+        </motion.h1>
 
-        {/* Main content container */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "32px",
-            zIndex: 1,
-            maxWidth: "900px",
-            width: "100%",
-            padding: "0 32px",
-          }}
-        >
-          {/* Header title */}
-          <h1
-            style={{
-              fontSize: "42px",
-              fontWeight: "800",
-              color: "#f59e0b",
-              textAlign: "center",
-              letterSpacing: "2px",
-              animation: visible ? "fadeSlideUp 0.6s ease-out forwards" : "none",
-              opacity: visible ? 1 : 0,
-              textShadow: isDark ? "0 0 30px rgba(245,158,11,0.3)" : "none",
+        {/* Player Card */}
+        <div className="details-card">
+          {/* Golden accent top line rendered via CSS ::before */}
+
+          {/* Player Photo */}
+          <motion.div
+            className="details-card__photo-container"
+            initial={{ opacity: 0, x: -100 }}
+            animate={{ opacity: visible ? 1 : 0, x: visible ? 0 : -100 }}
+            transition={{
+              delay: 0.15,
+              duration: 0.7,
+              type: "spring",
+              stiffness: 100,
+              damping: 15,
             }}
           >
-            PLAYER REVEALED!
-          </h1>
-
-          {/* Player card */}
-          <div
-            style={{
-              display: "flex",
-              gap: "40px",
-              alignItems: "center",
-              background: cardBg,
-              border: `1px solid ${cardBorder}`,
-              borderRadius: "20px",
-              padding: "36px",
-              width: "100%",
-              animation: visible ? "glowPulse 3s ease-in-out infinite" : "none",
-            }}
-          >
-            {/* Player photo */}
-            <div
-              style={{
-                width: "280px",
-                height: "340px",
-                borderRadius: "16px",
-                overflow: "hidden",
-                flexShrink: 0,
-                border: "2px solid rgba(245,158,11,0.3)",
-                animation: visible ? "photoZoomIn 0.8s ease-out 0.1s forwards, borderGlow 2s ease-in-out infinite" : "none",
-                opacity: visible ? 1 : 0,
-                boxShadow: photoShadow,
-              }}
-            >
-              <img
-                src="https://images.unsplash.com/photo-1560250097-0b93528c311a"
-                alt="player"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
+            {playerPhoto ? (
+              <motion.img
+                className="details-card__photo"
+                src={playerPhoto}
+                alt={playerName}
+                animate={visible ? { y: [0, -3, 0] } : {}}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay: 1.5,
                 }}
               />
-            </div>
-
-            {/* Player details */}
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "20px" }}>
-              {/* Name */}
-              <h2
-                style={{
-                  fontSize: "40px",
-                  fontWeight: "800",
-                  color: textPrimary,
-                  margin: 0,
-                  letterSpacing: "-0.5px",
-                  animation: visible ? "nameSlideIn 0.6s ease-out 0.3s forwards" : "none",
-                  opacity: visible ? 1 : 0,
-                }}
-              >
-                VIRAT KOHLI
-              </h2>
-
-              {/* Role badge */}
-              <div
-                style={{
-                  animation: visible ? "fadeSlideUp 0.5s ease-out 0.5s forwards" : "none",
-                  opacity: visible ? 1 : 0,
-                }}
-              >
-                <span
-                  style={{
-                    background: roleBg,
-                    color: roleText,
-                    padding: "6px 16px",
-                    borderRadius: "8px",
-                    fontWeight: "700",
-                    fontSize: "13px",
-                    letterSpacing: "1px",
-                    border: `1px solid ${roleBorder}`,
-                  }}
-                >
-                  BATSMAN
+            ) : (
+              <div className="details-card__photo-placeholder">
+                <span className="details-card__photo-placeholder-icon">🏏</span>
+                <span style={{ fontSize: "12px", color: "#64748B", fontWeight: "500" }}>
+                  Player Photo
                 </span>
               </div>
+            )}
+          </motion.div>
 
-              {/* Stats grid */}
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "16px",
-                  marginTop: "8px",
+          {/* Player Info */}
+          <div className="details-card__info">
+            {/* Name with letter reveal */}
+            <h2 className="details-card__name">
+              {visible && <AnimatedName name={playerName} startDelay={0.4} />}
+            </h2>
+
+            {/* Role badge */}
+            {playerRole && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{
+                  opacity: visible ? 1 : 0,
+                  scale: visible ? [0, 1.15, 1] : 0,
                 }}
+                transition={{ delay: 0.6, duration: 0.5, type: "spring", stiffness: 200 }}
               >
-                {[
-                  { label: "Batting Style", value: "Right Hand Bat", delay: "0.6s" },
-                  { label: "Bowling Style", value: "Medium Pace", delay: "0.75s" },
-                  { label: "Nationality", value: "India", delay: "0.9s", flag: true },
-                  { label: "Base Price", value: "₹50,000", delay: "1.05s", highlight: true },
-                ].map((stat) => (
+                <span className="details-card__role">
+                  ✦ {playerRole.toUpperCase()}
+                </span>
+              </motion.div>
+            )}
+
+            {/* Stats grid */}
+            <div className="details-card__stats">
+              {stats.map((stat) => (
+                <motion.div
+                  key={stat.label}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: visible ? 1 : 0, y: visible ? 0 : 16 }}
+                  transition={{
+                    delay: parseFloat(stat.delay),
+                    duration: 0.45,
+                    ease: "easeOut",
+                  }}
+                >
+                  <div className="details-card__stat-label">{stat.label}</div>
                   <div
-                    key={stat.label}
-                    style={{
-                      animation: visible ? `fadeSlideUp 0.5s ease-out ${stat.delay} forwards` : "none",
-                      opacity: visible ? 1 : 0,
-                    }}
+                    className={`details-card__stat-value ${
+                      stat.highlight ? "details-card__stat-value--highlight" : ""
+                    }`}
                   >
-                    <div
-                      style={{
-                        fontSize: "11px",
-                        fontWeight: "600",
-                        color: statLabelColor,
-                        textTransform: "uppercase",
-                        letterSpacing: "0.5px",
-                        marginBottom: "4px",
-                      }}
-                    >
-                      {stat.label}
-                    </div>
-                    <div
-                      style={{
-                        fontSize: "15px",
-                        fontWeight: "700",
-                        color: stat.highlight ? "#f59e0b" : textPrimary,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "6px",
-                      }}
-                    >
-                      {stat.flag && <span style={{ fontSize: "18px" }}>🇮🇳</span>}
-                      {stat.value}
-                    </div>
+                    {stat.flag && <span style={{ fontSize: "18px" }}>🇮🇳</span>}
+                    {stat.value}
                   </div>
-                ))}
-              </div>
+                </motion.div>
+              ))}
             </div>
           </div>
-
-          {/* Bottom bid section */}
-          <div
-            style={{
-              width: "100%",
-              background: cardBg,
-              border: `1px solid ${cardBorder}`,
-              borderRadius: "16px",
-              padding: "28px",
-              textAlign: "center",
-              animation: visible ? "fadeSlideUp 0.6s ease-out 1.1s forwards" : "none",
-              opacity: visible ? 1 : 0,
-            }}
-          >
-            <p
-              style={{
-                color: textSecondary,
-                marginBottom: "8px",
-                fontSize: "13px",
-                textTransform: "uppercase",
-                letterSpacing: "1px",
-                fontWeight: "600",
-              }}
-            >
-              Starting Bid
-            </p>
-
-            <h1
-              style={{
-                fontSize: "48px",
-                color: "#f59e0b",
-                fontWeight: "800",
-                marginBottom: "24px",
-                animation: visible ? "priceReveal 0.6s ease-out 1.1s forwards" : "none",
-                opacity: visible ? 1 : 0,
-                textShadow: isDark ? "0 0 20px rgba(245,158,11,0.2)" : "none",
-              }}
-            >
-              ₹ 50,000
-            </h1>
-
-            <button
-              onClick={() => {
-                if (onStartBidding) {
-                  onStartBidding();
-                } else {
-                  navigate("/live-auction");
-                }
-              }}
-              style={{
-                background: "linear-gradient(135deg, #2563eb, #1d4ed8)",
-                color: "#fff",
-                border: "none",
-                borderRadius: "12px",
-                padding: "14px 40px",
-                fontSize: "16px",
-                fontWeight: "700",
-                cursor: "pointer",
-                transition: "all 0.3s ease",
-                boxShadow: "0 4px 20px rgba(37,99,235,0.35)",
-                animation: visible ? "fadeSlideUp 0.5s ease-out 1.3s forwards" : "none",
-                opacity: visible ? 1 : 0,
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translateY(-2px)";
-                e.currentTarget.style.boxShadow = "0 6px 28px rgba(37,99,235,0.45)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = "0 4px 20px rgba(37,99,235,0.35)";
-              }}
-            >
-              Start Bidding
-            </button>
-
-            <p
-              style={{
-                marginTop: "16px",
-                color: textSecondary,
-                fontSize: "13px",
-              }}
-            >
-              Bidding will begin once you click Start Bidding.
-            </p>
-          </div>
         </div>
+
+        {/* Bid Section */}
+        <motion.div
+          className="details-bid"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: visible ? 1 : 0, y: visible ? 0 : 20 }}
+          transition={{ delay: 1.2, duration: 0.5, ease: "easeOut" }}
+        >
+          <p className="details-bid__label">Starting Bid</p>
+
+          <motion.h1
+            className="details-bid__price"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: visible ? 1 : 0, scale: visible ? 1 : 0.8 }}
+            transition={{ delay: 1.3, duration: 0.5, type: "spring", stiffness: 150 }}
+          >
+            {visible && <AnimatedPrice value={basePrice} duration={1200} />}
+          </motion.h1>
+
+          <motion.button
+            className="details-bid__btn"
+            onClick={handleStartBidding}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: visible ? 1 : 0, y: visible ? 0 : 12 }}
+            transition={{ delay: 1.5, duration: 0.5, type: "spring", stiffness: 120 }}
+            whileHover={{ y: -3, boxShadow: "0 8px 36px rgba(29,78,216,0.45)" }}
+            whileTap={{ scale: 0.98 }}
+          >
+            🏏 START BIDDING
+          </motion.button>
+
+          <motion.p
+            className="details-bid__hint"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: visible ? 1 : 0 }}
+            transition={{ delay: 1.7, duration: 0.3 }}
+          >
+            Bidding will begin once you click Start Bidding.
+          </motion.p>
+        </motion.div>
       </div>
-    </>,
+    </div>,
     document.body
   );
 };
