@@ -57,6 +57,7 @@ const tournamentSchema = new mongoose.Schema({
     enum: ['idle', 'bidding', 'sold', 'unsold'],
     default: 'idle'
   },
+<<<<<<< HEAD
   registrationEndDate: {
     type: Date,
     default: null
@@ -69,6 +70,12 @@ const tournamentSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: [true, 'Tournament owner is required']
+=======
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null
+>>>>>>> 0cb2f4c3873fa197e732ed7a4e0ba6ba0d16aae1
   }
 }, {
   timestamps: true

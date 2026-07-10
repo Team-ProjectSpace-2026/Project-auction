@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
 import Player from "../models/Player.js";
+<<<<<<< HEAD
 import Tournament from "../models/Tournament.js";
+=======
+import Bid from "../models/Bid.js";
+>>>>>>> 0cb2f4c3873fa197e732ed7a4e0ba6ba0d16aae1
 
 export const getPlayers = async (req, res, next) => {
   try {
@@ -90,8 +94,11 @@ export const deletePlayer = async (req, res, next) => {
     player.deleted = true;
     await player.save();
 
-    // Remove associated bids (optional, depending on desired behavior)
-    // await Bid.deleteMany({ playerId: player._id });
+    // Cancel any active bids for this player to prevent orphaned references
+    await Bid.updateMany(
+      { playerId: player._id, status: "Active" },
+      { $set: { status: "Cancelled" } }
+    );
 
     res.json({ message: 'Player deleted successfully' });
   } catch (error) {

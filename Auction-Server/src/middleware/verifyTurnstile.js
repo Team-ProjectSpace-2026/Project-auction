@@ -1,8 +1,15 @@
 const verifyTurnstile = async (req, res, next) => {
+  // Fail closed: if secret key is not configured, reject all requests
+  if (!process.env.TURNSTILE_SECRET_KEY) {
+    console.error("[Turnstile] TURNSTILE_SECRET_KEY not configured — rejecting request");
+    return res.status(503).json({
+      message: "Security verification is not configured. Please contact the administrator.",
+    });
+  }
+
   const { turnstileToken } = req.body;
 
   if (!turnstileToken) {
-    console.log("[Turnstile] No token provided");
     return res.status(403).json({
       message: "Security verification required. Please complete the CAPTCHA.",
     });
@@ -25,7 +32,6 @@ const verifyTurnstile = async (req, res, next) => {
     );
 
     const data = await response.json();
-    console.log("[Turnstile] Verification result:", data);
 
     if (!data.success) {
       return res.status(403).json({
@@ -36,9 +42,10 @@ const verifyTurnstile = async (req, res, next) => {
     // Token is valid, proceed
     next();
   } catch (error) {
-    console.error("[Turnstile] Verification error:", error);
-    return res.status(500).json({
-      message: "Security verification error. Please try again.",
+    // Fail closed: network errors = reject, never allow through
+    console.error("[Turnstile] Verification error:", error.message);
+    return res.status(403).json({
+      message: "Security verification failed. Please try again.",
     });
   }
 };

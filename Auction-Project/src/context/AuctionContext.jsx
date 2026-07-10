@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback } from "react";
+import { createContext, useContext, useState, useCallback, useMemo } from "react";
 import { useSocket } from "../hooks/useSocket";
 import { getAuctionState } from "../services/auctionService";
 
@@ -194,7 +194,8 @@ export const AuctionProvider = ({ children }) => {
   const clearUnsoldInfo = useCallback(() => setUnsoldInfo(null), []);
   const clearError = useCallback(() => setError(null), []);
 
-  const value = {
+  // Memoize context value to prevent unnecessary re-renders of consumers
+  const value = useMemo(() => ({
     isConnected: socketHook.isConnected,
     connectionError: socketHook.connectionError,
     tournamentId,
@@ -222,7 +223,14 @@ export const AuctionProvider = ({ children }) => {
     clearError,
     setTeams,
     setPlayers,
-  };
+  }), [
+    socketHook.isConnected, socketHook.connectionError,
+    tournamentId, currentPlayer, currentBid, highestBidder, auctionStatus,
+    teams, bids, players, error, soldInfo, unsoldInfo, revealedPlayer,
+    initTournament, joinAndListen, placeBid, revealPlayer, markSold,
+    markUnsold, startAuction, endAuction, clearSoldInfo, clearUnsoldInfo,
+    clearError,
+  ]);
 
   return (
     <AuctionContext.Provider value={value}>{children}</AuctionContext.Provider>

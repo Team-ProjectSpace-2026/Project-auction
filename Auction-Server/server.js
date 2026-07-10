@@ -2,6 +2,8 @@ import { createServer } from 'http';
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
+import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import connectDB from './src/config/db.js';
 import { initializeSocket } from './src/socket/auctionSocket.js';
@@ -21,9 +23,23 @@ import dashboardRoutes from './src/routes/dashboard.routes.js';
 
 // Import middleware
 import { errorHandler } from './src/middleware/errorHandler.js';
+import { xssSanitize } from './src/middleware/sanitize.js';
+import logger from './src/utils/logger.js';
 
 // Load environment variables
 dotenv.config();
+
+// --- Startup validation: fail fast if critical secrets are missing ---
+const requiredEnvVars = ['JWT_SECRET', 'MONGO_URI'];
+const missing = requiredEnvVars.filter((v) => !process.env[v]);
+if (missing.length > 0) {
+  console.error(`FATAL: Missing required environment variables: ${missing.join(', ')}`);
+  process.exit(1);
+}
+if (process.env.JWT_SECRET.length < 32) {
+  console.error('FATAL: JWT_SECRET must be at least 32 characters');
+  process.exit(1);
+}
 
 const app = express();
 const server = createServer(app);
@@ -32,16 +48,46 @@ const PORT = process.env.PORT || 5000;
 // Connect to database
 await connectDB();
 
-// Middleware
-// Note: CSRF protection is handled by sameSite:'strict' cookies (set in auth.controller.js)
-// This prevents cross-site request forgery without requiring additional middleware
+// --- Security headers via Helmet ---
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "blob:"],
+      connectSrc: ["'self'"],
+      fontSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      frameAncestors: ["'none'"],
+    },
+  },
+  crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+}));
+
+// CORS with strict origin validation
+const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
+  .split(',')
+  .map((o) => o.trim());
+
 app.use(cors({
-  origin: process.env.CLIENT_URL || "http://localhost:5173",
+  origin: (origin, callback) => {
+    // Allow requests with no origin (server-to-server, mobile apps, curl)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 app.use(cookieParser());
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
+
+// XSS sanitization for all API request bodies
+app.use('/api', xssSanitize);
 
 // Rate limiting
 import rateLimit from 'express-rate-limit';
@@ -51,6 +97,9 @@ const limiter = rateLimit({
   message: 'Too many requests from this IP, please try again later.'
 });
 app.use('/api/', limiter);
+
+// Request logging
+app.use(logger.requestMiddleware);
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -63,41 +112,63 @@ app.use('/api/dashboard', dashboardRoutes);
 // Serve uploaded files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
-    message: 'CricAuction API is running',
-    timestamp: new Date().toISOString()
-  });
+// Health check endpoint with dependency checks
+app.get('/api/health', async (req, res) => {
+  const health = {
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    services: {},
+  };
+
+  // Check MongoDB connectivity
+  try {
+    const state = mongoose.connection.readyState;
+    // 0=disconnected, 1=connected, 2=connecting, 3=disconnecting
+    health.services.mongodb = state === 1 ? 'connected' : 'unavailable';
+  } catch {
+    health.services.mongodb = 'error';
+  }
+
+  // Check Socket.IO
+  health.services.socketio = io ? 'initialized' : 'not initialized';
+
+  // Overall status
+  if (health.services.mongodb !== 'connected') {
+    health.status = 'DEGRADED';
+    return res.status(503).json(health);
+  }
+
+  res.json(health);
 });
 
 // Error handling middleware
 app.use(errorHandler);
 
 // Initialize Socket.IO
-initializeSocket(server);
+const io = initializeSocket(server);
 
 // Start server
 server.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📡 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🌐 Client URL: ${process.env.CLIENT_URL || 'http://localhost:5173'}`);
+  logger.info(`Server running on port ${PORT}`, {
+    env: process.env.NODE_ENV || "development",
+    clientUrl: process.env.CLIENT_URL || "http://localhost:5173",
+  });
 });
 
 // Handle graceful shutdown
 process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down gracefully');
+  logger.info('SIGTERM received, shutting down gracefully');
   server.close(() => {
-    console.log('Process terminated');
+    logger.info('Process terminated');
     process.exit(0);
   });
 });
 
 process.on('SIGINT', () => {
-  console.log('SIGINT received, shutting down gracefully');
+  logger.info('SIGINT received, shutting down gracefully');
   server.close(() => {
-    console.log('Process terminated');
+    logger.info('Process terminated');
     process.exit(0);
   });
 });

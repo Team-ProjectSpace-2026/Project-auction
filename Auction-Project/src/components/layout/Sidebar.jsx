@@ -17,8 +17,8 @@ const Sidebar = ({ activePage = "dashboard", onNavigate }) => {
 
   const handleLogout = () => {
     try {
-      localStorage.removeItem("authToken");
-      sessionStorage.removeItem("authToken");
+      localStorage.removeItem("token");
+      sessionStorage.removeItem("token");
     } catch {
       // ignore errors during cleanup
     }
