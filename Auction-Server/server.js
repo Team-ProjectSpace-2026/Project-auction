@@ -44,6 +44,8 @@ if (process.env.JWT_SECRET.length < 32) {
 const app = express();
 const server = createServer(app);
 const PORT = process.env.PORT || 5000;
+const SERVER_URL = process.env.SERVER_URL || `http://localhost:${PORT}`;
+const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
 
 // Connect to database
 await connectDB();
@@ -55,7 +57,7 @@ app.use(helmet({
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "blob:", "http://localhost:5000", "http://localhost:5173"],
+      imgSrc: ["'self'", "data:", "blob:", SERVER_URL, CLIENT_URL],
       connectSrc: ["'self'"],
       fontSrc: ["'self'"],
       objectSrc: ["'none'"],

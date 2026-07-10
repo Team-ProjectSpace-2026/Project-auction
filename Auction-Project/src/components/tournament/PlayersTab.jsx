@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Pencil, Trash2, Check, X } from "lucide-react";
 import * as playerService from "../../services/playerService";
+import PlayerForm from "../players/PlayerForm";
 
 const getRoleStyle = (role) => {
   switch (role) {
@@ -27,6 +28,7 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("All Roles");
+  const [showAddForm, setShowAddForm] = useState(false);
 
   useEffect(() => {
     if (!tournamentId) {
@@ -54,9 +56,10 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
 
   const filteredPlayers = useMemo(() => {
     return players.filter((p) => {
+      const name = p.name || "";
       const matchesSearch =
         !searchTerm ||
-        p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (p.mobile && p.mobile.includes(searchTerm));
       const matchesRole =
         roleFilter === "All Roles" || p.role === roleFilter;
@@ -133,6 +136,7 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
             <option>Wicket Keeper</option>
           </select>
           <button
+            onClick={() => setShowAddForm(true)}
             style={{
               background: "var(--accent-light)", color: "#fff", border: "none",
               borderRadius: "12px", padding: "12px 20px", fontWeight: "600", cursor: "pointer",
@@ -211,6 +215,34 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
           </tbody>
         </table>
       </div>
+
+      {showAddForm && (
+        <div
+          style={{
+            position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
+            background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center",
+            justifyContent: "center", zIndex: 1000,
+          }}
+          onClick={() => setShowAddForm(false)}
+        >
+          <div
+            style={{
+              background: "var(--card-bg-light)", borderRadius: "16px", padding: "28px",
+              maxWidth: "600px", width: "90%", maxHeight: "90vh", overflow: "auto",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <PlayerForm
+              tournamentId={tournamentId}
+              onSaved={() => {
+                setShowAddForm(false);
+                playerService.getPlayers(tournamentId).then((res) => setPlayers(res.data));
+              }}
+              onCancel={() => setShowAddForm(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

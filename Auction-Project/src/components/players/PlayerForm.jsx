@@ -1,7 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import * as playerService from "../../services/playerService";
 import InputField from "../common/InputField.jsx";
 import Button from "../common/Button.jsx";
+
+const API_BASE = import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:5000";
 
 const PlayerForm = ({ playerId, tournamentId, onSaved, onCancel }) => {
   const [form, setForm] = useState({
@@ -18,6 +20,7 @@ const PlayerForm = ({ playerId, tournamentId, onSaved, onCancel }) => {
   });
   const [photo, setPhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
+  const previewUrlRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -42,13 +45,22 @@ const PlayerForm = ({ playerId, tournamentId, onSaved, onCancel }) => {
               bowlingStyle: p.bowlingStyle || "Not Applicable",
             });
             if (p.photo) {
-              setPhotoPreview(`http://localhost:5000/uploads/photos/${p.photo}`);
+              setPhotoPreview(`${API_BASE}/uploads/photos/${p.photo}`);
             }
           }
+        })
+        .catch((err) => {
+          setError(err.response?.data?.message || err.message || "Failed to load player");
         })
         .finally(() => setLoading(false));
     }
   }, [playerId, tournamentId]);
+
+  useEffect(() => {
+    return () => {
+      if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+    };
+  }, []);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -70,7 +82,10 @@ const PlayerForm = ({ playerId, tournamentId, onSaved, onCancel }) => {
       return;
     }
     setPhoto(file);
-    setPhotoPreview(URL.createObjectURL(file));
+    if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+    const newUrl = URL.createObjectURL(file);
+    previewUrlRef.current = newUrl;
+    setPhotoPreview(newUrl);
     setError(null);
   };
 
@@ -94,7 +109,13 @@ const PlayerForm = ({ playerId, tournamentId, onSaved, onCancel }) => {
       }
       if (onSaved) onSaved();
     } catch (err) {
-      setError(err.response?.data?.message || err.message || "Failed to save player");
+      const validationErrors = err.response?.data?.errors;
+      if (validationErrors && Array.isArray(validationErrors)) {
+        const msgs = validationErrors.map((e) => `${e.path}: ${e.msg}`).join(", ");
+        setError(msgs);
+      } else {
+        setError(err.response?.data?.message || err.message || "Failed to save player");
+      }
     } finally {
       setLoading(false);
     }

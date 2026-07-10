@@ -9,6 +9,8 @@ import Bid from "../models/Bid.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 export const getPlayers = async (req, res, next) => {
   try {
     const tournamentId = req.query.tournamentId
@@ -23,9 +25,10 @@ export const getPlayers = async (req, res, next) => {
     }
 
     if (search) {
+      const safe = escapeRegex(search);
       filter.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { mobile: { $regex: search, $options: "i" } },
+        { name: { $regex: safe, $options: "i" } },
+        { mobile: { $regex: safe, $options: "i" } },
       ];
     }
 
@@ -168,7 +171,6 @@ export const registerPlayer = async (req, res, next) => {
       return res.status(400).json({ message: 'Invalid tournament ID format' });
     }
 
-    const Tournament = mongoose.model('Tournament');
     const tournament = await Tournament.findById(tournamentId);
     if (!tournament) {
       return res.status(404).json({ message: 'Tournament not found' });
@@ -228,7 +230,9 @@ export const getRegisteredPlayers = async (req, res, next) => {
       tournamentId,
       isRegistered: true,
       deleted: false,
-    }).populate('tournamentId', 'name');
+    })
+      .select("name role style battingStyle bowlingStyle keeper isRegistered")
+      .populate("tournamentId", "name");
 
     res.json(players);
   } catch (error) {

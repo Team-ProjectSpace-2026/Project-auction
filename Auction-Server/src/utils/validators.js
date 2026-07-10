@@ -214,11 +214,11 @@ export const validatePublicRegistration = [
 
   body('isKeeper')
     .optional({ values: 'falsy' })
-    .isIn(['Yes', 'No', 'true', 'false'])
+    .isIn(['Yes', 'No'])
     .withMessage('isKeeper must be Yes or No'),
 
   body('isAllRounder')
     .optional({ values: 'falsy' })
-    .isIn(['Yes', 'No', 'true', 'false'])
+    .isIn(['Yes', 'No'])
     .withMessage('isAllRounder must be Yes or No'),
 ];

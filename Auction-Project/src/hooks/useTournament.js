@@ -12,13 +12,18 @@ export function useTournament(tournamentId) {
     if (!tournamentId) return;
     try {
       setLoading(true);
-      const [tourneyRes, playersRes] = await Promise.all([
+      const [tourneyResult, playersResult] = await Promise.allSettled([
         tournamentService.getTournament(tournamentId),
         playerService.getPlayers(tournamentId),
       ]);
-      setTournament(tourneyRes.data);
-      setPlayers(playersRes.data);
-      setError(null);
+      if (tourneyResult.status === "fulfilled") {
+        setTournament(tourneyResult.value.data);
+      } else {
+        setError(tourneyResult.reason?.response?.data?.message || tourneyResult.reason?.message);
+      }
+      if (playersResult.status === "fulfilled") {
+        setPlayers(playersResult.value.data);
+      }
     } catch (err) {
       setError(err.response?.data?.message || err.message);
     } finally {
