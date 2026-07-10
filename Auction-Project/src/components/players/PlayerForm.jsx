@@ -24,11 +24,20 @@ const PlayerForm = ({ playerId, tournamentId, onSaved, onCancel }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const safePhotoPreview =
-    typeof photoPreview === "string" &&
-    (photoPreview.startsWith("blob:") || photoPreview.startsWith(`${API_BASE}/uploads/photos/`))
-      ? photoPreview
-      : null;
+  const safePhotoPreview = (() => {
+    if (typeof photoPreview !== "string") return null;
+    try {
+      const parsed = new URL(photoPreview);
+      if (parsed.protocol === "blob:") return parsed.href;
+      const allowed = new URL(API_BASE);
+      if (parsed.origin === allowed.origin && parsed.pathname.startsWith("/uploads/photos/")) {
+        return parsed.href;
+      }
+    } catch {
+      // invalid URL
+    }
+    return null;
+  })();
 
   useEffect(() => {
     if (playerId) {
