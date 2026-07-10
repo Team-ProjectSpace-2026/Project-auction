@@ -1,0 +1,732 @@
+/* ============================================================
+   reveal-screen.css
+   Styles for the auction reveal experience:
+   - Stadium background animations
+   - Card strip & card design
+   - Card flip 3D transforms
+   - Golden glow & particle effects
+   - Button styles
+   - Responsive breakpoints
+   - Reduced motion support
+   ============================================================ */
+
+/* ---- Stadium Background ---- */
+.stadium-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.stadium-bg__image {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.stadium-bg__vignette {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.1) 30%, rgba(255,255,255,0) 60%);
+  pointer-events: none;
+}
+
+
+/* ---- Reveal Modal Layout ---- */
+.reveal-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.reveal-modal__close {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  background: rgba(0,0,0,0.05);
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 10px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  cursor: pointer;
+  color: rgba(15,23,42,0.4);
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.reveal-modal__close:hover {
+  background: rgba(0,0,0,0.1);
+  color: #0F172A;
+}
+
+.reveal-modal__title {
+  font-size: 38px;
+  font-weight: 800;
+  color: #0F172A;
+  text-align: center;
+  letter-spacing: -0.5px;
+  margin-bottom: 8px;
+  z-index: 1;
+}
+
+.reveal-modal__subtitle {
+  color: #64748B;
+  font-size: 16px;
+  text-align: center;
+  margin-bottom: 48px;
+  z-index: 1;
+  font-weight: 500;
+}
+
+
+/* ---- Card Strip ---- */
+.card-strip {
+  position: relative;
+  width: 100%;
+  height: 240px;
+  overflow: hidden;
+  margin-bottom: 48px;
+  z-index: 1;
+}
+
+.card-strip__center-marker {
+  position: absolute;
+  top: -8px;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 160px;
+  border: 2.5px solid rgba(29,78,216,0.2);
+  border-radius: 20px;
+  pointer-events: none;
+  z-index: 5;
+  transition: border-color 0.6s ease, box-shadow 0.6s ease;
+}
+
+.card-strip__center-marker--selected {
+  border-color: rgba(245,158,11,0.5);
+  box-shadow: 0 0 30px rgba(245,158,11,0.15);
+}
+
+.card-strip__belt {
+  display: flex;
+  gap: 16px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  will-change: transform;
+}
+
+
+/* ---- Player Card ---- */
+.player-card {
+  width: 140px;
+  height: 200px;
+  border-radius: 16px;
+  background: #FFFFFF;
+  border: 1.5px solid #E2E8F0;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-shrink: 0;
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  perspective: 1000px;
+  cursor: default;
+  user-select: none;
+}
+
+.player-card__number {
+  font-size: 32px;
+  font-weight: 800;
+  color: #1D4ED8;
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+
+.player-card__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #EBF0FA, #DBEAFE);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.player-card__icon svg {
+  width: 24px;
+  height: 24px;
+  color: #1D4ED8;
+  opacity: 0.6;
+}
+
+.player-card__label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #64748B;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Selected card state */
+.player-card--selected {
+  border-color: #F59E0B;
+  box-shadow: 
+    0 0 40px rgba(245,158,11,0.35),
+    0 0 80px rgba(245,158,11,0.15),
+    0 8px 32px rgba(0,0,0,0.1);
+  transform: scale(1.12);
+  z-index: 10;
+}
+
+.player-card--selected .player-card__number {
+  color: #D97706;
+}
+
+/* Faded non-selected cards */
+.player-card--faded {
+  opacity: 0.25;
+  filter: blur(2px);
+  transform: scale(0.88);
+}
+
+
+/* ---- Card Flip ---- */
+.card-flip-container {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.card-flip {
+  width: 160px;
+  height: 220px;
+  perspective: 1200px;
+}
+
+.card-flip__inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.card-flip__inner--flipped {
+  transform: rotateY(180deg);
+}
+
+.card-flip__front,
+.card-flip__back {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.card-flip__front {
+  background: #FFFFFF;
+  border: 2px solid #F59E0B;
+  box-shadow: 0 0 40px rgba(245,158,11,0.35);
+}
+
+.card-flip__back {
+  background: linear-gradient(135deg, #1D4ED8, #1E3A8A);
+  transform: rotateY(180deg);
+  color: #fff;
+  padding: 16px;
+  gap: 8px;
+}
+
+.card-flip__back-photo {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgba(255,255,255,0.3);
+}
+
+.card-flip__back-name {
+  font-size: 16px;
+  font-weight: 800;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+.card-flip__back-role {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.8;
+}
+
+
+/* ---- Golden Light Sweep ---- */
+.golden-sweep {
+  position: fixed;
+  inset: 0;
+  z-index: 99998;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(245,158,11,0.15) 40%,
+    rgba(245,158,11,0.35) 50%,
+    rgba(245,158,11,0.15) 60%,
+    transparent 100%
+  );
+  pointer-events: none;
+  animation: goldenSweep 0.6s ease-out forwards;
+}
+
+@keyframes goldenSweep {
+  0% { transform: translateX(-100%); opacity: 1; }
+  100% { transform: translateX(100%); opacity: 0; }
+}
+
+
+/* ---- Golden Particles ---- */
+.golden-particle {
+  position: absolute;
+  color: #F59E0B;
+  font-size: 14px;
+  pointer-events: none;
+  z-index: 15;
+}
+
+@keyframes sparkleOrbit {
+  0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: scale(1.2) rotate(360deg); }
+}
+
+
+/* ---- Reveal Button ---- */
+.reveal-btn {
+  background: linear-gradient(135deg, #1D4ED8, #1E3A8A);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  padding: 16px 44px;
+  font-weight: 700;
+  font-size: 17px;
+  cursor: pointer;
+  z-index: 1;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 4px 20px rgba(29,78,216,0.3);
+  font-family: inherit;
+  letter-spacing: 0.3px;
+}
+
+.reveal-btn:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 32px rgba(29,78,216,0.4);
+}
+
+.reveal-btn:active:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.reveal-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.reveal-btn--gold {
+  background: linear-gradient(135deg, #F59E0B, #D97706);
+  box-shadow: 0 4px 24px rgba(245,158,11,0.4);
+}
+
+.reveal-btn--gold:hover:not(:disabled) {
+  box-shadow: 0 8px 36px rgba(245,158,11,0.5);
+}
+
+
+/* ---- Status Section ---- */
+.reveal-status {
+  text-align: center;
+  margin-bottom: 28px;
+  z-index: 1;
+}
+
+.reveal-status__text {
+  font-size: 28px;
+  font-weight: 700;
+  color: #0F172A;
+  margin-bottom: 6px;
+  transition: color 0.4s ease;
+}
+
+.reveal-status__text--gold {
+  color: #D97706;
+}
+
+.reveal-status__hint {
+  color: #64748B;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+
+/* ---- Progress Indicator ---- */
+.reveal-progress {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 32px;
+  z-index: 1;
+}
+
+.reveal-progress__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(15,23,42,0.1);
+  transition: all 0.4s ease;
+}
+
+.reveal-progress__dot--active {
+  width: 12px;
+  height: 12px;
+  background: #1D4ED8;
+  box-shadow: 0 0 10px rgba(29,78,216,0.4);
+}
+
+.reveal-progress__dot--gold {
+  background: #F59E0B;
+  box-shadow: 0 0 10px rgba(245,158,11,0.4);
+}
+
+
+/* ---- Player Details Modal ---- */
+.details-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.details-modal__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  z-index: 1;
+  max-width: 960px;
+  width: 100%;
+  padding: 0 32px;
+}
+
+.details-modal__header {
+  font-size: 40px;
+  font-weight: 800;
+  color: #D97706;
+  text-align: center;
+  letter-spacing: 2px;
+}
+
+/* Player Card in Details */
+.details-card {
+  display: flex;
+  gap: 44px;
+  align-items: center;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226,232,240,0.8);
+  border-left: 4px solid #1D4ED8;
+  border-radius: 20px;
+  padding: 40px;
+  width: 100%;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.06);
+  position: relative;
+  overflow: hidden;
+}
+
+.details-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #F59E0B, #D97706, transparent);
+}
+
+/* Player photo */
+.details-card__photo-container {
+  width: 280px;
+  height: 350px;
+  border-radius: 16px;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 2px solid rgba(29,78,216,0.15);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.08);
+  position: relative;
+}
+
+.details-card__photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.details-card__photo-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #EBF0FA, #DBEAFE);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.details-card__photo-placeholder-icon {
+  font-size: 64px;
+  opacity: 0.3;
+}
+
+/* Player info */
+.details-card__info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.details-card__name {
+  font-size: 44px;
+  font-weight: 800;
+  color: #0F172A;
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+  margin: 0;
+}
+
+.details-card__name-char {
+  display: inline-block;
+  opacity: 0;
+  animation: charReveal 0.15s ease-out forwards;
+}
+
+@keyframes charReveal {
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Role badge */
+.details-card__role {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(29,78,216,0.08);
+  color: #1D4ED8;
+  padding: 7px 18px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 1px;
+  border: 1px solid rgba(29,78,216,0.15);
+  width: fit-content;
+}
+
+/* Stats grid */
+.details-card__stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-top: 8px;
+}
+
+.details-card__stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748B;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.details-card__stat-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0F172A;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.details-card__stat-value--highlight {
+  color: #D97706;
+  font-size: 18px;
+}
+
+/* Bid section */
+.details-bid {
+  width: 100%;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226,232,240,0.8);
+  border-radius: 16px;
+  padding: 32px;
+  text-align: center;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+}
+
+.details-bid__label {
+  color: #64748B;
+  margin-bottom: 8px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: 600;
+}
+
+.details-bid__price {
+  font-size: 52px;
+  color: #D97706;
+  font-weight: 800;
+  margin-bottom: 24px;
+  line-height: 1;
+}
+
+.details-bid__btn {
+  background: linear-gradient(135deg, #1D4ED8, #1E3A8A);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  padding: 16px 48px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 4px 24px rgba(29,78,216,0.35);
+  font-family: inherit;
+  animation: btnPulseGlow 2.5s ease-in-out infinite;
+}
+
+.details-bid__btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 36px rgba(29,78,216,0.45);
+}
+
+@keyframes btnPulseGlow {
+  0%, 100% { box-shadow: 0 4px 24px rgba(29,78,216,0.35); }
+  50% { box-shadow: 0 4px 32px rgba(29,78,216,0.5), 0 0 48px rgba(29,78,216,0.15); }
+}
+
+.details-bid__hint {
+  margin-top: 16px;
+  color: #64748B;
+  font-size: 13px;
+}
+
+
+/* ---- Reduced Motion ---- */
+@media (prefers-reduced-motion: reduce) {
+  .golden-particle,
+  .golden-sweep {
+    animation: none !important;
+  }
+  
+  .card-strip__belt {
+    transition: none !important;
+  }
+  
+  .card-flip__inner {
+    transition-duration: 0.01s !important;
+  }
+  
+  .player-card,
+  .player-card--selected,
+  .player-card--faded {
+    transition-duration: 0.01s !important;
+  }
+
+  .details-card__name-char {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+
+  .details-bid__btn {
+    animation: none !important;
+  }
+}
+
+
+/* ---- Responsive ---- */
+
+/* Laptop */
+@media (max-width: 1440px) {
+  .reveal-modal__title { font-size: 34px; }
+  .player-card { width: 120px; height: 175px; }
+  .player-card__number { font-size: 28px; }
+  .card-strip { height: 220px; }
+  .details-card { padding: 32px; gap: 36px; }
+  .details-card__photo-container { width: 240px; height: 300px; }
+  .details-card__name { font-size: 38px; }
+  .details-bid__price { font-size: 44px; }
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .reveal-modal__title { font-size: 28px; }
+  .reveal-modal__subtitle { font-size: 14px; margin-bottom: 32px; }
+  .player-card { width: 100px; height: 150px; }
+  .player-card__number { font-size: 24px; }
+  .player-card__icon { width: 36px; height: 36px; }
+  .card-strip { height: 190px; }
+  .details-card { flex-direction: column; padding: 28px; gap: 24px; }
+  .details-card__photo-container { width: 200px; height: 250px; }
+  .details-card__name { font-size: 32px; }
+  .details-card__stats { gap: 12px; }
+  .details-bid__price { font-size: 38px; }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .reveal-modal__title { font-size: 24px; }
+  .player-card { width: 80px; height: 120px; gap: 6px; }
+  .player-card__number { font-size: 20px; }
+  .player-card__icon { width: 28px; height: 28px; }
+  .player-card__label { font-size: 8px; }
+  .card-strip { height: 160px; }
+  .card-strip__belt { gap: 10px; }
+  .reveal-btn { padding: 14px 32px; font-size: 15px; }
+  .details-card__photo-container { width: 160px; height: 200px; }
+  .details-card__name { font-size: 26px; }
+  .details-bid__price { font-size: 32px; }
+  .details-bid__btn { padding: 14px 36px; font-size: 16px; }
+}

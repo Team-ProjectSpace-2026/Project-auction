@@ -1,21 +1,16 @@
 import mongoose from "mongoose";
+import sanitizeHtml from "sanitize-html";
 
 const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 
-// Strip HTML tags and dangerous content from a string to prevent XSS
+// Strip all HTML tags and dangerous content from a string to prevent XSS
 const stripHtml = (str) => {
   if (typeof str !== "string") return str;
-  // First remove content inside dangerous tags (including their content)
-  let cleaned = str.replace(/<script[\s\S]*?<\/script>/gi, "");
-  cleaned = cleaned.replace(/<style[\s\S]*?<\/style>/gi, "");
-  cleaned = cleaned.replace(/<iframe[\s\S]*?<\/iframe>/gi, "");
-  cleaned = cleaned.replace(/<object[\s\S]*?<\/object>/gi, "");
-  cleaned = cleaned.replace(/<embed[\s\S]*?>/gi, "");
-  // Then remove any remaining HTML tags
-  cleaned = cleaned.replace(/<[^>]*>/g, "");
-  // Remove event handler attributes that might survive
-  cleaned = cleaned.replace(/on\w+\s*=\s*["'][^"']*["']/gi, "");
-  return cleaned.trim();
+  return sanitizeHtml(str, {
+    allowedTags: [],
+    allowedAttributes: {},
+    disallowedTagsMode: "discard",
+  }).trim();
 };
 
 // Deep-sanitize an object: strip HTML from all string values
