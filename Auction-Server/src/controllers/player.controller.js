@@ -9,31 +9,39 @@ import Bid from "../models/Bid.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
 export const getPlayers = async (req, res, next) => {
   try {
+    // Sanitize tournamentId — ObjectId validates format, throws on invalid
     const tournamentId = req.query.tournamentId
       ? new mongoose.Types.ObjectId(req.query.tournamentId)
       : undefined;
-    const { search, role } = req.query;
 
-    let filter = { deleted: false };
+    // Sanitize role — whitelist lookup returns value from constant array, not user input
+    const allowedRoles = ["Batsman", "Bowler", "All Rounder", "Wicket Keeper"];
+    const roleIdx = allowedRoles.indexOf(String(req.query.role));
+    const validRole = roleIdx >= 0 ? allowedRoles[roleIdx] : undefined;
+
+    // Sanitize search — escape regex metacharacters to prevent injection
+    const safeSearch = req.query.search
+      ? String(req.query.search).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+      : "";
+
+    // Build filter from sanitized values only
+    const filter = { deleted: false };
 
     if (tournamentId) {
       filter.tournamentId = tournamentId;
     }
 
-    if (search) {
-      const safe = escapeRegex(search);
+    if (safeSearch) {
       filter.$or = [
-        { name: { $regex: safe, $options: "i" } },
-        { mobile: { $regex: safe, $options: "i" } },
+        { name: { $regex: safeSearch, $options: "i" } },
+        { mobile: { $regex: safeSearch, $options: "i" } },
       ];
     }
 
-    if (role && role !== "All Roles") {
-      filter.role = role;
+    if (validRole) {
+      filter.role = validRole;
     }
 
     const players = await Player.find(filter).populate("tournamentId", "name");

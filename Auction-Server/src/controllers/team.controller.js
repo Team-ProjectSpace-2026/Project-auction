@@ -88,6 +88,16 @@ export const updateTeam = async (req, res, next) => {
       return res.status(404).json({ message: 'Team not found' });
     }
 
+    // Check for duplicate team name within the same tournament (excluding self)
+    const duplicateTeam = await Team.findOne({
+      tournamentId: existingTeam.tournamentId,
+      name,
+      _id: { $ne: teamId }
+    });
+    if (duplicateTeam) {
+      return res.status(409).json({ message: `A team with name "${name}" already exists in this tournament` });
+    }
+
     const totalSpent = existingTeam.totalBudget - existingTeam.remainingBudget;
     const newRemainingBudget = Math.max(0, totalBudget - totalSpent);
 

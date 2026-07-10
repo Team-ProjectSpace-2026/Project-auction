@@ -62,5 +62,6 @@ const teamSchema = new mongoose.Schema({
 // Compound indexes for common query patterns
 teamSchema.index({ tournamentId: 1 });
 teamSchema.index({ tournamentId: 1, remainingBudget: -1 });
+teamSchema.index({ tournamentId: 1, name: 1 }, { unique: true });
 
 export default mongoose.model('Team', teamSchema);
