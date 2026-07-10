@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { Search, Pencil, Trash2, Check, X } from "lucide-react";
 const players = [
   {
     id: 1,
@@ -147,7 +148,7 @@ const PlayersTab = () => {
         }}
       >
         <input
-          placeholder="🔍 Search players..."
+          placeholder="Search players..."
           style={{
             width: "320px",
             padding: "14px 16px",
@@ -282,7 +283,7 @@ const PlayersTab = () => {
                       : "#ef4444",
                   }}
                 >
-                  {player.keeper ? "✓" : "✕"}
+                  {player.keeper ? <Check size={14} strokeWidth={3} /> : <X size={14} strokeWidth={3} />}
                 </td>
 
                 <td>
@@ -296,7 +297,7 @@ const PlayersTab = () => {
                 fontSize: "16px",
             }}
             >
-            ✏️
+            <Pencil size={16} strokeWidth={2} />
         </button>
 
         <button
@@ -307,7 +308,7 @@ const PlayersTab = () => {
                 fontSize: "16px",
             }}
         >
-        🗑️
+        <Trash2 size={16} strokeWidth={2} />
     </button>
     </td>
               </tr>

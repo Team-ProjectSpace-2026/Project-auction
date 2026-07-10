@@ -114,6 +114,7 @@
 
 .input-icon{
     position:relative;
+    pointer-events:auto;
 }
 
 .input-symbol{
@@ -132,6 +133,19 @@
 .input-icon input{
     width:100%;
     padding-left:52px;
+}
+
+.form-group input[type="datetime-local"]{
+    color-scheme: light;
+}
+
+.form-group input[type="datetime-local"]::-webkit-calendar-picker-indicator{
+    cursor:pointer;
+    opacity:0.6;
+}
+
+.form-group input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover{
+    opacity:1;
 }
 
 /* ===============================

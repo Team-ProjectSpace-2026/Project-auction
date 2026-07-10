@@ -1,3 +1,5 @@
+import { XCircle } from "lucide-react";
+
 const UnsoldPlayerModal = ({ onClose, onNextPlayer, playerName }) => {
   return (
     <div
@@ -23,11 +25,10 @@ const UnsoldPlayerModal = ({ onClose, onNextPlayer, playerName }) => {
       >
         <div
           style={{
-            fontSize: "60px",
             marginBottom: "12px",
           }}
         >
-          ❌
+          <XCircle size={60} strokeWidth={1.5} style={{ color: "#ef4444" }} />
         </div>
 
         <h1

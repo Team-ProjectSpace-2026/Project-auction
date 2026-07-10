@@ -1,11 +1,12 @@
 // src/components/layout/Sidebar.jsx
 import { useState } from "react";
+import { LayoutDashboard, Trophy, Settings, LogOut, Landmark } from "lucide-react";
 
 const navItems = [
-  { key: "dashboard", label: "Dashboard", icon: "🏠" },
-  { key: "tournaments", label: "Tournaments", icon: "🏆" },
-  { key: "settings", label: "Settings", icon: "⚙️" },
-  { key: "logout", label: "Logout", icon: "🚪" },
+  { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { key: "tournaments", label: "Tournaments", icon: Trophy },
+  { key: "settings", label: "Settings", icon: Settings },
+  { key: "logout", label: "Logout", icon: LogOut },
 ];
 
 import { useNavigate } from "react-router-dom";
@@ -126,7 +127,7 @@ const Sidebar = ({ activePage = "dashboard", onNavigate }) => {
                 if (!isActive) e.currentTarget.style.background = "transparent";
               }}
             >
-              <span style={{ fontSize: "16px" }}>{item.icon}</span>
+              <span style={{ fontSize: "16px", display: "flex", alignItems: "center" }}><item.icon size={18} /></span>
               {item.label}
             </button>
           );
@@ -169,7 +170,7 @@ const Sidebar = ({ activePage = "dashboard", onNavigate }) => {
             zIndex: 1,
           }}
         >
-          🏟️
+          <Landmark size={48} strokeWidth={1} style={{ opacity: 0.3, color: "var(--sidebar-text)" }} />
         </div>
       </div>
 
@@ -210,7 +211,7 @@ const Sidebar = ({ activePage = "dashboard", onNavigate }) => {
                 fontSize: "28px",
               }}
             >
-              🚪
+              <LogOut size={28} strokeWidth={2} style={{ color: "#d97706" }} />
             </div>
             <h3
               style={{

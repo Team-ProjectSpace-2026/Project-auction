@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { Hammer, Info, User } from "lucide-react";
 import PlayerRevealModal from "./PlayerRevealModal";
 import PlayerDetailsModal from "./PlayerDetailsModal";
 
@@ -52,11 +53,9 @@ const LiveAuctionTab = () => {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontSize: "32px",
-              color: "#2563eb",
             }}
           >
-            ⚒️
+            <Hammer size={32} strokeWidth={1.5} style={{ color: "#2563eb" }} />
           </div>
 
           <h2
@@ -104,10 +103,9 @@ const LiveAuctionTab = () => {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontSize: "56px",
             }}
           >
-            🔨
+            <Hammer size={56} strokeWidth={1.5} style={{ color: "#2563eb" }} />
           </div>
 
           <h2
@@ -225,10 +223,9 @@ const LiveAuctionTab = () => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: "30px",
               }}
             >
-              👤
+              <User size={30} strokeWidth={1.5} style={{ color: "#6b7280" }} />
             </div>
 
             <h4
@@ -325,10 +322,9 @@ const LiveAuctionTab = () => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: "30px",
               }}
             >
-              ⚒️
+              <Hammer size={30} strokeWidth={1.5} style={{ color: "#2563eb" }} />
             </div>
 
             <h4

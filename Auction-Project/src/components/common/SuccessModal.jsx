@@ -1,3 +1,5 @@
+import { Check } from "lucide-react";
+
 const SuccessModal = ({
   title,
   message,
@@ -28,19 +30,18 @@ const SuccessModal = ({
       >
         <div
           style={{
-            width: "90px",
-            height: "90px",
+            width: "64px",
+            height: "64px",
             borderRadius: "50%",
-            background: "var(--status-active-bg)",
+            background: "var(--bg-success-light)",
             color: "var(--status-active-text)",
-            fontSize: "48px",
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
             margin: "0 auto 24px",
           }}
         >
-          ✓
+          <Check size={48} strokeWidth={2.5} />
         </div>
 
         <h2

@@ -5,6 +5,11 @@ import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import connectDB from './src/config/db.js';
 import { initializeSocket } from './src/socket/auctionSocket.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Import routes
 import authRoutes from './src/routes/auth.routes.js';
@@ -12,6 +17,7 @@ import tournamentRoutes from './src/routes/tournament.routes.js';
 import playerRoutes from './src/routes/player.routes.js';
 import teamRoutes from './src/routes/team.routes.js';
 import auctionRoutes from './src/routes/auction.routes.js';
+import dashboardRoutes from './src/routes/dashboard.routes.js';
 
 // Import middleware
 import { errorHandler } from './src/middleware/errorHandler.js';
@@ -52,6 +58,10 @@ app.use('/api/tournaments', tournamentRoutes);
 app.use('/api/players', playerRoutes);
 app.use('/api/teams', express.json({ limit: '10mb' }), teamRoutes);
 app.use('/api/auction', auctionRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+
+// Serve uploaded files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
