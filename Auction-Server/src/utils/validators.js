@@ -57,9 +57,30 @@ export const validateTournament = [
     .notEmpty()
     .withMessage('Number of teams is required'),
   
-  body('format')
+  body('venue')
     .notEmpty()
-    .withMessage('Tournament format is required')
+    .withMessage('Venue is required')
+    .isLength({ max: 200 })
+    .withMessage('Venue cannot exceed 200 characters'),
+
+  body('budgetPerTeam')
+    .isFloat({ min: 0 })
+    .withMessage('Budget per team must be a positive number'),
+
+  body('maxPlayersPerTeam')
+    .isInt({ min: 1 })
+    .withMessage('Maximum players per team must be at least 1'),
+
+  body('playerBasePrice')
+    .isFloat({ min: 0 })
+    .withMessage('Player base price must be a positive number')
+];
+
+export const validateRegistrationDeadline = [
+  body('registrationEndDate')
+    .optional({ nullable: true })
+    .isISO8601()
+    .withMessage('Registration end date must be a valid date')
 ];
 
 export const validatePlayer = [

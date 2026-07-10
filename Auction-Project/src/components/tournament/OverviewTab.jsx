@@ -1,4 +1,45 @@
-const OverviewTab = () => {
+const formatDate = (dateStr) => {
+  if (!dateStr) return "—";
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+};
+
+const formatCurrency = (val) => {
+  if (!val && val !== 0) return "—";
+  return "₹" + Number(val).toLocaleString("en-IN");
+};
+
+const getDynamicStatus = (date) => {
+  if (!date) return "Upcoming";
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const auctionDate = new Date(date);
+  auctionDate.setHours(0, 0, 0, 0);
+  if (auctionDate < today) return "Completed";
+  if (auctionDate.getTime() === today.getTime()) return "Active";
+  return "Upcoming";
+};
+
+const OverviewTab = ({ tournament, teamsCount, playersCount }) => {
+  const t = tournament || {};
+  const dynamicStatus = getDynamicStatus(t.date);
+
+  const infoRows = [
+    ["Tournament Name", t.name || "—"],
+    ["Number of Teams", t.teams ? `${t.teams} Teams` : "—"],
+    ["Budget Per Team", formatCurrency(t.budgetPerTeam)],
+    ["Maximum Players", t.maxPlayersPerTeam ? `${t.maxPlayersPerTeam} Players` : "—"],
+    ["Player Base Price", formatCurrency(t.playerBasePrice)],
+    ["Venue", t.venue || "—"],
+    ["Auction Date", formatDate(t.date)],
+    ["Status", dynamicStatus],
+  ];
+
+  const createdOn = t.createdAt ? formatDate(t.createdAt) : "—";
+  const auctionStatus = t.auctionStatus
+    ? t.auctionStatus.charAt(0).toUpperCase() + t.auctionStatus.slice(1)
+    : dynamicStatus;
+
   return (
     <div
       style={{
@@ -27,23 +68,14 @@ const OverviewTab = () => {
           Tournament Information
         </h3>
 
-        {[
-          ["Tournament Name", "Summer League 2027"],
-          ["Number of Teams", "12 Teams"],
-          ["Budget Per Team", "₹25,00,000"],
-          ["Maximum Players", "18 Players"],
-          ["Venue", "Mangalore Cricket Stadium"],
-          ["Auction Date", "20 Jun 2027"],
-          ["Format", "T20 League"],
-          ["Status", "Active"],
-        ].map(([label, value]) => (
+        {infoRows.map(([label, value]) => (
           <div
             key={label}
             style={{
               display: "flex",
               justifyContent: "space-between",
               padding: "16px 0",
-               borderBottom: "1px solid var(--border-light)",
+              borderBottom: "1px solid var(--border-light)",
             }}
           >
             <span>{label}</span>
@@ -119,11 +151,11 @@ const OverviewTab = () => {
             Summary
           </h3>
 
-          <p>Total Teams : 12</p>
-          <p>Total Registered Players : 78</p>
+          <p>Total Teams : {teamsCount || t.teams || 0}</p>
+          <p>Total Registered Players : {playersCount || 0}</p>
           <p>Players Sold : 0</p>
-          <p>Auction Status : Upcoming</p>
-          <p>Created On : 01 Jun 2027</p>
+          <p>Auction Status : {auctionStatus}</p>
+          <p>Created On : {createdOn}</p>
         </div>
       </div>
     </div>

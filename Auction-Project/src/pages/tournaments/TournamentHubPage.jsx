@@ -9,6 +9,7 @@ import PlayersTab from "../../components/tournament/PlayersTab";
 import LiveAuctionTab from "../../components/tournament/LiveAuctionTab";
 import { useLocation, useParams } from "react-router-dom";
 import api from "../../services/api";
+import { Clock, Link, Users, User, Hammer } from "lucide-react";
 
 // const MOCK_USER = {
 //   name: "Rahul Organizer",
@@ -22,14 +23,29 @@ const TournamentHubPage = () => {
   const [tournament, setTournament] = useState(location.state?.tournament || null);
   const [activeTab, setActiveTab] = useState(
   location.state?.activeTab || "overview"
-);
+  );
+  const [teamsCount, setTeamsCount] = useState(0);
+  const [playersCount, setPlayersCount] = useState(0);
 
   useEffect(() => {
-    if (!tournament && tournamentId) {
+    if (tournamentId) {
       api.get(`/tournaments/${tournamentId}`)
         .then((res) => setTournament(res.data))
         .catch(() => {});
     }
+  }, [tournamentId]);
+
+  useEffect(() => {
+    const id = tournament?._id || tournamentId;
+    if (!id) return;
+
+    api.get(`/teams?tournamentId=${id}`)
+      .then((res) => setTeamsCount(res.data.length))
+      .catch(() => {});
+
+    api.get(`/players?tournamentId=${id}`)
+      .then((res) => setPlayersCount(res.data.length))
+      .catch(() => {});
   }, [tournament, tournamentId]);
 
   return (
@@ -60,7 +76,7 @@ const TournamentHubPage = () => {
           }}
         >
           {/* Tournament Header */}
-          <TournamentHeader />
+          <TournamentHeader tournament={tournament} />
 
           {/* Tabs */}
          <div
@@ -78,11 +94,11 @@ const TournamentHubPage = () => {
   }}
 >
   {[
-    { id: "overview", label: "🕒 Overview" },
-    { id: "registration", label: "🔗 Registration Link" },
-    { id: "teams", label: "👥 Teams" },
-    { id: "players", label: "👤 Players" },
-    { id: "auction", label: "⚒ Live Auction" },
+    { id: "overview", label: "Overview", icon: Clock },
+    { id: "registration", label: "Registration Link", icon: Link },
+    { id: "teams", label: "Teams", icon: Users },
+    { id: "players", label: "Players", icon: User },
+    { id: "auction", label: "Live Auction", icon: Hammer },
   ].map((tab) => (
     <button
       key={tab.id}
@@ -104,8 +120,12 @@ const TournamentHubPage = () => {
             ? "3px solid var(--accent-light)"
             : "3px solid transparent",
         transition: "color 0.2s ease, border-color 0.2s ease",
+        display: "flex",
+        alignItems: "center",
+        gap: "6px",
       }}
     >
+      <tab.icon size={15} strokeWidth={2} />
       {tab.label}
     </button>
   ))}
@@ -117,7 +137,13 @@ const TournamentHubPage = () => {
               marginTop: "16px",
             }}
           >
-            {activeTab === "overview" && <OverviewTab />}
+            {activeTab === "overview" && (
+              <OverviewTab
+                tournament={tournament}
+                teamsCount={teamsCount}
+                playersCount={playersCount}
+              />
+            )}
 
             {activeTab === "registration" && <RegistrationTab tournament={tournament} />}
 

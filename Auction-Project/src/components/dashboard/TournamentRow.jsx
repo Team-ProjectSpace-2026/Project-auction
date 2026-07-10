@@ -1,4 +1,7 @@
 // src/components/dashboard/TournamentRow.jsx
+import { CircleDot } from 'lucide-react';
+
+const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
 
 const statusColors = {
   Active:    { bg: 'var(--status-active-bg)', color: 'var(--status-active-text)' },
@@ -15,11 +18,16 @@ const TournamentRow = ({ tournament, onView }) => {
     <tr style={{ borderBottom: '1px solid var(--table-row-border)', transition: 'border-color 0.2s ease' }}>
       <td style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
         <div style={{
-          width: '36px', height: '36px', borderRadius: '8px',
+          width: '44px', height: '44px', borderRadius: '10px',
           background: 'var(--info-bg)', display: 'flex', alignItems: 'center',
-          justifyContent: 'center', fontSize: '18px', flexShrink: 0,
+          justifyContent: 'center', fontSize: '20px', flexShrink: 0,
+          overflow: 'hidden',
         }}>
-          {logo || '🏏'}
+          {logo ? (
+            <img src={`${API_BASE}${logo}`} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          ) : (
+            <CircleDot size={18} strokeWidth={2} style={{ color: 'var(--text-secondary-light)' }} />
+          )}
         </div>
         <span style={{ fontWeight: 600, color: 'var(--text-primary-light)', fontSize: '14px', transition: 'color 0.2s ease' }}>{name}</span>
       </td>
