@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Hammer, User } from "lucide-react";
 import { useAuction } from "../../context/AuctionContext";
@@ -21,10 +21,8 @@ const LiveAuctionTab = ({ tournamentId: propTournamentId }) => {
   const tournamentId = propTournamentId || searchParams.get("tournamentId");
   const { 
     auctionStatus, 
-    initTournament, 
     joinAndListen, 
     players, 
-    teams, 
     currentPlayer, 
     currentBid, 
     highestBidder, 
