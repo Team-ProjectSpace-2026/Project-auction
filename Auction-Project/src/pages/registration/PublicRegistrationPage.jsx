@@ -4,6 +4,7 @@ import { Check, X } from "lucide-react";
 import Cropper from "react-easy-crop";
 import InputField from "../../components/common/InputField.jsx";
 import Button from "../../components/common/Button.jsx";
+import CricketLoader from "../../components/common/CricketLoader";
 import * as playerService from "../../services/playerService.js";
 import roleBatsman from "../../assets/Batsman_Logo1.png";
 import roleBowler from "../../assets/Bowler_logo1.png";
@@ -284,7 +285,14 @@ export default function PublicRegistrationPage() {
   useEffect(() => {
     const fetchTournament = async () => {
       try {
+        const start = Date.now();
         const res = await playerService.getPublicTournament(tournamentId);
+        // Ensure loader shows for at least 2 seconds
+        const elapsed = Date.now() - start;
+        const minDelay = 2000;
+        if (elapsed < minDelay) {
+          await new Promise((r) => setTimeout(r, minDelay - elapsed));
+        }
         setTournamentData(res.data);
       } catch {
         setTournamentData(null);
@@ -420,10 +428,7 @@ export default function PublicRegistrationPage() {
       <div style={{ minHeight: "100vh", background: C.bg, fontFamily: "'Inter', 'Segoe UI', sans-serif",
         display: "flex", alignItems: "center", justifyContent: "center"
       }}>
-        <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>⏳</div>
-          <p style={{ color: C.muted, fontSize: 15 }}>Loading registration...</p>
-        </div>
+        <CricketLoader text="Loading registration..." />
       </div>
     );
   }

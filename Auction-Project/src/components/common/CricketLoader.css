@@ -1,0 +1,170 @@
+/* ================================================================
+   Premium Cricket Bat & Ball Loader
+   ================================================================ */
+
+/* --- Sizing tokens --- */
+.cricket-loader--sm { --loader-scale: 0.6; }
+.cricket-loader--md { --loader-scale: 1; }
+.cricket-loader--lg { --loader-scale: 1.4; }
+
+.cricket-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 32px 0;
+  transform: scale(var(--loader-scale, 1));
+}
+
+/* --- Scene --- */
+.cricket-loader__scene {
+  position: relative;
+  width: 160px;
+  height: 90px;
+}
+
+/* --- Pitch line --- */
+.cricket-loader__pitch {
+  position: absolute;
+  bottom: 8px;
+  left: 10px;
+  right: 10px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #d4a017 30%, #d4a017 70%, transparent);
+  border-radius: 1px;
+  opacity: 0.5;
+}
+
+/* --- Ball --- */
+.cricket-loader__ball {
+  position: absolute;
+  bottom: 14px;
+  left: 0;
+  width: 18px;
+  height: 18px;
+  background: radial-gradient(circle at 35% 35%, #e74c3c, #c0392b 60%, #962d22);
+  border-radius: 50%;
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.3),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+  animation: ballRoll 3.5s ease-in-out infinite;
+  z-index: 2;
+}
+
+.cricket-loader__ball-seam {
+  position: absolute;
+  top: 3px;
+  left: 4px;
+  width: 10px;
+  height: 12px;
+  border: 1.5px solid rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+  border-left-color: transparent;
+  border-bottom-color: transparent;
+  transform: rotate(-30deg);
+}
+
+/* --- Bat --- */
+.cricket-loader__bat {
+  position: absolute;
+  bottom: 16px;
+  right: 30px;
+  transform-origin: bottom center;
+  animation: batSwing 3.5s ease-in-out infinite;
+  z-index: 3;
+}
+
+.cricket-loader__bat-blade {
+  width: 18px;
+  height: 44px;
+  background: linear-gradient(180deg, #c9a84c 0%, #a07e2e 40%, #8b6914 100%);
+  border-radius: 3px 3px 6px 6px;
+  border: 1px solid #6b5210;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.25),
+    inset 0 1px 2px rgba(255, 255, 255, 0.3);
+}
+
+.cricket-loader__bat-handle {
+  width: 6px;
+  height: 22px;
+  background: linear-gradient(180deg, #2c1810, #1a0f0a);
+  border-radius: 2px;
+  margin: -2px auto 0;
+  border: 1px solid #0d0705;
+}
+
+/* --- Speed trails --- */
+.cricket-loader__trail {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  height: 2px;
+  border-radius: 1px;
+  opacity: 0;
+  animation: trailFly 3.5s ease-out infinite;
+}
+
+.cricket-loader__trail--1 {
+  width: 14px;
+  background: rgba(212, 160, 23, 0.6);
+  animation-delay: 1.7s;
+}
+.cricket-loader__trail--2 {
+  width: 10px;
+  background: rgba(212, 160, 23, 0.4);
+  animation-delay: 1.85s;
+}
+.cricket-loader__trail--3 {
+  width: 6px;
+  background: rgba(212, 160, 23, 0.25);
+  animation-delay: 2.0s;
+}
+
+/* --- Loading text --- */
+.cricket-loader__text {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary-light, #6b7280);
+  letter-spacing: 0.3px;
+  animation: textPulse 3.5s ease-in-out infinite;
+}
+
+/* ================================================================
+   Keyframe Animations
+   ================================================================ */
+
+/* Ball rolls in from left, pauses, then flies off after hit */
+@keyframes ballRoll {
+  0%   { transform: translateX(-10px); opacity: 0.8; }
+  30%  { transform: translateX(50px);  opacity: 1; }
+  45%  { transform: translateX(50px);  opacity: 1; }   /* pause before hit */
+  55%  { transform: translateX(80px);  opacity: 1; }   /* hit moment */
+  75%  { transform: translateX(180px); opacity: 0; }   /* fly off screen */
+  100% { transform: translateX(180px); opacity: 0; }
+}
+
+/* Bat swings down to hit, then returns */
+@keyframes batSwing {
+  0%   { transform: rotate(0deg); }
+  30%  { transform: rotate(0deg); }
+  48%  { transform: rotate(-45deg); }   /* wind up */
+  55%  { transform: rotate(15deg); }    /* strike through */
+  65%  { transform: rotate(0deg); }     /* follow through back */
+  100% { transform: rotate(0deg); }
+}
+
+/* Speed trails fly off after hit */
+@keyframes trailFly {
+  0%   { transform: translateX(0); opacity: 0; }
+  50%  { transform: translateX(0); opacity: 0; }
+  55%  { transform: translateX(55px); opacity: 0.7; }
+  75%  { transform: translateX(170px); opacity: 0; }
+  100% { transform: translateX(170px); opacity: 0; }
+}
+
+/* Text pulses gently */
+@keyframes textPulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.5; }
+}

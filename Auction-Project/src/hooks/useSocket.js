@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, useState } from "react";
+import { useEffect, useRef, useCallback, useState, useMemo } from "react";
 import { io } from "socket.io-client";
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
@@ -83,7 +83,7 @@ export const useSocket = () => {
     };
   }, [disconnect]);
 
-  return {
+  return useMemo(() => ({
     isConnected,
     connectionError,
     connect,
@@ -92,7 +92,7 @@ export const useSocket = () => {
     leaveTournament,
     emit,
     on,
-  };
+  }), [isConnected, connectionError, connect, disconnect, joinTournament, leaveTournament, emit, on]);
 };
 
 export default useSocket;

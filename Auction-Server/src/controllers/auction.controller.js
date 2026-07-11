@@ -9,6 +9,9 @@ export const getAuctionState = async (req, res, next) => {
   try {
     const tournamentId = new mongoose.Types.ObjectId(req.params.tournamentId);
 
+    // Get tournament info for playerBasePrice
+    const tournament = await Tournament.findById(tournamentId).select('playerBasePrice');
+
     // Get all players for this tournament
     const players = await Player.find({ tournamentId });
     
@@ -34,6 +37,7 @@ export const getAuctionState = async (req, res, next) => {
       players,
       teams,
       recentBids,
+      tournament: { playerBasePrice: tournament?.playerBasePrice || 0 },
       stats: {
         totalBids,
         totalPlayersSold,

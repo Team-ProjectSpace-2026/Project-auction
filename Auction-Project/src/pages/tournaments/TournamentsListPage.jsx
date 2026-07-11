@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/layout/Sidebar";
+import CricketLoader from "../../components/common/CricketLoader";
 import { getTournaments, deleteTournament } from "../../services/tournamentService";
 import { Pencil, Trash2, Trophy, Calendar, Users, MapPin, IndianRupee } from "lucide-react";
 
@@ -46,7 +47,14 @@ const TournamentsListPage = () => {
     const fetchTournaments = async () => {
       try {
         setLoading(true);
+        const start = Date.now();
         const res = await getTournaments();
+        // Ensure loader shows for at least 2 seconds
+        const elapsed = Date.now() - start;
+        const minDelay = 2000;
+        if (elapsed < minDelay) {
+          await new Promise((r) => setTimeout(r, minDelay - elapsed));
+        }
         setTournaments(res.data);
       } catch (err) {
         setError(err.response?.data?.message || "Failed to load tournaments");
@@ -207,11 +215,7 @@ const TournamentsListPage = () => {
             </div>
 
             {/* Loading / Error */}
-            {loading && (
-              <div style={{ textAlign: "center", padding: "40px", color: "var(--text-secondary-light)" }}>
-                Loading tournaments...
-              </div>
-            )}
+            {loading && <CricketLoader text="Loading tournaments..." />}
 
             {error && (
               <div style={{ textAlign: "center", padding: "40px", color: "#ef4444" }}>

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuction } from "../../context/AuctionContext";
+import { playerPhotoUrl } from "../../utils/playerPhotoUrl";
 import StadiumBackground from "../auction/StadiumBackground";
 import "./reveal-screen.css";
 
@@ -45,7 +46,6 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
 
   // ---- State ----
   const [phase, setPhase] = useState("idle"); // idle | shuffling | selected | flipping | done
-  const [beltOffset, setBeltOffset] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [isFlipped, setIsFlipped] = useState(false);
   const [showSweep, setShowSweep] = useState(false);
@@ -54,17 +54,14 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
   const animFrameRef = useRef(null);
   const startTimeRef = useRef(null);
   const containerRef = useRef(null);
+  const beltRef = useRef(null);
+  const targetIndexRef = useRef(null);
 
   // Build card list: use all players, repeat enough to fill the strip
   const cardList = useMemo(() => {
     if (!players || players.length === 0) {
-      // Fallback: generate placeholder cards
-      return Array.from({ length: 30 }, (_, i) => ({
-        _id: `placeholder-${i}`,
-        registrationNumber: i + 1,
-        name: `Player ${i + 1}`,
-        displayNumber: String(i + 1).padStart(3, "0"),
-      }));
+      // No players loaded yet - return empty array
+      return [];
     }
     // Create enough copies to fill a long strip
     const copies = Math.max(3, Math.ceil(50 / players.length));
@@ -81,58 +78,84 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
     return list;
   }, [players]);
 
-  // Pick a random unsold player for selection target (computed once on mount via useState)
-  const [targetIndex] = useState(() => {
-    if (!players || players.length === 0) {
-      // Fallback: use middle of cardList (30 elements by default)
-      return 15; 
-    }
-    const midStart = players.length;
-    const midEnd = players.length * 2;
-    return midStart + Math.floor(Math.random() * (midEnd - midStart));
-  });
-
-  // ---- Shuffle animation ----
+  // ---- Shuffle animation with bounce-back ----
   const startShuffle = useCallback(() => {
     setPhase("shuffling");
     startTimeRef.current = performance.now();
 
+    // Compute target index dynamically from current cardList
+    if (!players || players.length === 0) {
+      targetIndexRef.current = 15;
+    } else {
+      const start = players.length;
+      const end = Math.max(start + 1, cardList.length - players.length);
+      targetIndexRef.current = start + Math.floor(Math.random() * (end - start));
+    }
+    const ti = targetIndexRef.current;
+
     // Calculate target offset to center the selected card
     const containerWidth = containerRef.current?.offsetWidth || window.innerWidth;
     const centerOffset = containerWidth / 2 - CARD_WIDTH / 2;
-    const targetOffset = -(targetIndex * CARD_STEP) + centerOffset;
+    const targetOffset = -(ti * CARD_STEP) + centerOffset;
 
-    // Total travel distance
-    const startOffset = centerOffset; // start with first cards visible
+    const startOffset = centerOffset;
     const totalDistance = Math.abs(targetOffset - startOffset);
 
-    // Animation duration phases (total ~4.5s)
-    const TOTAL_DURATION = 4500;
+    // Total duration — slower for dramatic effect
+    const TOTAL_DURATION = 6000;
+
+    // 4-phase bounce easing: fast forward → overshoot → bounce back → settle
+    const bounceEase = (t) => {
+      if (t < 0.50) {
+        return (t / 0.50) * 0.90;
+      } else if (t < 0.68) {
+        const p = (t - 0.50) / 0.18;
+        return 0.90 + p * 0.18;
+      } else if (t < 0.84) {
+        const p = (t - 0.68) / 0.16;
+        return 1.08 - p * 0.11;
+      } else {
+        const p = (t - 0.84) / 0.16;
+        return 0.97 + p * 0.03;
+      }
+    };
 
     const animate = (now) => {
       const elapsed = now - startTimeRef.current;
       const progress = Math.min(elapsed / TOTAL_DURATION, 1);
-
-      // Easing: fast start, gradual slow-down (cubic ease-out)
-      const eased = 1 - Math.pow(1 - progress, 3);
+      const eased = bounceEase(progress);
 
       const currentOffset = startOffset - (totalDistance * eased);
-      setBeltOffset(currentOffset);
+
+      let wiggle = 0;
+      if (progress > 0.50 && progress < 0.84) {
+        wiggle = Math.sin((progress - 0.50) * 40) * 4 * (1 - (progress - 0.50) / 0.34);
+      }
+
+      // Update belt transform directly via ref (no re-render per frame)
+      if (beltRef.current) {
+        beltRef.current.style.transform = `translateY(calc(-50% + ${wiggle}px)) translateX(${currentOffset}px)`;
+      }
 
       if (progress < 1) {
         animFrameRef.current = requestAnimationFrame(animate);
       } else {
-        // Snap to exact target
-        setBeltOffset(targetOffset);
-        setSelectedIndex(targetIndex);
-        setSelectedPlayer(cardList[targetIndex]);
+        // Snap to exact target via ref
+        if (beltRef.current) {
+          beltRef.current.style.transform = `translateY(-50%) translateX(${targetOffset}px)`;
+        }
+        setSelectedIndex(ti);
+        setSelectedPlayer(cardList[ti]);
         setPhase("selected");
       }
     };
 
-    setBeltOffset(startOffset);
+    // Set initial belt position via ref
+    if (beltRef.current) {
+      beltRef.current.style.transform = `translateY(-50%) translateX(${startOffset}px)`;
+    }
     animFrameRef.current = requestAnimationFrame(animate);
-  }, [targetIndex, cardList]);
+  }, [players, cardList]);
 
   // Auto-start shuffle on mount
   useEffect(() => {
@@ -146,6 +169,11 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
   // ---- Reveal handler ----
   const handleRevealClick = useCallback(() => {
     if (phase !== "selected" || !selectedPlayer) return;
+
+    // Guard: don't reveal if player is placeholder or no players loaded
+    if (!selectedPlayer._id || selectedPlayer._id.startsWith("placeholder")) {
+      return;
+    }
 
     // Phase: flipping
     setPhase("flipping");
@@ -222,10 +250,8 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
           {/* Scrolling belt of cards */}
           <div
             className="card-strip__belt"
-            style={{
-              transform: `translateY(-50%) translateX(${beltOffset}px)`,
-              transition: phase === "idle" ? "none" : undefined,
-            }}
+            ref={beltRef}
+            style={{ transition: phase === "idle" ? "none" : undefined }}
           >
             {cardList.map((card, idx) => {
               const isSelected = phase === "selected" && idx === selectedIndex;
@@ -392,7 +418,7 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
                   {selectedPlayer.photo ? (
                     <img
                       className="card-flip__back-photo"
-                      src={selectedPlayer.photo}
+                      src={playerPhotoUrl(selectedPlayer.photo)}
                       alt={selectedPlayer.name || "Player"}
                     />
                   ) : (
