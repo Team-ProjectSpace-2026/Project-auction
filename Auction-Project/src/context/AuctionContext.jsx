@@ -11,7 +11,7 @@ export const useAuction = () => {
 };
 
 export const AuctionProvider = ({ children }) => {
-  const socketHook = useSocket();
+  const { isConnected, connectionError, connect, disconnect, joinTournament, leaveTournament, emit, on } = useSocket();
 
   const [tournamentId, setTournamentId] = useState(null);
   const [currentPlayer, setCurrentPlayer] = useState(null);
@@ -53,10 +53,10 @@ export const AuctionProvider = ({ children }) => {
     (id) => {
       initTournament(id);
 
-      const socket = socketHook.connect();
+      const socket = connect();
       if (!socket) return;
 
-      socketHook.joinTournament(id);
+      joinTournament(id);
 
       const onNewBid = (data) => {
         const { bid } = data;
@@ -145,50 +145,50 @@ export const AuctionProvider = ({ children }) => {
         socket.off("mark-unsold-error", onError);
       };
     },
-    [socketHook, initTournament]
+    [initTournament, connect, joinTournament]
   );
 
   const placeBid = useCallback(
     (amount, teamId, playerId) => {
       if (!tournamentId) return;
-      socketHook.emit("place-bid", { tournamentId, amount, teamId, playerId });
+      emit("place-bid", { tournamentId, amount, teamId, playerId });
     },
-    [socketHook, tournamentId]
+    [emit, tournamentId]
   );
 
   const revealPlayer = useCallback(
     (playerId) => {
       if (!tournamentId) return;
-      socketHook.emit("reveal-player", { tournamentId, playerId });
+      emit("reveal-player", { tournamentId, playerId });
     },
-    [socketHook, tournamentId]
+    [emit, tournamentId]
   );
 
   const markSold = useCallback(
     (playerId) => {
       if (!tournamentId) return;
-      socketHook.emit("mark-sold", { tournamentId, playerId });
+      emit("mark-sold", { tournamentId, playerId });
     },
-    [socketHook, tournamentId]
+    [emit, tournamentId]
   );
 
   const markUnsold = useCallback(
     (playerId) => {
       if (!tournamentId) return;
-      socketHook.emit("mark-unsold", { tournamentId, playerId });
+      emit("mark-unsold", { tournamentId, playerId });
     },
-    [socketHook, tournamentId]
+    [emit, tournamentId]
   );
 
   const startAuction = useCallback(() => {
     if (!tournamentId) return;
-    socketHook.emit("start-auction", { tournamentId });
-  }, [socketHook, tournamentId]);
+    emit("start-auction", { tournamentId });
+  }, [emit, tournamentId]);
 
   const endAuction = useCallback(() => {
     if (!tournamentId) return;
-    socketHook.emit("end-auction", { tournamentId });
-  }, [socketHook, tournamentId]);
+    emit("end-auction", { tournamentId });
+  }, [emit, tournamentId]);
 
   const clearSoldInfo = useCallback(() => setSoldInfo(null), []);
   const clearUnsoldInfo = useCallback(() => setUnsoldInfo(null), []);
@@ -196,8 +196,8 @@ export const AuctionProvider = ({ children }) => {
 
   // Memoize context value to prevent unnecessary re-renders of consumers
   const value = useMemo(() => ({
-    isConnected: socketHook.isConnected,
-    connectionError: socketHook.connectionError,
+    isConnected,
+    connectionError,
     tournamentId,
     currentPlayer,
     currentBid,
@@ -224,7 +224,7 @@ export const AuctionProvider = ({ children }) => {
     setTeams,
     setPlayers,
   }), [
-    socketHook.isConnected, socketHook.connectionError,
+    isConnected, connectionError,
     tournamentId, currentPlayer, currentBid, highestBidder, auctionStatus,
     teams, bids, players, error, soldInfo, unsoldInfo, revealedPlayer,
     initTournament, joinAndListen, placeBid, revealPlayer, markSold,

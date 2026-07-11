@@ -46,6 +46,7 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
   // ---- State ----
   const [phase, setPhase] = useState("idle"); // idle | shuffling | selected | flipping | done
   const [beltOffset, setBeltOffset] = useState(0);
+  const [beltY, setBeltY] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [isFlipped, setIsFlipped] = useState(false);
   const [showSweep, setShowSweep] = useState(false);
@@ -81,18 +82,16 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
     return list;
   }, [players]);
 
-  // Pick a random unsold player for selection target (computed once on mount via useState)
+  // Pick a random card for selection target — wider range for visual variety
   const [targetIndex] = useState(() => {
-    if (!players || players.length === 0) {
-      // Fallback: use middle of cardList (30 elements by default)
-      return 15; 
-    }
-    const midStart = players.length;
-    const midEnd = players.length * 2;
-    return midStart + Math.floor(Math.random() * (midEnd - midStart));
+    if (!players || players.length === 0) return 15;
+    // Pick from the full strip (skipping first copy so we always scroll past it)
+    const start = players.length;
+    const end = Math.max(start + 1, cardList.length - players.length);
+    return start + Math.floor(Math.random() * (end - start));
   });
 
-  // ---- Shuffle animation ----
+  // ---- Shuffle animation with bounce-back ----
   const startShuffle = useCallback(() => {
     setPhase("shuffling");
     startTimeRef.current = performance.now();
@@ -102,28 +101,54 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
     const centerOffset = containerWidth / 2 - CARD_WIDTH / 2;
     const targetOffset = -(targetIndex * CARD_STEP) + centerOffset;
 
-    // Total travel distance
-    const startOffset = centerOffset; // start with first cards visible
+    const startOffset = centerOffset;
     const totalDistance = Math.abs(targetOffset - startOffset);
 
-    // Animation duration phases (total ~4.5s)
-    const TOTAL_DURATION = 4500;
+    // Total duration — slower for dramatic effect
+    const TOTAL_DURATION = 6000;
+
+    // 4-phase bounce easing: fast forward → overshoot → bounce back → settle
+    const bounceEase = (t) => {
+      if (t < 0.50) {
+        // Phase 1: Fast forward with deceleration (reaches ~90% of distance)
+        return (t / 0.50) * 0.90;
+      } else if (t < 0.68) {
+        // Phase 2: Overshoot past target (goes to ~108%)
+        const p = (t - 0.50) / 0.18;
+        return 0.90 + p * 0.18;
+      } else if (t < 0.84) {
+        // Phase 3: Bounce back toward target (comes to ~97%)
+        const p = (t - 0.68) / 0.16;
+        return 1.08 - p * 0.11;
+      } else {
+        // Phase 4: Settle on target
+        const p = (t - 0.84) / 0.16;
+        return 0.97 + p * 0.03;
+      }
+    };
 
     const animate = (now) => {
       const elapsed = now - startTimeRef.current;
       const progress = Math.min(elapsed / TOTAL_DURATION, 1);
+      const eased = bounceEase(progress);
 
-      // Easing: fast start, gradual slow-down (cubic ease-out)
-      const eased = 1 - Math.pow(1 - progress, 3);
-
+      // Horizontal position
       const currentOffset = startOffset - (totalDistance * eased);
       setBeltOffset(currentOffset);
+
+      // Vertical wiggle during overshoot/bounce phases (50%-84%)
+      let wiggle = 0;
+      if (progress > 0.50 && progress < 0.84) {
+        wiggle = Math.sin((progress - 0.50) * 40) * 4 * (1 - (progress - 0.50) / 0.34);
+      }
+      setBeltY(wiggle);
 
       if (progress < 1) {
         animFrameRef.current = requestAnimationFrame(animate);
       } else {
         // Snap to exact target
         setBeltOffset(targetOffset);
+        setBeltY(0);
         setSelectedIndex(targetIndex);
         setSelectedPlayer(cardList[targetIndex]);
         setPhase("selected");
@@ -131,6 +156,7 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
     };
 
     setBeltOffset(startOffset);
+    setBeltY(0);
     animFrameRef.current = requestAnimationFrame(animate);
   }, [targetIndex, cardList]);
 
@@ -223,7 +249,7 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
           <div
             className="card-strip__belt"
             style={{
-              transform: `translateY(-50%) translateX(${beltOffset}px)`,
+              transform: `translateY(calc(-50% + ${beltY}px)) translateX(${beltOffset}px)`,
               transition: phase === "idle" ? "none" : undefined,
             }}
           >

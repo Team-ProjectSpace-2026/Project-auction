@@ -75,7 +75,7 @@ const AnimatedName = ({ name, startDelay = 0.4 }) => {
 
 const PlayerDetailsModal = ({ onClose, onStartBidding }) => {
   const navigate = useNavigate();
-  const { currentPlayer, revealedPlayer } = useAuction();
+  const { currentPlayer, revealedPlayer, tournamentId } = useAuction();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -114,7 +114,7 @@ const PlayerDetailsModal = ({ onClose, onStartBidding }) => {
     if (onStartBidding) {
       onStartBidding();
     } else {
-      navigate("/live-auction");
+      navigate(`/live-auction?tournamentId=${tournamentId}`);
     }
   }, [onStartBidding, navigate]);
 
