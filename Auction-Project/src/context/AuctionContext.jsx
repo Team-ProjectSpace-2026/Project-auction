@@ -25,6 +25,7 @@ export const AuctionProvider = ({ children }) => {
   const [soldInfo, setSoldInfo] = useState(null);
   const [unsoldInfo, setUnsoldInfo] = useState(null);
   const [revealedPlayer, setRevealedPlayer] = useState(null);
+  const [tournament, setTournament] = useState(null);
 
   const initTournament = useCallback(async (id) => {
     setTournamentId(id);
@@ -41,9 +42,10 @@ export const AuctionProvider = ({ children }) => {
       const data = res.data;
       if (data.teams) setTeams(data.teams);
       if (data.players) setPlayers(data.players);
-      if (data.bids) setBids(data.bids);
+      if (data.recentBids) setBids(data.recentBids);
       if (data.currentPlayer) setCurrentPlayer(data.currentPlayer);
       if (data.auctionStatus) setAuctionStatus(data.auctionStatus);
+      if (data.tournament) setTournament(data.tournament);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to load auction state");
     }
@@ -110,11 +112,14 @@ export const AuctionProvider = ({ children }) => {
       const onAuctionEnded = () => setAuctionStatus("completed");
 
       const onAuctionState = (data) => {
-        const { currentPlayer: cp, currentBid: cb, highestBidder: hb, auctionStatus: status } = data;
+        const { currentPlayer: cp, currentBid: cb, highestBidder: hb, auctionStatus: status, teams, players, tournament } = data;
         if (cp) setCurrentPlayer(cp);
         if (cb) setCurrentBid(cb);
         if (hb) setHighestBidder(hb);
         if (status) setAuctionStatus(status);
+        if (teams) setTeams(teams);
+        if (players) setPlayers(players);
+        if (tournament) setTournament(tournament);
       };
 
       const onError = (data) => setError(data.message);
@@ -150,7 +155,22 @@ export const AuctionProvider = ({ children }) => {
 
   const placeBid = useCallback(
     (amount, teamId, playerId) => {
-      if (!tournamentId) return;
+      if (!tournamentId) {
+        setError("No tournament selected");
+        return;
+      }
+      if (!teamId) {
+        setError("No team selected for bidding");
+        return;
+      }
+      if (!playerId) {
+        setError("No player selected for bidding");
+        return;
+      }
+      if (!amount || amount <= 0) {
+        setError("Invalid bid amount");
+        return;
+      }
       emit("place-bid", { tournamentId, amount, teamId, playerId });
     },
     [emit, tournamentId]
@@ -158,7 +178,14 @@ export const AuctionProvider = ({ children }) => {
 
   const revealPlayer = useCallback(
     (playerId) => {
-      if (!tournamentId) return;
+      if (!tournamentId) {
+        setError("No tournament selected");
+        return;
+      }
+      if (!playerId) {
+        setError("No player selected to reveal");
+        return;
+      }
       emit("reveal-player", { tournamentId, playerId });
     },
     [emit, tournamentId]
@@ -166,7 +193,14 @@ export const AuctionProvider = ({ children }) => {
 
   const markSold = useCallback(
     (playerId) => {
-      if (!tournamentId) return;
+      if (!tournamentId) {
+        setError("No tournament selected");
+        return;
+      }
+      if (!playerId) {
+        setError("No player selected to mark as sold");
+        return;
+      }
       emit("mark-sold", { tournamentId, playerId });
     },
     [emit, tournamentId]
@@ -174,19 +208,32 @@ export const AuctionProvider = ({ children }) => {
 
   const markUnsold = useCallback(
     (playerId) => {
-      if (!tournamentId) return;
+      if (!tournamentId) {
+        setError("No tournament selected");
+        return;
+      }
+      if (!playerId) {
+        setError("No player selected to mark as unsold");
+        return;
+      }
       emit("mark-unsold", { tournamentId, playerId });
     },
     [emit, tournamentId]
   );
 
   const startAuction = useCallback(() => {
-    if (!tournamentId) return;
+    if (!tournamentId) {
+      setError("No tournament selected");
+      return;
+    }
     emit("start-auction", { tournamentId });
   }, [emit, tournamentId]);
 
   const endAuction = useCallback(() => {
-    if (!tournamentId) return;
+    if (!tournamentId) {
+      setError("No tournament selected");
+      return;
+    }
     emit("end-auction", { tournamentId });
   }, [emit, tournamentId]);
 
@@ -210,6 +257,7 @@ export const AuctionProvider = ({ children }) => {
     soldInfo,
     unsoldInfo,
     revealedPlayer,
+    tournament,
     initTournament,
     joinAndListen,
     placeBid,
@@ -223,10 +271,11 @@ export const AuctionProvider = ({ children }) => {
     clearError,
     setTeams,
     setPlayers,
+    setTournament,
   }), [
     isConnected, connectionError,
     tournamentId, currentPlayer, currentBid, highestBidder, auctionStatus,
-    teams, bids, players, error, soldInfo, unsoldInfo, revealedPlayer,
+    teams, bids, players, error, soldInfo, unsoldInfo, revealedPlayer, tournament,
     initTournament, joinAndListen, placeBid, revealPlayer, markSold,
     markUnsold, startAuction, endAuction, clearSoldInfo, clearUnsoldInfo,
     clearError,

@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import * as tournamentService from "../../services/tournamentService.js";
+import CricketLoader from "../common/CricketLoader";
 
 const RegistrationTab = ({ tournament }) => {
   const [copied, setCopied] = useState(false);
@@ -26,11 +27,7 @@ const RegistrationTab = ({ tournament }) => {
   }, [deadlineOverride, tournament]);
 
   if (!tournament) {
-    return (
-      <div style={{ padding: "40px", textAlign: "center", color: "var(--text-secondary-light)" }}>
-        Loading tournament data...
-      </div>
-    );
+    return <CricketLoader text="Loading tournament data..." />;
   }
 
   const tournamentId = tournament?.id || tournament?._id || "";

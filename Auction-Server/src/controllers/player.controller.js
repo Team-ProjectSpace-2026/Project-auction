@@ -216,7 +216,7 @@ export const registerPlayer = async (req, res, next) => {
       photo: req.file ? req.file.filename : null,
       tournamentId,
       isRegistered: true,
-      basePrice: 0,
+      basePrice: tournament.playerBasePrice || 0,
     });
 
     await player.save();

@@ -2,6 +2,7 @@ import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import User from "../models/User.js";
+import Team from "../models/Team.js";
 import Bid from "../models/Bid.js";
 import Player from "../models/Player.js";
 import Tournament from "../models/Tournament.js";
@@ -136,6 +137,42 @@ export const initializeSocket = (server) => {
 
         socket.join(`tournament-${tournamentId}`);
         socket.joinedTournaments.add(tournamentId);
+
+        // Also send teams and players so the client has full state immediately
+        const [teams, players] = await Promise.all([
+          Team.find({ tournamentId }).lean(),
+          Player.find({ tournamentId }).lean(),
+        ]);
+
+        // Also fetch current bid state if auction is active
+        let currentBid = null;
+        let highestBidder = null;
+        if (tournament.currentPlayerId && tournament.auctionStatus === "bidding") {
+          currentBid = await getWinningBid(tournamentId, tournament.currentPlayerId._id);
+          if (currentBid) {
+            const populatedBid = await Bid.findById(currentBid._id)
+              .populate("teamId", "name short")
+              .lean();
+            currentBid = populatedBid;
+            highestBidder = populatedBid.teamId;
+          }
+        }
+
+        // Populate currentPlayerId to get full player object
+        let currentPlayerObj = null;
+        if (tournament.currentPlayerId) {
+          currentPlayerObj = await Player.findById(tournament.currentPlayerId).lean();
+        }
+
+        socket.emit("auction-state", {
+          teams,
+          players,
+          currentPlayer: currentPlayerObj,
+          currentBid,
+          highestBidder,
+          auctionStatus: tournament.auctionStatus,
+          tournament: { playerBasePrice: tournament.playerBasePrice || 0 },
+        });
       } catch (error) {
         socket.emit("join-error", { message: "Failed to join tournament" });
       }
@@ -561,6 +598,7 @@ export const initializeSocket = (server) => {
           currentBid,
           highestBidder,
           auctionStatus: tournament.auctionStatus,
+          tournament: { playerBasePrice: tournament.playerBasePrice || 0 },
         });
       } catch (error) {
         socket.emit("auction-state-error", { message: "Failed to get auction state" });

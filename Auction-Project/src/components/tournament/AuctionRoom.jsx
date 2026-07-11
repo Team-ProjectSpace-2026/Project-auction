@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { useAuction } from "../../context/AuctionContext";
 import { formatCurrency } from "../../utils/formatCurrency";
+import { playerPhotoUrl } from "../../utils/playerPhotoUrl";
 import PlayerRevealModal from "./PlayerRevealModal";
 import SoldPlayerModal from "./SoldPlayerModal";
 import UnsoldPlayerModal from "./UnsoldPlayerModal";
@@ -24,8 +25,10 @@ const AuctionRoom = () => {
     unsoldInfo,
     isConnected,
     connectionError,
+    error,
     clearSoldInfo,
     clearUnsoldInfo,
+    clearError,
   } = useAuction();
 
   const [showRevealModal, setShowRevealModal] = useState(false);
@@ -87,6 +90,39 @@ const AuctionRoom = () => {
         </div>
       )}
 
+      {error && (
+        <div style={{
+          background: "#fef2f2",
+          border: "1px solid #fecaca",
+          borderRadius: "10px",
+          padding: "10px 16px",
+          fontSize: "13px",
+          fontWeight: "600",
+          color: "#dc2626",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}>
+          <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <span style={{ fontSize: "16px" }}>!</span>
+            {error}
+          </span>
+          <button
+            onClick={clearError}
+            style={{
+              border: "none",
+              background: "transparent",
+              color: "#dc2626",
+              fontWeight: "600",
+              cursor: "pointer",
+              fontSize: "13px",
+            }}
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
       <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 400px", gap: "20px" }}>
           <div style={{
@@ -115,7 +151,7 @@ const AuctionRoom = () => {
                 overflow: "hidden",
               }}>
                 {currentPlayer?.photo ? (
-                  <img src={currentPlayer.photo} alt={currentPlayer.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  <img src={playerPhotoUrl(currentPlayer.photo)} alt={currentPlayer.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 ) : (
                   <>
                     <span style={{ fontSize: "48px", opacity: 0.4 }}>&#127951;</span>

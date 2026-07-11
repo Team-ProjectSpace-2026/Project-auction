@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuction } from "../../context/AuctionContext";
+import { playerPhotoUrl } from "../../utils/playerPhotoUrl";
 import StadiumBackground from "../auction/StadiumBackground";
 import "./reveal-screen.css";
 
@@ -59,13 +60,8 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
   // Build card list: use all players, repeat enough to fill the strip
   const cardList = useMemo(() => {
     if (!players || players.length === 0) {
-      // Fallback: generate placeholder cards
-      return Array.from({ length: 30 }, (_, i) => ({
-        _id: `placeholder-${i}`,
-        registrationNumber: i + 1,
-        name: `Player ${i + 1}`,
-        displayNumber: String(i + 1).padStart(3, "0"),
-      }));
+      // No players loaded yet - return empty array
+      return [];
     }
     // Create enough copies to fill a long strip
     const copies = Math.max(3, Math.ceil(50 / players.length));
@@ -173,6 +169,11 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
   // ---- Reveal handler ----
   const handleRevealClick = useCallback(() => {
     if (phase !== "selected" || !selectedPlayer) return;
+
+    // Guard: don't reveal if player is placeholder or no players loaded
+    if (!selectedPlayer._id || selectedPlayer._id.startsWith("placeholder")) {
+      return;
+    }
 
     // Phase: flipping
     setPhase("flipping");
@@ -417,7 +418,7 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
                   {selectedPlayer.photo ? (
                     <img
                       className="card-flip__back-photo"
-                      src={selectedPlayer.photo}
+                      src={playerPhotoUrl(selectedPlayer.photo)}
                       alt={selectedPlayer.name || "Player"}
                     />
                   ) : (

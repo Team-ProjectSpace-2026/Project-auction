@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Sidebar from "../../components/layout/Sidebar";
+import CricketLoader from "../../components/common/CricketLoader";
 import { getTeam } from "../../services/teamService";
 
 const getRoleStyle = (role) => {
@@ -36,14 +37,24 @@ const TeamDetailsPage = () => {
       return;
     }
 
+    const controller = new AbortController();
+
     const fetchTeam = async () => {
       try {
         setLoading(true);
         setError(null);
-        const { data } = await getTeam(teamId);
+        const start = Date.now();
+        const { data } = await getTeam(teamId, { signal: controller.signal });
+        // Ensure loader shows for at least 2 seconds
+        const elapsed = Date.now() - start;
+        const minDelay = 2000;
+        if (elapsed < minDelay) {
+          await new Promise((r) => setTimeout(r, minDelay - elapsed));
+        }
         setTeam(data);
         setPlayers(data.players || []);
       } catch (err) {
+        if (err.name === "CanceledError" || err.name === "AbortError") return;
         console.error("Failed to fetch team:", err);
         setError("Failed to load team details. Please try again.");
       } finally {
@@ -52,6 +63,7 @@ const TeamDetailsPage = () => {
     };
 
     fetchTeam();
+    return () => controller.abort();
   }, [teamId]);
 
   const exportSquad = () => {
@@ -92,7 +104,7 @@ const TeamDetailsPage = () => {
       <div style={{ display: "flex", minHeight: "100vh", background: "var(--bg-primary-light)" }}>
         <Sidebar activePage="tournaments" />
         <div style={{ marginLeft: "220px", flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <p style={{ color: "var(--text-secondary-light)" }}>Loading team details...</p>
+          <CricketLoader text="Loading team details..." />
         </div>
       </div>
     );

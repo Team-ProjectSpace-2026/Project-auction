@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Pencil, Trash2, Check, X } from "lucide-react";
 import * as playerService from "../../services/playerService";
 import PlayerForm from "../players/PlayerForm";
+import CricketLoader from "../common/CricketLoader";
 
 const getRoleStyle = (role) => {
   switch (role) {
@@ -38,9 +39,16 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
     }
     let cancelled = false;
     setLoading(true);
+    const start = Date.now();
     playerService
       .getPlayers(tournamentId)
-      .then((res) => {
+      .then(async (res) => {
+        // Ensure loader shows for at least 2 seconds
+        const elapsed = Date.now() - start;
+        const minDelay = 2000;
+        if (elapsed < minDelay) {
+          await new Promise((r) => setTimeout(r, minDelay - elapsed));
+        }
         if (!cancelled) {
           setPlayers(res.data);
           setError(null);
@@ -79,11 +87,7 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
   };
 
   if (loading) {
-    return (
-      <div style={{ padding: "40px", textAlign: "center", color: "var(--text-secondary-light)" }}>
-        Loading players...
-      </div>
-    );
+    return <CricketLoader text="Loading players..." />;
   }
 
   if (error) {

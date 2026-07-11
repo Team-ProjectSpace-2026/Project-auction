@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Hammer, User } from "lucide-react";
+import { useAuction } from "../../context/AuctionContext";
+import { playerPhotoUrl } from "../../utils/playerPhotoUrl";
 import PlayerRevealModal from "./PlayerRevealModal";
 import PlayerDetailsModal from "./PlayerDetailsModal";
 
@@ -13,22 +15,82 @@ const enterFullscreen = () => {
   }
 };
 
-const LiveAuctionTab = () => {
+const LiveAuctionTab = ({ tournamentId: propTournamentId }) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const tournamentId = searchParams.get("tournamentId");
+  const tournamentId = propTournamentId || searchParams.get("tournamentId");
+  const { 
+    auctionStatus, 
+    initTournament, 
+    joinAndListen, 
+    players, 
+    teams, 
+    currentPlayer, 
+    currentBid, 
+    highestBidder, 
+    error,
+    clearError
+  } = useAuction();
+
+  const statusLabel = auctionStatus === "bidding" ? "Live"
+    : auctionStatus === "sold" ? "Sold"
+    : auctionStatus === "unsold" ? "Unsold"
+    : auctionStatus === "completed" ? "Completed"
+    : "Not Started";
+
+  // Load auction state AND connect to socket when tab mounts
+  useEffect(() => {
+    if (tournamentId) {
+      const cleanup = joinAndListen(tournamentId);
+      return cleanup;
+    }
+  }, [tournamentId, joinAndListen]);
 
   const [showRevealModal, setShowRevealModal] = useState(false);
   const [showPlayerCard, setShowPlayerCard] = useState(false);
 
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "2.3fr 1fr",
-        gap: "24px",
-      }}
-    >
+    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+      {error && (
+        <div style={{
+          background: "#fef2f2",
+          border: "1px solid #fecaca",
+          borderRadius: "10px",
+          padding: "10px 16px",
+          fontSize: "13px",
+          fontWeight: "600",
+          color: "#dc2626",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}>
+          <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <span style={{ fontSize: "16px" }}>!</span>
+            {error}
+          </span>
+          <button
+            onClick={clearError}
+            style={{
+              border: "none",
+              background: "transparent",
+              color: "#dc2626",
+              fontWeight: "600",
+              cursor: "pointer",
+              fontSize: "13px",
+            }}
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "2.3fr 1fr",
+          gap: "24px",
+        }}
+      >
       {/* Left Section */}
       <div
         style={{
@@ -133,6 +195,7 @@ const LiveAuctionTab = () => {
 
           <button
             onClick={() => { enterFullscreen(); setShowRevealModal(true); }}
+            disabled={!players || players.length === 0}
             style={{
               marginTop: "28px",
               background: "#2563eb",
@@ -142,10 +205,12 @@ const LiveAuctionTab = () => {
               padding: "14px 36px",
               fontSize: "16px",
               fontWeight: "600",
-              cursor: "pointer",
+              cursor: (!players || players.length === 0) ? "not-allowed" : "pointer",
+              opacity: (!players || players.length === 0) ? 0.5 : 1,
             }}
           >
             ▶ Start Auction
+            {(!players || players.length === 0) && ' — Loading players...'}
           </button>
 
           <p
@@ -204,7 +269,7 @@ const LiveAuctionTab = () => {
                 fontWeight: "600",
               }}
             >
-              Not Started
+              {statusLabel}
             </span>
           </div>
 
@@ -214,38 +279,50 @@ const LiveAuctionTab = () => {
               marginBottom: "24px",
             }}
           >
-            <div
-              style={{
-                width: "70px",
-                height: "70px",
-                borderRadius: "50%",
-                background: "#f3f4f6",
-                margin: "0 auto 12px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <User size={30} strokeWidth={1.5} style={{ color: "#6b7280" }} />
-            </div>
-
-            <h4
-              style={{
-                color: "#111827",
-                marginBottom: "6px",
-              }}
-            >
-              No Player Selected
-            </h4>
-
-            <p
-              style={{
-                color: "#6b7280",
-                fontSize: "13px",
-              }}
-            >
-              The auction will begin once you start.
-            </p>
+            {currentPlayer ? (
+              <>
+                <div
+                  style={{
+                    width: "70px",
+                    height: "70px",
+                    borderRadius: "50%",
+                    background: currentPlayer.photo ? "transparent" : "#f3f4f6",
+                    margin: "0 auto 12px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    overflow: "hidden",
+                  }}
+                >
+                  {currentPlayer.photo ? (
+                    <img src={playerPhotoUrl(currentPlayer.photo)} alt={currentPlayer.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  ) : (
+                    <User size={30} strokeWidth={1.5} style={{ color: "#6b7280" }} />
+                  )}
+                </div>
+                <h4 style={{ color: "#111827", marginBottom: "4px" }}>{currentPlayer.name}</h4>
+                <p style={{ color: "#6b7280", fontSize: "13px" }}>{currentPlayer.role}</p>
+              </>
+            ) : (
+              <>
+                <div
+                  style={{
+                    width: "70px",
+                    height: "70px",
+                    borderRadius: "50%",
+                    background: "#f3f4f6",
+                    margin: "0 auto 12px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <User size={30} strokeWidth={1.5} style={{ color: "#6b7280" }} />
+                </div>
+                <h4 style={{ color: "#111827", marginBottom: "6px" }}>No Player Selected</h4>
+                <p style={{ color: "#6b7280", fontSize: "13px" }}>The auction will begin once you start.</p>
+              </>
+            )}
           </div>
 
           <div
@@ -254,36 +331,17 @@ const LiveAuctionTab = () => {
               paddingTop: "16px",
             }}
           >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                marginBottom: "14px",
-              }}
-            >
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "14px" }}>
               <span>Base Price</span>
-              <span>-</span>
+              <span>{currentPlayer?.basePrice ? `₹${currentPlayer.basePrice.toLocaleString("en-IN")}` : "-"}</span>
             </div>
-
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                marginBottom: "14px",
-              }}
-            >
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "14px" }}>
               <span>Current Bid</span>
-              <span>-</span>
+              <span>{currentBid?.amount ? `₹${currentBid.amount.toLocaleString("en-IN")}` : "-"}</span>
             </div>
-
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-              }}
-            >
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
               <span>Highest Bidder</span>
-              <span>-</span>
+              <span>{highestBidder?.name || "-"}</span>
             </div>
           </div>
         </div>
@@ -372,6 +430,7 @@ const LiveAuctionTab = () => {
           }}  
         />
       )}
+      </div>
     </div>
   );
 };

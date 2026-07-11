@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import AddTeamModal from "../teams/AddTeamModal";
 import EditTeamModal from "../teams/EditTeamModal";
 import TeamCard from "../teams/TeamCard";
+import CricketLoader from "../common/CricketLoader";
 import { getTeams, createTeam, updateTeam, deleteTeam } from "../../services/teamService";
 
 const TeamsTab = ({ tournamentId }) => {
@@ -22,7 +23,14 @@ const TeamsTab = ({ tournamentId }) => {
     try {
       setLoading(true);
       setError(null);
+      const start = Date.now();
       const { data } = await getTeams(tournamentId);
+      // Ensure loader shows for at least 2 seconds
+      const elapsed = Date.now() - start;
+      const minDelay = 2000;
+      if (elapsed < minDelay) {
+        await new Promise((r) => setTimeout(r, minDelay - elapsed));
+      }
       setTeams(data);
     } catch (err) {
       console.error("Failed to fetch teams:", err);
@@ -126,11 +134,7 @@ const TeamsTab = ({ tournamentId }) => {
         </button>
       </div>
 
-      {loading && (
-        <div style={{ textAlign: "center", padding: "40px", color: "var(--text-secondary-light)" }}>
-          Loading teams...
-        </div>
-      )}
+      {loading && <CricketLoader text="Loading teams..." />}
 
       {error && (
         <div style={{ textAlign: "center", padding: "40px", color: "#e74c3c" }}>

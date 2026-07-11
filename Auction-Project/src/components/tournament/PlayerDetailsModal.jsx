@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useAuction } from "../../context/AuctionContext";
 import { formatCurrency } from "../../utils/formatCurrency";
+import { playerPhotoUrl } from "../../utils/playerPhotoUrl";
 import StadiumBackground from "../auction/StadiumBackground";
 import "./reveal-screen.css";
 
@@ -75,7 +76,7 @@ const AnimatedName = ({ name, startDelay = 0.4 }) => {
 
 const PlayerDetailsModal = ({ onClose, onStartBidding }) => {
   const navigate = useNavigate();
-  const { currentPlayer, revealedPlayer, tournamentId } = useAuction();
+  const { currentPlayer, revealedPlayer, tournamentId, tournament } = useAuction();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -88,8 +89,10 @@ const PlayerDetailsModal = ({ onClose, onStartBidding }) => {
 
   const playerName = player?.name || "Player";
   const playerRole = player?.role || "";
-  const playerPhoto = player?.photo || null;
-  const basePrice = player?.basePrice || 0;
+  const playerPhoto = playerPhotoUrl(player?.photo);
+  const playerBasePrice = player?.basePrice || 0;
+  const tournamentBasePrice = tournament?.playerBasePrice || 0;
+  const basePrice = playerBasePrice > 0 ? playerBasePrice : tournamentBasePrice;
   const battingStyle = player?.battingStyle || player?.style || "";
   const bowlingStyle = player?.bowlingStyle || "";
   const age = player?.age || "";
@@ -113,7 +116,7 @@ const PlayerDetailsModal = ({ onClose, onStartBidding }) => {
   const handleStartBidding = useCallback(() => {
     if (onStartBidding) {
       onStartBidding();
-    } else if (tournamentId) {
+    } else if (tournamentId && /^[0-9a-fA-F]{24}$/.test(tournamentId)) {
       navigate(`/live-auction?tournamentId=${tournamentId}`);
     }
   }, [onStartBidding, navigate, tournamentId]);
