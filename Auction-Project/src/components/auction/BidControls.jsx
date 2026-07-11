@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { useAuction } from "../../context/AuctionContext";
 
-const quickBids = [1000, 2000, 5000, 10000, 20000, 50000];
+const TEAM_COLORS = [
+  "#2563eb", "#16a34a", "#7c3aed", "#d97706",
+  "#dc2626", "#0891b2", "#e11d48", "#4f46e5",
+];
 
 const BidControls = () => {
   const { currentBid, currentPlayer, teams, placeBid, markSold, markUnsold, auctionStatus } = useAuction();
@@ -10,17 +13,17 @@ const BidControls = () => {
 
   const currentAmount = currentBid?.amount || 0;
 
-  const handleQuickBid = (amount) => {
-    if (!selectedTeamId || !currentPlayer) return;
-    const totalBid = currentAmount + amount;
-    placeBid(totalBid, selectedTeamId, currentPlayer._id);
-  };
-
   const handleCustomBid = () => {
     const amount = parseInt(customAmount, 10);
     if (!amount || !selectedTeamId || !currentPlayer) return;
     placeBid(amount, selectedTeamId, currentPlayer._id);
     setCustomAmount("");
+  };
+
+  const handleRaiseBid = () => {
+    if (!selectedTeamId || !currentPlayer || !currentBid) return;
+    const raiseAmount = currentAmount + 1000;
+    placeBid(raiseAmount, selectedTeamId, currentPlayer._id);
   };
 
   const handleMarkSold = () => {
@@ -138,88 +141,82 @@ const BidControls = () => {
           </button>
         </div>
 
-        <div style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "6px",
-        }}>
-          {quickBids.slice(0, 2).map((amount) => (
-            <button
-              key={amount}
-              onClick={() => handleQuickBid(amount)}
-              disabled={!isBidding || !selectedTeamId}
-              className="auction-action-card"
-              style={{
-                background: "var(--accent-light)",
-                border: "1.5px solid var(--accent-light)",
-                borderRadius: "8px",
-                padding: "6px 8px",
-                cursor: !isBidding || !selectedTeamId ? "not-allowed" : "pointer",
-                opacity: !isBidding || !selectedTeamId ? 0.5 : 1,
-                color: "#fff",
-                fontSize: "11px",
-                fontWeight: "700",
-                transition: "all 0.2s ease",
-              }}
-            >
-              +₹{amount.toLocaleString("en-IN")}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Quick Bid Row */}
-      <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-        {quickBids.map((amount) => (
-          <button
-            key={amount}
-            onClick={() => handleQuickBid(amount)}
-            disabled={!isBidding || !selectedTeamId}
-            className="auction-quick-bid"
-            style={{
-              padding: "8px 14px",
-              border: "1.5px dashed var(--accent-light)",
-              borderRadius: "8px",
-              background: "color-mix(in srgb, var(--accent-light) 8%, transparent)",
-              color: "var(--accent-light)",
-              cursor: !isBidding || !selectedTeamId ? "not-allowed" : "pointer",
-              opacity: !isBidding || !selectedTeamId ? 0.5 : 1,
-              fontSize: "12px",
-              fontWeight: "600",
-              transition: "all 0.2s ease",
-            }}
-          >
-            +₹{amount.toLocaleString("en-IN")}
-          </button>
-        ))}
+        <button
+          onClick={handleRaiseBid}
+          disabled={!isBidding || !selectedTeamId || !currentBid}
+          style={{
+            background: "#2563eb",
+            color: "#fff",
+            border: "none",
+            borderRadius: "10px",
+            padding: "12px",
+            cursor: !isBidding || !selectedTeamId || !currentBid ? "not-allowed" : "pointer",
+            opacity: !isBidding || !selectedTeamId || !currentBid ? 0.5 : 1,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "4px",
+            transition: "all 0.2s ease",
+          }}
+        >
+          <div style={{ fontSize: "20px" }}>&#128296;</div>
+          <div style={{ fontSize: "13px", fontWeight: "800", letterSpacing: "0.5px" }}>RAISE BID</div>
+          <div style={{ fontSize: "9px", fontWeight: "500", opacity: 0.8 }}>Increase the bid</div>
+        </button>
       </div>
 
       {/* Team Selection */}
       {isBidding && (
         <div style={{ marginTop: "16px", borderTop: "1px solid var(--border-light)", paddingTop: "16px" }}>
-          <div style={{ fontSize: "11px", fontWeight: "600", color: "var(--text-secondary-light)", textTransform: "uppercase", marginBottom: "8px" }}>
-            Select Team to Bid For
-          </div>
-          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-            {teams.map((team) => (
-              <button
-                key={team._id}
-                onClick={() => setSelectedTeamId(team._id)}
-                style={{
-                  padding: "6px 12px",
-                  borderRadius: "8px",
-                  border: selectedTeamId === team._id ? "2px solid var(--accent-light)" : "1px solid var(--border-light)",
-                  background: selectedTeamId === team._id ? "color-mix(in srgb, var(--accent-light) 10%, transparent)" : "var(--card-bg-light)",
-                  cursor: "pointer",
-                  fontSize: "12px",
-                  fontWeight: "600",
-                  color: selectedTeamId === team._id ? "var(--accent-light)" : "var(--text-primary-light)",
-                  transition: "all 0.2s ease",
-                }}
-              >
-                {team.short || team.name?.slice(0, 3).toUpperCase()}
-              </button>
-            ))}
+          <h3 style={{ fontSize: "14px", fontWeight: "700", color: "var(--text-primary-light)", margin: 0, textTransform: "uppercase", letterSpacing: "0.3px" }}>
+            All Teams <span style={{ fontWeight: "400", color: "var(--text-secondary-light)", textTransform: "none", fontSize: "12px" }}>(Click to bid for a team)</span>
+          </h3>
+          <div style={{ display: "flex", gap: "12px", marginTop: "16px", overflowX: "auto", paddingBottom: "4px" }}>
+            {teams.map((team, idx) => {
+              const isSelected = selectedTeamId === team._id;
+              const color = TEAM_COLORS[idx % TEAM_COLORS.length];
+              const initials = team.name
+                ? team.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()
+                : team.short || "??";
+
+              return (
+                <div
+                  key={team._id}
+                  onClick={() => setSelectedTeamId(team._id)}
+                  style={{
+                    border: isSelected ? "2.5px solid var(--accent-light)" : "1.5px solid var(--border-light)",
+                    borderRadius: "12px",
+                    padding: "14px 10px 10px",
+                    textAlign: "center",
+                    cursor: "pointer",
+                    background: isSelected ? "color-mix(in srgb, var(--accent-light) 8%, transparent)" : "var(--card-bg-light)",
+                    minWidth: "105px",
+                    flexShrink: 0,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: "8px",
+                    transition: "all 0.2s ease",
+                  }}
+                >
+                  <div style={{
+                    width: "44px", height: "44px", borderRadius: "50%",
+                    background: color,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    color: "#fff", fontSize: "12px", fontWeight: "800",
+                  }}>
+                    {initials}
+                  </div>
+                  <div style={{ fontSize: "11px", fontWeight: "600", color: isSelected ? "var(--accent-light)" : "var(--text-primary-light)", lineHeight: "1.3" }}>
+                    {team.name}
+                  </div>
+                  <div style={{ fontSize: "10px", color: "var(--text-secondary-light)" }}>
+                    {team.remainingBudget != null ? `₹${team.remainingBudget.toLocaleString("en-IN")}` : ""}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
