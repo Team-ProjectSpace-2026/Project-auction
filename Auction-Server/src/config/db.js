@@ -12,26 +12,25 @@ const connectDB = async (retryCount = 0) => {
       serverSelectionTimeoutMS: 5000,
       heartbeatFrequencyMS: 10000,
     });
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
+    console.log(`  ✓ MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
     if (retryCount < MAX_RETRIES) {
-      console.warn(`MongoDB connection attempt ${retryCount + 1}/${MAX_RETRIES} failed: ${error.message}`);
-      console.warn(`Retrying in ${RETRY_DELAY_MS / 1000}s...`);
+      console.warn(`  ⏳ MongoDB retry ${retryCount + 1}/${MAX_RETRIES}: ${error.message}`);
       await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
       return connectDB(retryCount + 1);
     }
-    console.error(`FATAL: MongoDB connection failed after ${MAX_RETRIES} retries: ${error.message}`);
+    console.error(`  ✗ MongoDB connection failed after ${MAX_RETRIES} retries: ${error.message}`);
     process.exit(1);
   }
 };
 
 // Monitor connection health after initial connect
 mongoose.connection.on('disconnected', () => {
-  console.warn('MongoDB disconnected');
+  console.warn('  ⚠ MongoDB disconnected');
 });
 
 mongoose.connection.on('error', (err) => {
-  console.error('MongoDB error:', err.message);
+  console.error(`  ✗ MongoDB error: ${err.message}`);
 });
 
 export default connectDB;

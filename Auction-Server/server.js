@@ -152,10 +152,33 @@ const io = initializeSocket(server);
 
 // Start server
 server.listen(PORT, () => {
-  logger.info(`Server running on port ${PORT}`, {
-    env: process.env.NODE_ENV || "development",
-    clientUrl: process.env.CLIENT_URL || "http://localhost:5173",
-  });
+  const env = process.env.NODE_ENV || "development";
+  const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+
+  console.log("");
+  console.log("╔══════════════════════════════════════════════════════════╗");
+  console.log("║                                                          ║");
+  console.log("║             🏏  CricAuction Server  🏏                  ║");
+  console.log("║                                                          ║");
+  console.log("╠══════════════════════════════════════════════════════════╣");
+  console.log(`║  Status:    ✓ Running                                    ║`);
+  console.log(`║  Port:      ${PORT}                                        ║`);
+  console.log(`║  Environment: ${env.padEnd(43)}║`);
+  console.log(`║  Server:    ${SERVER_URL.padEnd(43)}║`);
+  console.log(`║  Client:    ${clientUrl.padEnd(43)}║`);
+  console.log("║                                                          ║");
+  console.log("╠══════════════════════════════════════════════════════════╣");
+  console.log("║  API Endpoints:                                          ║");
+  console.log("║    • Auth:         /api/auth                             ║");
+  console.log("║    • Tournaments:  /api/tournaments                      ║");
+  console.log("║    • Players:      /api/players                          ║");
+  console.log("║    • Teams:        /api/teams                            ║");
+  console.log("║    • Auction:      /api/auction                          ║");
+  console.log("║    • Dashboard:    /api/dashboard                        ║");
+  console.log("║    • Health:       /api/health                           ║");
+  console.log("║                                                          ║");
+  console.log("╚══════════════════════════════════════════════════════════╝");
+  console.log("");
 });
 
 // Handle graceful shutdown
