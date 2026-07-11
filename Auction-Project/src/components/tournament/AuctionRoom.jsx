@@ -8,6 +8,7 @@ import UnsoldPlayerModal from "./UnsoldPlayerModal";
 import BidControls from "../auction/BidControls";
 import ActivityFeed from "../auction/ActivityFeed";
 import BidLedger from "../auction/BidLedger";
+import cricLogo from "../../assets/cricauctionlogo1.png";
 
 const TEAM_COLORS = [
   "#2563eb", "#16a34a", "#7c3aed", "#d97706",
@@ -114,168 +115,216 @@ const AuctionRoom = () => {
 
       <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 400px", gap: "20px" }}>
+          {/* Player Card */}
           <div style={{
             background: "var(--card-bg-light)",
-            borderRadius: "16px",
+            borderRadius: "20px",
             border: "1px solid var(--border-light)",
-            padding: "48px",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+            overflow: "hidden",
+            boxShadow: "0 4px 24px rgba(0,0,0,0.06)",
             transition: "background-color 0.2s ease, border-color 0.2s ease",
-            display: "flex",
-            flexDirection: "column",
           }}>
-            <div style={{ display: "flex", gap: "50px", alignItems: "stretch", flex: 1 }}>
+            {/* Blue accent header */}
+            <div style={{
+              background: "linear-gradient(135deg, #1E3A8A 0%, #2563EB 40%, #60A5FA 70%, #DBEAFE 100%)",
+              padding: "20px 32px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <div style={{
+                  width: "52px",
+                  height: "52px",
+                  borderRadius: "14px",
+                  background: "transparent",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  overflow: "hidden",
+                  flexShrink: 0,
+                }}>
+                  <img src={cricLogo} alt="Cricket Auction Hub" style={{ width: "100px", height: "100px", objectFit: "contain" }} />
+                </div>
+                <div>
+                  <h2 style={{ margin: 0, fontSize: "18px", fontWeight: "800", color: "#fff", letterSpacing: "-0.3px" }}>
+                    {currentPlayerName.toUpperCase()}
+                  </h2>
+                  {currentPlayerRole && (
+                    <span style={{
+                      fontSize: "11px",
+                      fontWeight: "600",
+                      color: "rgba(255,255,255,0.75)",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.5px",
+                    }}>
+                      ✦ {currentPlayerRole}
+                    </span>
+                  )}
+                </div>
+              </div>
               <div style={{
-                width: "288px",
-                height: "384px",
-                borderRadius: "14px",
-                border: currentPlayer?.photo ? "none" : "2px dashed var(--border-light)",
+                background: "#fff",
+                borderRadius: "12px",
+                padding: "10px 20px",
+                textAlign: "center",
+                boxShadow: "0 2px 12px rgba(0,0,0,0.1)",
+              }}>
+                <div style={{ fontSize: "10px", fontWeight: "700", color: "#64748B", textTransform: "uppercase", letterSpacing: "0.5px" }}>Base Price</div>
+                <div style={{ fontSize: "22px", fontWeight: "800", color: "#1E40AF", lineHeight: "1.2" }}>{formatCurrency(basePrice)}</div>
+              </div>
+            </div>
+
+            {/* Player Content */}
+            <div style={{ display: "flex", gap: "32px", padding: "32px", alignItems: "flex-start" }}>
+              {/* Photo */}
+              <div style={{
+                width: "240px",
+                height: "300px",
+                borderRadius: "16px",
+                overflow: "hidden",
+                flexShrink: 0,
+                border: currentPlayer?.photo ? "3px solid var(--border-light)" : "2px dashed var(--border-light)",
                 background: currentPlayer?.photo ? "transparent" : "color-mix(in srgb, var(--card-bg-light) 60%, var(--bg-primary-light))",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: "12px",
-                flexShrink: 0,
-                overflow: "hidden",
+                gap: "8px",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
               }}>
                 {currentPlayer?.photo ? (
                   <img src={playerPhotoUrl(currentPlayer.photo)} alt={currentPlayer.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 ) : (
                   <>
-                    <span style={{ fontSize: "48px", opacity: 0.4 }}>&#127951;</span>
-                    <span style={{ fontSize: "12px", color: "var(--text-secondary-light)", fontWeight: "500" }}>Player Photo</span>
-                    <span style={{ fontSize: "20px", opacity: 0.3 }}>&#128247;</span>
+                    <span style={{ fontSize: "48px", opacity: 0.3 }}>&#127951;</span>
+                    <span style={{ fontSize: "11px", color: "var(--text-secondary-light)", fontWeight: "500" }}>No Photo</span>
                   </>
                 )}
               </div>
 
-              <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-                <div>
-                  <h1 style={{ fontSize: "42px", fontWeight: "800", color: "var(--text-primary-light)", margin: 0, letterSpacing: "-0.5px", lineHeight: "1.1" }}>
-                    {currentPlayerName.toUpperCase()}
-                  </h1>
-
-                  {/* Role Badge */}
-                  <div style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    marginTop: "10px",
-                    marginBottom: "24px",
-                    padding: "6px 14px",
-                    borderRadius: "8px",
-                    border: "1.5px solid var(--accent-light)",
-                    background: "color-mix(in srgb, var(--accent-light) 8%, transparent)",
-                    fontSize: "12px",
-                    fontWeight: "700",
-                    color: "var(--accent-light)",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.5px",
-                  }}>
-                    <span style={{ fontSize: "10px" }}>&#10022;</span>
-                    {currentPlayerRole || "CRICKETER"}
-                  </div>
-
-                  {/* Important Details - Highlighted */}
-                  <div style={{ display: "flex", gap: "12px", marginBottom: "20px", flexWrap: "wrap" }}>
-                    {currentPlayer?.battingStyle && (
-                      <div style={{
-                        padding: "8px 14px",
-                        borderRadius: "8px",
-                        border: "1.5px solid var(--accent-light)",
-                        background: "color-mix(in srgb, var(--accent-light) 8%, transparent)",
-                      }}>
-                        <div style={{ fontSize: "9px", fontWeight: "600", color: "var(--accent-light)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Batting</div>
-                        <div style={{ fontSize: "13px", fontWeight: "700", color: "var(--text-primary-light)" }}>{currentPlayer.battingStyle}</div>
-                      </div>
-                    )}
-                    {currentPlayer?.bowlingStyle && currentPlayer.bowlingStyle !== "Not Applicable" && (
-                      <div style={{
-                        padding: "8px 14px",
-                        borderRadius: "8px",
-                        border: "1.5px solid var(--accent-light)",
-                        background: "color-mix(in srgb, var(--accent-light) 8%, transparent)",
-                      }}>
-                        <div style={{ fontSize: "9px", fontWeight: "600", color: "var(--accent-light)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Bowling</div>
-                        <div style={{ fontSize: "13px", fontWeight: "700", color: "var(--text-primary-light)" }}>{currentPlayer.bowlingStyle}</div>
-                      </div>
-                    )}
-                    {currentPlayer?.style && (
-                      <div style={{
-                        padding: "8px 14px",
-                        borderRadius: "8px",
-                        border: "1.5px solid var(--accent-light)",
-                        background: "color-mix(in srgb, var(--accent-light) 8%, transparent)",
-                      }}>
-                        <div style={{ fontSize: "9px", fontWeight: "600", color: "var(--accent-light)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Style</div>
-                        <div style={{ fontSize: "13px", fontWeight: "700", color: "var(--text-primary-light)" }}>{currentPlayer.style}</div>
-                      </div>
-                    )}
-                    {currentPlayer?.keeper && (
-                      <div style={{
-                        padding: "8px 14px",
-                        borderRadius: "8px",
-                        border: "1.5px solid #7c3aed",
-                        background: "rgba(124, 58, 237, 0.08)",
-                      }}>
-                        <div style={{ fontSize: "9px", fontWeight: "600", color: "#7c3aed", textTransform: "uppercase", letterSpacing: "0.5px" }}>Role</div>
-                        <div style={{ fontSize: "13px", fontWeight: "700", color: "#7c3aed" }}>WK</div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Other Details - Simple */}
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px" }}>
-                    {currentPlayer?.age && (
-                      <div>
-                        <div style={{ fontSize: "10px", fontWeight: "600", color: "var(--text-secondary-light)", textTransform: "uppercase", marginBottom: "2px", letterSpacing: "0.5px" }}>Age</div>
-                        <div style={{ fontSize: "14px", fontWeight: "700", color: "var(--text-primary-light)" }}>{currentPlayer.age} YRS</div>
-                      </div>
-                    )}
-                    {currentPlayer?.mobile && (
-                      <div>
-                        <div style={{ fontSize: "10px", fontWeight: "600", color: "var(--text-secondary-light)", textTransform: "uppercase", marginBottom: "2px", letterSpacing: "0.5px" }}>Mobile</div>
-                        <div style={{ fontSize: "14px", fontWeight: "700", color: "var(--text-primary-light)" }}>{currentPlayer.countryCode} {currentPlayer.mobile}</div>
-                      </div>
-                    )}
-                    {basePrice > 0 && (
-                      <div>
-                        <div style={{ fontSize: "10px", fontWeight: "600", color: "var(--text-secondary-light)", textTransform: "uppercase", marginBottom: "2px", letterSpacing: "0.5px" }}>Base Price</div>
-                        <div style={{ fontSize: "14px", fontWeight: "700", color: "var(--text-primary-light)" }}>{formatCurrency(basePrice)}</div>
-                      </div>
-                    )}
-                  </div>
+              {/* Details */}
+              <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "20px" }}>
+                {/* Stats Cards */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                  {currentPlayer?.battingStyle && (
+                    <div style={{
+                      background: "color-mix(in srgb, var(--accent-light) 6%, transparent)",
+                      border: "1px solid color-mix(in srgb, var(--accent-light) 15%, transparent)",
+                      borderRadius: "12px",
+                      padding: "14px 16px",
+                    }}>
+                      <div style={{ fontSize: "9px", fontWeight: "700", color: "var(--accent-light)", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: "4px" }}>Batting Style</div>
+                      <div style={{ fontSize: "15px", fontWeight: "700", color: "var(--text-primary-light)" }}>{currentPlayer.battingStyle}</div>
+                    </div>
+                  )}
+                  {currentPlayer?.bowlingStyle && currentPlayer.bowlingStyle !== "Not Applicable" && (
+                    <div style={{
+                      background: "color-mix(in srgb, var(--accent-light) 6%, transparent)",
+                      border: "1px solid color-mix(in srgb, var(--accent-light) 15%, transparent)",
+                      borderRadius: "12px",
+                      padding: "14px 16px",
+                    }}>
+                      <div style={{ fontSize: "9px", fontWeight: "700", color: "var(--accent-light)", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: "4px" }}>Bowling Style</div>
+                      <div style={{ fontSize: "15px", fontWeight: "700", color: "var(--text-primary-light)" }}>{currentPlayer.bowlingStyle}</div>
+                    </div>
+                  )}
+                  {currentPlayer?.keeper && (
+                    <div style={{
+                      background: "rgba(124, 58, 237, 0.06)",
+                      border: "1px solid rgba(124, 58, 237, 0.15)",
+                      borderRadius: "12px",
+                      padding: "14px 16px",
+                    }}>
+                      <div style={{ fontSize: "9px", fontWeight: "700", color: "#7C3AED", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: "4px" }}>Role</div>
+                      <div style={{ fontSize: "15px", fontWeight: "700", color: "#7C3AED" }}>Wicket Keeper</div>
+                    </div>
+                  )}
                 </div>
 
+                {/* Info Row */}
+                <div style={{ display: "flex", gap: "24px", flexWrap: "wrap" }}>
+                  {currentPlayer?.age && (
+                    <div style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      padding: "8px 14px",
+                      background: "color-mix(in srgb, var(--card-bg-light) 60%, var(--bg-primary-light))",
+                      borderRadius: "8px",
+                      border: "1px solid var(--border-light)",
+                    }}>
+                      <span style={{ fontSize: "14px" }}>&#128100;</span>
+                      <div>
+                        <div style={{ fontSize: "9px", fontWeight: "600", color: "var(--text-secondary-light)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Age</div>
+                        <div style={{ fontSize: "13px", fontWeight: "700", color: "var(--text-primary-light)" }}>{currentPlayer.age} YRS</div>
+                      </div>
+                    </div>
+                  )}
+                  {currentPlayer?.mobile && (
+                    <div style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      padding: "8px 14px",
+                      background: "color-mix(in srgb, var(--card-bg-light) 60%, var(--bg-primary-light))",
+                      borderRadius: "8px",
+                      border: "1px solid var(--border-light)",
+                    }}>
+                      <span style={{ fontSize: "14px" }}>&#128222;</span>
+                      <div>
+                        <div style={{ fontSize: "9px", fontWeight: "600", color: "var(--text-secondary-light)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Mobile</div>
+                        <div style={{ fontSize: "13px", fontWeight: "700", color: "var(--text-primary-light)" }}>{currentPlayer.countryCode} {currentPlayer.mobile}</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Bid Stats */}
                 <div style={{
                   display: "grid",
                   gridTemplateColumns: "1fr 1fr 1fr",
-                  paddingTop: "36px",
+                  gap: "16px",
+                  marginTop: "8px",
+                  paddingTop: "20px",
                   borderTop: "1px solid var(--border-light)",
-                  alignItems: "center",
                 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                    <div style={{
-                      width: "42px", height: "42px", borderRadius: "50%",
-                      background: highestBidder ? "#2563eb" : "#94a3b8",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      color: "#fff", fontSize: "13px", fontWeight: "800", flexShrink: 0,
-                    }}>{highestBidderShort}</div>
-                    <div>
-                      <div style={{ fontSize: "10px", fontWeight: "600", color: "var(--text-secondary-light)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Highest Bidder</div>
-                      <div style={{ fontSize: "16px", fontWeight: "800", color: "var(--text-primary-light)", marginTop: "1px" }}>{highestBidderName}</div>
+                  <div style={{
+                    background: "color-mix(in srgb, #94a3b8 8%, transparent)",
+                    borderRadius: "12px",
+                    padding: "16px",
+                    textAlign: "center",
+                  }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", marginBottom: "6px" }}>
+                      <div style={{
+                        width: "28px", height: "28px", borderRadius: "50%",
+                        background: highestBidder ? "#2563eb" : "#94a3b8",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        color: "#fff", fontSize: "10px", fontWeight: "800",
+                      }}>{highestBidderShort}</div>
+                      <div style={{ fontSize: "9px", fontWeight: "700", color: "var(--text-secondary-light)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Highest Bidder</div>
                     </div>
+                    <div style={{ fontSize: "14px", fontWeight: "800", color: "var(--text-primary-light)" }}>{highestBidderName}</div>
                   </div>
 
-                  <div style={{ textAlign: "center" }}>
-                    <div style={{ fontSize: "10px", fontWeight: "600", color: "var(--text-secondary-light)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Base Price</div>
-                    <div style={{ fontSize: "28px", fontWeight: "800", color: "var(--accent-light)", marginTop: "2px" }}>{formatCurrency(basePrice)}</div>
+                  <div style={{
+                    background: "color-mix(in srgb, var(--accent-light) 6%, transparent)",
+                    borderRadius: "12px",
+                    padding: "16px",
+                    textAlign: "center",
+                  }}>
+                    <div style={{ fontSize: "9px", fontWeight: "700", color: "var(--accent-light)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "6px" }}>Base Price</div>
+                    <div style={{ fontSize: "24px", fontWeight: "800", color: "var(--accent-light)", lineHeight: "1.1" }}>{formatCurrency(basePrice)}</div>
                   </div>
 
-                  <div style={{ textAlign: "right" }}>
-                    <div style={{ fontSize: "10px", fontWeight: "600", color: "var(--text-secondary-light)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Current Bid</div>
-                    <div style={{ fontSize: "36px", fontWeight: "800", color: "#16a34a", marginTop: "2px", lineHeight: "1" }}>{formatCurrency(currentAmount)}</div>
+                  <div style={{
+                    background: "rgba(22, 163, 74, 0.06)",
+                    borderRadius: "12px",
+                    padding: "16px",
+                    textAlign: "center",
+                  }}>
+                    <div style={{ fontSize: "9px", fontWeight: "700", color: "#16a34a", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "6px" }}>Current Bid</div>
+                    <div style={{ fontSize: "28px", fontWeight: "800", color: "#16a34a", lineHeight: "1.1" }}>{formatCurrency(currentAmount)}</div>
                   </div>
                 </div>
               </div>
