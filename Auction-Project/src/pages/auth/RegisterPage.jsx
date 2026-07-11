@@ -3,11 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import InputField from "../../components/common/InputField";
 import Button from "../../components/common/Button";
-import TurnstileWidget from "../../components/common/TurnstileWidget";
+import SimpleCaptcha from "../../components/common/SimpleCaptcha";
 import "./RegisterPage.css";
 import batsmanLogo from "../../assets/cricauctionlogo1.png";
-
-const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 
 const RegisterPage = () => {
   const [fullName, setFullName] = useState("");
@@ -19,19 +17,15 @@ const RegisterPage = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [turnstileToken, setTurnstileToken] = useState(null);
+  const [captchaData, setCaptchaData] = useState(null);
 
   const { register } = useAuth();
   const navigate = useNavigate();
-  const turnstileRef = useRef(null);
+  const captchaRef = useRef(null);
 
-  const handleTurnstileVerify = (token) => {
-    setTurnstileToken(token);
+  const handleCaptchaVerify = (answer, captchaId) => {
+    setCaptchaData({ answer, captchaId });
     setError("");
-  };
-
-  const handleTurnstileExpire = () => {
-    setTurnstileToken(null);
   };
 
   const handleSubmit = async (e) => {
@@ -43,7 +37,7 @@ const RegisterPage = () => {
       return;
     }
 
-    if (!turnstileToken && TURNSTILE_SITE_KEY) {
+    if (!captchaData) {
       setError("Please complete the security verification");
       return;
     }
@@ -56,18 +50,19 @@ const RegisterPage = () => {
         email,
         mobile,
         password,
-        turnstileToken,
+        captchaId: captchaData.captchaId,
+        captchaAnswer: captchaData.answer,
       });
       navigate("/dashboard");
     } catch (err) {
       const message =
         err.response?.data?.message || "Registration failed. Please try again.";
       setError(message);
-      // Reset turnstile on error
-      if (turnstileRef.current?.resetWidget) {
-        turnstileRef.current.resetWidget();
+      // Reset captcha on error
+      if (captchaRef.current?.resetCaptcha) {
+        captchaRef.current.resetCaptcha();
       }
-      setTurnstileToken(null);
+      setCaptchaData(null);
     } finally {
       setIsSubmitting(false);
     }
@@ -401,14 +396,10 @@ const RegisterPage = () => {
               </button>
             </div>
 
-            {TURNSTILE_SITE_KEY && (
-              <TurnstileWidget
-                ref={turnstileRef}
-                siteKey={TURNSTILE_SITE_KEY}
-                onVerify={handleTurnstileVerify}
-                onExpire={handleTurnstileExpire}
-              />
-            )}
+            <SimpleCaptcha
+              ref={captchaRef}
+              onVerify={handleCaptchaVerify}
+            />
 
             <Button
               type="submit"

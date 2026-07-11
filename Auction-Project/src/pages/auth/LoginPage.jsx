@@ -3,11 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import InputField from "../../components/common/InputField";
 import Button from "../../components/common/Button";
-import TurnstileWidget from "../../components/common/TurnstileWidget";
+import SimpleCaptcha from "../../components/common/SimpleCaptcha";
 import "./LoginPage.css";
 import batsmanLogo from "../../assets/cricauctionlogo1.png";
-
-const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -16,26 +14,22 @@ const LoginPage = () => {
   const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [turnstileToken, setTurnstileToken] = useState(null);
+  const [captchaData, setCaptchaData] = useState(null);
 
   const { login } = useAuth();
   const navigate = useNavigate();
-  const turnstileRef = useRef(null);
+  const captchaRef = useRef(null);
 
-  const handleTurnstileVerify = (token) => {
-    setTurnstileToken(token);
+  const handleCaptchaVerify = (answer, captchaId) => {
+    setCaptchaData({ answer, captchaId });
     setError("");
-  };
-
-  const handleTurnstileExpire = () => {
-    setTurnstileToken(null);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    if (!turnstileToken && TURNSTILE_SITE_KEY) {
+    if (!captchaData) {
       setError("Please complete the security verification");
       return;
     }
@@ -43,17 +37,22 @@ const LoginPage = () => {
     setIsSubmitting(true);
 
     try {
-      await login({ email, password, turnstileToken });
+      await login({
+        email,
+        password,
+        captchaId: captchaData.captchaId,
+        captchaAnswer: captchaData.answer,
+      });
       navigate("/dashboard");
     } catch (err) {
       const message =
         err.response?.data?.message || "Login failed. Please try again.";
       setError(message);
-      // Reset turnstile on error
-      if (turnstileRef.current?.resetWidget) {
-        turnstileRef.current.resetWidget();
+      // Reset captcha on error
+      if (captchaRef.current?.resetCaptcha) {
+        captchaRef.current.resetCaptcha();
       }
-      setTurnstileToken(null);
+      setCaptchaData(null);
     } finally {
       setIsSubmitting(false);
     }
@@ -277,14 +276,10 @@ const LoginPage = () => {
               </Link>
             </div>
 
-            {TURNSTILE_SITE_KEY && (
-              <TurnstileWidget
-                ref={turnstileRef}
-                siteKey={TURNSTILE_SITE_KEY}
-                onVerify={handleTurnstileVerify}
-                onExpire={handleTurnstileExpire}
-              />
-            )}
+            <SimpleCaptcha
+              ref={captchaRef}
+              onVerify={handleCaptchaVerify}
+            />
 
             <Button
               type="submit"
