@@ -1,0 +1,6 @@
+# .coderabbit.yaml
+reviews:
+  auto_review:
+    enabled: true
+  auto_approval:
+    enabled: true
