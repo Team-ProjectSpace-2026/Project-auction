@@ -113,10 +113,10 @@ const PlayerDetailsModal = ({ onClose, onStartBidding }) => {
   const handleStartBidding = useCallback(() => {
     if (onStartBidding) {
       onStartBidding();
-    } else {
+    } else if (tournamentId) {
       navigate(`/live-auction?tournamentId=${tournamentId}`);
     }
-  }, [onStartBidding, navigate]);
+  }, [onStartBidding, navigate, tournamentId]);
 
   return createPortal(
     <div className="details-modal">

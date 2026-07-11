@@ -45,8 +45,6 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
 
   // ---- State ----
   const [phase, setPhase] = useState("idle"); // idle | shuffling | selected | flipping | done
-  const [beltOffset, setBeltOffset] = useState(0);
-  const [beltY, setBeltY] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [isFlipped, setIsFlipped] = useState(false);
   const [showSweep, setShowSweep] = useState(false);
@@ -55,6 +53,8 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
   const animFrameRef = useRef(null);
   const startTimeRef = useRef(null);
   const containerRef = useRef(null);
+  const beltRef = useRef(null);
+  const targetIndexRef = useRef(null);
 
   // Build card list: use all players, repeat enough to fill the strip
   const cardList = useMemo(() => {
@@ -82,24 +82,25 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
     return list;
   }, [players]);
 
-  // Pick a random card for selection target — wider range for visual variety
-  const [targetIndex] = useState(() => {
-    if (!players || players.length === 0) return 15;
-    // Pick from the full strip (skipping first copy so we always scroll past it)
-    const start = players.length;
-    const end = Math.max(start + 1, cardList.length - players.length);
-    return start + Math.floor(Math.random() * (end - start));
-  });
-
   // ---- Shuffle animation with bounce-back ----
   const startShuffle = useCallback(() => {
     setPhase("shuffling");
     startTimeRef.current = performance.now();
 
+    // Compute target index dynamically from current cardList
+    if (!players || players.length === 0) {
+      targetIndexRef.current = 15;
+    } else {
+      const start = players.length;
+      const end = Math.max(start + 1, cardList.length - players.length);
+      targetIndexRef.current = start + Math.floor(Math.random() * (end - start));
+    }
+    const ti = targetIndexRef.current;
+
     // Calculate target offset to center the selected card
     const containerWidth = containerRef.current?.offsetWidth || window.innerWidth;
     const centerOffset = containerWidth / 2 - CARD_WIDTH / 2;
-    const targetOffset = -(targetIndex * CARD_STEP) + centerOffset;
+    const targetOffset = -(ti * CARD_STEP) + centerOffset;
 
     const startOffset = centerOffset;
     const totalDistance = Math.abs(targetOffset - startOffset);
@@ -110,18 +111,14 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
     // 4-phase bounce easing: fast forward → overshoot → bounce back → settle
     const bounceEase = (t) => {
       if (t < 0.50) {
-        // Phase 1: Fast forward with deceleration (reaches ~90% of distance)
         return (t / 0.50) * 0.90;
       } else if (t < 0.68) {
-        // Phase 2: Overshoot past target (goes to ~108%)
         const p = (t - 0.50) / 0.18;
         return 0.90 + p * 0.18;
       } else if (t < 0.84) {
-        // Phase 3: Bounce back toward target (comes to ~97%)
         const p = (t - 0.68) / 0.16;
         return 1.08 - p * 0.11;
       } else {
-        // Phase 4: Settle on target
         const p = (t - 0.84) / 0.16;
         return 0.97 + p * 0.03;
       }
@@ -132,33 +129,37 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
       const progress = Math.min(elapsed / TOTAL_DURATION, 1);
       const eased = bounceEase(progress);
 
-      // Horizontal position
       const currentOffset = startOffset - (totalDistance * eased);
-      setBeltOffset(currentOffset);
 
-      // Vertical wiggle during overshoot/bounce phases (50%-84%)
       let wiggle = 0;
       if (progress > 0.50 && progress < 0.84) {
         wiggle = Math.sin((progress - 0.50) * 40) * 4 * (1 - (progress - 0.50) / 0.34);
       }
-      setBeltY(wiggle);
+
+      // Update belt transform directly via ref (no re-render per frame)
+      if (beltRef.current) {
+        beltRef.current.style.transform = `translateY(calc(-50% + ${wiggle}px)) translateX(${currentOffset}px)`;
+      }
 
       if (progress < 1) {
         animFrameRef.current = requestAnimationFrame(animate);
       } else {
-        // Snap to exact target
-        setBeltOffset(targetOffset);
-        setBeltY(0);
-        setSelectedIndex(targetIndex);
-        setSelectedPlayer(cardList[targetIndex]);
+        // Snap to exact target via ref
+        if (beltRef.current) {
+          beltRef.current.style.transform = `translateY(-50%) translateX(${targetOffset}px)`;
+        }
+        setSelectedIndex(ti);
+        setSelectedPlayer(cardList[ti]);
         setPhase("selected");
       }
     };
 
-    setBeltOffset(startOffset);
-    setBeltY(0);
+    // Set initial belt position via ref
+    if (beltRef.current) {
+      beltRef.current.style.transform = `translateY(-50%) translateX(${startOffset}px)`;
+    }
     animFrameRef.current = requestAnimationFrame(animate);
-  }, [targetIndex, cardList]);
+  }, [players, cardList]);
 
   // Auto-start shuffle on mount
   useEffect(() => {
@@ -248,10 +249,8 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
           {/* Scrolling belt of cards */}
           <div
             className="card-strip__belt"
-            style={{
-              transform: `translateY(calc(-50% + ${beltY}px)) translateX(${beltOffset}px)`,
-              transition: phase === "idle" ? "none" : undefined,
-            }}
+            ref={beltRef}
+            style={{ transition: phase === "idle" ? "none" : undefined }}
           >
             {cardList.map((card, idx) => {
               const isSelected = phase === "selected" && idx === selectedIndex;

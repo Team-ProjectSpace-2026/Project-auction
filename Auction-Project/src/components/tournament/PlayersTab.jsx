@@ -37,7 +37,6 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
       return;
     }
     let cancelled = false;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     playerService
       .getPlayers(tournamentId)

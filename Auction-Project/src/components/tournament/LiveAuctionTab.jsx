@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Hammer, User } from "lucide-react";
 import PlayerRevealModal from "./PlayerRevealModal";
 import PlayerDetailsModal from "./PlayerDetailsModal";
@@ -15,7 +15,8 @@ const enterFullscreen = () => {
 
 const LiveAuctionTab = () => {
   const navigate = useNavigate();
-  const { tournamentId } = useParams();
+  const [searchParams] = useSearchParams();
+  const tournamentId = searchParams.get("tournamentId");
 
   const [showRevealModal, setShowRevealModal] = useState(false);
   const [showPlayerCard, setShowPlayerCard] = useState(false);

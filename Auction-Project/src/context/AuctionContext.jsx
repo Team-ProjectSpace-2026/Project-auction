@@ -11,7 +11,7 @@ export const useAuction = () => {
 };
 
 export const AuctionProvider = ({ children }) => {
-  const { isConnected, connectionError, connect, disconnect, joinTournament, leaveTournament, emit, on } = useSocket();
+  const { isConnected, connectionError, connect, joinTournament, emit } = useSocket();
 
   const [tournamentId, setTournamentId] = useState(null);
   const [currentPlayer, setCurrentPlayer] = useState(null);

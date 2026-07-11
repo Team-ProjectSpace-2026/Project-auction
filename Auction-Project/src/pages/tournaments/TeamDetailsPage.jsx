@@ -38,7 +38,6 @@ const TeamDetailsPage = () => {
 
     const fetchTeam = async () => {
       try {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setLoading(true);
         setError(null);
         const { data } = await getTeam(teamId);
@@ -48,12 +47,11 @@ const TeamDetailsPage = () => {
         console.error("Failed to fetch team:", err);
         setError("Failed to load team details. Please try again.");
       } finally {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setLoading(false);
       }
     };
 
-    fetchTeam(); // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchTeam();
   }, [teamId]);
 
   const exportSquad = () => {
