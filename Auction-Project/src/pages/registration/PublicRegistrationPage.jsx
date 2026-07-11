@@ -4,7 +4,8 @@ import { Check, X } from "lucide-react";
 import Cropper from "react-easy-crop";
 import InputField from "../../components/common/InputField.jsx";
 import Button from "../../components/common/Button.jsx";
-import CricketLoader from "../../components/common/CricketLoader";
+import { SkeletonRect, SkeletonText } from "../../components/common/SkeletonLoader";
+import "../../components/common/SkeletonLoader.css";
 import * as playerService from "../../services/playerService.js";
 import roleBatsman from "../../assets/Batsman_Logo1.png";
 import roleBowler from "../../assets/Bowler_logo1.png";
@@ -425,10 +426,80 @@ export default function PublicRegistrationPage() {
   // ── Loading state ──
   if (tournamentLoading) {
     return (
-      <div style={{ minHeight: "100vh", background: C.bg, fontFamily: "'Inter', 'Segoe UI', sans-serif",
-        display: "flex", alignItems: "center", justifyContent: "center"
-      }}>
-        <CricketLoader text="Loading registration..." />
+      <div style={{ minHeight: "100vh", background: C.bg, fontFamily: "'Inter', 'Segoe UI', sans-serif" }}>
+        {/* Hero Skeleton */}
+        <div style={{
+          background: `linear-gradient(135deg, ${C.heroTop} 0%, ${C.heroBott} 100%)`,
+          padding: "60px 24px 50px",
+          textAlign: "center",
+        }}>
+          <SkeletonRect width="80px" height="80px" borderRadius="50%" style={{ margin: "0 auto 20px", background: "rgba(255,255,255,0.15)" }} />
+          <SkeletonRect width="250px" height="32px" style={{ margin: "0 auto 12px", background: "rgba(255,255,255,0.2)" }} />
+          <SkeletonRect width="180px" height="16px" style={{ margin: "0 auto", background: "rgba(255,255,255,0.15)" }} />
+        </div>
+
+        {/* Form Skeleton */}
+        <div style={{ maxWidth: 640, margin: "-30px auto 40px", padding: "0 20px" }}>
+          <div style={{
+            background: C.cardBg,
+            borderRadius: 16,
+            border: `1px solid ${C.border}`,
+            padding: "32px 28px",
+            boxShadow: "0 4px 24px rgba(0,0,0,0.06)",
+          }}>
+            {/* Section 1: Personal Info */}
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+              <SkeletonRect width="28px" height="28px" borderRadius="50%" />
+              <SkeletonRect width="150px" height="18px" />
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+              <div>
+                <SkeletonText width="80px" size="sm" />
+                <SkeletonRect height="44px" style={{ marginTop: 6 }} />
+              </div>
+              <div>
+                <SkeletonText width="60px" size="sm" />
+                <SkeletonRect height="44px" style={{ marginTop: 6 }} />
+              </div>
+            </div>
+
+            <div style={{ marginTop: 16 }}>
+              <SkeletonText width="100px" size="sm" />
+              <SkeletonRect height="44px" style={{ marginTop: 6 }} />
+            </div>
+
+            {/* Section 2: Role */}
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 28, marginBottom: 20 }}>
+              <SkeletonRect width="28px" height="28px" borderRadius="50%" />
+              <SkeletonRect width="120px" height="18px" />
+            </div>
+
+            <div style={{ display: "flex", gap: 12 }}>
+              {[1, 2, 3].map((i) => (
+                <SkeletonRect key={i} width="100px" height="100px" borderRadius="12px" />
+              ))}
+            </div>
+
+            <div style={{ marginTop: 16 }}>
+              <SkeletonText width="90px" size="sm" />
+              <SkeletonRect height="44px" style={{ marginTop: 6 }} />
+            </div>
+
+            {/* Section 3: Photo */}
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 28, marginBottom: 20 }}>
+              <SkeletonRect width="28px" height="28px" borderRadius="50%" />
+              <SkeletonRect width="130px" height="18px" />
+            </div>
+
+            <SkeletonRect height="120px" borderRadius="12px" />
+
+            {/* Submit Button */}
+            <div style={{ marginTop: 28 }}>
+              <SkeletonRect height="50px" borderRadius="10px" />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

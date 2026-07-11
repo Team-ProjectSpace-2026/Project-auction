@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import * as tournamentService from "../../services/tournamentService.js";
-import CricketLoader from "../common/CricketLoader";
+import { RegistrationTabSkeleton } from "../common/SkeletonLoader";
 
 const RegistrationTab = ({ tournament }) => {
   const [copied, setCopied] = useState(false);
@@ -27,7 +27,7 @@ const RegistrationTab = ({ tournament }) => {
   }, [deadlineOverride, tournament]);
 
   if (!tournament) {
-    return <CricketLoader text="Loading tournament data..." />;
+    return <RegistrationTabSkeleton />;
   }
 
   const tournamentId = tournament?.id || tournament?._id || "";

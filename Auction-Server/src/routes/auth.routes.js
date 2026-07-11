@@ -10,15 +10,18 @@ import { validateRegister, validateLogin } from "../utils/validators.js";
 import { handleValidationErrors } from "../middleware/errorHandler.js";
 import { authLimiter } from "../middleware/rateLimiter.js";
 import auth from "../middleware/auth.middleware.js";
-import verifyTurnstile from "../middleware/verifyTurnstile.js";
+import { generateCaptcha, verifyCaptcha } from "../middleware/verifyCaptcha.js";
 
 const router = express.Router();
 
-// Public routes with Turnstile verification
+// Captcha routes
+router.post("/captcha/new", generateCaptcha);
+
+// Public routes with captcha verification
 router.post(
   "/register",
   authLimiter,
-  verifyTurnstile,
+  verifyCaptcha,
   validateRegister,
   handleValidationErrors,
   register
@@ -26,7 +29,7 @@ router.post(
 router.post(
   "/login",
   authLimiter,
-  verifyTurnstile,
+  verifyCaptcha,
   validateLogin,
   handleValidationErrors,
   login
