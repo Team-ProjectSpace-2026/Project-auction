@@ -9,13 +9,13 @@ import "./reveal-screen.css";
 /**
  * PlayerRevealModal
  * 
- * Three-phase auction reveal:
+ * Two-phase auction reveal:
  *   1. Shuffling — cards scroll rapidly across a horizontal belt
  *   2. Selection — belt decelerates, center card locks with golden glow
- *   3. Identity Reveal — card flips to show player, then transitions to details
+ *   3. Flip — card flips to reveal player identity, then transitions to PlayerDetailsModal
  *
  * Uses `players` from AuctionContext. Calls `revealPlayer()` when revealing.
- * All backend/socket logic is unchanged.
+ * After flip, calls `onContinue()` to show PlayerDetailsModal (the single "PLAYER REVEALED!" screen).
  */
 
 // Player silhouette SVG icon
@@ -188,17 +188,12 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
       revealPlayer(selectedPlayer._id);
     }
 
-    // Transition to revealed details screen
+    // Transition directly to PlayerDetailsModal
     setTimeout(() => {
-      setPhase("revealed");
+      setPhase("done");
+      onContinue();
     }, 900);
-  }, [phase, selectedPlayer, revealPlayer]);
-
-  // ---- Continue to auction ----
-  const handleContinueToAuction = useCallback(() => {
-    setPhase("done");
-    onContinue();
-  }, [onContinue]);
+  }, [phase, selectedPlayer, revealPlayer, onContinue]);
 
   // ---- Progress dots ----
   const progressPhase = phase === "idle" ? 0 : phase === "shuffling" ? 1 : phase === "selected" ? 2 : 3;
@@ -445,69 +440,6 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
                   <div className="card-flip__back-name">
                     {(selectedPlayer.name || "Player").toUpperCase()}
                   </div>
-                  <div className="card-flip__back-role" style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "4px",
-                    padding: "4px 10px",
-                    borderRadius: "6px",
-                    border: "1px solid rgba(255,255,255,0.3)",
-                    background: "rgba(255,255,255,0.1)",
-                    fontSize: "10px",
-                    fontWeight: "700",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.5px",
-                  }}>
-                    <span style={{ fontSize: "8px" }}>&#10022;</span>
-                    {selectedPlayer.role || "CRICKETER"}
-                  </div>
-
-                  {/* Highlighted badges */}
-                  <div style={{ display: "flex", gap: "6px", marginTop: "6px", flexWrap: "wrap", justifyContent: "center" }}>
-                    {selectedPlayer.battingStyle && (
-                      <span style={{
-                        padding: "3px 8px",
-                        borderRadius: "4px",
-                        background: "rgba(255,255,255,0.15)",
-                        fontSize: "8px",
-                        fontWeight: "600",
-                      }}>{selectedPlayer.battingStyle}</span>
-                    )}
-                    {selectedPlayer.bowlingStyle && selectedPlayer.bowlingStyle !== "Not Applicable" && (
-                      <span style={{
-                        padding: "3px 8px",
-                        borderRadius: "4px",
-                        background: "rgba(255,255,255,0.15)",
-                        fontSize: "8px",
-                        fontWeight: "600",
-                      }}>{selectedPlayer.bowlingStyle}</span>
-                    )}
-                    {selectedPlayer.style && (
-                      <span style={{
-                        padding: "3px 8px",
-                        borderRadius: "4px",
-                        background: "rgba(255,255,255,0.15)",
-                        fontSize: "8px",
-                        fontWeight: "600",
-                      }}>{selectedPlayer.style}</span>
-                    )}
-                    {selectedPlayer.keeper && (
-                      <span style={{
-                        padding: "3px 8px",
-                        borderRadius: "4px",
-                        background: "rgba(124, 58, 237, 0.4)",
-                        fontSize: "8px",
-                        fontWeight: "700",
-                      }}>WK</span>
-                    )}
-                  </div>
-
-                  {/* Other details */}
-                  <div style={{ display: "flex", gap: "10px", marginTop: "8px", fontSize: "8px", color: "rgba(255,255,255,0.7)", flexWrap: "wrap", justifyContent: "center" }}>
-                    {selectedPlayer.age && <span>Age: {selectedPlayer.age}</span>}
-                    {selectedPlayer.mobile && <span>{selectedPlayer.countryCode} {selectedPlayer.mobile}</span>}
-                    {selectedPlayer.basePrice > 0 && <span>Base: ₹{selectedPlayer.basePrice.toLocaleString("en-IN")}</span>}
-                  </div>
                 </div>
               </div>
             </motion.div>
@@ -515,263 +447,6 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
         )}
       </AnimatePresence>
 
-      {/* PLAYER REVEALED! Full Details Screen */}
-      <AnimatePresence>
-        {phase === "revealed" && selectedPlayer && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.4 }}
-            style={{
-              position: "fixed",
-              inset: 0,
-              zIndex: 100001,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "40px",
-              overflowY: "auto",
-            }}
-          >
-            <div style={{ position: "fixed", inset: 0, zIndex: 0 }}>
-              <StadiumBackground />
-            </div>
-
-            {/* Close button */}
-            <button
-              onClick={onClose}
-              aria-label="Close"
-              style={{
-                position: "fixed",
-                top: "20px",
-                right: "20px",
-                zIndex: 2,
-                width: "40px",
-                height: "40px",
-                borderRadius: "50%",
-                border: "none",
-                background: "rgba(0,0,0,0.1)",
-                color: "#64748b",
-                fontSize: "24px",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              ×
-            </button>
-
-            {/* Title */}
-            <motion.h2
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              style={{
-                fontSize: "48px",
-                fontWeight: "900",
-                color: "#d97706",
-                margin: "0 0 30px",
-                textTransform: "uppercase",
-                letterSpacing: "2px",
-                textAlign: "center",
-                textShadow: "0 2px 10px rgba(217, 119, 6, 0.3)",
-                position: "relative",
-                zIndex: 1,
-              }}
-            >
-              PLAYER REVEALED!
-            </motion.h2>
-
-            {/* Player Card */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2, duration: 0.5, type: "spring" }}
-              style={{
-                background: "#fff",
-                borderRadius: "20px",
-                border: "3px solid #2563eb",
-                padding: "40px",
-                maxWidth: "700px",
-                width: "100%",
-                display: "flex",
-                gap: "40px",
-                boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
-                position: "relative",
-                zIndex: 1,
-              }}
-            >
-              {/* Photo */}
-              <div style={{
-                width: "250px",
-                height: "320px",
-                borderRadius: "14px",
-                border: selectedPlayer.photo ? "none" : "2px dashed #cbd5e1",
-                background: selectedPlayer.photo ? "transparent" : "#f1f5f9",
-                flexShrink: 0,
-                overflow: "hidden",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}>
-                {selectedPlayer.photo ? (
-                  <img
-                    src={playerPhotoUrl(selectedPlayer.photo)}
-                    alt={selectedPlayer.name}
-                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                  />
-                ) : (
-                  <span style={{ fontSize: "64px", opacity: 0.3 }}>&#127951;</span>
-                )}
-              </div>
-
-              {/* Details */}
-              <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                <h1 style={{ fontSize: "42px", fontWeight: "900", color: "#1e293b", margin: 0, letterSpacing: "-0.5px" }}>
-                  {(selectedPlayer.name || "PLAYER").toUpperCase()}
-                </h1>
-
-                {/* Role Badge */}
-                <div style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  marginTop: "12px",
-                  marginBottom: "28px",
-                  padding: "8px 16px",
-                  borderRadius: "8px",
-                  border: "1.5px solid #2563eb",
-                  background: "rgba(37, 99, 235, 0.08)",
-                  fontSize: "13px",
-                  fontWeight: "700",
-                  color: "#2563eb",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.5px",
-                  alignSelf: "flex-start",
-                }}>
-                  <span style={{ fontSize: "11px" }}>&#10022;</span>
-                  {selectedPlayer.role || "CRICKETER"}
-                </div>
-
-                {/* Highlighted Details */}
-                <div style={{ display: "flex", gap: "12px", marginBottom: "24px", flexWrap: "wrap" }}>
-                  {selectedPlayer.battingStyle && (
-                    <div style={{
-                      padding: "10px 16px",
-                      borderRadius: "10px",
-                      border: "1.5px solid #2563eb",
-                      background: "rgba(37, 99, 235, 0.06)",
-                    }}>
-                      <div style={{ fontSize: "10px", fontWeight: "600", color: "#2563eb", textTransform: "uppercase", letterSpacing: "0.5px" }}>Batting Style</div>
-                      <div style={{ fontSize: "15px", fontWeight: "700", color: "#1e293b", marginTop: "2px" }}>{selectedPlayer.battingStyle}</div>
-                    </div>
-                  )}
-                  {selectedPlayer.bowlingStyle && selectedPlayer.bowlingStyle !== "Not Applicable" && (
-                    <div style={{
-                      padding: "10px 16px",
-                      borderRadius: "10px",
-                      border: "1.5px solid #2563eb",
-                      background: "rgba(37, 99, 235, 0.06)",
-                    }}>
-                      <div style={{ fontSize: "10px", fontWeight: "600", color: "#2563eb", textTransform: "uppercase", letterSpacing: "0.5px" }}>Bowling Style</div>
-                      <div style={{ fontSize: "15px", fontWeight: "700", color: "#1e293b", marginTop: "2px" }}>{selectedPlayer.bowlingStyle}</div>
-                    </div>
-                  )}
-                  {selectedPlayer.keeper && (
-                    <div style={{
-                      padding: "10px 16px",
-                      borderRadius: "10px",
-                      border: "1.5px solid #7c3aed",
-                      background: "rgba(124, 58, 237, 0.08)",
-                    }}>
-                      <div style={{ fontSize: "10px", fontWeight: "600", color: "#7c3aed", textTransform: "uppercase", letterSpacing: "0.5px" }}>Role</div>
-                      <div style={{ fontSize: "15px", fontWeight: "700", color: "#7c3aed", marginTop: "2px" }}>Wicket Keeper</div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Other Details */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-                  {selectedPlayer.style && (
-                    <div>
-                      <div style={{ fontSize: "10px", fontWeight: "600", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.5px" }}>Playing Style</div>
-                      <div style={{ fontSize: "14px", fontWeight: "700", color: "#1e293b" }}>{selectedPlayer.style}</div>
-                    </div>
-                  )}
-                  {selectedPlayer.age && (
-                    <div>
-                      <div style={{ fontSize: "10px", fontWeight: "600", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.5px" }}>Age</div>
-                      <div style={{ fontSize: "14px", fontWeight: "700", color: "#1e293b" }}>{selectedPlayer.age} Years</div>
-                    </div>
-                  )}
-                  {selectedPlayer.mobile && (
-                    <div>
-                      <div style={{ fontSize: "10px", fontWeight: "600", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.5px" }}>Mobile</div>
-                      <div style={{ fontSize: "14px", fontWeight: "700", color: "#1e293b" }}>{selectedPlayer.countryCode} {selectedPlayer.mobile}</div>
-                    </div>
-                  )}
-                  {selectedPlayer.basePrice > 0 && (
-                    <div>
-                      <div style={{ fontSize: "10px", fontWeight: "600", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.5px" }}>Base Price</div>
-                      <div style={{ fontSize: "14px", fontWeight: "700", color: "#d97706" }}>₹{selectedPlayer.basePrice.toLocaleString("en-IN")}</div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Starting Bid & Start Button */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.5 }}
-              style={{
-                marginTop: "30px",
-                textAlign: "center",
-                position: "relative",
-                zIndex: 1,
-              }}
-            >
-              <div style={{ fontSize: "12px", fontWeight: "600", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "1px" }}>Starting Bid</div>
-              <div style={{ fontSize: "48px", fontWeight: "900", color: "#d97706", lineHeight: "1" }}>
-                ₹{(selectedPlayer.basePrice || 0).toLocaleString("en-IN")}
-              </div>
-
-              <motion.button
-                onClick={handleContinueToAuction}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                style={{
-                  marginTop: "20px",
-                  padding: "16px 48px",
-                  background: "linear-gradient(135deg, #2563eb, #1d4ed8)",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: "12px",
-                  fontSize: "16px",
-                  fontWeight: "800",
-                  cursor: "pointer",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  boxShadow: "0 4px 20px rgba(37, 99, 235, 0.4)",
-                  textTransform: "uppercase",
-                  letterSpacing: "1px",
-                }}
-              >
-                <span style={{ fontSize: "18px" }}>&#9889;</span>
-                START BIDDING
-              </motion.button>
-              <p style={{ fontSize: "12px", color: "#94a3b8", marginTop: "12px" }}>
-                Bidding will begin once you click Start Bidding.
-              </p>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </>,
     document.body
   );

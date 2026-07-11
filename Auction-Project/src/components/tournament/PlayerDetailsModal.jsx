@@ -94,24 +94,9 @@ const PlayerDetailsModal = ({ onClose, onStartBidding }) => {
   const tournamentBasePrice = tournament?.playerBasePrice || 0;
   const basePrice = playerBasePrice > 0 ? playerBasePrice : tournamentBasePrice;
   const battingStyle = player?.battingStyle || player?.style || "";
-  const bowlingStyle = player?.bowlingStyle || "";
+  const bowlingStyle = player?.bowlingStyle && player.bowlingStyle !== "Not Applicable" ? player.bowlingStyle : "";
   const age = player?.age || "";
-  const nationality = player?.nationality || "";
-
-  // Build stats array dynamically from available data
-  const stats = useMemo(() => {
-    const s = [];
-    if (battingStyle) s.push({ label: "Batting Style", value: battingStyle, delay: "0.7s" });
-    if (bowlingStyle) s.push({ label: "Bowling Style", value: bowlingStyle, delay: "0.85s" });
-    if (age) s.push({ label: "Age", value: `${age} Years`, delay: "1.0s" });
-    if (nationality) s.push({ label: "Nationality", value: nationality, delay: "1.15s", flag: true });
-    if (basePrice) s.push({ label: "Base Price", value: formatCurrency(basePrice), delay: "1.3s", highlight: true });
-    // Ensure at least base price is shown
-    if (s.length === 0 && basePrice) {
-      s.push({ label: "Base Price", value: formatCurrency(basePrice), delay: "0.7s", highlight: true });
-    }
-    return s;
-  }, [battingStyle, bowlingStyle, age, nationality, basePrice]);
+  const isKeeper = player?.keeper || false;
 
   const handleStartBidding = useCallback(() => {
     if (onStartBidding) {
@@ -211,28 +196,50 @@ const PlayerDetailsModal = ({ onClose, onStartBidding }) => {
 
             {/* Stats grid */}
             <div className="details-card__stats">
-              {stats.map((stat) => (
+              {battingStyle && (
                 <motion.div
-                  key={stat.label}
+                  className="details-card__stat-card"
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: visible ? 1 : 0, y: visible ? 0 : 16 }}
-                  transition={{
-                    delay: parseFloat(stat.delay),
-                    duration: 0.45,
-                    ease: "easeOut",
-                  }}
+                  transition={{ delay: 0.7, duration: 0.45, ease: "easeOut" }}
                 >
-                  <div className="details-card__stat-label">{stat.label}</div>
-                  <div
-                    className={`details-card__stat-value ${
-                      stat.highlight ? "details-card__stat-value--highlight" : ""
-                    }`}
-                  >
-                    {stat.flag && <span style={{ fontSize: "18px" }}>🇮🇳</span>}
-                    {stat.value}
-                  </div>
+                  <div className="details-card__stat-label">Batting Style</div>
+                  <div className="details-card__stat-value">{battingStyle}</div>
                 </motion.div>
-              ))}
+              )}
+              {bowlingStyle && (
+                <motion.div
+                  className="details-card__stat-card"
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: visible ? 1 : 0, y: visible ? 0 : 16 }}
+                  transition={{ delay: 0.85, duration: 0.45, ease: "easeOut" }}
+                >
+                  <div className="details-card__stat-label">Bowling Style</div>
+                  <div className="details-card__stat-value">{bowlingStyle}</div>
+                </motion.div>
+              )}
+              {age && (
+                <motion.div
+                  className="details-card__stat-card"
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: visible ? 1 : 0, y: visible ? 0 : 16 }}
+                  transition={{ delay: 1.0, duration: 0.45, ease: "easeOut" }}
+                >
+                  <div className="details-card__stat-label">Age</div>
+                  <div className="details-card__stat-value">{age} Years</div>
+                </motion.div>
+              )}
+              {isKeeper && (
+                <motion.div
+                  className="details-card__stat-card"
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: visible ? 1 : 0, y: visible ? 0 : 16 }}
+                  transition={{ delay: 1.15, duration: 0.45, ease: "easeOut" }}
+                >
+                  <div className="details-card__stat-label">Role</div>
+                  <div className="details-card__stat-value details-card__stat-value--keeper">Wicket Keeper</div>
+                </motion.div>
+              )}
             </div>
           </div>
         </div>
