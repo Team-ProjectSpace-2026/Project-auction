@@ -377,7 +377,7 @@ const TournamentsListPage = () => {
                           >
                             {tournament.logo ? (
                               <img
-                                src={`${API_BASE}${tournament.logo}`}
+                                src={tournament.logo || ""}
                                 alt={tournament.name}
                                 style={{ width: "100%", height: "100%", objectFit: "cover" }}
                               />

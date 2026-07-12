@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import * as playerService from "../../services/playerService";
+import { playerPhotoUrl } from "../../utils/playerPhotoUrl";
 import InputField from "../common/InputField.jsx";
 import Button from "../common/Button.jsx";
 
@@ -30,9 +31,8 @@ const PlayerForm = ({ playerId, tournamentId, onSaved, onCancel }) => {
       const parsed = new URL(photoPreview);
       if (parsed.protocol === "blob:") return parsed.href;
       const allowed = new URL(API_BASE);
-      if (parsed.origin === allowed.origin && parsed.pathname.startsWith("/uploads/photos/")) {
-        return parsed.href;
-      }
+      if (parsed.origin === allowed.origin) return parsed.href;
+      if (parsed.origin.includes("cloudinary.com")) return parsed.href;
     } catch {
       // invalid URL
     }
@@ -61,7 +61,7 @@ const PlayerForm = ({ playerId, tournamentId, onSaved, onCancel }) => {
               bowlingStyle: p.bowlingStyle || "Not Applicable",
             });
             if (p.photo) {
-              setPhotoPreview(`${API_BASE}/uploads/photos/${encodeURIComponent(p.photo)}`);
+              setPhotoPreview(playerPhotoUrl(p.photo));
             }
           }
         })
