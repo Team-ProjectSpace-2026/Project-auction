@@ -1,13 +1,8 @@
 import mongoose from "mongoose";
-import fs from "fs/promises";
-import path from "path";
-import { fileURLToPath } from "url";
+import { v2 as cloudinary } from "cloudinary";
 import Player from "../models/Player.js";
 import Tournament from "../models/Tournament.js";
 import Bid from "../models/Bid.js";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 export const getPlayers = async (req, res, next) => {
   try {
@@ -111,10 +106,18 @@ export const updatePlayer = async (req, res, next) => {
 
     if (req.file) {
       if (player.photo) {
-        const oldPhotoPath = path.join(__dirname, "../../uploads/photos", player.photo);
-        await fs.unlink(oldPhotoPath).catch(() => {});
+        try {
+          const photoUrl = new URL(player.photo);
+          if (photoUrl.hostname.endsWith(".cloudinary.com")) {
+            const parts = photoUrl.pathname.split("/");
+            const publicId = parts.slice(parts.indexOf("upload") + 1, -1).join("/");
+            await cloudinary.uploader.destroy(publicId).catch(() => {});
+          }
+        } catch {
+          // Not a valid URL, skip deletion
+        }
       }
-      updateData.photo = req.file.filename;
+      updateData.photo = req.file.path;
     }
 
     const updatedPlayer = await Player.findByIdAndUpdate(
@@ -213,7 +216,7 @@ export const registerPlayer = async (req, res, next) => {
       countryCode: countryCode || '+91',
       battingStyle,
       bowlingStyle,
-      photo: req.file ? req.file.filename : null,
+      photo: req.file ? req.file.path : null,
       tournamentId,
       isRegistered: true,
       basePrice: tournament.playerBasePrice || 0,

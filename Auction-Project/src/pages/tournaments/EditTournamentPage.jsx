@@ -12,7 +12,7 @@ const EditTournamentPage = () => {
     const [showSuccess, setShowSuccess] = useState(false);
     const [saving, setSaving] = useState(false);
     const [logoFile, setLogoFile] = useState(null);
-    const [logoPreview, setLogoPreview] = useState(tournament?.logo ? `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}${tournament.logo}` : null);
+    const [logoPreview, setLogoPreview] = useState(tournament?.logo || null);
     const fileInputRef = useRef(null);
     const [formData, setFormData] = useState({
         tournamentName: tournament?.name || "",

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { v2 as cloudinary } from "cloudinary";
 import Tournament from "../models/Tournament.js";
 import Player from "../models/Player.js";
 import Team from "../models/Team.js";
@@ -24,7 +25,7 @@ export const createTournament = async (req, res, next) => {
     const maxPlayersPerTeam = Number(req.body.maxPlayersPerTeam) || 0;
     const playerBasePrice = Number(req.body.playerBasePrice) || 0;
     const description = String(req.body.description || "");
-    const logo = req.file ? `/uploads/photos/${req.file.filename}` : "";
+    const logo = req.file ? req.file.path : "";
     const tournament = new Tournament({
       name,
       status,
@@ -76,11 +77,24 @@ export const updateTournament = async (req, res, next) => {
       updateData.registrationEndDate = req.body.registrationEndDate ? new Date(req.body.registrationEndDate) : null;
     }
     if (req.file) {
-      updateData.logo = `/uploads/photos/${req.file.filename}`;
+      const existing = await Tournament.findById(tournamentId);
+      if (existing?.logo) {
+        try {
+          const logoUrl = new URL(existing.logo);
+          if (logoUrl.hostname.endsWith(".cloudinary.com")) {
+            const parts = logoUrl.pathname.split("/");
+            const publicId = parts.slice(parts.indexOf("upload") + 1, -1).join("/");
+            await cloudinary.uploader.destroy(publicId).catch(() => {});
+          }
+        } catch {
+          // Not a valid URL, skip deletion
+        }
+      }
+      updateData.logo = req.file.path;
     }
     const tournament = await Tournament.findByIdAndUpdate(
       tournamentId,
-      updateData,
+      { $set: updateData },
       { new: true, runValidators: true },
     );
 

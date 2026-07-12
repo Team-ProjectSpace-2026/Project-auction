@@ -1,22 +1,14 @@
 import multer from "multer";
-import path from "path";
-import fs from "fs/promises";
-import { fileURLToPath } from "url";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
+import { v2 as cloudinary } from "cloudinary";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const uploadDir = path.join(__dirname, "../../uploads/photos");
-fs.mkdir(uploadDir, { recursive: true }).catch(() => {});
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, "../../uploads/photos"));
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  },
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: (req, file) => ({
+    folder: req.originalUrl.includes("/tournaments") ? "cricauction/tournaments" : "cricauction/players",
+    allowed_formats: ["jpg", "jpeg", "png"],
+    transformation: [{ width: 800, height: 1067, crop: "limit" }],
+  }),
 });
 
 const fileFilter = (req, file, cb) => {
