@@ -4,11 +4,11 @@ import { v2 as cloudinary } from "cloudinary";
 
 const storage = new CloudinaryStorage({
   cloudinary,
-  params: {
-    folder: "cricauction/players",
+  params: (req, file) => ({
+    folder: req.originalUrl.includes("/tournaments") ? "cricauction/tournaments" : "cricauction/players",
     allowed_formats: ["jpg", "jpeg", "png"],
     transformation: [{ width: 800, height: 1067, crop: "limit" }],
-  },
+  }),
 });
 
 const fileFilter = (req, file, cb) => {

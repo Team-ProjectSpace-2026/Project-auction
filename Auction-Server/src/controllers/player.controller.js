@@ -105,9 +105,17 @@ export const updatePlayer = async (req, res, next) => {
     if (req.body.bowlingStyle !== undefined) updateData.bowlingStyle = String(req.body.bowlingStyle);
 
     if (req.file) {
-      if (player.photo && player.photo.includes("cloudinary.com")) {
-        const publicId = player.photo.split("/").slice(-2).join("/").split(".")[0];
-        await cloudinary.uploader.destroy(publicId).catch(() => {});
+      if (player.photo) {
+        try {
+          const photoUrl = new URL(player.photo);
+          if (photoUrl.hostname.endsWith(".cloudinary.com")) {
+            const parts = photoUrl.pathname.split("/");
+            const publicId = parts.slice(parts.indexOf("upload") + 1, -1).join("/");
+            await cloudinary.uploader.destroy(publicId).catch(() => {});
+          }
+        } catch {
+          // Not a valid URL, skip deletion
+        }
       }
       updateData.photo = req.file.path;
     }

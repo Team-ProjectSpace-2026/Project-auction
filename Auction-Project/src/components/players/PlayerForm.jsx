@@ -31,8 +31,8 @@ const PlayerForm = ({ playerId, tournamentId, onSaved, onCancel }) => {
       const parsed = new URL(photoPreview);
       if (parsed.protocol === "blob:") return parsed.href;
       const allowed = new URL(API_BASE);
-      if (parsed.origin === allowed.origin) return parsed.href;
-      if (parsed.origin.includes("cloudinary.com")) return parsed.href;
+      if (parsed.protocol === "https:" && parsed.origin === allowed.origin && parsed.pathname.startsWith("/uploads/photos/")) return parsed.href;
+      if (parsed.protocol === "https:" && (parsed.hostname.endsWith(".cloudinary.com") || parsed.hostname === "cloudinary.com")) return parsed.href;
     } catch {
       // invalid URL
     }

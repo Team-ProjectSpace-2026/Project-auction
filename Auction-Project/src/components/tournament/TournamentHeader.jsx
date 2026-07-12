@@ -7,8 +7,6 @@ const formatDate = (dateStr) => {
   return d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
 };
 
-const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
-
 const getDynamicStatus = (date) => {
   if (!date) return "Upcoming";
   const today = new Date();

@@ -42,7 +42,7 @@ async function migrateExistingPhotos() {
 
     const result = await cloudinary.uploader.upload(filePath, {
       folder: "cricauction/players",
-      public_id: file.split(".")[0], // keep original ID part
+      public_id: file.slice(0, file.lastIndexOf(".")), // strip only the final extension
     });
 
     urlMap[file] = result.secure_url;
@@ -52,7 +52,7 @@ async function migrateExistingPhotos() {
   console.log(`\nUploaded ${Object.keys(urlMap).length} files to Cloudinary.\n`);
 
   // 2. Update Player.photo fields (stores just filename)
-  const players = await Player.find({ photo: { $ne: null, $ne: "" } });
+  const players = await Player.find({ photo: { $nin: [null, ""] } });
   console.log(`Updating ${players.length} player photos in DB...`);
 
   for (const player of players) {
@@ -66,7 +66,7 @@ async function migrateExistingPhotos() {
   }
 
   // 3. Update Tournament.logo fields (stores /uploads/photos/filename)
-  const tournaments = await Tournament.find({ logo: { $ne: null, $ne: "" } });
+  const tournaments = await Tournament.find({ logo: { $nin: [null, ""] } });
   console.log(`\nUpdating ${tournaments.length} tournament logos in DB...`);
 
   for (const tournament of tournaments) {
