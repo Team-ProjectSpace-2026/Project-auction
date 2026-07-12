@@ -94,7 +94,7 @@ export const updateTournament = async (req, res, next) => {
     }
     const tournament = await Tournament.findByIdAndUpdate(
       tournamentId,
-      updateData,
+      { $set: updateData },
       { new: true, runValidators: true },
     );
 
