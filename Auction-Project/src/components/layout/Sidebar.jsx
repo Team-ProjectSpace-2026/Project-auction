@@ -1,6 +1,7 @@
 // src/components/layout/Sidebar.jsx
 import { useState } from "react";
-import { LayoutDashboard, Trophy, Settings, LogOut, Landmark } from "lucide-react";
+import { LayoutDashboard, Trophy, Settings, LogOut } from "lucide-react";
+import cricketTrophy from "../../assets/Cricket_Trophy1.png";
 
 const navItems = [
   { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -72,7 +73,7 @@ const Sidebar = ({ activePage = "dashboard", onNavigate }) => {
       </div>
 
       {/* Nav */}
-      <nav style={{ flex: 1, padding: "16px 12px" }}>
+      <nav style={{ padding: "16px 12px" }}>
         {navItems.map((item) => {
           const isActive = activePage === item.key;
           const isLogout = item.key === "logout";
@@ -134,43 +135,41 @@ const Sidebar = ({ activePage = "dashboard", onNavigate }) => {
         })}
       </nav>
 
-    
-      <div
-        style={{
-          padding: "0 0 0",
-          background:
-            "linear-gradient(to top, rgba(15,21,53,0) 0%, rgba(15,21,53,1) 60%)",
-          position: "relative",
-          height: "160px",
-          overflow: "hidden",
-        }}
-      >
-        <div
-          style={{
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: "160px",
-            background: "linear-gradient(to top, #0f1535 30%, transparent)",
-            zIndex: 2,
+      {/* Promotional Card */}
+      <div style={{ padding: '6px 10px 10px' }}>
+        <div style={{
+          background: 'linear-gradient(135deg, #1a2550 0%, #0f1a3e 100%)',
+          borderRadius: '14px',
+          padding: '6px 14px 16px',
+          textAlign: 'center',
+          position: 'relative',
+          overflow: 'hidden',
+        }}>
+          {/* Trophy Image */}
+          <img src={cricketTrophy} alt="Cricket Trophy" style={{ width: '100%', maxWidth: '160px', height: 'auto', display: 'block', margin: '0 auto' }} />
+
+          <h3 style={{ color: '#fff', fontSize: '14px', fontWeight: 700, margin: '0 0 6px' }}>
+            Create. Manage. Win.
+          </h3>
+          <p style={{ color: '#8899b8', fontSize: '11px', lineHeight: 1.4, margin: '0 0 12px' }}>
+            Run world-class auctions with ease and confidence.
+          </p>
+          <button style={{
+            background: 'transparent',
+            border: '1px solid rgba(255,255,255,0.25)',
+            color: '#fff',
+            padding: '5px 10px',
+            borderRadius: '8px',
+            fontSize: '12px',
+            fontWeight: 600,
+            cursor: 'pointer',
+            transition: 'all 0.2s',
           }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "flex-end",
-            fontSize: "48px",
-            paddingBottom: "8px",
-            zIndex: 1,
-          }}
-        >
-          <Landmark size={48} strokeWidth={1} style={{ opacity: 0.3, color: "var(--sidebar-text)" }} />
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+          >
+            Learn More
+          </button>
         </div>
       </div>
 
