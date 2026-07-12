@@ -1,6 +1,6 @@
 // src/components/dashboard/MetricCard.jsx
 
-const MetricCard = ({ icon: Icon, iconBg, label, value }) => {
+const MetricCard = ({ icon: Icon, iconBg, label, value, subtitle }) => {
   return (
     <div style={{
       background: 'var(--card-bg-light)',
@@ -29,6 +29,7 @@ const MetricCard = ({ icon: Icon, iconBg, label, value }) => {
       <div>
         <div style={{ fontSize: '13px', color: 'var(--text-secondary-light)', fontWeight: 500, marginBottom: '4px', transition: 'color 0.2s ease' }}>{label}</div>
         <div style={{ fontSize: '28px', fontWeight: 700, color: 'var(--text-primary-light)', lineHeight: 1, transition: 'color 0.2s ease' }}>{value}</div>
+        {subtitle && <div style={{ fontSize: '12px', color: 'var(--text-secondary-light)', marginTop: '4px', transition: 'color 0.2s ease' }}>{subtitle}</div>}
       </div>
     </div>
   );

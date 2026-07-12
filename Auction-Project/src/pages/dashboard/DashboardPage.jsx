@@ -9,12 +9,13 @@ import ProgressFooter from '../../components/layout/ProgressFooter';
 import MetricCard from '../../components/dashboard/MetricCard';
 import TournamentRow from '../../components/dashboard/TournamentRow';
 import { Trophy, Play, Calendar, CheckCircle, ClipboardList } from 'lucide-react';
+import cricketIllustration from '../../assets/cricket-illustration.png';
 
 const metricCards = [
-  { key: 'total',     label: 'Total Tournaments',     icon: Trophy,      iconBg: '#ede9fe' },
-  { key: 'active',    label: 'Active Tournaments',    icon: Play,        iconBg: '#dcfce7' },
-  { key: 'upcoming',  label: 'Upcoming Tournaments',  icon: Calendar,    iconBg: '#e8f0fe' },
-  { key: 'completed', label: 'Completed Tournaments', icon: CheckCircle, iconBg: '#fff7ed' },
+  { key: 'total',     label: 'Total Tournaments',     icon: Trophy,      iconBg: '#ede9fe', subtitle: 'All time tournaments' },
+  { key: 'active',    label: 'Active Tournaments',    icon: Play,        iconBg: '#dcfce7', subtitle: 'Currently running' },
+  { key: 'upcoming',  label: 'Upcoming Tournaments',  icon: Calendar,    iconBg: '#e8f0fe', subtitle: 'Scheduled ahead' },
+  { key: 'completed', label: 'Completed Tournaments', icon: CheckCircle, iconBg: '#fff7ed', subtitle: 'Successfully finished' },
 ];
 
 const DashboardPage = () => {
@@ -51,7 +52,7 @@ const DashboardPage = () => {
         <TopBar user={user} />
 
         {/* Scrollable content */}
-        <main style={{ flex: 1, padding: '96px 32px 0', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        <main style={{ flex: 1, padding: '72px 32px 0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {loading ? (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1, minHeight: '300px' }}>
               <div style={{
@@ -64,13 +65,22 @@ const DashboardPage = () => {
           ) : (
             <>
               {/* Welcome */}
-              <div>
-                <h1 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-primary-light)', margin: 0 }}>
-                  Welcome, {user?.name || 'User'}
-                </h1>
-                <p style={{ color: 'var(--text-secondary-light)', fontSize: '14px', margin: '4px 0 0', transition: 'color 0.2s ease' }}>
-                  Let's create and manage amazing cricket tournaments.
-                </p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <h1 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-primary-light)', margin: 0 }}>
+                    Welcome back, {user?.name || 'User'}! 👋
+                  </h1>
+                  <p style={{ color: 'var(--text-secondary-light)', fontSize: '14px', margin: '4px 0 0', transition: 'color 0.2s ease' }}>
+                    Let's create and manage amazing cricket tournaments.
+                  </p>
+                </div>
+                <div style={{ flexShrink: 0 }}>
+                  <img 
+                    src={cricketIllustration} 
+                    alt="Cricket illustration" 
+                    style={{ width: '140px', height: 'auto'}}
+                  />
+                </div>
               </div>
 
               {/* Metric ribbon */}
@@ -82,6 +92,7 @@ const DashboardPage = () => {
                     iconBg={card.iconBg}
                     label={card.label}
                     value={metrics[card.key]}
+                    subtitle={card.subtitle}
                   />
                 ))}
               </div>

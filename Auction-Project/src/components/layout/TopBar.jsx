@@ -74,7 +74,7 @@ const TopBar = ({ user }) => {
             borderRadius: '6px',
             cursor: 'pointer',
             fontSize: '14px',
-            fontWeight: '500',
+            fontWeight: '600',
             transition: 'background-color 0.2s',
           }}
           onMouseOver={(e) => e.target.style.backgroundColor = '#dc2626'}
