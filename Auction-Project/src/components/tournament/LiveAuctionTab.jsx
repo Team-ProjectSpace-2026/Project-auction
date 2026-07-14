@@ -48,16 +48,16 @@ const LiveAuctionTab = ({ tournamentId: propTournamentId }) => {
   const [showPlayerCard, setShowPlayerCard] = useState(false);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+    <div className="auction-screen" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
       {error && (
         <div style={{
-          background: "#fef2f2",
-          border: "1px solid #fecaca",
+          background: "var(--warning-bg)",
+          border: "1px solid var(--warning-border)",
           borderRadius: "10px",
           padding: "10px 16px",
           fontSize: "13px",
           fontWeight: "600",
-          color: "#dc2626",
+          color: "var(--warning-text)",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -71,7 +71,7 @@ const LiveAuctionTab = ({ tournamentId: propTournamentId }) => {
             style={{
               border: "none",
               background: "transparent",
-              color: "#dc2626",
+              color: "var(--warning-text)",
               fontWeight: "600",
               cursor: "pointer",
               fontSize: "13px",
@@ -92,8 +92,10 @@ const LiveAuctionTab = ({ tournamentId: propTournamentId }) => {
       {/* Left Section */}
       <div
         style={{
-          background: "#fff",
-          border: "1px solid #e8eaf0",
+          background: "var(--glass-bg)",
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
+          border: "1px solid var(--glass-border)",
           borderRadius: "16px",
           padding: "40px",
           minHeight: "620px",
@@ -109,14 +111,14 @@ const LiveAuctionTab = ({ tournamentId: propTournamentId }) => {
               width: "72px",
               height: "72px",
               borderRadius: "50%",
-              background: "#eef4ff",
+              background: "var(--info-bg)",
               margin: "0 auto",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <Hammer size={32} strokeWidth={1.5} style={{ color: "#2563eb" }} />
+            <Hammer size={32} strokeWidth={1.5} style={{ color: "var(--accent-light)" }} />
           </div>
 
           <h2
@@ -124,7 +126,8 @@ const LiveAuctionTab = ({ tournamentId: propTournamentId }) => {
               marginTop: "18px",
               marginBottom: "8px",
               fontSize: "28px",
-              color: "#111827",
+              color: "var(--text-primary-light)",
+              transition: "color 0.2s ease",
             }}
           >
             Live Auction
@@ -132,8 +135,9 @@ const LiveAuctionTab = ({ tournamentId: propTournamentId }) => {
 
           <p
             style={{
-              color: "#6b7280",
+              color: "var(--text-secondary-light)",
               fontSize: "14px",
+              transition: "color 0.2s ease",
             }}
           >
             Auction has not started yet.
@@ -143,7 +147,8 @@ const LiveAuctionTab = ({ tournamentId: propTournamentId }) => {
             style={{
               marginTop: "32px",
               marginBottom: "32px",
-              borderTop: "1px solid #edf1f7",
+              borderTop: "1px solid var(--border-light)",
+              transition: "border-color 0.2s ease",
             }}
           />
         </div>
@@ -159,14 +164,14 @@ const LiveAuctionTab = ({ tournamentId: propTournamentId }) => {
               width: "120px",
               height: "120px",
               borderRadius: "50%",
-              background: "#eef4ff",
+              background: "var(--info-bg)",
               margin: "0 auto",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <Hammer size={56} strokeWidth={1.5} style={{ color: "#2563eb" }} />
+            <Hammer size={56} strokeWidth={1.5} style={{ color: "var(--accent-light)" }} />
           </div>
 
           <h2
@@ -174,7 +179,8 @@ const LiveAuctionTab = ({ tournamentId: propTournamentId }) => {
               marginTop: "24px",
               fontSize: "34px",
               fontWeight: "700",
-              color: "#111827",
+              color: "var(--text-primary-light)",
+              transition: "color 0.2s ease",
             }}
           >
             Ready to Start the Auction?
@@ -182,9 +188,10 @@ const LiveAuctionTab = ({ tournamentId: propTournamentId }) => {
 
           <p
             style={{
-              color: "#6b7280",
+              color: "var(--text-secondary-light)",
               marginTop: "12px",
               fontSize: "15px",
+              transition: "color 0.2s ease",
             }}
           >
             Once you start the auction, teams will be able to
@@ -196,7 +203,7 @@ const LiveAuctionTab = ({ tournamentId: propTournamentId }) => {
             disabled={!players || players.length === 0}
             style={{
               marginTop: "28px",
-              background: "#2563eb",
+              background: "var(--accent-light)",
               color: "#fff",
               border: "none",
               borderRadius: "10px",
@@ -205,6 +212,7 @@ const LiveAuctionTab = ({ tournamentId: propTournamentId }) => {
               fontWeight: "600",
               cursor: (!players || players.length === 0) ? "not-allowed" : "pointer",
               opacity: (!players || players.length === 0) ? 0.5 : 1,
+              transition: "background-color 0.2s ease",
             }}
           >
             ▶ Start Auction
@@ -214,8 +222,9 @@ const LiveAuctionTab = ({ tournamentId: propTournamentId }) => {
           <p
             style={{
               marginTop: "20px",
-              color: "#6b7280",
+              color: "var(--text-secondary-light)",
               fontSize: "13px",
+              transition: "color 0.2s ease",
             }}
           >
             ℹ️ You can't pause or reset the auction once it has started.
@@ -234,8 +243,10 @@ const LiveAuctionTab = ({ tournamentId: propTournamentId }) => {
         {/* Current Auction */}
         <div
           style={{
-            background: "#fff",
-            border: "1px solid #e8eaf0",
+            background: "var(--glass-bg)",
+            backdropFilter: "blur(16px)",
+            WebkitBackdropFilter: "blur(16px)",
+            border: "1px solid var(--glass-border)",
             borderRadius: "16px",
             padding: "20px",
           }}
@@ -249,9 +260,10 @@ const LiveAuctionTab = ({ tournamentId: propTournamentId }) => {
           >
             <h3
               style={{
-                color: "#111827",
+                color: "var(--text-primary-light)",
                 fontSize: "18px",
                 fontWeight: "700",
+                transition: "color 0.2s ease",
               }}
             >
               Current Auction
@@ -259,12 +271,13 @@ const LiveAuctionTab = ({ tournamentId: propTournamentId }) => {
 
             <span
               style={{
-                background: "#eef4ff",
-                color: "#2563eb",
+                background: "var(--info-bg)",
+                color: "var(--accent-light)",
                 padding: "4px 10px",
                 borderRadius: "8px",
                 fontSize: "12px",
                 fontWeight: "600",
+                transition: "background-color 0.2s ease, color 0.2s ease",
               }}
             >
               {statusLabel}
@@ -284,22 +297,23 @@ const LiveAuctionTab = ({ tournamentId: propTournamentId }) => {
                     width: "70px",
                     height: "70px",
                     borderRadius: "50%",
-                    background: currentPlayer.photo ? "transparent" : "#f3f4f6",
+                    background: currentPlayer.photo ? "transparent" : "var(--avatar-bg)",
                     margin: "0 auto 12px",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     overflow: "hidden",
+                    transition: "background-color 0.2s ease",
                   }}
                 >
                   {currentPlayer.photo ? (
                     <img src={playerPhotoUrl(currentPlayer.photo)} alt={currentPlayer.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                   ) : (
-                    <User size={30} strokeWidth={1.5} style={{ color: "#6b7280" }} />
+                    <User size={30} strokeWidth={1.5} style={{ color: "var(--text-secondary-light)" }} />
                   )}
                 </div>
-                <h4 style={{ color: "#111827", marginBottom: "4px" }}>{currentPlayer.name}</h4>
-                <p style={{ color: "#6b7280", fontSize: "13px" }}>{currentPlayer.role}</p>
+                <h4 style={{ color: "var(--text-primary-light)", marginBottom: "4px", transition: "color 0.2s ease" }}>{currentPlayer.name}</h4>
+                <p style={{ color: "var(--text-secondary-light)", fontSize: "13px", transition: "color 0.2s ease" }}>{currentPlayer.role}</p>
               </>
             ) : (
               <>
@@ -308,38 +322,40 @@ const LiveAuctionTab = ({ tournamentId: propTournamentId }) => {
                     width: "70px",
                     height: "70px",
                     borderRadius: "50%",
-                    background: "#f3f4f6",
+                    background: "var(--avatar-bg)",
                     margin: "0 auto 12px",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
+                    transition: "background-color 0.2s ease",
                   }}
                 >
-                  <User size={30} strokeWidth={1.5} style={{ color: "#6b7280" }} />
+                  <User size={30} strokeWidth={1.5} style={{ color: "var(--text-secondary-light)" }} />
                 </div>
-                <h4 style={{ color: "#111827", marginBottom: "6px" }}>No Player Selected</h4>
-                <p style={{ color: "#6b7280", fontSize: "13px" }}>The auction will begin once you start.</p>
+                <h4 style={{ color: "var(--text-primary-light)", marginBottom: "6px", transition: "color 0.2s ease" }}>No Player Selected</h4>
+                <p style={{ color: "var(--text-secondary-light)", fontSize: "13px", transition: "color 0.2s ease" }}>The auction will begin once you start.</p>
               </>
             )}
           </div>
 
           <div
             style={{
-              borderTop: "1px solid #edf1f7",
+              borderTop: "1px solid var(--border-light)",
               paddingTop: "16px",
+              transition: "border-color 0.2s ease",
             }}
           >
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "14px" }}>
-              <span>Base Price</span>
-              <span>{currentPlayer?.basePrice ? `₹${currentPlayer.basePrice.toLocaleString("en-IN")}` : "-"}</span>
+              <span style={{ color: "var(--text-secondary-light)", transition: "color 0.2s ease" }}>Base Price</span>
+              <span style={{ color: "var(--text-primary-light)", transition: "color 0.2s ease" }}>{currentPlayer?.basePrice ? `₹${currentPlayer.basePrice.toLocaleString("en-IN")}` : "-"}</span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "14px" }}>
-              <span>Current Bid</span>
-              <span>{currentBid?.amount ? `₹${currentBid.amount.toLocaleString("en-IN")}` : "-"}</span>
+              <span style={{ color: "var(--text-secondary-light)", transition: "color 0.2s ease" }}>Current Bid</span>
+              <span style={{ color: "var(--text-primary-light)", transition: "color 0.2s ease" }}>{currentBid?.amount ? `₹${currentBid.amount.toLocaleString("en-IN")}` : "-"}</span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span>Highest Bidder</span>
-              <span>{highestBidder?.name || "-"}</span>
+              <span style={{ color: "var(--text-secondary-light)", transition: "color 0.2s ease" }}>Highest Bidder</span>
+              <span style={{ color: "var(--text-primary-light)", transition: "color 0.2s ease" }}>{highestBidder?.name || "-"}</span>
             </div>
           </div>
         </div>
@@ -347,8 +363,10 @@ const LiveAuctionTab = ({ tournamentId: propTournamentId }) => {
         {/* Auction Activity */}
         <div
           style={{
-            background: "#fff",
-            border: "1px solid #e8eaf0",
+            background: "var(--glass-bg)",
+            backdropFilter: "blur(16px)",
+            WebkitBackdropFilter: "blur(16px)",
+            border: "1px solid var(--glass-border)",
             borderRadius: "16px",
             padding: "20px",
           }}
@@ -358,6 +376,8 @@ const LiveAuctionTab = ({ tournamentId: propTournamentId }) => {
               marginBottom: "24px",
               fontSize: "18px",
               fontWeight: "700",
+              color: "var(--text-primary-light)",
+              transition: "color 0.2s ease",
             }}
           >
             Auction Activity
@@ -374,20 +394,21 @@ const LiveAuctionTab = ({ tournamentId: propTournamentId }) => {
                 width: "70px",
                 height: "70px",
                 borderRadius: "50%",
-                background: "#eef4ff",
+                background: "var(--info-bg)",
                 margin: "0 auto 12px",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <Hammer size={30} strokeWidth={1.5} style={{ color: "#2563eb" }} />
+              <Hammer size={30} strokeWidth={1.5} style={{ color: "var(--accent-light)" }} />
             </div>
 
             <h4
               style={{
-                color: "#111827",
+                color: "var(--text-primary-light)",
                 marginBottom: "8px",
+                transition: "color 0.2s ease",
               }}
             >
               No activity yet
@@ -395,8 +416,9 @@ const LiveAuctionTab = ({ tournamentId: propTournamentId }) => {
 
             <p
               style={{
-                color: "#6b7280",
+                color: "var(--text-secondary-light)",
                 fontSize: "13px",
+                transition: "color 0.2s ease",
               }}
             >
               Auction activity will appear here once the auction begins.

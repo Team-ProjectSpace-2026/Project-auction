@@ -3,10 +3,10 @@
 const MetricCard = ({ icon: Icon, iconBg, label, value, subtitle }) => {
   return (
     <div style={{
-      background: 'rgba(255, 255, 255, 0.45)',
+      background: 'var(--glass-bg)',
       backdropFilter: 'blur(16px)',
       WebkitBackdropFilter: 'blur(16px)',
-      border: '1px solid rgba(255, 255, 255, 0.6)',
+      border: '1px solid var(--glass-border)',
       borderRadius: '12px',
       padding: '14px 20px',
       display: 'flex',
@@ -15,6 +15,7 @@ const MetricCard = ({ icon: Icon, iconBg, label, value, subtitle }) => {
       flex: 1,
       minWidth: '160px',
       boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
+      transition: 'background-color 0.2s ease, border-color 0.2s ease',
     }}>
       <div style={{
         width: '42px',

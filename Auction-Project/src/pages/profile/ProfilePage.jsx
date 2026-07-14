@@ -49,7 +49,7 @@ const ProfilePage = () => {
         {/* If your team built TopBar.jsx, uncomment the line below to add the top navigation */}
         {/* <TopBar user={{ name: 'Rahul Organizer', role: 'Organizer' }} /> */}
 
-        <main style={{ padding: '40px 32px', maxWidth: '1000px', overflow: 'visible', position: 'relative', zIndex: 1 }}>
+        <main style={{ padding: '40px 32px', maxWidth: '1000px', margin: '0 auto', overflow: 'visible', position: 'relative', zIndex: 1 }}>
           
           <div className="page-header">
             <h1>Profile Settings</h1>
@@ -58,13 +58,14 @@ const ProfilePage = () => {
 
           {/* Theme Toggle Section */}
           <div style={{
-            background: 'rgba(255, 255, 255, 0.45)',
+            background: 'var(--glass-bg)',
             backdropFilter: 'blur(16px)',
             WebkitBackdropFilter: 'blur(16px)',
-            border: '1px solid rgba(255, 255, 255, 0.6)',
+            border: '1px solid var(--glass-border)',
             borderRadius: '8px',
-            padding: '20px 32px',
+            padding: '12px 24px',
             marginBottom: '24px',
+            transition: 'background-color 0.2s ease, border-color 0.2s ease',
           }}>
             <div className="theme-toggle-wrapper">
               <div className="theme-toggle-label">

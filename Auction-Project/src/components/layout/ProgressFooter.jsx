@@ -11,11 +11,12 @@ const steps = [
 const ProgressFooter = () => {
   return (
     <div style={{
-      background: 'rgba(255, 255, 255, 0.45)',
+      background: 'var(--glass-bg)',
       backdropFilter: 'blur(16px)',
       WebkitBackdropFilter: 'blur(16px)',
-      borderTop: '1px solid rgba(255, 255, 255, 0.5)',
+      borderTop: '1px solid var(--glass-border)',
       padding: '20px 32px',
+      transition: 'background-color 0.2s ease, border-color 0.2s ease',
     }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '16px' }}>
           <Lightbulb size={16} strokeWidth={2} style={{ color: 'var(--text-secondary-light)' }} />
@@ -45,7 +46,7 @@ const ProgressFooter = () => {
               </div>
             </div>
             {idx < steps.length - 1 && (
-              <ArrowRight size={18} strokeWidth={2} style={{ color: '#c5cae0', padding: '12px 8px 0', flexShrink: 0 }} />
+              <ArrowRight size={18} strokeWidth={2} style={{ color: 'var(--text-secondary-light)', padding: '12px 8px 0', flexShrink: 0, transition: 'color 0.2s ease' }} />
             )}
           </div>
         ))}

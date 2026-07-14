@@ -120,12 +120,13 @@ const DashboardPage = () => {
               {/* Tournaments section */}
               {tournaments.length > 0 ? (
                 <div style={{
-                  background: 'rgba(255, 255, 255, 0.45)',
+                  background: 'var(--glass-bg)',
                   backdropFilter: 'blur(16px)',
                   WebkitBackdropFilter: 'blur(16px)',
-                  border: '1px solid rgba(255, 255, 255, 0.6)',
+                  border: '1px solid var(--glass-border)',
                   borderRadius: '16px', overflow: 'hidden',
                   boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
+                  transition: 'background-color 0.2s ease, border-color 0.2s ease',
                 }}>
                   {/* Table header */}
                   <div style={{

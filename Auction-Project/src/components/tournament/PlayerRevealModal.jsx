@@ -199,7 +199,7 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
   const progressPhase = phase === "idle" ? 0 : phase === "shuffling" ? 1 : phase === "selected" ? 2 : 3;
 
   return createPortal(
-    <>
+    <div className="auction-screen">
       {/* Golden light sweep overlay */}
       <AnimatePresence>
         {showSweep && <div className="golden-sweep" key="sweep" />}
@@ -447,7 +447,7 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
         )}
       </AnimatePresence>
 
-    </>,
+    </div>,
     document.body
   );
 };

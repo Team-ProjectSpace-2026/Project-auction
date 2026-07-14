@@ -107,6 +107,7 @@ const PlayerDetailsModal = ({ onClose, onStartBidding }) => {
   }, [onStartBidding, navigate, tournamentId]);
 
   return createPortal(
+    <div className="auction-screen">
     <div className="details-modal">
       <StadiumBackground />
 
@@ -284,6 +285,7 @@ const PlayerDetailsModal = ({ onClose, onStartBidding }) => {
           </motion.p>
         </motion.div>
       </div>
+    </div>
     </div>,
     document.body
   );
