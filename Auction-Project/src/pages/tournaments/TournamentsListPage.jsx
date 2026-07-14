@@ -4,6 +4,7 @@ import Sidebar from "../../components/layout/Sidebar";
 import CricketLoader from "../../components/common/CricketLoader";
 import { getTournaments, deleteTournament } from "../../services/tournamentService";
 import { Pencil, Trash2, Trophy, Calendar, Users, MapPin, IndianRupee } from "lucide-react";
+import bgStadium from "../../assets/bgstadium2.png";
 
 const getDynamicStatus = (date) => {
   if (!date) return "Upcoming";
@@ -103,10 +104,9 @@ const TournamentsListPage = () => {
     <div
       style={{
         display: "flex",
-        minHeight: "100vh",
-        background: "var(--bg-primary-light)",
+        height: "100vh",
+        overflow: "hidden",
         fontFamily: "'Inter','Segoe UI',sans-serif",
-        transition: "background-color 0.2s ease",
       }}
     >
       <Sidebar activePage={activePage} onNavigate={setActivePage} />
@@ -117,9 +117,26 @@ const TournamentsListPage = () => {
           flex: 1,
           display: "flex",
           flexDirection: "column",
+          height: "100vh",
+          overflow: "auto",
+          position: "relative",
         }}
       >
-        <main style={{ padding: "28px 28px 28px" }}>
+        {/* Fixed background image */}
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: "220px",
+          right: 0,
+          bottom: 0,
+          backgroundImage: `url(${bgStadium})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center bottom",
+          backgroundRepeat: "no-repeat",
+          zIndex: 0,
+        }} />
+
+        <main style={{ padding: "28px 28px 28px", overflow: "visible", position: "relative", zIndex: 1 }}>
           <h1
             style={{
               fontSize: "28px",
@@ -142,15 +159,17 @@ const TournamentsListPage = () => {
             Manage all your cricket tournaments.
           </p>
 
-          <div
-            style={{
-              background: "var(--card-bg-light)",
-              borderRadius: "16px",
-              border: "1px solid var(--border-light)",
-              padding: "18px",
-              transition: "background-color 0.2s ease, border-color 0.2s ease",
-            }}
-          >
+<div
+                style={{
+                  background: "rgba(255, 255, 255, 0.45)",
+                  backdropFilter: "blur(16px)",
+                  WebkitBackdropFilter: "blur(16px)",
+                  borderRadius: "16px",
+                  border: "1px solid rgba(255, 255, 255, 0.6)",
+                  padding: "18px",
+                  transition: "background-color 0.2s ease, border-color 0.2s ease",
+                }}
+              >
             {/* Search Row */}
             <div
               style={{
@@ -195,21 +214,22 @@ const TournamentsListPage = () => {
                 <option>Completed</option>
               </select>
 
-              <button
-                onClick={() => navigate("/create-tournament")}
-                style={{
-                  background: "var(--accent-light)",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: "10px",
-                  padding: "14px 24px",
-                  fontWeight: "700",
-                  cursor: "pointer",
-                  transition: "background-color 0.2s ease",
-                }}
-              >
-                + New Tournament
-              </button>
+<button
+                     onClick={() => navigate("/create-tournament")}
+                     style={{
+                       background: "rgba(37, 99, 235, 0.9)",
+                       color: "#fff",
+                       border: "1px solid rgba(255, 255, 255, 0.6)",
+                       borderRadius: "10px",
+                       padding: "14px 24px",
+                       fontWeight: "700",
+                       cursor: "pointer",
+                       backdropFilter: "blur(16px)",
+                       WebkitBackdropFilter: "blur(16px)",
+                     }}
+                   >
+                     + New Tournament
+                   </button>
             </div>
 
             {/* Loading / Error */}
@@ -239,18 +259,20 @@ const TournamentsListPage = () => {
                     {filtered.map((tournament) => {
                       const budgetPerTeam = tournament.budgetPerTeam;
                       return (
-                      <div
-                        key={tournament._id}
-                        style={{
-                          background: "var(--card-bg-light)",
-                          border: "1px solid var(--border-light)",
-                          borderRadius: "14px",
-                          padding: "16px",
-                          position: "relative",
-                          boxShadow: "0 2px 8px rgba(15,23,42,0.04)",
-                          transition: "background-color 0.2s ease, border-color 0.2s ease",
-                        }}
-                      >
+<div
+                          key={tournament._id}
+                          style={{
+                            background: "rgba(255, 255, 255, 0.45)",
+                            backdropFilter: "blur(16px)",
+                            WebkitBackdropFilter: "blur(16px)",
+                            border: "1px solid rgba(255, 255, 255, 0.6)",
+                            borderRadius: "14px",
+                            padding: "16px",
+                            position: "relative",
+                            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.08)",
+                            transition: "background-color 0.2s ease, border-color 0.2s ease",
+                          }}
+                        >
                         {/* 3-Dot Menu */}
                         <div style={{ position: "absolute", top: "14px", right: "14px" }} data-menu-id={tournament._id}>
                           <div
@@ -470,11 +492,13 @@ const TournamentsListPage = () => {
                             marginTop: "16px",
                             height: "44px",
                             borderRadius: "10px",
-                            border: "1px solid var(--accent-light)",
-                            background: "var(--card-bg-light)",
+                            border: "1px solid rgba(37, 99, 235, 0.6)",
+                            background: "rgba(255, 255, 255, 0.6)",
                             color: "var(--accent-light)",
                             fontWeight: "700",
                             cursor: "pointer",
+                            backdropFilter: "blur(16px)",
+                            WebkitBackdropFilter: "blur(16px)",
                             transition: "background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease",
                           }}
                         >

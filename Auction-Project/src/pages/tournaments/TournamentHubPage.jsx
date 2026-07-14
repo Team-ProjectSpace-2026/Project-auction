@@ -10,6 +10,7 @@ import LiveAuctionTab from "../../components/tournament/LiveAuctionTab";
 import { useLocation, useParams } from "react-router-dom";
 import api from "../../services/api";
 import { Clock, Link, Users, User, Hammer } from "lucide-react";
+import bgStadium from "../../assets/bgstadium2.png";
 
 // const MOCK_USER = {
 //   name: "Rahul Organizer",
@@ -53,9 +54,9 @@ const TournamentHubPage = () => {
     <div
       style={{
         display: "flex",
-        minHeight: "100vh",
-        background: "var(--bg-primary-light)",
-        transition: "background-color 0.2s ease",
+        height: "100vh",
+        overflow: "hidden",
+        fontFamily: "'Inter','Segoe UI',sans-serif",
       }}
     >
       <Sidebar
@@ -67,13 +68,35 @@ const TournamentHubPage = () => {
         style={{
           marginLeft: "220px",
           flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          height: "100vh",
+          overflow: "auto",
+          position: "relative",
         }}
       >
+        {/* Fixed background image */}
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: "220px",
+          right: 0,
+          bottom: 0,
+          backgroundImage: `url(${bgStadium})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center bottom",
+          backgroundRepeat: "no-repeat",
+          zIndex: 0,
+        }} />
+
         {/* <TopBar user={MOCK_USER} /> */}
 
         <main
           style={{
             padding: "28px 32px 32px",
+            overflow: "visible",
+            position: "relative",
+            zIndex: 1,
           }}
         >
           {/* Tournament Header */}

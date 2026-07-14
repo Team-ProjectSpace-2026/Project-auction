@@ -11,10 +11,11 @@ const steps = [
 const ProgressFooter = () => {
   return (
     <div style={{
-      background: 'var(--bg-secondary-light)',
-      borderTop: '1px solid var(--border-light)',
+      background: 'rgba(255, 255, 255, 0.45)',
+      backdropFilter: 'blur(16px)',
+      WebkitBackdropFilter: 'blur(16px)',
+      borderTop: '1px solid rgba(255, 255, 255, 0.5)',
       padding: '20px 32px',
-      transition: 'background-color 0.2s ease, border-color 0.2s ease',
     }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '16px' }}>
           <Lightbulb size={16} strokeWidth={2} style={{ color: 'var(--text-secondary-light)' }} />

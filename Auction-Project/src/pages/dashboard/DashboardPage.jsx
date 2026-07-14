@@ -10,6 +10,7 @@ import MetricCard from '../../components/dashboard/MetricCard';
 import TournamentRow from '../../components/dashboard/TournamentRow';
 import { Trophy, Play, Calendar, CheckCircle, ClipboardList } from 'lucide-react';
 import cricketIllustration from '../../assets/cricket-illustration.png';
+import bgStadium from '../../assets/bgstadium2.png';
 
 const metricCards = [
   { key: 'total',     label: 'Total Tournaments',     icon: Trophy,      iconBg: '#ede9fe', subtitle: 'All time tournaments' },
@@ -42,17 +43,36 @@ const DashboardPage = () => {
   }, []);
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-primary-light)', fontFamily: "'Inter', 'Segoe UI', sans-serif", transition: 'background-color 0.2s ease' }}>
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', fontFamily: "'Inter', 'Segoe UI', sans-serif" }}>
       {/* Sidebar */}
       <Sidebar activePage={activePage} onNavigate={setActivePage} />
 
       {/* Main area */}
-      <div style={{ marginLeft: '220px', flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <div style={{
+        marginLeft: '220px', flex: 1, display: 'flex', flexDirection: 'column', height: '100vh',
+        overflow: 'auto', position: 'relative',
+      }}>
+        {/* Fixed background image */}
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: '220px',
+          right: 0,
+          bottom: 0,
+          backgroundImage: `url(${bgStadium})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center bottom',
+          backgroundRepeat: 'no-repeat',
+          zIndex: 0,
+        }} />
+
         {/* Top bar */}
-        <TopBar user={user} />
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <TopBar user={user} />
+        </div>
 
         {/* Scrollable content */}
-        <main style={{ flex: 1, padding: '72px 32px 0', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <main style={{ flex: 1, padding: '68px 32px 0', display: 'flex', flexDirection: 'column', gap: '2px', position: 'relative', zIndex: 1, overflow: 'visible', justifyContent: 'flex-start' }}>
           {loading ? (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1, minHeight: '300px' }}>
               <div style={{
@@ -67,7 +87,7 @@ const DashboardPage = () => {
               {/* Welcome */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                  <h1 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-primary-light)', margin: 0 }}>
+                  <h1 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-primary-light)', margin: 0 }}>
                     Welcome back, {user?.name || 'User'}! 👋
                   </h1>
                   <p style={{ color: 'var(--text-secondary-light)', fontSize: '14px', margin: '4px 0 0', transition: 'color 0.2s ease' }}>
@@ -78,7 +98,7 @@ const DashboardPage = () => {
                   <img 
                     src={cricketIllustration} 
                     alt="Cricket illustration" 
-                    style={{ width: '140px', height: 'auto'}}
+                    style={{ width: '150px', height: 'auto'}}
                   />
                 </div>
               </div>
@@ -100,9 +120,12 @@ const DashboardPage = () => {
               {/* Tournaments section */}
               {tournaments.length > 0 ? (
                 <div style={{
-                  background: 'var(--card-bg-light)', borderRadius: '16px',
-                  border: '1px solid var(--border-light)', overflow: 'hidden',
-                  transition: 'background-color 0.2s ease, border-color 0.2s ease',
+                  background: 'rgba(255, 255, 255, 0.45)',
+                  backdropFilter: 'blur(16px)',
+                  WebkitBackdropFilter: 'blur(16px)',
+                  border: '1px solid rgba(255, 255, 255, 0.6)',
+                  borderRadius: '16px', overflow: 'hidden',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
                 }}>
                   {/* Table header */}
                   <div style={{
@@ -153,16 +176,13 @@ const DashboardPage = () => {
               ) : (
                 /* Empty state */
                 <div style={{
-                  background: 'var(--card-bg-light)', borderRadius: '16px',
-                  border: '1px solid var(--border-light)', flex: 1,
+                  flex: 1,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  minHeight: '320px',
-                  transition: 'background-color 0.2s ease, border-color 0.2s ease',
                 }}>
-                  <div style={{ textAlign: 'center', padding: '40px 20px' }}>
+                  <div style={{ textAlign: 'center', padding: '24px 20px' }}>
                     {/* Trophy + clipboard illustration */}
-                      <div style={{ position: 'relative', display: 'inline-block', marginBottom: '20px' }}>
-                      <ClipboardList size={80} strokeWidth={1} style={{ opacity: 0.18, color: 'var(--text-primary-light)' }} />
+                      <div style={{ position: 'relative', display: 'inline-block', marginBottom: '16px' }}>
+                      <ClipboardList size={60} strokeWidth={1} style={{ opacity: 0.18, color: 'var(--text-primary-light)' }} />
                       <div style={{
                         position: 'absolute', bottom: '2px', right: '-8px',
                         width: '32px', height: '32px', borderRadius: '50%',
@@ -171,10 +191,10 @@ const DashboardPage = () => {
                         fontWeight: 900, boxShadow: '0 2px 8px rgba(37,99,235,0.4)',
                       }}>+</div>
                     </div>
-                    <h2 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-primary-light)', margin: '0 0 8px', transition: 'color 0.2s ease' }}>
+                    <h2 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary-light)', margin: '0 0 6px', transition: 'color 0.2s ease' }}>
                       No Tournaments Yet!
                     </h2>
-                    <p style={{ color: 'var(--text-secondary-light)', fontSize: '14px', margin: '0 0 24px', lineHeight: 1.6, transition: 'color 0.2s ease' }}>
+                    <p style={{ color: 'var(--text-secondary-light)', fontSize: '13px', margin: '0 0 18px', lineHeight: 1.6, transition: 'color 0.2s ease' }}>
                       You haven't created any tournaments yet.<br />
                       Create your first tournament to get started.
                     </p>
@@ -182,8 +202,8 @@ const DashboardPage = () => {
                       onClick={() => navigate('/create-tournament')}
                       style={{
                         background: '#2563eb', color: '#fff', border: 'none',
-                        borderRadius: '10px', padding: '13px 28px',
-                        fontSize: '15px', fontWeight: 700, cursor: 'pointer',
+                        borderRadius: '10px', padding: '11px 24px',
+                        fontSize: '14px', fontWeight: 700, cursor: 'pointer',
                         display: 'inline-flex', alignItems: 'center', gap: '8px',
                         boxShadow: '0 4px 14px rgba(37,99,235,0.35)',
                         transition: 'transform 0.1s, box-shadow 0.1s',
@@ -207,7 +227,7 @@ const DashboardPage = () => {
         </main>
 
         {/* Progress footer — fixed at bottom */}
-        <div style={{ marginTop: '24px' }}>
+        <div style={{ position: 'relative', zIndex: 1, flexShrink: 0 }}>
           <ProgressFooter />
         </div>
       </div>
