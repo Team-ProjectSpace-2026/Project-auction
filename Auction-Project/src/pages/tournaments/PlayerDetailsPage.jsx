@@ -69,10 +69,10 @@ const PlayerDetailsPage = () => {
 {/* Player Header */}
            <div
              style={{
-               background: "rgba(255, 255, 255, 0.45)",
+               background: "var(--glass-bg)",
                backdropFilter: "blur(16px)",
                WebkitBackdropFilter: "blur(16px)",
-               border: "1px solid rgba(255, 255, 255, 0.6)",
+               border: "1px solid var(--glass-border)",
                borderRadius: "16px",
                padding: "24px",
                display: "flex",
@@ -152,7 +152,7 @@ const PlayerDetailsPage = () => {
               style={{
                 background: "rgba(37, 99, 235, 0.9)",
                 color: "#fff",
-                border: "1px solid rgba(255, 255, 255, 0.6)",
+                border: "1px solid var(--glass-border)",
                 borderRadius: "10px",
                 padding: "12px 24px",
                 fontWeight: "600",
@@ -176,10 +176,10 @@ const PlayerDetailsPage = () => {
             {/* Player Information */}
             <div
               style={{
-                background: "rgba(255, 255, 255, 0.45)",
+                background: "var(--glass-bg)",
                 backdropFilter: "blur(16px)",
                 WebkitBackdropFilter: "blur(16px)",
-                border: "1px solid rgba(255, 255, 255, 0.6)",
+                border: "1px solid var(--glass-border)",
                 borderRadius: "16px",
                 padding: "24px",
               }}
@@ -223,10 +223,10 @@ const PlayerDetailsPage = () => {
             {/* Auction Information */}
             <div
               style={{
-                background: "rgba(255, 255, 255, 0.45)",
+                background: "var(--glass-bg)",
                 backdropFilter: "blur(16px)",
                 WebkitBackdropFilter: "blur(16px)",
-                border: "1px solid rgba(255, 255, 255, 0.6)",
+                border: "1px solid var(--glass-border)",
                 borderRadius: "16px",
                 padding: "24px",
               }}
@@ -268,10 +268,10 @@ const PlayerDetailsPage = () => {
           <div
             style={{
               marginTop: "24px",
-              background: "rgba(255, 255, 255, 0.45)",
+              background: "var(--glass-bg)",
               backdropFilter: "blur(16px)",
               WebkitBackdropFilter: "blur(16px)",
-              border: "1px solid rgba(255, 255, 255, 0.6)",
+              border: "1px solid var(--glass-border)",
               borderRadius: "16px",
               padding: "24px",
             }}

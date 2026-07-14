@@ -203,10 +203,10 @@ const TeamDetailsPage = () => {
           {/* Header */}
           <div
             style={{
-              background: "rgba(255, 255, 255, 0.45)",
+              background: "var(--glass-bg)",
               backdropFilter: "blur(16px)",
               WebkitBackdropFilter: "blur(16px)",
-              border: "1px solid rgba(255, 255, 255, 0.6)",
+              border: "1px solid var(--glass-border)",
               borderRadius: "20px",
               padding: "22px 24px",
               display: "flex",
@@ -259,7 +259,7 @@ const TeamDetailsPage = () => {
                 padding: "12px 24px",
                 borderRadius: "12px",
                 border: "1px solid rgba(37, 99, 235, 0.6)",
-                background: players.length === 0 ? "var(--text-secondary-light)" : "rgba(255, 255, 255, 0.6)",
+                background: players.length === 0 ? "var(--text-secondary-light)" : "var(--glass-border)",
                 color: players.length === 0 ? "#fff" : "var(--accent-light)",
                 fontWeight: "700",
                 cursor: players.length === 0 ? "not-allowed" : "pointer",
@@ -274,10 +274,10 @@ const TeamDetailsPage = () => {
           {/* Squad List */}
           <div
             style={{
-              background: "rgba(255, 255, 255, 0.45)",
+              background: "var(--glass-bg)",
               backdropFilter: "blur(16px)",
               WebkitBackdropFilter: "blur(16px)",
-              border: "1px solid rgba(255, 255, 255, 0.6)",
+              border: "1px solid var(--glass-border)",
               borderRadius: "20px",
               padding: "24px",
               boxShadow: "0 8px 32px rgba(0, 0, 0, 0.08)",

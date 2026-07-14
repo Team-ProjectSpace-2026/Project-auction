@@ -161,11 +161,11 @@ const TournamentsListPage = () => {
 
 <div
                 style={{
-                  background: "rgba(255, 255, 255, 0.45)",
+                  background: "var(--glass-bg)",
                   backdropFilter: "blur(16px)",
                   WebkitBackdropFilter: "blur(16px)",
                   borderRadius: "16px",
-                  border: "1px solid rgba(255, 255, 255, 0.6)",
+                  border: "1px solid var(--glass-border)",
                   padding: "18px",
                   transition: "background-color 0.2s ease, border-color 0.2s ease",
                 }}
@@ -219,13 +219,11 @@ const TournamentsListPage = () => {
                      style={{
                        background: "rgba(37, 99, 235, 0.9)",
                        color: "#fff",
-                       border: "1px solid rgba(255, 255, 255, 0.6)",
+                       border: "1px solid transparent",
                        borderRadius: "10px",
                        padding: "14px 24px",
                        fontWeight: "700",
                        cursor: "pointer",
-                       backdropFilter: "blur(16px)",
-                       WebkitBackdropFilter: "blur(16px)",
                      }}
                    >
                      + New Tournament
@@ -262,10 +260,10 @@ const TournamentsListPage = () => {
 <div
                           key={tournament._id}
                           style={{
-                            background: "rgba(255, 255, 255, 0.45)",
+                            background: "var(--glass-bg)",
                             backdropFilter: "blur(16px)",
                             WebkitBackdropFilter: "blur(16px)",
-                            border: "1px solid rgba(255, 255, 255, 0.6)",
+                            border: "1px solid var(--glass-border)",
                             borderRadius: "14px",
                             padding: "16px",
                             position: "relative",
@@ -492,8 +490,8 @@ const TournamentsListPage = () => {
                             marginTop: "16px",
                             height: "44px",
                             borderRadius: "10px",
-                            border: "1px solid rgba(37, 99, 235, 0.6)",
-                            background: "rgba(255, 255, 255, 0.6)",
+                            border: "1px solid var(--accent-light)",
+                            background: "var(--glass-bg-hover)",
                             color: "var(--accent-light)",
                             fontWeight: "700",
                             cursor: "pointer",
