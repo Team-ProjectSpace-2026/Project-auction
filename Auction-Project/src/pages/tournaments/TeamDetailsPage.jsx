@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import Sidebar from "../../components/layout/Sidebar";
 import CricketLoader from "../../components/common/CricketLoader";
 import { getTeam } from "../../services/teamService";
+import bgStadium from "../../assets/bgstadium2.png";
 
 const getRoleStyle = (role) => {
   switch (role) {
@@ -101,10 +102,25 @@ const TeamDetailsPage = () => {
 
   if (loading) {
     return (
-      <div style={{ display: "flex", minHeight: "100vh", background: "var(--bg-primary-light)" }}>
+      <div style={{ display: "flex", height: "100vh", overflow: "hidden", fontFamily: "'Inter','Segoe UI',sans-serif" }}>
         <Sidebar activePage="tournaments" />
-        <div style={{ marginLeft: "220px", flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <CricketLoader text="Loading team details..." />
+        <div style={{ marginLeft: "220px", flex: 1, display: "flex", flexDirection: "column", height: "100vh", overflow: "auto", position: "relative" }}>
+          {/* Fixed background image */}
+          <div style={{
+            position: "fixed",
+            top: 0,
+            left: "220px",
+            right: 0,
+            bottom: 0,
+            backgroundImage: `url(${bgStadium})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center bottom",
+            backgroundRepeat: "no-repeat",
+            zIndex: 0,
+          }} />
+          <div style={{ marginLeft: "0", flex: 1, display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
+            <CricketLoader text="Loading team details..." />
+          </div>
         </div>
       </div>
     );
@@ -112,10 +128,24 @@ const TeamDetailsPage = () => {
 
   if (error || !team) {
     return (
-      <div style={{ display: "flex", minHeight: "100vh", background: "var(--bg-primary-light)" }}>
+      <div style={{ display: "flex", height: "100vh", overflow: "hidden", fontFamily: "'Inter','Segoe UI',sans-serif" }}>
         <Sidebar activePage="tournaments" />
-        <div style={{ marginLeft: "220px", flex: 1, padding: "28px 32px" }}>
-          <p style={{ color: "#e74c3c" }}>{error || "Team not found."}</p>
+        <div style={{ marginLeft: "220px", flex: 1, display: "flex", flexDirection: "column", height: "100vh", overflow: "auto", position: "relative" }}>
+          {/* Fixed background image */}
+          <div style={{
+            position: "fixed",
+            top: 0,
+            left: "220px",
+            right: 0,
+            bottom: 0,
+            backgroundImage: `url(${bgStadium})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center bottom",
+            backgroundRepeat: "no-repeat",
+            zIndex: 0,
+          }} />
+          <div style={{ flex: 1, padding: "28px 32px", position: "relative", zIndex: 1 }}>
+            <p style={{ color: "#e74c3c" }}>{error || "Team not found."}</p>
           <button
             onClick={() => navigate(-1)}
             style={{
@@ -132,15 +162,30 @@ const TeamDetailsPage = () => {
           </button>
         </div>
       </div>
+      </div>
     );
   }
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: "var(--bg-primary-light)", transition: "background-color 0.2s ease" }}>
+    <div style={{ display: "flex", height: "100vh", overflow: "hidden", fontFamily: "'Inter','Segoe UI',sans-serif" }}>
       <Sidebar activePage="tournaments" />
 
-      <div style={{ marginLeft: "220px", flex: 1 }}>
-        <main style={{ padding: "28px 32px 32px" }}>
+      <div style={{ marginLeft: "220px", flex: 1, display: "flex", flexDirection: "column", height: "100vh", overflow: "auto", position: "relative" }}>
+        {/* Fixed background image */}
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: "220px",
+          right: 0,
+          bottom: 0,
+          backgroundImage: `url(${bgStadium})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center bottom",
+          backgroundRepeat: "no-repeat",
+          zIndex: 0,
+        }} />
+
+        <main style={{ padding: "28px 32px 32px", overflow: "visible", position: "relative", zIndex: 1 }}>
           <button
             onClick={() => navigate(-1)}
             style={{
@@ -158,8 +203,10 @@ const TeamDetailsPage = () => {
           {/* Header */}
           <div
             style={{
-              background: "var(--card-bg-light)",
-              border: "1px solid var(--border-light)",
+              background: "rgba(255, 255, 255, 0.45)",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+              border: "1px solid rgba(255, 255, 255, 0.6)",
               borderRadius: "20px",
               padding: "22px 24px",
               display: "flex",
@@ -167,7 +214,7 @@ const TeamDetailsPage = () => {
               alignItems: "center",
               marginTop: "16px",
               marginBottom: "24px",
-              transition: "background-color 0.2s ease, border-color 0.2s ease",
+              boxShadow: "0 8px 32px rgba(0, 0, 0, 0.08)",
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "18px" }}>
@@ -211,11 +258,13 @@ const TeamDetailsPage = () => {
               style={{
                 padding: "12px 24px",
                 borderRadius: "12px",
-                border: "1px solid var(--accent-light)",
-                background: players.length === 0 ? "var(--text-secondary-light)" : "var(--card-bg-light)",
+                border: "1px solid rgba(37, 99, 235, 0.6)",
+                background: players.length === 0 ? "var(--text-secondary-light)" : "rgba(255, 255, 255, 0.6)",
                 color: players.length === 0 ? "#fff" : "var(--accent-light)",
                 fontWeight: "700",
                 cursor: players.length === 0 ? "not-allowed" : "pointer",
+                backdropFilter: "blur(16px)",
+                WebkitBackdropFilter: "blur(16px)",
               }}
             >
               Export Squad
@@ -225,11 +274,13 @@ const TeamDetailsPage = () => {
           {/* Squad List */}
           <div
             style={{
-              background: "var(--card-bg-light)",
-              border: "1px solid var(--border-light)",
+              background: "rgba(255, 255, 255, 0.45)",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+              border: "1px solid rgba(255, 255, 255, 0.6)",
               borderRadius: "20px",
               padding: "24px",
-              transition: "background-color 0.2s ease, border-color 0.2s ease",
+              boxShadow: "0 8px 32px rgba(0, 0, 0, 0.08)",
             }}
           >
             <h2 style={{ fontSize: "24px", fontWeight: "700", color: "var(--text-primary-light)", marginBottom: "20px" }}>

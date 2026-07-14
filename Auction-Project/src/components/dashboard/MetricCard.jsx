@@ -3,21 +3,23 @@
 const MetricCard = ({ icon: Icon, iconBg, label, value, subtitle }) => {
   return (
     <div style={{
-      background: 'var(--card-bg-light)',
-      border: '1px solid var(--border-light)',
+      background: 'rgba(255, 255, 255, 0.45)',
+      backdropFilter: 'blur(16px)',
+      WebkitBackdropFilter: 'blur(16px)',
+      border: '1px solid rgba(255, 255, 255, 0.6)',
       borderRadius: '12px',
-      padding: '20px 24px',
+      padding: '14px 20px',
       display: 'flex',
       alignItems: 'center',
-      gap: '16px',
+      gap: '14px',
       flex: 1,
       minWidth: '160px',
-      transition: 'background-color 0.2s ease, border-color 0.2s ease',
+      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
     }}>
       <div style={{
-        width: '48px',
-        height: '48px',
-        borderRadius: '12px',
+        width: '42px',
+        height: '42px',
+        borderRadius: '10px',
         background: iconBg,
         display: 'flex',
         alignItems: 'center',
@@ -28,7 +30,7 @@ const MetricCard = ({ icon: Icon, iconBg, label, value, subtitle }) => {
       </div>
       <div>
         <div style={{ fontSize: '13px', color: 'var(--text-secondary-light)', fontWeight: 500, marginBottom: '4px', transition: 'color 0.2s ease' }}>{label}</div>
-        <div style={{ fontSize: '28px', fontWeight: 700, color: 'var(--text-primary-light)', lineHeight: 1, transition: 'color 0.2s ease' }}>{value}</div>
+        <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-primary-light)', lineHeight: 1, transition: 'color 0.2s ease' }}>{value}</div>
         {subtitle && <div style={{ fontSize: '12px', color: 'var(--text-secondary-light)', marginTop: '4px', transition: 'color 0.2s ease' }}>{subtitle}</div>}
       </div>
     </div>
