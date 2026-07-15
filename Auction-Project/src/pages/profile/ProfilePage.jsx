@@ -4,6 +4,7 @@ import Avatar from '../../components/common/Avatar';
 import InputField from '../../components/common/InputField';
 import Button from '../../components/common/Button';
 import { useTheme } from '../../context/ThemeContext';
+import bgStadium from '../../assets/bgstadium2.png';
 
 const ProfilePage = () => {
   const { theme, toggleTheme } = useTheme();
@@ -24,18 +25,31 @@ const ProfilePage = () => {
   };
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-primary-light)', fontFamily: "'Inter', sans-serif", transition: 'background-color 0.2s ease' }}>
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', fontFamily: "'Inter', sans-serif" }}>
       
       {/* 1. Add the Sidebar and lock it to 'settings' */}
       <Sidebar activePage="settings" />
 
       {/* 2. Push the content right by 220px so it doesn't hide behind the sidebar */}
-      <div style={{ marginLeft: '220px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-        
+      <div style={{ marginLeft: '220px', flex: 1, display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'auto', position: 'relative' }}>
+        {/* Fixed background image */}
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: '220px',
+          right: 0,
+          bottom: 0,
+          backgroundImage: `url(${bgStadium})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center bottom',
+          backgroundRepeat: 'no-repeat',
+          zIndex: 0,
+        }} />
+
         {/* If your team built TopBar.jsx, uncomment the line below to add the top navigation */}
         {/* <TopBar user={{ name: 'Rahul Organizer', role: 'Organizer' }} /> */}
 
-        <main style={{ padding: '40px 32px', maxWidth: '1000px' }}>
+        <main style={{ padding: '40px 32px', maxWidth: '1000px', margin: '0 auto', overflow: 'visible', position: 'relative', zIndex: 1 }}>
           
           <div className="page-header">
             <h1>Profile Settings</h1>
@@ -44,10 +58,12 @@ const ProfilePage = () => {
 
           {/* Theme Toggle Section */}
           <div style={{
-            background: 'var(--card-bg-light)',
-            border: '1px solid var(--border-light)',
+            background: 'var(--glass-bg)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            border: '1px solid var(--glass-border)',
             borderRadius: '8px',
-            padding: '20px 32px',
+            padding: '12px 24px',
             marginBottom: '24px',
             transition: 'background-color 0.2s ease, border-color 0.2s ease',
           }}>

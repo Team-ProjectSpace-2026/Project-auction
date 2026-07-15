@@ -61,11 +61,14 @@ const TournamentCard = ({ tournament }) => {
         marginTop: "18px",
         padding: "12px",
         borderRadius: "10px",
-        border: "1px solid #2563eb",
-        background: "#fff",
-        color: "#2563eb",
+        border: "1px solid var(--accent-light)",
+        background: "var(--glass-bg)",
+        color: "var(--accent-light)",
         fontWeight: 700,
         cursor: "pointer",
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
+        transition: "background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease",
        }}
       >
       View Details →

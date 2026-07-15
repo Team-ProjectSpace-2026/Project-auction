@@ -2,7 +2,7 @@ import { formatCurrency } from "../../utils/formatCurrency";
 
 const SoldPlayerModal = ({ onClose, onNextPlayer, playerName, teamName, soldPrice }) => {
   return (
-    <div
+    <div className="auction-screen"
       style={{
         position: "fixed",
         inset: 0,

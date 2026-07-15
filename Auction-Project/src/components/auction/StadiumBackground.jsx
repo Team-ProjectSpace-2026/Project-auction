@@ -1,10 +1,14 @@
 import { memo } from "react";
+import { useTheme } from "../../context/ThemeContext";
 import stadiumBgImage from "../../assets/stadiumbg.jpeg";
 
 /**
  * StadiumBackground — Pure stadium image background
  */
 const StadiumBackground = () => {
+  const { theme } = useTheme();
+  if (theme === "dark") return null;
+
   return (
     <div className="stadium-bg" aria-hidden="true">
       <div

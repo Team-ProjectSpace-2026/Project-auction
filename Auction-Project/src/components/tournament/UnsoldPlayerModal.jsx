@@ -2,7 +2,7 @@ import { XCircle } from "lucide-react";
 
 const UnsoldPlayerModal = ({ onClose, onNextPlayer, playerName }) => {
   return (
-    <div
+    <div className="auction-screen"
       style={{
         position: "fixed",
         inset: 0,

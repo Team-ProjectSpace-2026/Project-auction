@@ -5,6 +5,7 @@ import "./CreateTournamentPage.css";
 import { useNavigate } from "react-router-dom";
 import { useState, useRef } from "react";
 import { createTournament } from "../../services/tournamentService";
+import bgStadium from "../../assets/bgstadium2.png";
 
 // const MOCK_USER = {
 //   name: "Rahul Organizer",
@@ -88,6 +89,20 @@ const CreateTournamentPage = () => {
 
       {/* Main Container */}
       <div className="create-container">
+        {/* Fixed Background */}
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: "220px",
+          right: 0,
+          bottom: 0,
+          backgroundImage: `url(${bgStadium})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center bottom",
+          backgroundRepeat: "no-repeat",
+          zIndex: 0,
+        }} />
+
         {/* Top Navigation */}
         {/* <TopBar user={MOCK_USER} /> */}
 
@@ -113,8 +128,13 @@ const CreateTournamentPage = () => {
             </p>
           </div>
 
-          {/* Main White Card */}
-          <div className="create-card">
+{/* Main White Card */}
+        <div className="create-card" style={{
+          background: "var(--glass-bg)",
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
+          border: "1px solid var(--glass-border)",
+        }}>
 
     {/* Logo Upload */}
     <div style={{ marginBottom: "24px", textAlign: "center" }}>

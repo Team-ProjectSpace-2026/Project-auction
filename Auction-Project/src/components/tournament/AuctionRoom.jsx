@@ -53,7 +53,7 @@ const AuctionRoom = () => {
   const getTeamColor = (idx) => TEAM_COLORS[idx % TEAM_COLORS.length];
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "20px", padding: "4px 0" }}>
+    <div className="auction-screen" style={{ display: "flex", flexDirection: "column", gap: "20px", padding: "4px 0" }}>
       <style>{`
         @keyframes livePulse {
           0%, 100% { opacity: 1; transform: scale(1); }
@@ -164,14 +164,15 @@ const AuctionRoom = () => {
                 </div>
               </div>
               <div style={{
-                background: "#fff",
+                background: "var(--card-bg-light)",
                 borderRadius: "12px",
                 padding: "10px 20px",
                 textAlign: "center",
                 boxShadow: "0 2px 12px rgba(0,0,0,0.1)",
+                transition: "background-color 0.2s ease",
               }}>
-                <div style={{ fontSize: "10px", fontWeight: "700", color: "#64748B", textTransform: "uppercase", letterSpacing: "0.5px" }}>Base Price</div>
-                <div style={{ fontSize: "22px", fontWeight: "800", color: "#1E40AF", lineHeight: "1.2" }}>{formatCurrency(basePrice)}</div>
+                <div style={{ fontSize: "10px", fontWeight: "700", color: "var(--text-secondary-light)", textTransform: "uppercase", letterSpacing: "0.5px", transition: "color 0.2s ease" }}>Base Price</div>
+                <div style={{ fontSize: "22px", fontWeight: "800", color: "var(--accent-light)", lineHeight: "1.2", transition: "color 0.2s ease" }}>{formatCurrency(basePrice)}</div>
               </div>
             </div>
 
@@ -380,7 +381,7 @@ const AuctionRoom = () => {
                   <div style={{ textAlign: "right", fontSize: "14px", fontWeight: "700", color: "#16a34a" }}>
                     {formatCurrency(team.remainingBudget)}
                   </div>
-                  <div style={{ textAlign: "right", fontSize: "13px", fontWeight: "600", color: "#64748b" }}>
+                  <div style={{ textAlign: "right", fontSize: "13px", fontWeight: "600", color: "var(--text-secondary-light)", transition: "color 0.2s ease" }}>
                     {team.players || 0} / {team.maxPlayers || 18}
                   </div>
                 </div>

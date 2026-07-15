@@ -1,17 +1,19 @@
 .create-page{
     display:flex;
-    min-height:100vh;
-    background:var(--bg-primary-light);
-    transition:background-color 0.2s ease;
+    height:100vh;
+    overflow:hidden;
 }
 
 .create-container{
     flex:1;
     margin-left:220px;
+    position:relative;
 }
 
 .create-main{
     padding:28px 32px 32px;
+    flex:1;
+    overflow:hidden;
 }
 
 .breadcrumb{
@@ -29,6 +31,10 @@
 
 .breadcrumb-separator{
     color:#94A3B8;
+}
+
+body.dark-mode .breadcrumb-separator{
+    color:var(--text-secondary-light);
 }
 
 .breadcrumb-current{
@@ -137,6 +143,10 @@
 
 .form-group input[type="datetime-local"]{
     color-scheme: light;
+}
+
+body.dark-mode .form-group input[type="datetime-local"]{
+    color-scheme: dark;
 }
 
 .form-group input[type="datetime-local"]::-webkit-calendar-picker-indicator{

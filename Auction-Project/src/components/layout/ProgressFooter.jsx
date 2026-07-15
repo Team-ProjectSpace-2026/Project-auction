@@ -11,8 +11,10 @@ const steps = [
 const ProgressFooter = () => {
   return (
     <div style={{
-      background: 'var(--bg-secondary-light)',
-      borderTop: '1px solid var(--border-light)',
+      background: 'var(--glass-bg)',
+      backdropFilter: 'blur(16px)',
+      WebkitBackdropFilter: 'blur(16px)',
+      borderTop: '1px solid var(--glass-border)',
       padding: '20px 32px',
       transition: 'background-color 0.2s ease, border-color 0.2s ease',
     }}>
@@ -44,7 +46,7 @@ const ProgressFooter = () => {
               </div>
             </div>
             {idx < steps.length - 1 && (
-              <ArrowRight size={18} strokeWidth={2} style={{ color: '#c5cae0', padding: '12px 8px 0', flexShrink: 0 }} />
+              <ArrowRight size={18} strokeWidth={2} style={{ color: 'var(--text-secondary-light)', padding: '12px 8px 0', flexShrink: 0, transition: 'color 0.2s ease' }} />
             )}
           </div>
         ))}

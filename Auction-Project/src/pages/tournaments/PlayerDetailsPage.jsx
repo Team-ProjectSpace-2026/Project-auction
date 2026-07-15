@@ -1,14 +1,15 @@
 import Sidebar from "../../components/layout/Sidebar";
 // import TopBar from "../../components/layout/TopBar";
+import bgStadium from "../../assets/bgstadium2.png";
 
 const PlayerDetailsPage = () => {
   return (
     <div
       style={{
         display: "flex",
-        minHeight: "100vh",
-        background: "var(--bg-primary-light)",
-        transition: "background-color 0.2s ease",
+        height: "100vh",
+        overflow: "hidden",
+        fontFamily: "'Inter','Segoe UI',sans-serif",
       }}
     >
       <Sidebar activePage="tournaments" />
@@ -17,8 +18,27 @@ const PlayerDetailsPage = () => {
         style={{
           marginLeft: "220px",
           flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          height: "100vh",
+          overflow: "auto",
+          position: "relative",
         }}
       >
+        {/* Fixed background image */}
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: "220px",
+          right: 0,
+          bottom: 0,
+          backgroundImage: `url(${bgStadium})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center bottom",
+          backgroundRepeat: "no-repeat",
+          zIndex: 0,
+        }} />
+
         {/* <TopBar
           user={{
             name: "Rahul Organizer",
@@ -29,6 +49,9 @@ const PlayerDetailsPage = () => {
         <main
           style={{
             padding: "28px 32px 32px",
+            overflow: "visible",
+            position: "relative",
+            zIndex: 1,
           }}
         >
           {/* Back Button */}
@@ -43,20 +66,22 @@ const PlayerDetailsPage = () => {
             ← Back to Players
           </div>
 
-          {/* Player Header */}
-          <div
-            style={{
-              background: "var(--card-bg-light)",
-              border: "1px solid var(--border-light)",
-              borderRadius: "16px",
-              padding: "24px",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: "24px",
-              transition: "background-color 0.2s ease, border-color 0.2s ease",
-            }}
-          >
+{/* Player Header */}
+           <div
+             style={{
+               background: "var(--glass-bg)",
+               backdropFilter: "blur(16px)",
+               WebkitBackdropFilter: "blur(16px)",
+               border: "1px solid var(--glass-border)",
+               borderRadius: "16px",
+               padding: "24px",
+               display: "flex",
+               justifyContent: "space-between",
+               alignItems: "center",
+               marginBottom: "24px",
+               boxShadow: "0 8px 32px rgba(0, 0, 0, 0.08)",
+             }}
+           >
             <div
               style={{
                 display: "flex",
@@ -125,13 +150,15 @@ const PlayerDetailsPage = () => {
 
             <button
               style={{
-                background: "var(--accent-light)",
+                background: "rgba(37, 99, 235, 0.9)",
                 color: "#fff",
-                border: "none",
+                border: "1px solid var(--glass-border)",
                 borderRadius: "10px",
                 padding: "12px 24px",
                 fontWeight: "600",
                 cursor: "pointer",
+                backdropFilter: "blur(16px)",
+                WebkitBackdropFilter: "blur(16px)",
               }}
             >
               Edit Player
@@ -149,11 +176,12 @@ const PlayerDetailsPage = () => {
             {/* Player Information */}
             <div
               style={{
-                background: "var(--card-bg-light)",
-                border: "1px solid var(--border-light)",
+                background: "var(--glass-bg)",
+                backdropFilter: "blur(16px)",
+                WebkitBackdropFilter: "blur(16px)",
+                border: "1px solid var(--glass-border)",
                 borderRadius: "16px",
                 padding: "24px",
-                transition: "background-color 0.2s ease, border-color 0.2s ease",
               }}
             >
               <h2
@@ -195,11 +223,12 @@ const PlayerDetailsPage = () => {
             {/* Auction Information */}
             <div
               style={{
-                background: "var(--card-bg-light)",
-                border: "1px solid var(--border-light)",
+                background: "var(--glass-bg)",
+                backdropFilter: "blur(16px)",
+                WebkitBackdropFilter: "blur(16px)",
+                border: "1px solid var(--glass-border)",
                 borderRadius: "16px",
                 padding: "24px",
-                transition: "background-color 0.2s ease, border-color 0.2s ease",
               }}
             >
               <h2
@@ -239,11 +268,12 @@ const PlayerDetailsPage = () => {
           <div
             style={{
               marginTop: "24px",
-              background: "var(--card-bg-light)",
-              border: "1px solid var(--border-light)",
+              background: "var(--glass-bg)",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+              border: "1px solid var(--glass-border)",
               borderRadius: "16px",
               padding: "24px",
-              transition: "background-color 0.2s ease, border-color 0.2s ease",
             }}
           >
               <h2

@@ -34,6 +34,77 @@
   pointer-events: none;
 }
 
+body.dark-mode .stadium-bg {
+  display: none;
+}
+
+/* ---- Auction Screen Light Theme Override ---- */
+/* Forces light theme for auction screens regardless of body.dark-mode */
+.auction-screen,
+.auction-screen *,
+.auction-screen *::before,
+.auction-screen *::after {
+  --bg-primary-light: #f4f6fb !important;
+  --bg-secondary-light: #ffffff !important;
+  --text-primary-light: #1a1d2e !important;
+  --text-secondary-light: #8a94a6 !important;
+  --border-light: #e8eaf0 !important;
+  --accent-light: #2563eb !important;
+  --accent-hover-light: #0b5ed7 !important;
+  --card-bg-light: #ffffff !important;
+  --topbar-bg: #ffffff !important;
+  --topbar-text: #1a1d2e !important;
+  --role-batsman-bg: #dbeafe !important;
+  --role-bowler-bg: #fef3c7 !important;
+  --role-allrounder-bg: #ede9fe !important;
+  --role-keeper-bg: #dcfce7 !important;
+  --role-batsman-text: #2563eb !important;
+  --role-bowler-text: #d97706 !important;
+  --role-allrounder-text: #7c3aed !important;
+  --role-keeper-text: #16a34a !important;
+  --info-bg: #F3F7FF !important;
+  --info-border: #D7E5FF !important;
+  --info-icon-bg: #2563EB !important;
+  --info-title-color: #1E3A8A !important;
+  --warning-bg: #fff7ed !important;
+  --warning-border: #fed7aa !important;
+  --warning-text: #9a3412 !important;
+  --status-active-bg: #dcfce7 !important;
+  --status-active-text: #16a34a !important;
+  --status-upcoming-bg: #dbeafe !important;
+  --status-upcoming-text: #2563eb !important;
+  --status-completed-bg: #e5e7eb !important;
+  --status-completed-text: #4b5563 !important;
+  --table-header-bg: #f8fafc !important;
+  --table-row-border: #eef2f7 !important;
+  --breadcrumb-active: #2563eb !important;
+  --breadcrumb-current: #64748B !important;
+  --input-bg: #ffffff !important;
+  --input-border: #DCE3EE !important;
+  --input-text: #1F2937 !important;
+  --input-placeholder: #98A2B3 !important;
+  --avatar-bg: #f3f4f6 !important;
+  --avatar-border: #ffffff !important;
+  --section-title: #111827 !important;
+  --settings-footer-border: #eaeaea !important;
+  --page-header-color: #111827 !important;
+  --page-subtitle-color: #667085 !important;
+  --modal-bg: #ffffff !important;
+  --modal-border: #e8eaf0 !important;
+  --glass-bg: rgba(255, 255, 255, 0.45) !important;
+  --glass-border: rgba(255, 255, 255, 0.6) !important;
+  --glass-bg-hover: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Ensure stadium background always shows in auction screens */
+.auction-screen div[style*="bgstadium"] {
+  display: block !important;
+}
+
+.auction-screen .stadium-bg {
+  display: block !important;
+}
+
 
 /* ---- Reveal Modal Layout ---- */
 .reveal-modal {
