@@ -7,7 +7,7 @@ import Bid from "../models/Bid.js";
 
 export const getTournaments = async (req, res, next) => {
   try {
-    const tournaments = await Tournament.find().sort({ createdAt: -1 });
+    const tournaments = await Tournament.find({ owner: req.user._id }).sort({ createdAt: -1 });
     res.json(tournaments);
   } catch (error) {
     next(error);
@@ -63,6 +63,13 @@ export const getTournament = async (req, res, next) => {
 export const updateTournament = async (req, res, next) => {
   try {
     const tournamentId = new mongoose.Types.ObjectId(req.params.id);
+    const existing = await Tournament.findById(tournamentId);
+    if (!existing) {
+      return res.status(404).json({ message: "Tournament not found" });
+    }
+    if (existing.owner.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Not authorized to update this tournament" });
+    }
     const name = String(req.body.name || "");
     const status = String(req.body.status || "");
     const date = String(req.body.date || "");
@@ -77,7 +84,6 @@ export const updateTournament = async (req, res, next) => {
       updateData.registrationEndDate = req.body.registrationEndDate ? new Date(req.body.registrationEndDate) : null;
     }
     if (req.file) {
-      const existing = await Tournament.findById(tournamentId);
       if (existing?.logo) {
         try {
           const logoUrl = new URL(existing.logo);
@@ -111,12 +117,17 @@ export const updateTournament = async (req, res, next) => {
 export const deleteTournament = async (req, res, next) => {
   try {
     const tournamentId = new mongoose.Types.ObjectId(req.params.id);
-    const tournament = await Tournament.findByIdAndDelete(tournamentId);
+    const tournament = await Tournament.findById(tournamentId);
 
     if (!tournament) {
       return res.status(404).json({ message: "Tournament not found" });
     }
 
+    if (tournament.owner.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Not authorized to delete this tournament" });
+    }
+
+    await Tournament.findByIdAndDelete(tournamentId);
     res.json({ message: "Tournament deleted successfully" });
   } catch (error) {
     next(error);
