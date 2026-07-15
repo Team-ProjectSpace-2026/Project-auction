@@ -79,6 +79,20 @@ const playerSchema = new mongoose.Schema(
         "",
       ],
     },
+    jerseyNumber: {
+      type: Number,
+      min: [0, "Jersey number cannot be negative"],
+    },
+    jerseySize: {
+      type: String,
+      enum: ["S", "M", "L", "XL", "XXL", "XXXL", ""],
+      trim: true,
+    },
+    jerseyName: {
+      type: String,
+      trim: true,
+      maxlength: [30, "Jersey name cannot exceed 30 characters"],
+    },
     photo: {
       type: String,
     },
@@ -90,6 +104,11 @@ const playerSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
   },
   {
     timestamps: true,
@@ -100,5 +119,7 @@ const playerSchema = new mongoose.Schema(
 playerSchema.index({ tournamentId: 1, deleted: 1 });
 playerSchema.index({ tournamentId: 1, isSold: 1, deleted: 1 });
 playerSchema.index({ mobile: 1, tournamentId: 1 }, { unique: true, partialFilterExpression: { deleted: false } });
+playerSchema.index({ createdBy: 1 });
+playerSchema.index({ tournamentId: 1, createdBy: 1 });
 
 export default mongoose.model("Player", playerSchema);

@@ -95,8 +95,7 @@ export const validatePlayer = [
     .withMessage('Role must be Batsman, Bowler, All Rounder, or Wicket Keeper'),
   
   body('style')
-    .notEmpty()
-    .withMessage('Playing style is required')
+    .optional({ values: 'falsy' })
     .isLength({ max: 100 })
     .withMessage('Playing style cannot exceed 100 characters'),
   

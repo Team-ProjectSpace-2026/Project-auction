@@ -7,7 +7,7 @@ import Tournament from '../models/Tournament.js';
 export const getTeams = async (req, res, next) => {
   try {
     const tournamentId = req.query.tournamentId ? new mongoose.Types.ObjectId(req.query.tournamentId) : undefined;
-    let filter = {};
+    let filter = { createdBy: req.user._id };
     if (tournamentId) {
       filter.tournamentId = tournamentId;
     }
@@ -29,8 +29,12 @@ export const getTeam = async (req, res, next) => {
       return res.status(404).json({ message: 'Team not found' });
     }
 
+    if (team.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
     const players = await Player.find({ soldTo: teamId, deleted: false })
-      .select('name role style basePrice soldPrice');
+      .select('name role style basePrice soldPrice jerseyNumber jerseySize jerseyName');
 
     res.json({ ...team.toObject(), players });
   } catch (error) {
@@ -64,7 +68,7 @@ export const createTeam = async (req, res, next) => {
     }
 
     const remainingBudget = totalBudget;
-    const team = new Team({ name, short, budget, maxPlayers, totalBudget, remainingBudget, tournamentId, ownerName, logo });
+    const team = new Team({ name, short, budget, maxPlayers, totalBudget, remainingBudget, tournamentId, ownerName, logo, createdBy: req.user._id });
     await team.save();
     res.status(201).json(team);
   } catch (error) {
@@ -86,6 +90,10 @@ export const updateTeam = async (req, res, next) => {
     const existingTeam = await Team.findById(teamId);
     if (!existingTeam) {
       return res.status(404).json({ message: 'Team not found' });
+    }
+
+    if (existingTeam.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Access denied' });
     }
 
     // Check for duplicate team name within the same tournament (excluding self)
@@ -121,6 +129,10 @@ export const deleteTeam = async (req, res, next) => {
     
     if (!team) {
       return res.status(404).json({ message: 'Team not found' });
+    }
+
+    if (team.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Access denied' });
     }
 
     await session.withTransaction(async () => {
