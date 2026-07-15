@@ -88,7 +88,7 @@ const SimpleCaptcha = forwardRef(({ onVerify, onExpire }, ref) => {
 
   useEffect(() => {
     fetchCaptcha();
-  }, []);
+  }, [fetchCaptcha]);
 
   useEffect(() => {
     if (status === "ready" && canvasRef.current && captchaText) {
