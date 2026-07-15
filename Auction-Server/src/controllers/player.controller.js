@@ -21,11 +21,20 @@ export const getPlayers = async (req, res, next) => {
       ? String(req.query.search).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
       : "";
 
-    // Build filter from sanitized values only
-    const filter = { deleted: false };
+    // Build filter: include admin-created players OR registered players for the same tournament
+    const filter = {
+      deleted: false,
+      $or: [
+        { createdBy: req.user._id },
+        { isRegistered: true },
+      ],
+    };
 
     if (tournamentId) {
       filter.tournamentId = tournamentId;
+    } else {
+      // Without tournamentId scope, only show own players for safety
+      filter.$or = [{ createdBy: req.user._id }];
     }
 
     if (safeSearch) {
@@ -48,19 +57,43 @@ export const getPlayers = async (req, res, next) => {
 
 export const createPlayer = async (req, res, next) => {
   try {
-    const name = String(req.body.name || "");
-    const role = String(req.body.role || "");
-    const style = String(req.body.style || "");
-    const keeper = Boolean(req.body.keeper);
+    const name = String(req.body.name || req.body.playerName || "").trim();
+    const role = String(req.body.role || req.body.primaryRole || "").trim();
+    let style = String(req.body.style || "").trim();
+    const battingStyle = String(req.body.battingStyle || "").trim();
+    const bowlingStyle = String(req.body.bowlingStyle || "").trim();
+
+    // Derive style from batting/bowling if not provided
+    if (!style && battingStyle) {
+      style = bowlingStyle && bowlingStyle !== "Not Applicable"
+        ? `${battingStyle} Bat, ${bowlingStyle}`
+        : `${battingStyle} Bat`;
+    }
+
+    const keeper = req.body.keeper === "true" || req.body.keeper === true || req.body.isKeeper === "Yes";
     const basePrice = Number(req.body.basePrice) || 0;
     const tournamentId = String(req.body.tournamentId || "");
+    const jerseyNumber = req.body.jerseyNumber ? Number(req.body.jerseyNumber) : undefined;
+    const jerseySize = String(req.body.jerseySize || "").trim() || undefined;
+    const jerseyName = String(req.body.jerseyName || "").trim() || undefined;
+    const age = req.body.age ? Number(req.body.age) : undefined;
+    const mobile = String(req.body.mobile || "").trim() || undefined;
+
     const player = new Player({
       name,
       role,
       style,
+      battingStyle,
+      bowlingStyle,
       keeper,
       basePrice,
       tournamentId,
+      jerseyNumber,
+      jerseySize,
+      jerseyName,
+      age,
+      mobile,
+      createdBy: req.user._id,
     });
     await player.save();
     res.status(201).json(player);
@@ -76,6 +109,11 @@ export const getPlayer = async (req, res, next) => {
     if (!player || player.deleted) {
       return res.status(404).json({ message: 'Player not found' });
     }
+
+    if (player.createdBy && player.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
     res.json(player);
   } catch (error) {
     next(error);
@@ -91,18 +129,27 @@ export const updatePlayer = async (req, res, next) => {
       return res.status(404).json({ message: 'Player not found' });
     }
 
+    if (player.createdBy && player.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
     const updateData = {};
 
-    if (req.body.name !== undefined) updateData.name = String(req.body.name);
-    if (req.body.role !== undefined) updateData.role = String(req.body.role);
+    if (req.body.name !== undefined || req.body.playerName !== undefined) updateData.name = String(req.body.name || req.body.playerName || "").trim();
+    if (req.body.role !== undefined || req.body.primaryRole !== undefined) updateData.role = String(req.body.role || req.body.primaryRole || "").trim();
     if (req.body.style !== undefined) updateData.style = String(req.body.style);
-    if (req.body.keeper !== undefined) updateData.keeper = req.body.keeper === "true" || req.body.keeper === true;
+    if (req.body.keeper !== undefined || req.body.isKeeper !== undefined) {
+      updateData.keeper = req.body.keeper === "true" || req.body.keeper === true || req.body.isKeeper === "Yes";
+    }
     if (req.body.basePrice !== undefined) updateData.basePrice = Number(req.body.basePrice) || 0;
     if (req.body.age !== undefined) updateData.age = Number(req.body.age) || undefined;
     if (req.body.mobile !== undefined) updateData.mobile = String(req.body.mobile);
     if (req.body.countryCode !== undefined) updateData.countryCode = String(req.body.countryCode);
     if (req.body.battingStyle !== undefined) updateData.battingStyle = String(req.body.battingStyle);
     if (req.body.bowlingStyle !== undefined) updateData.bowlingStyle = String(req.body.bowlingStyle);
+    if (req.body.jerseyNumber !== undefined) updateData.jerseyNumber = req.body.jerseyNumber ? Number(req.body.jerseyNumber) : undefined;
+    if (req.body.jerseySize !== undefined) updateData.jerseySize = String(req.body.jerseySize) || undefined;
+    if (req.body.jerseyName !== undefined) updateData.jerseyName = String(req.body.jerseyName) || undefined;
 
     if (req.file) {
       if (player.photo) {
@@ -139,6 +186,10 @@ export const deletePlayer = async (req, res, next) => {
 
     if (!player || player.deleted) {
       return res.status(404).json({ message: 'Player not found' });
+    }
+
+    if (player.createdBy && player.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Access denied' });
     }
 
     player.deleted = true;
@@ -200,6 +251,9 @@ export const registerPlayer = async (req, res, next) => {
     const battingStyle = String(req.body.battingStyle || "").trim();
     const bowlingStyle = String(req.body.bowlingStyle || "").trim();
     const isKeeper = String(req.body.isKeeper || "").trim();
+    const jerseyNumber = req.body.jerseyNumber ? Number(req.body.jerseyNumber) : undefined;
+    const jerseySize = String(req.body.jerseySize || "").trim();
+    const jerseyName = String(req.body.jerseyName || "").trim();
 
     const existing = await Player.findOne({ mobile, tournamentId, deleted: false });
     if (existing) {
@@ -216,6 +270,9 @@ export const registerPlayer = async (req, res, next) => {
       countryCode: countryCode || '+91',
       battingStyle,
       bowlingStyle,
+      jerseyNumber,
+      jerseySize: jerseySize || undefined,
+      jerseyName: jerseyName || undefined,
       photo: req.file ? req.file.path : null,
       tournamentId,
       isRegistered: true,
@@ -242,7 +299,7 @@ export const getRegisteredPlayers = async (req, res, next) => {
       isRegistered: true,
       deleted: false,
     })
-      .select("name role style battingStyle bowlingStyle keeper isRegistered")
+      .select("name role style battingStyle bowlingStyle keeper isRegistered jerseyNumber jerseySize jerseyName age mobile photo basePrice isSold soldTo soldPrice")
       .populate("tournamentId", "name");
 
     res.json(players);

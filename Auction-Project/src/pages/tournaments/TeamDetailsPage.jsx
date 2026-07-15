@@ -80,9 +80,12 @@ const TeamDetailsPage = () => {
     };
 
     const csvContent = [
-      ["Player Name", "Role", "Purchase Price"],
+      ["Player Name", "Jersey #", "Jersey Size", "Jersey Name", "Role", "Purchase Price"],
       ...players.map((p) => [
         escapeCSV(p.name),
+        escapeCSV(p.jerseyNumber ?? ""),
+        escapeCSV(p.jerseySize || ""),
+        escapeCSV(p.jerseyName || ""),
         escapeCSV(p.role),
         escapeCSV(formatCurrency(p.soldPrice)),
       ]),
@@ -246,6 +249,8 @@ const TeamDetailsPage = () => {
                   <tr style={{ background: "var(--table-header-bg)" }}>
                     <th style={{ padding: "16px", textAlign: "left" }}>#</th>
                     <th style={{ padding: "16px", textAlign: "left" }}>Player Name</th>
+                    <th style={{ padding: "16px", textAlign: "left" }}>Jersey #</th>
+                    <th style={{ padding: "16px", textAlign: "left" }}>Jersey Size</th>
                     <th style={{ padding: "16px", textAlign: "left" }}>Role</th>
                     <th style={{ padding: "16px", textAlign: "left" }}>Purchase Price</th>
                   </tr>
@@ -255,6 +260,12 @@ const TeamDetailsPage = () => {
                     <tr key={player._id || index} style={{ borderTop: "1px solid var(--table-row-border)" }}>
                       <td style={{ padding: "16px" }}>{index + 1}</td>
                       <td style={{ padding: "16px", fontWeight: "600" }}>{player.name}</td>
+                      <td style={{ padding: "16px", fontWeight: "600", color: "var(--accent-light)" }}>
+                        {player.jerseyNumber ?? "—"}
+                      </td>
+                      <td style={{ padding: "16px" }}>
+                        {player.jerseySize || "—"}
+                      </td>
                       <td style={{ padding: "16px" }}>
                         <span
                           style={{

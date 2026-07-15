@@ -54,6 +54,11 @@ const teamSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Tournament',
     required: true
+  },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
   }
 }, {
   timestamps: true
@@ -63,5 +68,7 @@ const teamSchema = new mongoose.Schema({
 teamSchema.index({ tournamentId: 1 });
 teamSchema.index({ tournamentId: 1, remainingBudget: -1 });
 teamSchema.index({ tournamentId: 1, name: 1 }, { unique: true });
+teamSchema.index({ createdBy: 1 });
+teamSchema.index({ tournamentId: 1, createdBy: 1 });
 
 export default mongoose.model('Team', teamSchema);

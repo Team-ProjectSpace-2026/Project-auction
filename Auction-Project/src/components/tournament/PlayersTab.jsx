@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Pencil, Trash2, Check, X } from "lucide-react";
 import * as playerService from "../../services/playerService";
-import PlayerForm from "../players/PlayerForm";
 import CricketLoader from "../common/CricketLoader";
 
 const getRoleStyle = (role) => {
@@ -29,7 +28,6 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("All Roles");
-  const [showAddForm, setShowAddForm] = useState(false);
 
   useEffect(() => {
     if (!tournamentId) {
@@ -141,7 +139,7 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
             <option>Wicket Keeper</option>
           </select>
           <button
-            onClick={() => setShowAddForm(true)}
+            onClick={() => window.open(`${window.location.origin}/register/${tournamentId}`, "_blank")}
             style={{
               background: "var(--accent-light)", color: "#fff", border: "none",
               borderRadius: "12px", padding: "12px 20px", fontWeight: "600", cursor: "pointer",
@@ -162,16 +160,18 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
             <tr style={{ background: "var(--table-header-bg)", textAlign: "left" }}>
               <th style={{ padding: "16px" }}>#</th>
               <th>Player Name</th>
+              <th>Jersey #</th>
               <th>Role</th>
               <th>Player Style</th>
               <th>Keeper</th>
+              <th>Source</th>
               <th>Action</th>
             </tr>
           </thead>
           <tbody>
             {filteredPlayers.length === 0 ? (
               <tr>
-                <td colSpan="6" style={{ padding: "40px", textAlign: "center", color: "var(--text-secondary-light)" }}>
+                <td colSpan="8" style={{ padding: "40px", textAlign: "center", color: "var(--text-secondary-light)" }}>
                   No players found.
                 </td>
               </tr>
@@ -184,6 +184,9 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
                     style={{ fontWeight: "600", color: "var(--accent-light)", cursor: "pointer" }}
                   >
                     {player.name}
+                  </td>
+                  <td style={{ fontWeight: "600", color: "var(--accent-light)" }}>
+                    {player.jerseyNumber ?? "\u2014"}
                   </td>
                   <td>
                     <span style={{
@@ -199,6 +202,25 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
                     color: player.keeper ? "#16a34a" : "#ef4444",
                   }}>
                     {player.keeper ? <Check size={14} strokeWidth={3} /> : <X size={14} strokeWidth={3} />}
+                  </td>
+                  <td>
+                    {player.isRegistered ? (
+                      <span style={{
+                        padding: "4px 10px", borderRadius: "999px",
+                        fontSize: "11px", fontWeight: "600",
+                        background: "#dbeafe", color: "#2563eb",
+                      }}>
+                        Registered
+                      </span>
+                    ) : (
+                      <span style={{
+                        padding: "4px 10px", borderRadius: "999px",
+                        fontSize: "11px", fontWeight: "600",
+                        background: "#f0fdf4", color: "#16a34a",
+                      }}>
+                        Added
+                      </span>
+                    )}
                   </td>
                   <td>
                     <button
@@ -220,34 +242,6 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
           </tbody>
         </table>
       </div>
-
-      {showAddForm && (
-        <div
-          style={{
-            position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
-            background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center",
-            justifyContent: "center", zIndex: 1000,
-          }}
-          onClick={() => setShowAddForm(false)}
-        >
-          <div
-            style={{
-              background: "var(--card-bg-light)", borderRadius: "16px", padding: "28px",
-              maxWidth: "600px", width: "90%", maxHeight: "90vh", overflow: "auto",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <PlayerForm
-              tournamentId={tournamentId}
-              onSaved={() => {
-                setShowAddForm(false);
-                playerService.getPlayers(tournamentId).then((res) => setPlayers(res.data));
-              }}
-              onCancel={() => setShowAddForm(false)}
-            />
-          </div>
-        </div>
-      )}
     </div>
   );
 };
