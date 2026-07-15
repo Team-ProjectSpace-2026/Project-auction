@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { FiPlay, FiChevronDown, FiArrowDown, FiX } from 'react-icons/fi';
@@ -24,10 +24,13 @@ const gavels = Array.from({ length: 8 }, (_, i) => ({
   rotation: Math.random() * 360,
 }));
 
-const HeroSection = () => {
+const HeroSection = forwardRef((props, ref) => {
   const [showVideo, setShowVideo] = useState(false);
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
+  const heroRef = useRef(null);
+
+  useImperativeHandle(ref, () => heroRef.current, []);
 
   // Canvas-based animated video background
   const initCanvas = useCallback(() => {
@@ -204,7 +207,7 @@ const HeroSection = () => {
   const handleCloseVideo = () => setShowVideo(false);
 
   return (
-    <section className="hero-section" aria-labelledby="hero-title">
+    <section ref={heroRef} className="hero-section" aria-labelledby="hero-title">
       {/* Canvas Animated Video Background */}
       <canvas
         ref={canvasRef}
@@ -458,6 +461,8 @@ const HeroSection = () => {
       </AnimatePresence>
     </section>
   );
-};
+});
+
+HeroSection.displayName = 'HeroSection';
 
 export default HeroSection;
