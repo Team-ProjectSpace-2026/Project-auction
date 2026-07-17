@@ -155,92 +155,109 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
         borderRadius: "16px", overflow: "hidden",
         transition: "background-color 0.2s ease, border-color 0.2s ease",
       }}>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr style={{ background: "var(--table-header-bg)", textAlign: "left" }}>
-              <th style={{ padding: "16px" }}>#</th>
-              <th>Player Name</th>
-              <th>Jersey #</th>
-              <th>Role</th>
-              <th>Player Style</th>
-              <th>Keeper</th>
-              <th>Source</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredPlayers.length === 0 ? (
-              <tr>
-                <td colSpan="8" style={{ padding: "40px", textAlign: "center", color: "var(--text-secondary-light)" }}>
-                  No players found.
-                </td>
+        <div style={{ maxHeight: "60vh", overflowY: "auto", position: "relative" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr style={{ background: "var(--table-header-bg)", textAlign: "left", position: "sticky", top: 0, zIndex: 1, boxShadow: "0 1px 0 var(--border-light)" }}>
+                <th style={{ padding: "16px" }}>#</th>
+                <th>Player Name</th>
+                <th>Role</th>
+                <th>Batting Style</th>
+                <th>Bowling Style</th>
+                <th>All Rounder</th>
+                <th>Wicket Keeper</th>
+                <th>Source</th>
+                <th>Action</th>
               </tr>
-            ) : (
-              filteredPlayers.map((player, index) => (
-                <tr key={player._id} style={{ borderTop: "1px solid var(--table-row-border)" }}>
-                  <td style={{ padding: "16px" }}>{index + 1}</td>
-                  <td
-                    onClick={() => navigate(`/player-details/${player._id}`)}
-                    style={{ fontWeight: "600", color: "var(--accent-light)", cursor: "pointer" }}
-                  >
-                    {player.name}
-                  </td>
-                  <td style={{ fontWeight: "600", color: "var(--accent-light)" }}>
-                    {player.jerseyNumber ?? "\u2014"}
-                  </td>
-                  <td>
-                    <span style={{
-                      padding: "6px 10px", borderRadius: "8px",
-                      fontSize: "12px", fontWeight: "600", ...getRoleStyle(player.role),
-                    }}>
-                      {player.role}
-                    </span>
-                  </td>
-                  <td>{player.style}</td>
-                  <td style={{
-                    fontSize: "18px", fontWeight: "700",
-                    color: player.keeper ? "#16a34a" : "#ef4444",
-                  }}>
-                    {player.keeper ? <Check size={14} strokeWidth={3} /> : <X size={14} strokeWidth={3} />}
-                  </td>
-                  <td>
-                    {player.isRegistered ? (
-                      <span style={{
-                        padding: "4px 10px", borderRadius: "999px",
-                        fontSize: "11px", fontWeight: "600",
-                        background: "#dbeafe", color: "#2563eb",
-                      }}>
-                        Registered
-                      </span>
-                    ) : (
-                      <span style={{
-                        padding: "4px 10px", borderRadius: "999px",
-                        fontSize: "11px", fontWeight: "600",
-                        background: "#f0fdf4", color: "#16a34a",
-                      }}>
-                        Added
-                      </span>
-                    )}
-                  </td>
-                  <td>
-                    <button
-                      onClick={() => navigate(`/player-details/${player._id}`)}
-                      style={{ border: "none", background: "transparent", cursor: "pointer", marginRight: "12px", fontSize: "16px" }}
-                    >
-                      <Pencil size={16} strokeWidth={2} />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(player._id)}
-                      style={{ border: "none", background: "transparent", cursor: "pointer", fontSize: "16px" }}
-                    >
-                      <Trash2 size={16} strokeWidth={2} />
-                    </button>
+            </thead>
+            <tbody>
+              {filteredPlayers.length === 0 ? (
+                <tr>
+                  <td colSpan="9" style={{ padding: "40px", textAlign: "center", color: "var(--text-secondary-light)" }}>
+                    No players found.
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                filteredPlayers.map((player, index) => (
+                  <tr key={player._id} style={{ borderTop: "1px solid var(--table-row-border)" }}>
+                    <td style={{ padding: "16px" }}>{index + 1}</td>
+                    <td
+                      onClick={() => navigate(`/player-details/${player._id}`)}
+                      style={{ fontWeight: "600", color: "var(--accent-light)", cursor: "pointer" }}
+                    >
+                      {player.name}
+                    </td>
+                    <td>
+                      <span style={{
+                        padding: "6px 10px", borderRadius: "8px",
+                        fontSize: "12px", fontWeight: "600", ...getRoleStyle(player.role),
+                      }}>
+                        {player.role}
+                      </span>
+                    </td>
+                    <td style={{
+                      fontSize: "18px", fontWeight: "700",
+                      color: player.battingStyle ? "#16a34a" : "#ef4444",
+                    }}>
+                      {player.battingStyle ? <Check size={14} strokeWidth={3} /> : <X size={14} strokeWidth={3} />}
+                    </td>
+                    <td style={{
+                      fontSize: "18px", fontWeight: "700",
+                      color: (player.bowlingStyle && player.bowlingStyle !== "Not Applicable") ? "#16a34a" : "#ef4444",
+                    }}>
+                      {(player.bowlingStyle && player.bowlingStyle !== "Not Applicable") ? <Check size={14} strokeWidth={3} /> : <X size={14} strokeWidth={3} />}
+                    </td>
+                    <td style={{
+                      fontSize: "18px", fontWeight: "700",
+                      color: player.role === "All Rounder" ? "#16a34a" : "#ef4444",
+                    }}>
+                      {player.role === "All Rounder" ? <Check size={14} strokeWidth={3} /> : <X size={14} strokeWidth={3} />}
+                    </td>
+                    <td style={{
+                      fontSize: "18px", fontWeight: "700",
+                      color: player.keeper ? "#16a34a" : "#ef4444",
+                    }}>
+                      {player.keeper ? <Check size={14} strokeWidth={3} /> : <X size={14} strokeWidth={3} />}
+                    </td>
+                    <td>
+                      {player.isRegistered ? (
+                        <span style={{
+                          padding: "4px 10px", borderRadius: "999px",
+                          fontSize: "11px", fontWeight: "600",
+                          background: "#dbeafe", color: "#2563eb",
+                        }}>
+                          Registered
+                        </span>
+                      ) : (
+                        <span style={{
+                          padding: "4px 10px", borderRadius: "999px",
+                          fontSize: "11px", fontWeight: "600",
+                          background: "#f0fdf4", color: "#16a34a",
+                        }}>
+                          Added
+                        </span>
+                      )}
+                    </td>
+                    <td>
+                      <button
+                        onClick={() => navigate(`/player-details/${player._id}`)}
+                        style={{ border: "none", background: "transparent", cursor: "pointer", marginRight: "12px", fontSize: "16px" }}
+                      >
+                        <Pencil size={16} strokeWidth={2} />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(player._id)}
+                        style={{ border: "none", background: "transparent", cursor: "pointer", fontSize: "16px" }}
+                      >
+                        <Trash2 size={16} strokeWidth={2} />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
