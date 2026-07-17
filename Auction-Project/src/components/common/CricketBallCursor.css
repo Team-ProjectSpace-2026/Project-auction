@@ -1,0 +1,53 @@
+.cricket-ball-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 22px;
+  height: 22px;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  will-change: transform;
+  background: radial-gradient(circle at 30% 30%, #ff4444 0%, #cc0000 40%, #8b0000 100%);
+  border-radius: 50%;
+  box-shadow:
+    inset -2px -2px 4px rgba(255, 255, 255, 0.3),
+    inset 2px 2px 4px rgba(0, 0, 0, 0.4),
+    0 2px 8px rgba(204, 0, 0, 0.5);
+}
+
+.cricket-ball-cursor::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 22px;
+  height: 2px;
+  background: #660000;
+  transform: translate(-50%, -50%) rotate(45deg);
+  border-radius: 1px;
+  opacity: 0.6;
+}
+
+.cricket-ball-cursor::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 22px;
+  height: 2px;
+  background: #660000;
+  transform: translate(-50%, -50%) rotate(-45deg);
+  border-radius: 1px;
+  opacity: 0.6;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .cricket-ball-cursor {
+    display: none !important;
+  }
+
+  body {
+    cursor: auto !important;
+  }
+}

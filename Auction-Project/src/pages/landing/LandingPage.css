@@ -12,6 +12,26 @@ main {
   z-index: 1; /* Ensure main content is above the fixed NavBar */
 }
 
+/* GSAP ScrollTrigger reveal animations */
+#hero,
+#recent-auctions,
+#our-auctions,
+#about,
+#features {
+  opacity: 0;
+  transform: translateY(60px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+#hero.reveal-visible,
+#recent-auctions.reveal-visible,
+#our-auctions.reveal-visible,
+#about.reveal-visible,
+#features.reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 /* Dark Mode adjustments for landing page */
 .dark-mode .landing-page-wrapper {
   background-color: var(--bg-primary-dark);
