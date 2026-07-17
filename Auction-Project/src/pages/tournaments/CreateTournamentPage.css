@@ -8,12 +8,16 @@
     flex:1;
     margin-left:220px;
     position:relative;
+    height:100vh;
+    overflow:auto;
 }
 
 .create-main{
     padding:28px 32px 32px;
     flex:1;
-    overflow:hidden;
+    overflow:visible;
+    position:relative;
+    z-index:1;
 }
 
 .breadcrumb{
