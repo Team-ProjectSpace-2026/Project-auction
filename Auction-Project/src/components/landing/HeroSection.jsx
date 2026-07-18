@@ -297,18 +297,15 @@ const HeroSection = forwardRef((props, ref) => {
             <span>🏏 Cricket League Auction Platform</span>
           </motion.div>
 
-          {/* Main Headline */}
-          <motion.h1
+          {/* Main Headline — chars marked for GSAP SplitText */}
+          <h1
             id="hero-title"
             className="hero-headline"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4, ease: 'easeOut' }}
           >
-            Where Champions
+            <span data-char-split="true">Where Champions</span>
             <br />
-            <span className="hero-accent">Are Born</span>
-          </motion.h1>
+            <span className="hero-accent" data-char-split="true">Are Born</span>
+          </h1>
 
           {/* Sub-headline */}
           <motion.p
