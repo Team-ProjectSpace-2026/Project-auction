@@ -1,12 +1,50 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { FiX, FiUpload } from "react-icons/fi";
 
+const IPL_PRESETS = {
+  CSK: { primary: "#FDB913", secondary: "#0081C6" },
+  MI: { primary: "#004BA0", secondary: "#D1AB3E" },
+  RCB: { primary: "#EC1C24", secondary: "#E6B800" },
+  KKR: { primary: "#3A225D", secondary: "#F3E06C" },
+  DC: { primary: "#000080", secondary: "#FF0000" },
+  RR: { primary: "#EA1B8E", secondary: "#254AA5" },
+  SRH: { primary: "#FF822A", secondary: "#000000" },
+  PBKS: { primary: "#ED1F24", secondary: "#D2D3D5" },
+  LSG: { primary: "#0057A4", secondary: "#E4A115" },
+  GT: { primary: "#1B2544", secondary: "#C3A056" },
+};
+
+const getIplColors = (name) => {
+  const clean = name.trim().toUpperCase();
+  for (const [key, val] of Object.entries(IPL_PRESETS)) {
+    if (clean.includes(key)) {
+      return val;
+    }
+  }
+  const lower = clean.toLowerCase();
+  if (lower.includes("chennai") || lower.includes("kings")) {
+    if (lower.includes("punjab")) return IPL_PRESETS.PBKS;
+    return IPL_PRESETS.CSK;
+  }
+  if (lower.includes("mumbai") || lower.includes("indians")) return IPL_PRESETS.MI;
+  if (lower.includes("bengaluru") || lower.includes("bangalore") || lower.includes("challengers")) return IPL_PRESETS.RCB;
+  if (lower.includes("kolkata") || lower.includes("riders")) return IPL_PRESETS.KKR;
+  if (lower.includes("delhi") || lower.includes("capitals")) return IPL_PRESETS.DC;
+  if (lower.includes("rajasthan") || lower.includes("royals")) return IPL_PRESETS.RR;
+  if (lower.includes("hyderabad") || lower.includes("sunrisers")) return IPL_PRESETS.SRH;
+  if (lower.includes("lucknow") || lower.includes("giants")) return IPL_PRESETS.LSG;
+  if (lower.includes("gujarat") || lower.includes("titans")) return IPL_PRESETS.GT;
+  return null;
+};
+
 const EditTeamModal = ({ isOpen, onClose, onSubmit, team }) => {
   const [formData, setFormData] = useState({
     teamName: "",
     ownerName: "",
     totalBudget: "",
     maxPlayers: "18",
+    primaryColor: "#1e3a8a",
+    secondaryColor: "#f59e0b",
   });
   const [logoPreview, setLogoPreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -20,6 +58,8 @@ const EditTeamModal = ({ isOpen, onClose, onSubmit, team }) => {
         ownerName: team.ownerName || "",
         totalBudget: team.totalBudget?.toString() || "",
         maxPlayers: (team.maxPlayers || 18).toString(),
+        primaryColor: team.primaryColor || "#1e3a8a",
+        secondaryColor: team.secondaryColor || "#f59e0b",
       });
       setLogoPreview(team.logo || null);
     }
@@ -33,7 +73,17 @@ const EditTeamModal = ({ isOpen, onClose, onSubmit, team }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => {
+      const next = { ...prev, [name]: value };
+      if (name === "teamName") {
+        const ipl = getIplColors(value);
+        if (ipl) {
+          next.primaryColor = ipl.primary;
+          next.secondaryColor = ipl.secondary;
+        }
+      }
+      return next;
+    });
   };
 
   const handleFileChange = (e) => {
@@ -62,7 +112,7 @@ const EditTeamModal = ({ isOpen, onClose, onSubmit, team }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { teamName, ownerName, totalBudget, maxPlayers } = formData;
+    const { teamName, ownerName, totalBudget, maxPlayers, primaryColor, secondaryColor } = formData;
 
     if (!teamName.trim() || !ownerName.trim()) {
       alert("Please fill in all required fields.");
@@ -94,6 +144,8 @@ const EditTeamModal = ({ isOpen, onClose, onSubmit, team }) => {
         budget,
         totalBudget: budget,
         maxPlayers: parsedMaxPlayers,
+        primaryColor,
+        secondaryColor,
       });
     } finally {
       setIsSubmitting(false);
@@ -335,6 +387,107 @@ const EditTeamModal = ({ isOpen, onClose, onSubmit, team }) => {
                   boxSizing: "border-box",
                 }}
               />
+            </div>
+          </div>
+
+          <div style={{ display: "flex", gap: "12px", marginBottom: "20px" }}>
+            <div style={{ flex: 1 }}>
+              <label
+                style={{
+                  display: "block",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  color: "var(--text-primary-light)",
+                  marginBottom: "6px",
+                }}
+              >
+                Primary Color
+              </label>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <input
+                  type="color"
+                  name="primaryColor"
+                  value={formData.primaryColor}
+                  onChange={handleInputChange}
+                  style={{
+                    border: "none",
+                    width: "36px",
+                    height: "36px",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    padding: 0,
+                    backgroundColor: "transparent",
+                  }}
+                />
+                <input
+                  type="text"
+                  name="primaryColor"
+                  value={formData.primaryColor}
+                  onChange={handleInputChange}
+                  placeholder="#1e3a8a"
+                  style={{
+                    flex: 1,
+                    width: "100%",
+                    padding: "8px 10px",
+                    border: "1px solid var(--input-border)",
+                    borderRadius: "6px",
+                    fontSize: "14px",
+                    color: "var(--input-text)",
+                    backgroundColor: "var(--input-bg)",
+                    outline: "none",
+                    boxSizing: "border-box",
+                  }}
+                />
+              </div>
+            </div>
+            <div style={{ flex: 1 }}>
+              <label
+                style={{
+                  display: "block",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  color: "var(--text-primary-light)",
+                  marginBottom: "6px",
+                }}
+              >
+                Secondary Color
+              </label>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <input
+                  type="color"
+                  name="secondaryColor"
+                  value={formData.secondaryColor}
+                  onChange={handleInputChange}
+                  style={{
+                    border: "none",
+                    width: "36px",
+                    height: "36px",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    padding: 0,
+                    backgroundColor: "transparent",
+                  }}
+                />
+                <input
+                  type="text"
+                  name="secondaryColor"
+                  value={formData.secondaryColor}
+                  onChange={handleInputChange}
+                  placeholder="#f59e0b"
+                  style={{
+                    flex: 1,
+                    width: "100%",
+                    padding: "8px 10px",
+                    border: "1px solid var(--input-border)",
+                    borderRadius: "6px",
+                    fontSize: "14px",
+                    color: "var(--input-text)",
+                    backgroundColor: "var(--input-bg)",
+                    outline: "none",
+                    boxSizing: "border-box",
+                  }}
+                />
+              </div>
             </div>
           </div>
 

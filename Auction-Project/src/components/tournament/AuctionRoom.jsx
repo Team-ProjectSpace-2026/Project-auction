@@ -3,8 +3,7 @@ import { useAuction } from "../../context/AuctionContext";
 import { formatCurrency } from "../../utils/formatCurrency";
 import { playerPhotoUrl } from "../../utils/playerPhotoUrl";
 import PlayerRevealModal from "./PlayerRevealModal";
-import SoldPlayerModal from "./SoldPlayerModal";
-import UnsoldPlayerModal from "./UnsoldPlayerModal";
+import AuctionResultModal from "./AuctionResultModal";
 import BidControls from "../auction/BidControls";
 import ActivityFeed from "../auction/ActivityFeed";
 import BidLedger from "../auction/BidLedger";
@@ -412,20 +411,27 @@ const AuctionRoom = () => {
       )}
 
       {soldInfo && (
-        <SoldPlayerModal
+        <AuctionResultModal
+          status="sold"
+          playerName={soldInfo.playerName}
+          playerRole={currentPlayer?.role}
+          playerPhoto={currentPlayer?.photo}
+          soldPrice={soldInfo.soldPrice}
+          winningTeam={teams.find((t) => t._id === soldInfo.teamId) || { name: soldInfo.teamName }}
           onClose={clearSoldInfo}
           onNextPlayer={handleRevealNext}
-          playerName={soldInfo.playerName}
-          teamName={soldInfo.teamName}
-          soldPrice={soldInfo.soldPrice}
         />
       )}
 
       {unsoldInfo && (
-        <UnsoldPlayerModal
+        <AuctionResultModal
+          status="unsold"
+          playerName={unsoldInfo.playerName}
+          playerRole={currentPlayer?.role}
+          playerPhoto={currentPlayer?.photo}
+          basePrice={currentPlayer?.basePrice}
           onClose={clearUnsoldInfo}
           onNextPlayer={handleRevealNext}
-          playerName={unsoldInfo.playerName}
         />
       )}
     </div>

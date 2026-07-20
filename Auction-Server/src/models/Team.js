@@ -44,6 +44,14 @@ const teamSchema = new mongoose.Schema({
     default: null,
     maxlength: [5242880, 'Logo cannot exceed 5MB']
   },
+  primaryColor: {
+    type: String,
+    default: '#1e3a8a'
+  },
+  secondaryColor: {
+    type: String,
+    default: '#f59e0b'
+  },
   ownerName: {
     type: String,
     required: [true, 'Owner name is required'],

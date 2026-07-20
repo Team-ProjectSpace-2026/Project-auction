@@ -785,9 +785,6 @@ body.dark-mode .theme-toggle-slider {
 }
 
 /* Global custom cursor styles */
-body {
-  cursor: none;
-}
 
 input,
 textarea,

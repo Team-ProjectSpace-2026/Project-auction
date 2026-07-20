@@ -3,11 +3,9 @@ import Sidebar from '../../components/layout/Sidebar';
 import Avatar from '../../components/common/Avatar';
 import InputField from '../../components/common/InputField';
 import Button from '../../components/common/Button';
-import { useTheme } from '../../context/ThemeContext';
 import bgStadium from '../../assets/bgstadium2.png';
 
 const ProfilePage = () => {
-  const { theme, toggleTheme } = useTheme();
   const [formData, setFormData] = useState({
     fullName: 'Rahul Organizer',
     email: 'rahul.organizer@cricauction.com',
@@ -54,37 +52,6 @@ const ProfilePage = () => {
           <div className="page-header">
             <h1>Profile Settings</h1>
             <p>Update your personal and organization details.</p>
-          </div>
-
-          {/* Theme Toggle Section */}
-          <div style={{
-            background: 'var(--glass-bg)',
-            backdropFilter: 'blur(16px)',
-            WebkitBackdropFilter: 'blur(16px)',
-            border: '1px solid var(--glass-border)',
-            borderRadius: '8px',
-            padding: '12px 24px',
-            marginBottom: '24px',
-            transition: 'background-color 0.2s ease, border-color 0.2s ease',
-          }}>
-            <div className="theme-toggle-wrapper">
-              <div className="theme-toggle-label">
-                <span className="theme-toggle-label-text">Dark Mode</span>
-                <span className="theme-toggle-label-desc">Switch between light and dark themes</span>
-              </div>
-              <label className="theme-toggle">
-                <input
-                  type="checkbox"
-                  checked={theme === 'dark'}
-                  onChange={toggleTheme}
-                />
-                <span className="theme-toggle-slider"></span>
-                <span className="theme-toggle-icons">
-                  <span></span>
-                  <span></span>
-                </span>
-              </label>
-            </div>
           </div>
 
           <div className="settings-card">

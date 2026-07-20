@@ -21,8 +21,11 @@ const BidControls = () => {
   };
 
   const handleRaiseBid = () => {
-    if (!selectedTeamId || !currentPlayer || !currentBid) return;
-    const raiseAmount = currentAmount + 1000;
+    if (!selectedTeamId || !currentPlayer) return;
+    const basePrice = currentPlayer.basePrice || 0;
+    const raiseAmount = currentAmount > 0 
+      ? currentAmount + 1000 
+      : (basePrice > 0 ? basePrice : 1000);
     placeBid(raiseAmount, selectedTeamId, currentPlayer._id);
   };
 
@@ -143,15 +146,15 @@ const BidControls = () => {
 
         <button
           onClick={handleRaiseBid}
-          disabled={!isBidding || !selectedTeamId || !currentBid}
+          disabled={!isBidding || !selectedTeamId}
           style={{
             background: "#2563eb",
             color: "#fff",
             border: "none",
             borderRadius: "10px",
             padding: "12px",
-            cursor: !isBidding || !selectedTeamId || !currentBid ? "not-allowed" : "pointer",
-            opacity: !isBidding || !selectedTeamId || !currentBid ? 0.5 : 1,
+            cursor: !isBidding || !selectedTeamId ? "not-allowed" : "pointer",
+            opacity: !isBidding || !selectedTeamId ? 0.5 : 1,
             display: "flex",
             flexDirection: "column",
             alignItems: "center",

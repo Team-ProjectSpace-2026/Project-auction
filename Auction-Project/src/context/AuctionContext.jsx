@@ -99,6 +99,13 @@ export const AuctionProvider = ({ children }) => {
             return t;
           })
         );
+        setPlayers((prev) =>
+          prev.map((p) =>
+            p._id === data.playerId
+              ? { ...p, isSold: true, soldTo: data.teamId, soldPrice: data.soldPrice }
+              : p
+          )
+        );
       };
 
       const onPlayerUnsold = (data) => {
@@ -106,6 +113,13 @@ export const AuctionProvider = ({ children }) => {
         setAuctionStatus("unsold");
         setCurrentBid(null);
         setHighestBidder(null);
+        setPlayers((prev) =>
+          prev.map((p) =>
+            p._id === data.playerId
+              ? { ...p, isUnsold: true }
+              : p
+          )
+        );
       };
 
       const onAuctionStarted = () => setAuctionStatus("bidding");
