@@ -41,10 +41,8 @@ const AddTeamModal = ({ isOpen, onClose, onSubmit, tournamentId }) => {
   const [formData, setFormData] = useState({
     teamName: "",
     ownerName: "",
-    totalBudget: "",
     maxPlayers: "18",
     primaryColor: "#1e3a8a",
-    secondaryColor: "#f59e0b",
   });
   const [logoPreview, setLogoPreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -54,10 +52,8 @@ const AddTeamModal = ({ isOpen, onClose, onSubmit, tournamentId }) => {
     setFormData({
       teamName: "",
       ownerName: "",
-      totalBudget: "",
       maxPlayers: "18",
       primaryColor: "#1e3a8a",
-      secondaryColor: "#f59e0b",
     });
     setLogoPreview(null);
     onClose();
@@ -73,7 +69,6 @@ const AddTeamModal = ({ isOpen, onClose, onSubmit, tournamentId }) => {
         const ipl = getIplColors(value);
         if (ipl) {
           next.primaryColor = ipl.primary;
-          next.secondaryColor = ipl.secondary;
         }
       }
       return next;
@@ -106,15 +101,10 @@ const AddTeamModal = ({ isOpen, onClose, onSubmit, tournamentId }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { teamName, ownerName, totalBudget, maxPlayers, primaryColor, secondaryColor } = formData;
+    const { teamName, ownerName, maxPlayers, primaryColor } = formData;
 
     if (!teamName.trim() || !ownerName.trim()) {
       alert("Please fill in all required fields.");
-      return;
-    }
-
-    if (!totalBudget || Number(totalBudget) <= 0) {
-      alert("Please enter a valid total budget.");
       return;
     }
 
@@ -127,7 +117,6 @@ const AddTeamModal = ({ isOpen, onClose, onSubmit, tournamentId }) => {
     setIsSubmitting(true);
 
     const short = generateShort(teamName);
-    const budget = Number(totalBudget);
 
     try {
       await onSubmit({
@@ -135,22 +124,16 @@ const AddTeamModal = ({ isOpen, onClose, onSubmit, tournamentId }) => {
         short,
         ownerName: ownerName.trim(),
         logo: logoPreview || "",
-        budget,
-        totalBudget: budget,
-        remainingBudget: budget,
         maxPlayers: parsedMaxPlayers,
         primaryColor,
-        secondaryColor,
         tournamentId,
       });
 
       setFormData({
         teamName: "",
         ownerName: "",
-        totalBudget: "",
         maxPlayers: "18",
         primaryColor: "#1e3a8a",
-        secondaryColor: "#f59e0b",
       });
       setLogoPreview(null);
     } finally {
@@ -329,39 +312,7 @@ const AddTeamModal = ({ isOpen, onClose, onSubmit, tournamentId }) => {
             />
           </div>
 
-          <div style={{ display: "flex", gap: "12px", marginBottom: "16px" }}>
-            <div style={{ flex: 1 }}>
-              <label
-                style={{
-                  display: "block",
-                  fontSize: "14px",
-                  fontWeight: "600",
-                  color: "var(--text-primary-light)",
-                  marginBottom: "6px",
-                }}
-              >
-                Total Budget (₹) <span style={{ color: "#e74c3c" }}>*</span>
-              </label>
-              <input
-                type="number"
-                name="totalBudget"
-                value={formData.totalBudget}
-                onChange={handleInputChange}
-                placeholder="e.g. 1000000"
-                min="1"
-                style={{
-                  width: "100%",
-                  padding: "10px 12px",
-                  border: "1px solid var(--input-border)",
-                  borderRadius: "6px",
-                  fontSize: "14px",
-                  color: "var(--input-text)",
-                  backgroundColor: "var(--input-bg)",
-                  outline: "none",
-                  boxSizing: "border-box",
-                }}
-              />
-            </div>
+          <div style={{ display: "flex", gap: "12px", marginBottom: "20px" }}>
             <div style={{ flex: 1 }}>
               <label
                 style={{
@@ -394,9 +345,6 @@ const AddTeamModal = ({ isOpen, onClose, onSubmit, tournamentId }) => {
                 }}
               />
             </div>
-          </div>
-
-          <div style={{ display: "flex", gap: "12px", marginBottom: "20px" }}>
             <div style={{ flex: 1 }}>
               <label
                 style={{
@@ -407,7 +355,7 @@ const AddTeamModal = ({ isOpen, onClose, onSubmit, tournamentId }) => {
                   marginBottom: "6px",
                 }}
               >
-                Primary Color
+                Team Color
               </label>
               <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                 <input
@@ -431,55 +379,6 @@ const AddTeamModal = ({ isOpen, onClose, onSubmit, tournamentId }) => {
                   value={formData.primaryColor}
                   onChange={handleInputChange}
                   placeholder="#1e3a8a"
-                  style={{
-                    flex: 1,
-                    width: "100%",
-                    padding: "8px 10px",
-                    border: "1px solid var(--input-border)",
-                    borderRadius: "6px",
-                    fontSize: "14px",
-                    color: "var(--input-text)",
-                    backgroundColor: "var(--input-bg)",
-                    outline: "none",
-                    boxSizing: "border-box",
-                  }}
-                />
-              </div>
-            </div>
-            <div style={{ flex: 1 }}>
-              <label
-                style={{
-                  display: "block",
-                  fontSize: "14px",
-                  fontWeight: "600",
-                  color: "var(--text-primary-light)",
-                  marginBottom: "6px",
-                }}
-              >
-                Secondary Color
-              </label>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <input
-                  type="color"
-                  name="secondaryColor"
-                  value={formData.secondaryColor}
-                  onChange={handleInputChange}
-                  style={{
-                    border: "none",
-                    width: "36px",
-                    height: "36px",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                    padding: 0,
-                    backgroundColor: "transparent",
-                  }}
-                />
-                <input
-                  type="text"
-                  name="secondaryColor"
-                  value={formData.secondaryColor}
-                  onChange={handleInputChange}
-                  placeholder="#f59e0b"
                   style={{
                     flex: 1,
                     width: "100%",

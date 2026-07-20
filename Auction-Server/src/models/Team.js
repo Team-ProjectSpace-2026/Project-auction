@@ -21,7 +21,7 @@ const teamSchema = new mongoose.Schema({
   },
   budget: {
     type: Number,
-    required: [true, 'Budget is required'],
+    default: 0,
     min: [0, 'Budget cannot be negative']
   },
   maxPlayers: {
@@ -31,12 +31,12 @@ const teamSchema = new mongoose.Schema({
   },
   totalBudget: {
     type: Number,
-    required: [true, 'Total budget is required'],
+    default: 0,
     min: [0, 'Total budget cannot be negative']
   },
   remainingBudget: {
     type: Number,
-    required: [true, 'Remaining budget is required'],
+    default: 0,
     min: [0, 'Remaining budget cannot be negative']
   },
   logo: {

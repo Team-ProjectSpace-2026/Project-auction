@@ -64,13 +64,15 @@ export const createTeam = async (req, res, next) => {
       return res.status(404).json({ message: 'Tournament not found' });
     }
 
+    const finalBudget = Number(req.body.totalBudget) > 0 ? Number(req.body.totalBudget) : (tournament.budgetPerTeam || 0);
+
     const existingTeam = await Team.findOne({ tournamentId, name });
     if (existingTeam) {
       return res.status(400).json({ message: 'Team name already exists in this tournament' });
     }
 
-    const remainingBudget = totalBudget;
-    const team = new Team({ name, short, budget, maxPlayers, totalBudget, remainingBudget, tournamentId, ownerName, logo, primaryColor, secondaryColor, createdBy: req.user._id });
+    const remainingBudget = finalBudget;
+    const team = new Team({ name, short, budget: finalBudget, maxPlayers, totalBudget: finalBudget, remainingBudget, tournamentId, ownerName, logo, primaryColor, secondaryColor, createdBy: req.user._id });
     await team.save();
     res.status(201).json(team);
   } catch (error) {

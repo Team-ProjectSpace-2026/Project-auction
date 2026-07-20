@@ -125,12 +125,12 @@ export const validateTeam = [
     .withMessage('Team abbreviation must be 1-3 characters'),
   
   body('budget')
-    .notEmpty()
-    .withMessage('Budget is required')
+    .optional()
     .isFloat({ min: 0 })
     .withMessage('Budget must be a positive number'),
   
   body('totalBudget')
+    .optional()
     .isFloat({ min: 0 })
     .withMessage('Total budget must be a positive number'),
   
