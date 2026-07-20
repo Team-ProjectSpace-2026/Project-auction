@@ -1,8 +1,13 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Pencil, Trash2, Check, X } from "lucide-react";
+import { Pencil, Trash2, Check, X, Download } from "lucide-react";
+import pdfMake from "pdfmake/build/pdfmake";
+import vfsModule from "pdfmake/build/vfs_fonts";
 import * as playerService from "../../services/playerService";
+import { playerPhotoUrl } from "../../utils/playerPhotoUrl";
 import CricketLoader from "../common/CricketLoader";
+
+pdfMake.vfs = vfsModule.default || vfsModule;
 
 const getRoleStyle = (role) => {
   switch (role) {
@@ -84,6 +89,79 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
     }
   };
 
+  const downloadPDF = async () => {
+    const toBase64 = (url) =>
+      fetch(url)
+        .then((r) => { if (!r.ok) throw new Error(r.status); return r.blob(); })
+        .then(
+          (blob) =>
+            new Promise((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result);
+              reader.readAsDataURL(blob);
+            })
+        )
+        .catch(() => null);
+
+    const photos = await Promise.all(
+      filteredPlayers.map((p) =>
+        p.photo ? toBase64(playerPhotoUrl(p.photo)) : Promise.resolve(null)
+      )
+    );
+
+    const playerCards = filteredPlayers.map((p, i) => {
+      const cardContent = [
+        { text: p.name, style: "playerName", margin: [0, 0, 0, 2] },
+        { text: `Role: ${p.role}`, style: "playerDetail" },
+        { text: `Batting: ${p.battingStyle || "N/A"}`, style: "playerDetail" },
+        { text: `Bowling: ${p.bowlingStyle || "N/A"}`, style: "playerDetail" },
+        { text: `Keeper: ${p.keeper ? "Yes" : "No"}`, style: "playerDetail" },
+      ];
+
+      const cell = photos[i]
+        ? [
+            {
+              columns: [
+                { image: photos[i], width: 40, height: 50, fit: [40, 50] },
+                { stack: cardContent, width: "*" },
+              ],
+              columnGap: 8,
+            },
+          ]
+        : [{ stack: cardContent }];
+
+      return cell;
+    });
+
+    const rows = [];
+    for (let i = 0; i < playerCards.length; i += 2) {
+      const left = playerCards[i] || [{}];
+      const right = playerCards[i + 1] || [{}];
+      rows.push([left, right]);
+    }
+
+    const docDefinition = {
+      content: [
+        { text: "Player List", style: "header", margin: [0, 0, 0, 15] },
+        {
+          table: {
+            widths: ["50%", "50%"],
+            body: rows,
+          },
+          layout: "lightHorizontalLines",
+        },
+      ],
+      styles: {
+        header: { fontSize: 20, bold: true, alignment: "center" },
+        playerName: { fontSize: 11, bold: true },
+        playerDetail: { fontSize: 9, color: "#555" },
+      },
+      pageMargins: [30, 30, 30, 30],
+    };
+
+    pdfMake.createPdf(docDefinition).download("player-list.pdf");
+  };
+
   if (loading) {
     return <CricketLoader text="Loading players..." />;
   }
@@ -138,6 +216,17 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
             <option>All Rounder</option>
             <option>Wicket Keeper</option>
           </select>
+          <button
+            onClick={downloadPDF}
+            style={{
+              background: "var(--card-bg-light)", color: "var(--text-primary-light)",
+              border: "1px solid var(--border-light)", borderRadius: "12px",
+              padding: "12px 20px", fontWeight: "600", cursor: "pointer",
+              display: "flex", alignItems: "center", gap: "8px",
+            }}
+          >
+            <Download size={16} /> Download PDF
+          </button>
           <button
             onClick={() => window.open(`${window.location.origin}/register/${tournamentId}`, "_blank")}
             style={{
