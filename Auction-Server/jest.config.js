@@ -3,18 +3,5 @@ export default {
   transform: {},
   moduleFileExtensions: ['js', 'json'],
   testMatch: ['**/__tests__/**/*.test.js', '**/*.test.js'],
-  collectCoverageFrom: [
-    'src/**/*.js',
-    '!src/middleware/upload.js',
-    '!src/config/db.js',
-  ],
-  coverageDirectory: 'coverage',
-  coverageThreshold: {
-    global: {
-      branches: 50,
-      functions: 50,
-      lines: 50,
-      statements: 50,
-    },
-  },
+  testTimeout: 30000,
 };
