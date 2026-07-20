@@ -1,18 +1,10 @@
-import { useLocation, Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useLocation, Link } from 'react-router-dom';
 import batsmanLogo from '../../assets/cricauctionlogo1.png';
 
 const TopBar = ({ user }) => {
   const location = useLocation();
-  const navigate = useNavigate();
-  const { logout } = useAuth();
 
   const showBackLink = location.pathname !== '/dashboard' && location.pathname !== '/';
-
-  const handleLogout = async () => {
-    await logout();
-    navigate('/login');
-  };
 
   return (
     <header className="topbar">
@@ -36,14 +28,6 @@ const TopBar = ({ user }) => {
       </div>
 
       <div className="topbar-right">
-        <button className="notif-btn" aria-label="Notifications">
-          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-          </svg>
-          <span className="notif-dot"></span>
-        </button>
-
         <div className="user-profile-menu">
           <div className="user-avatar">
             {user?.name?.charAt(0) || 'U'}
@@ -62,26 +46,6 @@ const TopBar = ({ user }) => {
             <path d="M6 9l6 6 6-6"></path>
           </svg>
         </div>
-
-        <button
-          onClick={handleLogout}
-          style={{
-            marginLeft: '12px',
-            padding: '8px 16px',
-            backgroundColor: '#ef4444',
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '14px',
-            fontWeight: '600',
-            transition: 'background-color 0.2s',
-          }}
-          onMouseOver={(e) => e.target.style.backgroundColor = '#dc2626'}
-          onMouseOut={(e) => e.target.style.backgroundColor = '#ef4444'}
-        >
-          Logout
-        </button>
       </div>
     </header>
   );

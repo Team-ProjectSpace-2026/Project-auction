@@ -12,24 +12,24 @@ main {
   z-index: 1; /* Ensure main content is above the fixed NavBar */
 }
 
-/* GSAP ScrollTrigger reveal animations */
-#hero,
-#recent-auctions,
-#our-auctions,
-#about,
-#features {
-  opacity: 0;
-  transform: translateY(60px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
+/* GSAP ScrollTrigger reveal animations — handled by GSAP directly, no CSS transitions */
+
+/* Hero headline character split animation */
+.hero-headline {
+  transform-style: preserve-3d;
+  perspective: 800px;
 }
 
-#hero.reveal-visible,
-#recent-auctions.reveal-visible,
-#our-auctions.reveal-visible,
-#about.reveal-visible,
-#features.reveal-visible {
-  opacity: 1;
-  transform: translateY(0);
+.char {
+  display: inline-block;
+  transform-origin: bottom center;
+  will-change: transform, opacity;
+}
+
+/* Depth layer parallax helpers */
+.depth-layer {
+  will-change: transform;
+  pointer-events: none;
 }
 
 /* Dark Mode adjustments for landing page */

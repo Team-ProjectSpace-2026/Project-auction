@@ -58,7 +58,7 @@ const checkTournamentExists = async (tournamentId) => {
 const checkPlayerInTournament = async (playerId, tournamentId) => {
   if (!playerId || !isValidObjectId(playerId)) return null;
   const player = await Player.findById(new mongoose.Types.ObjectId(playerId));
-  if (!player || player.tournamentId.toString() !== tournamentId) return null;
+  if (!player || player.tournamentId.toString() !== tournamentId.toString()) return null;
   return player;
 };
 
@@ -231,20 +231,21 @@ export const initializeSocket = (server) => {
           return;
         }
 
+        // Get current winning bid atomically
+        const currentBid = await getWinningBid(sanitizedTournamentId, sanitizedPlayerId);
+        const currentBidAmount = currentBid ? currentBid.amount : 0;
+
         // Validate bid using shared validator
         try {
           await validateBid(
             { amount: sanitizedAmount, teamId: sanitizedTeamId, playerId: sanitizedPlayerId },
-            sanitizedTournamentId
+            sanitizedTournamentId,
+            currentBidAmount
           );
         } catch (validationError) {
           socket.emit("bid-error", { message: validationError.message });
           return;
         }
-
-        // Get current winning bid atomically
-        const currentBid = await getWinningBid(sanitizedTournamentId, sanitizedPlayerId);
-        const currentBidAmount = currentBid ? currentBid.amount : 0;
 
         if (sanitizedAmount <= currentBidAmount) {
           socket.emit("bid-error", {
@@ -253,31 +254,50 @@ export const initializeSocket = (server) => {
           return;
         }
 
-        // Atomic bid creation with conditional update for active bid transition
-        const session = await Bid.startSession();
+        // Atomic bid creation with fallback for non-replica set Mongo deployments
         let newBidId;
         try {
-          await session.withTransaction(async () => {
-            const bid = new Bid({
-              tournamentId: sanitizedTournamentId,
-              playerId: sanitizedPlayerId,
-              teamId: sanitizedTeamId,
-              amount: sanitizedAmount,
-              status: "Active",
-            });
-            await bid.save({ session });
-            newBidId = bid._id;
+          const session = await Bid.startSession();
+          try {
+            await session.withTransaction(async () => {
+              const bid = new Bid({
+                tournamentId: sanitizedTournamentId,
+                playerId: sanitizedPlayerId,
+                teamId: sanitizedTeamId,
+                amount: sanitizedAmount,
+                status: "Active",
+              });
+              await bid.save({ session });
+              newBidId = bid._id;
 
-            if (currentBid) {
-              await Bid.updateOne(
-                { _id: currentBid._id, status: "Active" },
-                { $set: { status: "Outbid" } },
-                { session }
-              );
-            }
+              if (currentBid) {
+                await Bid.updateOne(
+                  { _id: currentBid._id, status: "Active" },
+                  { $set: { status: "Outbid" } },
+                  { session }
+                );
+              }
+            });
+          } finally {
+            await session.endSession();
+          }
+        } catch (txErr) {
+          // Fallback for standalone MongoDB without transaction support
+          if (currentBid) {
+            await Bid.updateOne(
+              { _id: currentBid._id, status: "Active" },
+              { $set: { status: "Outbid" } }
+            );
+          }
+          const bid = new Bid({
+            tournamentId: sanitizedTournamentId,
+            playerId: sanitizedPlayerId,
+            teamId: sanitizedTeamId,
+            amount: sanitizedAmount,
+            status: "Active",
           });
-        } finally {
-          await session.endSession();
+          await bid.save();
+          newBidId = bid._id;
         }
 
         // Broadcast bid to all clients in tournament room
@@ -296,7 +316,7 @@ export const initializeSocket = (server) => {
           isWinningBid: true,
         });
       } catch (error) {
-        socket.emit("bid-error", { message: "Failed to place bid" });
+        socket.emit("bid-error", { message: error.message || "Failed to place bid" });
       }
     });
 
@@ -530,14 +550,18 @@ export const initializeSocket = (server) => {
           return;
         }
 
-        const session = await Bid.startSession();
         let cancelledCount = 0;
         try {
-          await session.withTransaction(async () => {
-            cancelledCount = await cancelActiveBids(sanitizedTournamentId, sanitizedPlayerId, session);
-          });
-        } finally {
-          await session.endSession();
+          const session = await Bid.startSession();
+          try {
+            await session.withTransaction(async () => {
+              cancelledCount = await cancelActiveBids(sanitizedTournamentId, sanitizedPlayerId, session);
+            });
+          } finally {
+            await session.endSession();
+          }
+        } catch (txErr) {
+          cancelledCount = await cancelActiveBids(sanitizedTournamentId, sanitizedPlayerId);
         }
 
         tournament.currentPlayerId = null;
