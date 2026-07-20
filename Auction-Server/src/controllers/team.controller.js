@@ -52,6 +52,8 @@ export const createTeam = async (req, res, next) => {
     const tournamentId = String(req.body.tournamentId || "");
     const ownerName = String(req.body.ownerName || "");
     const logo = req.body.logo ? String(req.body.logo) : undefined;
+    const primaryColor = req.body.primaryColor ? String(req.body.primaryColor) : undefined;
+    const secondaryColor = req.body.secondaryColor ? String(req.body.secondaryColor) : undefined;
 
     if (!mongoose.Types.ObjectId.isValid(tournamentId)) {
       return res.status(400).json({ message: 'Invalid tournament ID' });
@@ -62,13 +64,15 @@ export const createTeam = async (req, res, next) => {
       return res.status(404).json({ message: 'Tournament not found' });
     }
 
+    const finalBudget = Number(req.body.totalBudget) > 0 ? Number(req.body.totalBudget) : (tournament.budgetPerTeam || 0);
+
     const existingTeam = await Team.findOne({ tournamentId, name });
     if (existingTeam) {
       return res.status(400).json({ message: 'Team name already exists in this tournament' });
     }
 
-    const remainingBudget = totalBudget;
-    const team = new Team({ name, short, budget, maxPlayers, totalBudget, remainingBudget, tournamentId, ownerName, logo, createdBy: req.user._id });
+    const remainingBudget = finalBudget;
+    const team = new Team({ name, short, budget: finalBudget, maxPlayers, totalBudget: finalBudget, remainingBudget, tournamentId, ownerName, logo, primaryColor, secondaryColor, createdBy: req.user._id });
     await team.save();
     res.status(201).json(team);
   } catch (error) {
@@ -86,6 +90,8 @@ export const updateTeam = async (req, res, next) => {
     const totalBudget = Number(req.body.totalBudget) || 0;
     const ownerName = String(req.body.ownerName || "");
     const logo = req.body.logo ? String(req.body.logo) : undefined;
+    const primaryColor = req.body.primaryColor ? String(req.body.primaryColor) : undefined;
+    const secondaryColor = req.body.secondaryColor ? String(req.body.secondaryColor) : undefined;
 
     const existingTeam = await Team.findById(teamId);
     if (!existingTeam) {
@@ -111,7 +117,7 @@ export const updateTeam = async (req, res, next) => {
 
     const team = await Team.findByIdAndUpdate(
       teamId,
-      { name, short, budget, maxPlayers, totalBudget, remainingBudget: newRemainingBudget, ownerName, logo },
+      { name, short, budget, maxPlayers, totalBudget, remainingBudget: newRemainingBudget, ownerName, logo, primaryColor, secondaryColor },
       { new: true, runValidators: true }
     );
     

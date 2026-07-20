@@ -14,6 +14,15 @@ const TournamentRow = ({ tournament, onView }) => {
   const { name, logo, status, auctionDate, teamsCount } = tournament;
   const pill = statusColors[status] || statusColors.Draft;
 
+  // Resolve logo URL (supports absolute Cloudinary URLs & local paths)
+  const getLogoUrl = (logoPath) => {
+    if (!logoPath) return "";
+    if (logoPath.startsWith("http")) return logoPath;
+    const normalized = logoPath.replace(/\\/g, "/");
+    const prefix = normalized.startsWith("/") ? "" : "/";
+    return `${API_BASE}${prefix}${normalized}`;
+  };
+
   return (
     <tr style={{ borderBottom: '1px solid var(--table-row-border)', transition: 'border-color 0.2s ease' }}>
       <td style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -24,7 +33,7 @@ const TournamentRow = ({ tournament, onView }) => {
           overflow: 'hidden',
         }}>
           {logo ? (
-            <img src={`${API_BASE}${logo}`} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <img src={getLogoUrl(logo)} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           ) : (
             <CircleDot size={18} strokeWidth={2} style={{ color: 'var(--text-secondary-light)' }} />
           )}

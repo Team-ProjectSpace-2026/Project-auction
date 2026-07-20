@@ -4,6 +4,8 @@ import { SkeletonRect, SkeletonText } from "../../components/common/SkeletonLoad
 import "../../components/common/SkeletonLoader.css";
 import * as playerService from "../../services/playerService.js";
 import PlayerRegistrationForm from "../../components/players/PlayerRegistrationForm.jsx";
+import { CheckCircle2 } from "lucide-react";
+import "./SuccessCelebration.css";
 
 // ─── Design tokens ──────────────────────────────────────────────────────────
 const C = {
@@ -60,14 +62,29 @@ export default function PublicRegistrationPage() {
     fetchTournament();
   }, [tournamentId]);
 
+  const [registeredPlayer, setRegisteredPlayer] = useState(null);
+  const [confettiList, setConfettiList] = useState([]);
+
   const isClosed = tournamentData?.registrationEndDate && now > new Date(tournamentData.registrationEndDate);
 
-  async function handleSubmit(formData) {
+  async function handleSubmit(formData, rawForm) {
     setLoading(true);
     setBanner(null);
     try {
       await playerService.registerPlayer(tournamentId, formData);
-      setBanner({ type: "success", message: "Registration successful! You have been registered for the tournament." });
+      const list = Array.from({ length: 25 }).map((_, i) => ({
+        id: i,
+        left: `${Math.random() * 100}%`,
+        delay: `${Math.random() * 3}s`,
+        duration: `${Math.random() * 2 + 3}s`
+      }));
+      setConfettiList(list);
+      setRegisteredPlayer({
+        name: rawForm?.playerName || "Registered Player",
+        role: rawForm?.primaryRole || "All-Rounder",
+        jerseyNumber: rawForm?.jerseyNumber || "—",
+        jerseyName: rawForm?.jerseyName || rawForm?.playerName || "",
+      });
     } catch (err) {
       const serverErrors = err?.response?.data?.errors;
       let msg;
@@ -244,6 +261,63 @@ export default function PublicRegistrationPage() {
           resetOnSubmit={true}
         />
       </div>
+
+      {/* ── Success Celebration Overlay Modal ── */}
+      {registeredPlayer && (
+        <div className="celebration-overlay" onClick={() => { setRegisteredPlayer(null); setConfettiList([]); }}>
+          
+          {/* Confetti elements background */}
+          <div className="confetti-layer">
+            {confettiList.map((c) => (
+              <div
+                key={c.id}
+                className="confetti-piece"
+                style={{
+                  left: c.left,
+                  animationDelay: c.delay,
+                  animationDuration: c.duration,
+                }}
+              />
+            ))}
+          </div>
+
+          <div className="celebration-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="celebration-badge">
+              <CheckCircle2 size={14} /> DRAFT PROFILE SECURED
+            </div>
+            
+            <h2 className="celebration-title">Draft Registered!</h2>
+            <p className="celebration-subtitle">
+              Congratulations! Your player profile has been successfully submitted and entered into the draft pool for {tournamentData?.name || "the tournament"}.
+            </p>
+
+            {/* Custom Draft Card visual */}
+            <div className="player-draft-card">
+              <div className="card-jersey-visual">
+                <div className="jersey-number-display">
+                  {registeredPlayer.jerseyNumber ? `#${registeredPlayer.jerseyNumber}` : "—"}
+                </div>
+              </div>
+              <h3 className="card-player-name">
+                {registeredPlayer.name}
+              </h3>
+              <div className="card-player-role-badge">
+                {registeredPlayer.role}
+              </div>
+            </div>
+
+            <button
+              className="celebration-close-btn"
+              onClick={() => {
+                setRegisteredPlayer(null);
+                setConfettiList([]);
+              }}
+            >
+              Done & Return
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ── Footer ── */}
       <div style={{

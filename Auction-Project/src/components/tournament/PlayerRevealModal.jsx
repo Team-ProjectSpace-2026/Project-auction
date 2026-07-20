@@ -57,17 +57,22 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
   const beltRef = useRef(null);
   const targetIndexRef = useRef(null);
 
-  // Build card list: use all players, repeat enough to fill the strip
+  // Filter available players: exclude already sold or unsold players
+  const availablePlayers = useMemo(() => {
+    return (players || []).filter((p) => !p.isSold && !p.isUnsold);
+  }, [players]);
+
+  // Build card list: use available players, repeat enough to fill the strip
   const cardList = useMemo(() => {
-    if (!players || players.length === 0) {
-      // No players loaded yet - return empty array
+    if (!availablePlayers || availablePlayers.length === 0) {
+      // No available players loaded/remaining
       return [];
     }
     // Create enough copies to fill a long strip
-    const copies = Math.max(3, Math.ceil(50 / players.length));
+    const copies = Math.max(3, Math.ceil(50 / availablePlayers.length));
     const list = [];
     for (let c = 0; c < copies; c++) {
-      players.forEach((p, i) => {
+      availablePlayers.forEach((p, i) => {
         list.push({
           ...p,
           _cardKey: `${c}-${i}`,
@@ -76,7 +81,7 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
       });
     }
     return list;
-  }, [players]);
+  }, [availablePlayers]);
 
   // ---- Shuffle animation with bounce-back ----
   const startShuffle = useCallback(() => {
@@ -84,11 +89,11 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
     startTimeRef.current = performance.now();
 
     // Compute target index dynamically from current cardList
-    if (!players || players.length === 0) {
-      targetIndexRef.current = 15;
+    if (!availablePlayers || availablePlayers.length === 0) {
+      targetIndexRef.current = 0;
     } else {
-      const start = players.length;
-      const end = Math.max(start + 1, cardList.length - players.length);
+      const start = availablePlayers.length;
+      const end = Math.max(start + 1, cardList.length - availablePlayers.length);
       targetIndexRef.current = start + Math.floor(Math.random() * (end - start));
     }
     const ti = targetIndexRef.current;
@@ -155,7 +160,7 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
       beltRef.current.style.transform = `translateY(-50%) translateX(${startOffset}px)`;
     }
     animFrameRef.current = requestAnimationFrame(animate);
-  }, [players, cardList]);
+  }, [availablePlayers, cardList]);
 
   // Auto-start shuffle on mount
   useEffect(() => {
@@ -197,6 +202,96 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
 
   // ---- Progress dots ----
   const progressPhase = phase === "idle" ? 0 : phase === "shuffling" ? 1 : phase === "selected" ? 2 : 3;
+
+  if (!players || players.length === 0 || availablePlayers.length === 0) {
+    return createPortal(
+      <div className="auction-screen">
+        <StadiumBackground />
+        <div className="reveal-modal" style={{ display: "flex", alignItems: "center", justifyContent: "center", zIndex: 99999 }}>
+          <button
+            className="reveal-modal__close"
+            onClick={onClose}
+            style={{ zIndex: 100000, background: "rgba(255,255,255,0.2)", color: "#fff" }}
+          >
+            ×
+          </button>
+          
+          <div style={{
+            background: "rgba(15, 23, 42, 0.92)",
+            backdropFilter: "blur(16px)",
+            WebkitBackdropFilter: "blur(16px)",
+            border: "1.5px solid rgba(255, 255, 255, 0.15)",
+            borderRadius: "24px",
+            padding: "40px 48px",
+            textAlign: "center",
+            maxWidth: "420px",
+            width: "90%",
+            boxShadow: "0 25px 60px rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "16px",
+            zIndex: 99999,
+          }}>
+            <div style={{
+              width: "72px",
+              height: "72px",
+              borderRadius: "50%",
+              background: "linear-gradient(135deg, rgba(245,158,11,0.2), rgba(217,119,6,0.3))",
+              border: "1.5px solid rgba(245,158,11,0.5)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "36px",
+            }}>
+              🏏
+            </div>
+            
+            <h2 style={{
+              color: "#ffffff",
+              fontSize: "24px",
+              fontWeight: "800",
+              margin: 0,
+              letterSpacing: "0.5px",
+              textTransform: "uppercase",
+            }}>
+              No player left
+            </h2>
+
+            <p style={{
+              color: "rgba(255, 255, 255, 0.75)",
+              fontSize: "14px",
+              margin: 0,
+              lineHeight: "1.5",
+            }}>
+              No players left for this tournament. All registered players have already been auctioned.
+            </p>
+
+            <button
+              onClick={onClose}
+              style={{
+                marginTop: "12px",
+                width: "100%",
+                padding: "14px 28px",
+                background: "linear-gradient(135deg, #2563eb, #1d4ed8)",
+                color: "#ffffff",
+                border: "none",
+                borderRadius: "12px",
+                fontWeight: "700",
+                fontSize: "14px",
+                cursor: "pointer",
+                boxShadow: "0 4px 14px rgba(37, 99, 235, 0.4)",
+                transition: "all 0.2s ease",
+              }}
+            >
+              Return to Auction Room
+            </button>
+          </div>
+        </div>
+      </div>,
+      document.body
+    );
+  }
 
   return createPortal(
     <div className="auction-screen">

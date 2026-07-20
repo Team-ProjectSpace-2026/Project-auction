@@ -25,7 +25,7 @@ export const validateBid = async (bidData, tournamentId, currentBid = 0) => {
 
   // Verify player belongs to tournament
   const player = await Player.findById(sanitizedPlayerId);
-  if (!player || player.tournamentId.toString() !== tournamentId) {
+  if (!player || player.tournamentId.toString() !== tournamentId.toString()) {
     throw new Error('Invalid player for this tournament');
   }
 
@@ -39,7 +39,7 @@ export const validateBid = async (bidData, tournamentId, currentBid = 0) => {
 
   // Check team's remaining budget and tournament ownership
   const team = await Team.findById(sanitizedTeamId);
-  if (!team || team.tournamentId.toString() !== tournamentId) {
+  if (!team || team.tournamentId.toString() !== tournamentId.toString()) {
     throw new Error("Invalid team for this tournament");
   }
 
@@ -77,42 +77,59 @@ export const processWinningBid = async (bid) => {
     return bid;
   }
 
-  // Use transaction for atomic updates
-  const session = await Bid.startSession();
+  // Use transaction for atomic updates with fallback for standalone Mongo
   try {
-    await session.withTransaction(async () => {
-      // Atomically transition bid status - only if still Active
-      const updatedBid = await Bid.findOneAndUpdate(
-        { _id: bid._id, status: "Active" },
-        { $set: { status: "Won", isWinningBid: true } },
-        { new: true, session },
-      );
+    const session = await Bid.startSession();
+    try {
+      await session.withTransaction(async () => {
+        const updatedBid = await Bid.findOneAndUpdate(
+          { _id: bid._id, status: "Active" },
+          { $set: { status: "Won", isWinningBid: true } },
+          { new: true, session },
+        );
+        if (!updatedBid) return;
 
-      // If no document was updated, bid was already settled by another process
-      if (!updatedBid) {
-        return;
-      }
+        const player = await Player.findById(bid.playerId).session(session);
+        if (player && !player.isSold) {
+          player.isSold = true;
+          player.soldTo = bid.teamId;
+          player.soldPrice = bid.amount;
+          await player.save({ session });
+        }
 
-      // Update player as sold
-      const player = await Player.findById(bid.playerId).session(session);
+        const team = await Team.findById(bid.teamId).session(session);
+        if (team) {
+          team.remainingBudget = team.remainingBudget - bid.amount;
+          team.players += 1;
+          await team.save({ session });
+        }
+      });
+    } finally {
+      await session.endSession();
+    }
+  } catch (txErr) {
+    // Fallback for standalone Mongo deployments
+    const updatedBid = await Bid.findOneAndUpdate(
+      { _id: bid._id, status: "Active" },
+      { $set: { status: "Won", isWinningBid: true } },
+      { new: true }
+    );
+    if (updatedBid) {
+      const player = await Player.findById(bid.playerId);
       if (player && !player.isSold) {
         player.isSold = true;
         player.soldTo = bid.teamId;
         player.soldPrice = bid.amount;
-        await player.save({ session });
+        await player.save();
       }
 
-    // Update team's remaining budget
-    const team = await Team.findById(bid.teamId);
-    if (team) {
-      const remaining = team.remainingBudget - bid.amount;
-      team.remainingBudget = remaining;
-      team.players += 1;
-      await team.save({ session });
+      const team = await Team.findById(bid.teamId);
+      if (team) {
+        team.remainingBudget = team.remainingBudget - bid.amount;
+        team.players += 1;
+        await team.save();
+      }
     }
-    });
-  } finally {
-    await session.endSession();
   }
 
   // Return the updated bid, not the stale input
