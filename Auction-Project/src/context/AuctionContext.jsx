@@ -87,12 +87,14 @@ export const AuctionProvider = ({ children }) => {
         setAuctionStatus("sold");
         setCurrentBid(null);
         setHighestBidder(null);
+        const targetTeamId = String(typeof data.teamId === 'object' ? data.teamId._id : data.teamId);
+        const targetPlayerId = String(typeof data.playerId === 'object' ? data.playerId._id : data.playerId);
         setTeams((prev) =>
           prev.map((t) => {
-            if (t._id === data.teamId) {
+            if (String(t._id) === targetTeamId) {
               return {
                 ...t,
-                remainingBudget: t.remainingBudget - data.soldPrice,
+                remainingBudget: Math.max(0, (t.remainingBudget || 0) - (data.soldPrice || 0)),
                 players: (t.players || 0) + 1,
               };
             }
@@ -101,8 +103,8 @@ export const AuctionProvider = ({ children }) => {
         );
         setPlayers((prev) =>
           prev.map((p) =>
-            p._id === data.playerId
-              ? { ...p, isSold: true, soldTo: data.teamId, soldPrice: data.soldPrice }
+            String(p._id) === targetPlayerId
+              ? { ...p, isSold: true, soldTo: targetTeamId, soldPrice: data.soldPrice }
               : p
           )
         );

@@ -79,6 +79,13 @@ export const placeBid = async (req, res, next) => {
     // Validate bid
     await validateBid({ amount, teamId, playerId }, tournamentId, currentBidAmount);
     
+    // Mark previous active bids for this player as Outbid FIRST
+    await Bid.updateMany(
+      { tournamentId, playerId, status: 'Active' },
+      { $set: { status: 'Outbid' } },
+      { session }
+    );
+    
     // Create new bid
     const bid = new Bid({
       tournamentId,
@@ -89,12 +96,6 @@ export const placeBid = async (req, res, next) => {
     });
     
     await bid.save({ session });
-    
-    // Mark previous bid as outbid
-    if (currentBid) {
-      currentBid.status = 'Outbid';
-      await currentBid.save({ session });
-    }
     
     await session.commitTransaction();
     
@@ -185,13 +186,17 @@ export const markSold = async (req, res, next) => {
     // Populate response
     const populatedBid = await Bid.findById(activeBid._id)
       .populate('playerId', 'name')
-      .populate('teamId', 'name');
+      .populate('teamId', 'name short logo primaryColor secondaryColor');
 
     res.json({
       message: "Player marked as sold",
       bid: populatedBid,
       soldPrice: populatedBid.amount,
       teamName: populatedBid.teamId.name,
+      teamShort: populatedBid.teamId.short,
+      teamLogo: populatedBid.teamId.logo,
+      primaryColor: populatedBid.teamId.primaryColor,
+      secondaryColor: populatedBid.teamId.secondaryColor,
     });
   } catch (error) {
     next(error);

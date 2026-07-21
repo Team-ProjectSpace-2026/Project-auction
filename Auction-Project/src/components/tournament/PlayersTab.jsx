@@ -1,13 +1,17 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Pencil, Trash2, Check, X, Download } from "lucide-react";
-import pdfMake from "pdfmake/build/pdfmake";
-import vfsModule from "pdfmake/build/vfs_fonts";
+import pdfMake from "pdfmake/build/pdfmake.js";
+import vfsModule from "pdfmake/build/vfs_fonts.js";
 import * as playerService from "../../services/playerService";
 import { playerPhotoUrl } from "../../utils/playerPhotoUrl";
 import CricketLoader from "../common/CricketLoader";
 
-pdfMake.vfs = vfsModule.default || vfsModule;
+const pdfFonts = vfsModule?.pdfMake?.vfs ? vfsModule.pdfMake.vfs : (vfsModule?.default?.pdfMake?.vfs || vfsModule?.default || vfsModule);
+if (pdfMake) {
+  pdfMake.vfs = pdfFonts;
+}
+
 
 const getRoleStyle = (role) => {
   switch (role) {

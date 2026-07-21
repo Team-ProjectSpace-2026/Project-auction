@@ -71,7 +71,8 @@ export default function PublicRegistrationPage() {
     setLoading(true);
     setBanner(null);
     try {
-      await playerService.registerPlayer(tournamentId, formData);
+      const res = await playerService.registerPlayer(tournamentId, formData);
+      const createdPlayer = res?.data?.player;
       const list = Array.from({ length: 25 }).map((_, i) => ({
         id: i,
         left: `${Math.random() * 100}%`,
@@ -80,10 +81,11 @@ export default function PublicRegistrationPage() {
       }));
       setConfettiList(list);
       setRegisteredPlayer({
-        name: rawForm?.playerName || "Registered Player",
-        role: rawForm?.primaryRole || "All-Rounder",
-        jerseyNumber: rawForm?.jerseyNumber || "—",
-        jerseyName: rawForm?.jerseyName || rawForm?.playerName || "",
+        name: createdPlayer?.name || rawForm?.playerName || "Registered Player",
+        role: createdPlayer?.role || rawForm?.primaryRole || "All-Rounder",
+        registrationNumber: createdPlayer?.registrationNumber,
+        jerseyNumber: createdPlayer?.registrationNumber || createdPlayer?.jerseyNumber || rawForm?.jerseyNumber || 1,
+        jerseyName: createdPlayer?.jerseyName || rawForm?.jerseyName || rawForm?.playerName || "",
       });
     } catch (err) {
       const serverErrors = err?.response?.data?.errors;
@@ -295,7 +297,7 @@ export default function PublicRegistrationPage() {
             <div className="player-draft-card">
               <div className="card-jersey-visual">
                 <div className="jersey-number-display">
-                  {registeredPlayer.jerseyNumber ? `#${registeredPlayer.jerseyNumber}` : "—"}
+                  #{registeredPlayer.registrationNumber ?? registeredPlayer.jerseyNumber ?? 1}
                 </div>
               </div>
               <h3 className="card-player-name">

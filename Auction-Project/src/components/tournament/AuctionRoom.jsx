@@ -359,32 +359,57 @@ const AuctionRoom = () => {
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", flex: 1, overflowY: "auto" }}>
-              {teams.map((team, index) => (
-                <div key={team._id} style={{
-                  display: "grid",
-                  gridTemplateColumns: "2fr 1.2fr 0.8fr",
-                  alignItems: "center",
-                  padding: "12px 0",
-                  borderBottom: index < teams.length - 1 ? "1px solid color-mix(in srgb, var(--border-light) 50%, transparent)" : "none",
-                }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                    <div style={{
-                      width: "34px", height: "34px", borderRadius: "50%",
-                      background: getTeamColor(index), display: "flex", alignItems: "center", justifyContent: "center",
-                      color: "#fff", fontSize: "11px", fontWeight: "800", flexShrink: 0,
-                    }}>
-                      {team.short || team.name?.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()}
+              {teams.map((team, index) => {
+                const currentBidTeamId = currentBid && currentBid.teamId
+                  ? (typeof currentBid.teamId === 'object' ? currentBid.teamId._id : currentBid.teamId)
+                  : null;
+                const isCurrentBidder = currentBidTeamId && String(currentBidTeamId) === String(team._id);
+                const activeBidAmount = isCurrentBidder ? (currentBid.amount || 0) : 0;
+                const liveRemainingBudget = Math.max(0, (team.remainingBudget || 0) - activeBidAmount);
+
+                return (
+                  <div key={team._id} style={{
+                    display: "grid",
+                    gridTemplateColumns: "2fr 1.2fr 0.8fr",
+                    alignItems: "center",
+                    padding: "12px 0",
+                    borderBottom: index < teams.length - 1 ? "1px solid color-mix(in srgb, var(--border-light) 50%, transparent)" : "none",
+                  }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      <div style={{
+                        width: "34px", height: "34px", borderRadius: "50%",
+                        background: team.primaryColor || getTeamColor(index), display: "flex", alignItems: "center", justifyContent: "center",
+                        color: "#fff", fontSize: "11px", fontWeight: "800", flexShrink: 0,
+                        overflow: "hidden",
+                      }}>
+                        {team.logo ? (
+                          <img
+                            src={team.logo}
+                            alt={team.name}
+                            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                          />
+                        ) : (
+                          team.short || team.name?.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()
+                        )}
+                      </div>
+                      <span style={{ fontSize: "13px", fontWeight: "600", color: "var(--text-primary-light)" }}>{team.name}</span>
                     </div>
-                    <span style={{ fontSize: "13px", fontWeight: "600", color: "var(--text-primary-light)" }}>{team.name}</span>
+                    <div style={{ textAlign: "right" }}>
+                      <div style={{ fontSize: "14px", fontWeight: "700", color: isCurrentBidder ? "#eab308" : "#16a34a", transition: "all 0.2s ease" }}>
+                        {formatCurrency(liveRemainingBudget)}
+                      </div>
+                      {isCurrentBidder && activeBidAmount > 0 && (
+                        <div style={{ fontSize: "10px", color: "#eab308", fontWeight: "700", letterSpacing: "0.2px" }}>
+                          (-{formatCurrency(activeBidAmount)} live)
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ textAlign: "right", fontSize: "13px", fontWeight: "600", color: "var(--text-secondary-light)", transition: "color 0.2s ease" }}>
+                      {team.players || 0} / {team.maxPlayers || 18}
+                    </div>
                   </div>
-                  <div style={{ textAlign: "right", fontSize: "14px", fontWeight: "700", color: "#16a34a" }}>
-                    {formatCurrency(team.remainingBudget)}
-                  </div>
-                  <div style={{ textAlign: "right", fontSize: "13px", fontWeight: "600", color: "var(--text-secondary-light)", transition: "color 0.2s ease" }}>
-                    {team.players || 0} / {team.maxPlayers || 18}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
               {teams.length === 0 && (
                 <div style={{ textAlign: "center", padding: "20px 0", color: "var(--text-secondary-light)", fontSize: "13px" }}>
                   No teams loaded
@@ -409,18 +434,34 @@ const AuctionRoom = () => {
         <PlayerRevealModal onClose={() => setShowRevealModal(false)} onContinue={handleRevealContinue} />
       )}
 
-      {soldInfo && (
-        <AuctionResultModal
-          status="sold"
-          playerName={soldInfo.playerName}
-          playerRole={currentPlayer?.role}
-          playerPhoto={currentPlayer?.photo}
-          soldPrice={soldInfo.soldPrice}
-          winningTeam={teams.find((t) => t._id === soldInfo.teamId) || { name: soldInfo.teamName }}
-          onClose={clearSoldInfo}
-          onNextPlayer={handleRevealNext}
-        />
-      )}
+      {soldInfo && (() => {
+        const foundTeam = teams.find(
+          (t) =>
+            String(t._id || t.id) === String(soldInfo.teamId) ||
+            (t.name && soldInfo.teamName && t.name.trim().toLowerCase() === soldInfo.teamName.trim().toLowerCase()) ||
+            (t.short && soldInfo.teamName && t.short.trim().toLowerCase() === soldInfo.teamName.trim().toLowerCase())
+        );
+        const winningTeam = foundTeam || {
+          _id: soldInfo.teamId,
+          name: soldInfo.teamName,
+          short: soldInfo.teamShort || (soldInfo.teamName ? soldInfo.teamName.slice(0, 3).toUpperCase() : ""),
+          logo: soldInfo.teamLogo,
+          primaryColor: soldInfo.primaryColor,
+          secondaryColor: soldInfo.secondaryColor,
+        };
+        return (
+          <AuctionResultModal
+            status="sold"
+            playerName={soldInfo.playerName}
+            playerRole={currentPlayer?.role}
+            playerPhoto={currentPlayer?.photo}
+            soldPrice={soldInfo.soldPrice}
+            winningTeam={winningTeam}
+            onClose={clearSoldInfo}
+            onNextPlayer={handleRevealNext}
+          />
+        );
+      })()}
 
       {unsoldInfo && (
         <AuctionResultModal

@@ -108,6 +108,24 @@ export const updateTournament = async (req, res, next) => {
       return res.status(404).json({ message: "Tournament not found" });
     }
 
+    // Sync budgetPerTeam and maxPlayersPerTeam to teams that have not purchased players yet
+    if (budgetPerTeam > 0 || maxPlayersPerTeam > 0) {
+      const existingTeams = await Team.find({ tournamentId });
+      for (const t of existingTeams) {
+        const purchasedCount = await Player.countDocuments({ soldTo: t._id, deleted: false, isSold: true });
+        if (purchasedCount === 0) {
+          const newBudget = budgetPerTeam > 0 ? budgetPerTeam : t.totalBudget;
+          const newMax = maxPlayersPerTeam > 0 ? maxPlayersPerTeam : t.maxPlayers;
+          await Team.findByIdAndUpdate(t._id, {
+            totalBudget: newBudget,
+            budget: newBudget,
+            remainingBudget: newBudget,
+            maxPlayers: newMax,
+          });
+        }
+      }
+    }
+
     res.json(tournament);
   } catch (error) {
     next(error);

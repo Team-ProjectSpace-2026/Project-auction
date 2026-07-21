@@ -83,6 +83,9 @@ const playerSchema = new mongoose.Schema(
       type: Number,
       min: [0, "Jersey number cannot be negative"],
     },
+    registrationNumber: {
+      type: Number,
+    },
     jerseySize: {
       type: String,
       enum: ["S", "M", "L", "XL", "XXL", "XXXL", ""],

@@ -16,9 +16,9 @@ import {
 let io;
 
 // --- Socket rate limiting (per-connection) ---
-const RATE_LIMIT_WINDOW_MS = 1000; // 1 second
-const RATE_LIMIT_MAX_BIDS = 3;     // max 3 bids per second
-const RATE_LIMIT_MAX_EVENTS = 10;  // max 10 any events per second
+const RATE_LIMIT_WINDOW_MS = 600;  // 600ms window
+const RATE_LIMIT_MAX_BIDS = 1;     // max 1 bid per 600ms per connection
+const RATE_LIMIT_MAX_EVENTS = 10;  // max 10 any events per 600ms
 
 const createRateLimiter = (maxRequests, windowMs) => {
   const timestamps = [];
@@ -260,6 +260,13 @@ export const initializeSocket = (server) => {
           const session = await Bid.startSession();
           try {
             await session.withTransaction(async () => {
+              // Mark any existing active bid for this player as Outbid FIRST
+              await Bid.updateMany(
+                { tournamentId: sanitizedTournamentId, playerId: sanitizedPlayerId, status: "Active" },
+                { $set: { status: "Outbid" } },
+                { session }
+              );
+
               const bid = new Bid({
                 tournamentId: sanitizedTournamentId,
                 playerId: sanitizedPlayerId,
@@ -269,26 +276,17 @@ export const initializeSocket = (server) => {
               });
               await bid.save({ session });
               newBidId = bid._id;
-
-              if (currentBid) {
-                await Bid.updateOne(
-                  { _id: currentBid._id, status: "Active" },
-                  { $set: { status: "Outbid" } },
-                  { session }
-                );
-              }
             });
           } finally {
             await session.endSession();
           }
         } catch (txErr) {
           // Fallback for standalone MongoDB without transaction support
-          if (currentBid) {
-            await Bid.updateOne(
-              { _id: currentBid._id, status: "Active" },
-              { $set: { status: "Outbid" } }
-            );
-          }
+          await Bid.updateMany(
+            { tournamentId: sanitizedTournamentId, playerId: sanitizedPlayerId, status: "Active" },
+            { $set: { status: "Outbid" } }
+          );
+
           const bid = new Bid({
             tournamentId: sanitizedTournamentId,
             playerId: sanitizedPlayerId,
@@ -503,13 +501,17 @@ export const initializeSocket = (server) => {
 
         const populatedBid = await Bid.findById(activeBid._id)
           .populate("playerId", "name")
-          .populate("teamId", "name");
+          .populate("teamId", "name short logo primaryColor secondaryColor");
 
         io.to(`tournament-${tournamentId}`).emit("player-sold", {
           playerId: sanitizedPlayerId,
           playerName: populatedBid.playerId.name,
           teamId: populatedBid.teamId._id,
           teamName: populatedBid.teamId.name,
+          teamShort: populatedBid.teamId.short,
+          teamLogo: populatedBid.teamId.logo,
+          primaryColor: populatedBid.teamId.primaryColor,
+          secondaryColor: populatedBid.teamId.secondaryColor,
           soldPrice: populatedBid.amount,
         });
 

@@ -20,8 +20,15 @@
 }
 
 .result-overlay.sold-theme {
-  /* Set dynamically via style attribute, defaults to dark/gold */
-  background: radial-gradient(circle at center, var(--primary-color) 0%, var(--secondary-color) 70%, #000000 100%);
+  /* Dynamic primary color overlay with rich radial depth */
+  background-color: var(--primary-color, #1e3a8a);
+  background: radial-gradient(
+    circle at 50% 45%,
+    rgba(var(--primary-color-rgb, 30, 58, 138), 0.9) 0%,
+    var(--primary-color, #1e3a8a) 45%,
+    var(--primary-color-dark, #070d19) 85%
+  );
+  backdrop-filter: blur(8px);
 }
 
 /* Large Transparent Watermarks */
@@ -33,6 +40,7 @@
   align-items: center;
   pointer-events: none;
   z-index: 1;
+  overflow: hidden;
 }
 
 .unsold-watermark {
@@ -47,10 +55,43 @@
 }
 
 .sold-watermark {
-  max-width: 80%;
-  max-height: 80%;
-  opacity: 0.15;
-  filter: grayscale(0.3);
+  width: 88vh;
+  height: 88vh;
+  max-width: 90vw;
+  max-height: 90vh;
+  object-fit: contain;
+  opacity: 0.09; /* Clear, enlarged 9% watermark */
+  mix-blend-mode: screen; /* Automatically removes black background box from logo image */
+  filter: brightness(1.35) contrast(1.1);
+  pointer-events: none;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  animation: watermarkFloat 10s ease-in-out infinite alternate;
+}
+
+.sold-text-watermark {
+  font-size: 18vw;
+  font-weight: 900;
+  color: rgba(var(--primary-color-rgb, 255, 255, 255), 0.05);
+  text-transform: uppercase;
+  white-space: nowrap;
+  letter-spacing: 0.1em;
+  transform: rotate(-12deg);
+  -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.07);
+  pointer-events: none;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+@keyframes watermarkFloat {
+  0% { transform: scale(0.98) rotate(-1deg); }
+  100% { transform: scale(1.02) rotate(1deg); }
 }
 
 /* Atmospheric effects */
@@ -75,11 +116,11 @@
   transform: translateX(-50%);
   width: 800px;
   height: 140%;
-  background: radial-gradient(ellipse at top, rgba(255, 255, 255, 0.08) 0%, transparent 65%);
+  background: radial-gradient(ellipse at top, rgba(var(--primary-color-rgb, 255, 255, 255), 0.15) 0%, transparent 65%);
   pointer-events: none;
   z-index: 2;
   transform-origin: top center;
-  animation: spotlightSweep 6s ease-in-out infinite;
+  animation: spotlightSweep 8s ease-in-out infinite;
 }
 
 @keyframes spotlightSweep {
@@ -121,15 +162,44 @@
 /* Centerpiece Player Image */
 .focus-player-wrapper {
   position: relative;
-  margin-bottom: 25px;
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Top Close X Button */
+.card-top-close-btn {
+  position: absolute;
+  top: -20px;
+  z-index: 30;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.85);
+  border: 2px solid var(--primary-color-accent, rgba(255, 255, 255, 0.4));
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 0 15px rgba(var(--primary-color-rgb, 30, 58, 138), 0.5);
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+}
+
+.card-top-close-btn:hover {
+  transform: scale(1.1);
+  background: rgba(15, 23, 42, 0.95);
+  border-color: #ffffff;
 }
 
 .player-main-image {
-  width: 380px;
-  height: 440px;
+  width: 360px;
+  height: 420px;
   object-fit: cover;
   border-radius: 20px;
-  background-color: rgba(15, 23, 42, 0.8);
+  background-color: rgba(15, 23, 42, 0.85);
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
   transform: scale(0.6);
   opacity: 0;
@@ -143,8 +213,8 @@
 }
 
 .sold-theme .player-main-image {
-  border: 4px solid var(--primary-color, #1e3a8a);
-  box-shadow: 0 0 35px rgba(var(--primary-color-rgb, 30, 58, 138), 0.4), 0 10px 40px rgba(0, 0, 0, 0.8);
+  border: 2.5px solid var(--primary-color-accent, rgba(255, 255, 255, 0.5));
+  box-shadow: 0 0 35px rgba(var(--primary-color-rgb, 30, 58, 138), 0.4), 0 15px 45px rgba(0, 0, 0, 0.6);
 }
 
 @keyframes zoomReveal {
@@ -209,8 +279,15 @@
 }
 
 /* Premium Metallic SOLD Stamp styling */
+.sold-stamp-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .sold-stamp-graphic {
-  border: 5px solid var(--primary-color, #1e3a8a);
+  border: 4px solid var(--primary-color-accent, #60a5fa);
   border-radius: 50%;
   width: 140px;
   height: 140px;
@@ -218,25 +295,26 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
-  box-shadow: 0 0 30px rgba(var(--primary-color-rgb, 30, 58, 138), 0.6), inset 0 0 20px rgba(var(--primary-color-rgb, 30, 58, 138), 0.3);
+  background: rgba(15, 23, 42, 0.9);
+  box-shadow: 0 0 30px rgba(var(--primary-color-rgb, 30, 58, 138), 0.7), inset 0 0 15px rgba(var(--primary-color-rgb, 30, 58, 138), 0.4);
   position: relative;
   overflow: hidden;
+  backdrop-filter: blur(8px);
 }
 
 .sold-stamp-graphic .inner-circle {
-  border: 3px double var(--primary-color, #1e3a8a);
+  border: 2px double var(--primary-color-accent, #60a5fa);
   border-radius: 50%;
   width: 120px;
   height: 120px;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 900;
-  color: var(--primary-color, #1e3a8a);
-  letter-spacing: 0.05em;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
+  color: #ffffff;
+  letter-spacing: 0.08em;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.8));
   text-transform: uppercase;
 }
 
@@ -271,32 +349,37 @@
 }
 
 .result-player-name {
-  font-size: 42px;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-  margin: 0 0 6px 0;
-  text-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+  font-size: 44px;
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  margin: 0 0 4px 0;
+  color: #ffffff;
+  text-shadow: 0 4px 15px rgba(0, 0, 0, 0.7);
   text-transform: uppercase;
 }
 
 .result-player-role {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
   color: rgba(255, 255, 255, 0.7);
-  letter-spacing: 0.2em;
+  letter-spacing: 0.25em;
   text-transform: uppercase;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
+}
+
+.sold-theme .result-player-role {
+  color: var(--primary-color-accent, #60a5fa);
 }
 
 .result-price-box {
-  background: rgba(0, 0, 0, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 12px 36px;
-  border-radius: 40px;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  padding: 10px 40px;
+  border-radius: 30px;
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.5);
   backdrop-filter: blur(10px);
 }
 
@@ -305,23 +388,23 @@
 }
 
 .sold-theme .result-price-box {
-  border-color: rgba(var(--primary-color-rgb, 30, 58, 138), 0.3);
+  border-color: rgba(var(--primary-color-rgb, 30, 58, 138), 0.4);
 }
 
 .result-price-label {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.5);
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 4px;
+  letter-spacing: 0.12em;
+  margin-bottom: 2px;
 }
 
 .result-price-val {
   font-size: 32px;
   font-weight: 900;
-  background: #ffffff;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #ffffff;
+  background: none;
+  -webkit-text-fill-color: #ffffff;
 }
 
 .unsold-theme .result-price-val {
@@ -331,8 +414,8 @@
 }
 
 .sold-theme .result-price-val {
-  color: var(--primary-color, #1e3a8a);
-  -webkit-text-fill-color: var(--primary-color, #1e3a8a);
+  color: var(--primary-color-accent, #60a5fa);
+  -webkit-text-fill-color: var(--primary-color-accent, #60a5fa);
   background: none;
 }
 
@@ -341,16 +424,16 @@
   position: absolute;
   bottom: 40px;
   right: 40px;
-  background: rgba(15, 23, 42, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(var(--primary-color-rgb, 30, 58, 138), 0.3);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
   border-radius: 16px;
-  padding: 16px 20px;
+  padding: 14px 18px;
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 14px;
   width: 320px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  backdrop-filter: blur(12px);
   z-index: 30;
   opacity: 0;
   transform: translateX(30px);
@@ -369,17 +452,18 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.05);
+  background: transparent;
 }
 
 .winning-team-badge-wrapper img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  mix-blend-mode: screen;
 }
 
 .winning-team-badge-wrapper .initials-badge {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 900;
   color: #fff;
 }
@@ -391,41 +475,42 @@
 }
 
 .winning-team-lbl {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.4);
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.5);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   margin-bottom: 2px;
 }
 
 .winning-team-name {
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 15px;
+  font-weight: 800;
   color: #ffffff;
   text-transform: uppercase;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .winning-team-price {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 800;
-  color: var(--primary-color, #1e3a8a);
+  color: var(--primary-color-accent, #60a5fa);
 }
 
 /* Broadcast Timer Badge */
 .broadcast-timer-badge {
-  background: rgba(15, 23, 42, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 8px 18px;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(var(--primary-color-rgb, 30, 58, 138), 0.35);
+  color: #ffffff;
+  padding: 8px 20px;
   border-radius: 20px;
-  backdrop-filter: blur(5px);
+  backdrop-filter: blur(8px);
   text-transform: uppercase;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.12em;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -441,7 +526,7 @@
 
 .sold-theme .broadcast-timer-badge {
   color: #ffffff;
-  border-color: rgba(var(--primary-color-rgb, 30, 58, 138), 0.3);
+  border-color: rgba(var(--primary-color-rgb, 30, 58, 138), 0.35);
 }
 
 .timer-pulse-dot {
@@ -457,8 +542,8 @@
 }
 
 .sold-theme .timer-pulse-dot {
-  background-color: var(--primary-color, #1e3a8a);
-  box-shadow: 0 0 8px var(--primary-color, #1e3a8a);
+  background-color: var(--primary-color-accent, #60a5fa);
+  box-shadow: 0 0 10px var(--primary-color-accent, #60a5fa);
 }
 
 @keyframes timerPulse {
@@ -513,27 +598,28 @@
 }
 
 .sold-theme .result-btn.primary-btn {
-  background: var(--primary-color, #1e3a8a);
+  background: linear-gradient(135deg, var(--primary-color-accent, #3b82f6) 0%, var(--primary-color, #1e3a8a) 100%);
   color: #ffffff;
-  box-shadow: 0 5px 20px rgba(var(--primary-color-rgb, 30, 58, 138), 0.4);
+  box-shadow: 0 5px 20px rgba(var(--primary-color-rgb, 30, 58, 138), 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .sold-theme .result-btn.primary-btn:hover {
-  background: color-mix(in srgb, var(--primary-color, #1e3a8a) 85%, #000);
-  box-shadow: 0 8px 25px rgba(var(--primary-color-rgb, 30, 58, 138), 0.7);
+  background: linear-gradient(135deg, #60a5fa 0%, var(--primary-color-accent, #3b82f6) 100%);
+  box-shadow: 0 8px 25px rgba(var(--primary-color-rgb, 30, 58, 138), 0.8);
 }
 
 /* Secondary buttons styling */
 .result-btn.secondary-btn {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: rgba(255, 255, 255, 0.8);
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
   backdrop-filter: blur(10px);
 }
 
 .result-btn.secondary-btn:hover {
   background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.4);
   color: #ffffff;
 }
 
