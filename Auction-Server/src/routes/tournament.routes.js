@@ -5,7 +5,8 @@ import {
   getTournament,
   updateTournament,
   deleteTournament,
-  updateRegistrationDeadline
+  updateRegistrationDeadline,
+  getPublicRecentTournaments
 } from '../controllers/tournament.controller.js';
 import {
   validateTournament,
@@ -22,7 +23,10 @@ const router = express.Router();
 // Rate limiting applied first
 router.use(apiLimiter);
 
-// All routes require authentication
+// Public route — no auth required (must be before router.use(auth))
+router.get('/public/recent', getPublicRecentTournaments);
+
+// All remaining routes require authentication
 router.use(auth);
 
 router.get('/', getTournaments);

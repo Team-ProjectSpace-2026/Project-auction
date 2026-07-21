@@ -8,3 +8,8 @@ export const updateTournament = (id, data) =>
 export const updateRegistrationDeadline = (id, data) =>
   api.put(`/tournaments/${id}/deadline`, data);
 export const deleteTournament = (id) => api.delete(`/tournaments/${id}`);
+
+// Public endpoint — no auth required (for landing page)
+export const getPublicRecentTournaments = () =>
+  api.get("/tournaments/public/recent");
+

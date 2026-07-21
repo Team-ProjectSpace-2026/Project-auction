@@ -32,21 +32,163 @@ main {
   pointer-events: none;
 }
 
+/* ── Gavel Slam Section Divider ── */
+.gavel-slam-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 20px 24px;
+  position: relative;
+  z-index: 2;
+  background: linear-gradient(to bottom, #0f1322, #0a0e1a);
+}
+
+.divider-line {
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.4), rgba(251, 191, 36, 0.6), rgba(251, 191, 36, 0.4), transparent);
+  transform-origin: center;
+  will-change: transform;
+}
+
+.gavel-slam-center {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.gavel-icon-slam {
+  font-size: 32px;
+  position: relative;
+  z-index: 2;
+  filter: drop-shadow(0 4px 12px rgba(251, 191, 36, 0.4));
+  will-change: transform, opacity;
+}
+
+.shockwave-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid rgba(251, 191, 36, 0.6);
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+
+/* ── Floating Parallax Bid Tags ── */
+.floating-bid-tags-container {
+  position: relative;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  height: 0;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.floating-bid-tag {
+  position: absolute;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  will-change: transform;
+  pointer-events: none;
+  backdrop-filter: blur(8px);
+}
+
+.floating-bid-tag.tag-1 {
+  top: -200px;
+  right: 8%;
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+}
+
+.floating-bid-tag.tag-2 {
+  top: -100px;
+  left: 5%;
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  font-size: 14px;
+}
+
+.floating-bid-tag.tag-3 {
+  top: -300px;
+  left: 12%;
+  color: #6366f1;
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.floating-bid-tag.tag-4 {
+  top: -250px;
+  right: 15%;
+  color: #f97316;
+  background: rgba(249, 115, 22, 0.1);
+  border: 1px solid rgba(249, 115, 22, 0.2);
+  font-size: 11px;
+}
+
 /* Dark Mode adjustments for landing page */
 .dark-mode .landing-page-wrapper {
   background-color: var(--bg-primary-dark);
   color: var(--text-primary-dark);
 }
 
-/* Responsive adjustments */
+/* ── Responsive ── */
 @media (max-width: 768px) {
-  .landing-page-wrapper {
-    /* Adjustments for mobile if needed */
+  .floating-bid-tags-container {
+    display: none; /* Hide floating tags on mobile for cleanliness */
+  }
+
+  .gavel-slam-divider {
+    padding: 16px;
+  }
+
+  .gavel-slam-center {
+    width: 48px;
+    height: 48px;
+  }
+
+  .gavel-icon-slam {
+    font-size: 26px;
   }
 }
 
 @media (max-width: 480px) {
-  .landing-page-wrapper {
-    /* Further adjustments for smaller screens */
+  .gavel-slam-divider {
+    padding: 12px;
+  }
+
+  .gavel-slam-center {
+    width: 40px;
+    height: 40px;
+  }
+
+  .gavel-icon-slam {
+    font-size: 22px;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .gavel-icon-slam,
+  .shockwave-ring,
+  .divider-line,
+  .floating-bid-tag {
+    animation: none !important;
+    transition: none !important;
   }
 }
