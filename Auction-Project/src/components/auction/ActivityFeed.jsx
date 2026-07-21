@@ -39,7 +39,7 @@ const ActivityFeed = () => {
             No bids placed yet. Bids will appear here in real-time.
           </div>
         ) : (
-          bids.map((bid, index) => {
+          bids.slice(-5).reverse().map((bid, index) => {
             const teamName = bid.teamId?.name || "Unknown";
             const teamShort = bid.teamId?.short || teamName.slice(0, 2).toUpperCase();
             const teamId = bid.teamId?._id || bid.teamId;

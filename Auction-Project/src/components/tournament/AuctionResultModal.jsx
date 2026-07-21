@@ -58,11 +58,11 @@ const AuctionResultModal = ({
     const particles = [];
     const colors = status === "sold"
       ? [
-          winningTeam?.primaryColor || "#f5af19",
-          winningTeam?.secondaryColor || "#fbbf24",
+          winningTeam?.primaryColor || "#1e3a8a",
+          winningTeam?.secondaryColor || "#2563eb",
           "#ffffff",
-          "#ffd700",
-          "#ff8c00",
+          winningTeam?.primaryColor || "#1e3a8a",
+          winningTeam?.secondaryColor || "#2563eb",
         ]
       : ["#ef4444", "#dc2626", "#b91c1c", "#fca5a5", "#ff0000"];
 
@@ -214,11 +214,17 @@ const AuctionResultModal = ({
   const photoUrl = playerPhotoUrl(playerPhoto);
 
   // Dynamic colors for SOLD theme
-  const dynamicStyles = status === "sold" ? {
-    "--primary-color": winningTeam?.primaryColor || "#0f172a",
-    "--secondary-color": winningTeam?.secondaryColor || "#1e293b",
-    "--border-glow-color": winningTeam?.primaryColor || "#f5af19"
-  } : {};
+  const dynamicStyles = status === "sold" ? (() => {
+    const hex = winningTeam?.primaryColor || "#1e3a8a";
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return {
+      "--primary-color": hex,
+      "--secondary-color": winningTeam?.secondaryColor || "#1e293b",
+      "--primary-color-rgb": `${r}, ${g}, ${b}`,
+    };
+  })() : {};
 
   return (
     <div
@@ -277,7 +283,7 @@ const AuctionResultModal = ({
               {status === "unsold" ? (
                 <AlertTriangle size={80} strokeWidth={1} style={{ color: "#ef4444", opacity: 0.8 }} />
               ) : (
-                <Trophy size={80} strokeWidth={1} style={{ color: "#fbbf24", opacity: 0.8 }} />
+                <Trophy size={80} strokeWidth={1} style={{ color: winningTeam?.primaryColor || "#1e3a8a", opacity: 0.8 }} />
               )}
             </div>
           )}
@@ -358,7 +364,7 @@ const AuctionResultModal = ({
           <div className="winning-team-info">
             <span className="winning-team-lbl">Purchased By</span>
             <span className="winning-team-name">{winningTeam?.name || "Unknown Team"}</span>
-            <span className="winning-team-price">{formatCurrency(soldPrice || 0)}</span>
+            <span className="winning-team-price" style={{ color: winningTeam?.primaryColor || "#1e3a8a" }}>{formatCurrency(soldPrice || 0)}</span>
           </div>
         </div>
       )}

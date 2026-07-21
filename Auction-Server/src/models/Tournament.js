@@ -57,6 +57,10 @@ const tournamentSchema = new mongoose.Schema({
     enum: ['idle', 'bidding', 'sold', 'unsold'],
     default: 'idle'
   },
+  unsoldPlayerIds: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Player'
+  }],
   registrationEndDate: {
     type: Date,
     default: null

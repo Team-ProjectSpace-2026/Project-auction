@@ -23,9 +23,8 @@ const BidControls = () => {
   const handleRaiseBid = () => {
     if (!selectedTeamId || !currentPlayer) return;
     const basePrice = currentPlayer.basePrice || 0;
-    const raiseAmount = currentAmount > 0 
-      ? currentAmount + 1000 
-      : (basePrice > 0 ? basePrice : 1000);
+    const increment = basePrice > 0 ? basePrice : 1000;
+    const raiseAmount = currentAmount > 0 ? currentAmount + increment : increment;
     placeBid(raiseAmount, selectedTeamId, currentPlayer._id);
   };
 

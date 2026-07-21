@@ -123,10 +123,13 @@ export const AuctionProvider = ({ children }) => {
       };
 
       const onAuctionStarted = () => setAuctionStatus("bidding");
-      const onAuctionEnded = () => setAuctionStatus("completed");
+      const onAuctionEnded = () => {
+        setAuctionStatus("completed");
+        setPlayers(prev => prev.map(p => ({ ...p, isUnsold: false })));
+      };
 
       const onAuctionState = (data) => {
-        const { currentPlayer: cp, currentBid: cb, highestBidder: hb, auctionStatus: status, teams, players, tournament } = data;
+        const { currentPlayer: cp, currentBid: cb, highestBidder: hb, auctionStatus: status, teams, players, tournament, unsoldPlayerIds } = data;
         if (cp) setCurrentPlayer(cp);
         if (cb) setCurrentBid(cb);
         if (hb) setHighestBidder(hb);
@@ -134,6 +137,11 @@ export const AuctionProvider = ({ children }) => {
         if (teams) setTeams(teams);
         if (players) setPlayers(players);
         if (tournament) setTournament(tournament);
+        if (unsoldPlayerIds && unsoldPlayerIds.length > 0) {
+          setPlayers(prev => prev.map(p =>
+            unsoldPlayerIds.includes(p._id) ? { ...p, isUnsold: true } : p
+          ));
+        }
       };
 
       const onError = (data) => setError(data.message);

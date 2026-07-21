@@ -227,6 +227,9 @@ export const markUnsold = async (req, res, next) => {
     // Update tournament state
     tournament.currentPlayerId = null;
     tournament.auctionStatus = "unsold";
+    if (!tournament.unsoldPlayerIds.includes(playerId)) {
+      tournament.unsoldPlayerIds.push(playerId);
+    }
     await tournament.save();
 
     // Get player name

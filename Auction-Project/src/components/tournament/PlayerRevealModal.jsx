@@ -57,9 +57,11 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
   const beltRef = useRef(null);
   const targetIndexRef = useRef(null);
 
-  // Filter available players: exclude already sold or unsold players
+  // Filter available players: exclude sold players, include unsold only when no fresh remain
   const availablePlayers = useMemo(() => {
-    return (players || []).filter((p) => !p.isSold && !p.isUnsold);
+    const fresh = (players || []).filter((p) => !p.isSold && !p.isUnsold);
+    if (fresh.length > 0) return fresh;
+    return (players || []).filter((p) => !p.isSold && p.isUnsold);
   }, [players]);
 
   // Build card list: use available players, repeat enough to fill the strip
