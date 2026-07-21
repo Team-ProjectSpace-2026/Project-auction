@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useAuction } from "../../context/AuctionContext";
 
 const TEAM_COLORS = [
@@ -10,21 +10,41 @@ const BidControls = () => {
   const { currentBid, currentPlayer, teams, placeBid, markSold, markUnsold, auctionStatus } = useAuction();
   const [customAmount, setCustomAmount] = useState("");
   const [selectedTeamId, setSelectedTeamId] = useState(null);
+  const [isCooldown, setIsCooldown] = useState(false);
+  const cooldownTimerRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current);
+    };
+  }, []);
+
+  const triggerCooldown = (ms = 600) => {
+    setIsCooldown(true);
+    if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current);
+    cooldownTimerRef.current = setTimeout(() => {
+      setIsCooldown(false);
+    }, ms);
+  };
 
   const currentAmount = currentBid?.amount || 0;
 
   const handleCustomBid = () => {
+    if (isCooldown) return;
     const amount = parseInt(customAmount, 10);
     if (!amount || !selectedTeamId || !currentPlayer) return;
+    triggerCooldown(600);
     placeBid(amount, selectedTeamId, currentPlayer._id);
     setCustomAmount("");
   };
 
   const handleRaiseBid = () => {
+    if (isCooldown) return;
     if (!selectedTeamId || !currentPlayer) return;
     const basePrice = currentPlayer.basePrice || 0;
     const increment = basePrice > 0 ? basePrice : 1000;
     const raiseAmount = currentAmount > 0 ? currentAmount + increment : increment;
+    triggerCooldown(600);
     placeBid(raiseAmount, selectedTeamId, currentPlayer._id);
   };
 
@@ -112,7 +132,7 @@ const BidControls = () => {
             value={customAmount}
             onChange={(e) => setCustomAmount(e.target.value)}
             placeholder="Amount"
-            disabled={!isBidding}
+            disabled={!isBidding || isCooldown}
             style={{
               width: "100%",
               padding: "6px 8px",
@@ -126,34 +146,35 @@ const BidControls = () => {
           />
           <button
             onClick={handleCustomBid}
-            disabled={!isBidding || !customAmount || !selectedTeamId}
+            disabled={!isBidding || !customAmount || !selectedTeamId || isCooldown}
             style={{
               padding: "6px",
-              background: "var(--accent-light)",
+              background: isCooldown ? "#64748b" : "var(--accent-light)",
               color: "#fff",
               border: "none",
               borderRadius: "6px",
               fontSize: "11px",
               fontWeight: "600",
-              cursor: !isBidding || !customAmount || !selectedTeamId ? "not-allowed" : "pointer",
-              opacity: !isBidding || !customAmount || !selectedTeamId ? 0.5 : 1,
+              cursor: !isBidding || !customAmount || !selectedTeamId || isCooldown ? "not-allowed" : "pointer",
+              opacity: !isBidding || !customAmount || !selectedTeamId || isCooldown ? 0.5 : 1,
+              transition: "all 0.2s ease",
             }}
           >
-            Place Bid
+            {isCooldown ? "Wait..." : "Place Bid"}
           </button>
         </div>
 
         <button
           onClick={handleRaiseBid}
-          disabled={!isBidding || !selectedTeamId}
+          disabled={!isBidding || !selectedTeamId || isCooldown}
           style={{
-            background: "#2563eb",
+            background: isCooldown ? "#64748b" : "#2563eb",
             color: "#fff",
             border: "none",
             borderRadius: "10px",
             padding: "12px",
-            cursor: !isBidding || !selectedTeamId ? "not-allowed" : "pointer",
-            opacity: !isBidding || !selectedTeamId ? 0.5 : 1,
+            cursor: !isBidding || !selectedTeamId || isCooldown ? "not-allowed" : "pointer",
+            opacity: !isBidding || !selectedTeamId || isCooldown ? 0.6 : 1,
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
@@ -162,9 +183,13 @@ const BidControls = () => {
             transition: "all 0.2s ease",
           }}
         >
-          <div style={{ fontSize: "20px" }}>&#128296;</div>
-          <div style={{ fontSize: "13px", fontWeight: "800", letterSpacing: "0.5px" }}>RAISE BID</div>
-          <div style={{ fontSize: "9px", fontWeight: "500", opacity: 0.8 }}>Increase the bid</div>
+          <div style={{ fontSize: "20px" }}>{isCooldown ? "⏳" : "🔨"}</div>
+          <div style={{ fontSize: "13px", fontWeight: "800", letterSpacing: "0.5px" }}>
+            {isCooldown ? "WAIT..." : "RAISE BID"}
+          </div>
+          <div style={{ fontSize: "9px", fontWeight: "500", opacity: 0.8 }}>
+            {isCooldown ? "Cooldown active" : "Increase the bid"}
+          </div>
         </button>
       </div>
 
@@ -181,6 +206,13 @@ const BidControls = () => {
               const initials = team.name
                 ? team.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()
                 : team.short || "??";
+
+              const currentBidTeamId = currentBid && currentBid.teamId
+                ? (typeof currentBid.teamId === 'object' ? currentBid.teamId._id : currentBid.teamId)
+                : null;
+              const isCurrentBidder = currentBidTeamId && String(currentBidTeamId) === String(team._id);
+              const activeBidAmount = isCurrentBidder ? (currentBid.amount || 0) : 0;
+              const liveRemainingBudget = Math.max(0, (team.remainingBudget || 0) - activeBidAmount);
 
               return (
                 <div
@@ -204,17 +236,28 @@ const BidControls = () => {
                 >
                   <div style={{
                     width: "44px", height: "44px", borderRadius: "50%",
-                    background: color,
+                    background: team.primaryColor || color,
                     display: "flex", alignItems: "center", justifyContent: "center",
                     color: "#fff", fontSize: "12px", fontWeight: "800",
+                    overflow: "hidden",
+                    flexShrink: 0,
                   }}>
-                    {initials}
+                    {team.logo ? (
+                      <img
+                        src={team.logo}
+                        alt={team.name}
+                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      />
+                    ) : (
+                      initials
+                    )}
                   </div>
                   <div style={{ fontSize: "11px", fontWeight: "600", color: isSelected ? "var(--accent-light)" : "var(--text-primary-light)", lineHeight: "1.3" }}>
                     {team.name}
                   </div>
-                  <div style={{ fontSize: "10px", color: "var(--text-secondary-light)" }}>
-                    {team.remainingBudget != null ? `₹${team.remainingBudget.toLocaleString("en-IN")}` : ""}
+                  <div style={{ fontSize: "10px", color: isCurrentBidder ? "#d97706" : "var(--text-secondary-light)", fontWeight: isCurrentBidder ? "700" : "500" }}>
+                    {team.remainingBudget != null ? `₹${liveRemainingBudget.toLocaleString("en-IN")}` : ""}
+                    {isCurrentBidder && activeBidAmount > 0 && ` (-₹${activeBidAmount.toLocaleString("en-IN")})`}
                   </div>
                 </div>
               );

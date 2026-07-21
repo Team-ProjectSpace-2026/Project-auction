@@ -79,6 +79,12 @@ export const createPlayer = async (req, res, next) => {
     const age = req.body.age ? Number(req.body.age) : undefined;
     const mobile = String(req.body.mobile || "").trim() || undefined;
 
+    const currentCount = await Player.countDocuments({
+      tournamentId,
+      deleted: false,
+    });
+    const registrationNumber = currentCount + 1;
+
     const player = new Player({
       name,
       role,
@@ -88,7 +94,8 @@ export const createPlayer = async (req, res, next) => {
       keeper,
       basePrice,
       tournamentId,
-      jerseyNumber,
+      jerseyNumber: jerseyNumber || registrationNumber,
+      registrationNumber,
       jerseySize,
       jerseyName,
       age,
@@ -260,6 +267,13 @@ export const registerPlayer = async (req, res, next) => {
       return res.status(409).json({ message: 'This mobile number is already registered for this tournament' });
     }
 
+    // Calculate sequential registration number for this tournament
+    const currentRegisteredCount = await Player.countDocuments({
+      tournamentId,
+      deleted: false,
+    });
+    const registrationNumber = currentRegisteredCount + 1;
+
     const player = new Player({
       name: playerName,
       role: primaryRole,
@@ -270,7 +284,8 @@ export const registerPlayer = async (req, res, next) => {
       countryCode: countryCode || '+91',
       battingStyle,
       bowlingStyle,
-      jerseyNumber,
+      jerseyNumber: jerseyNumber || registrationNumber,
+      registrationNumber,
       jerseySize: jerseySize || undefined,
       jerseyName: jerseyName || undefined,
       photo: req.file ? req.file.path : null,
@@ -299,7 +314,7 @@ export const getRegisteredPlayers = async (req, res, next) => {
       isRegistered: true,
       deleted: false,
     })
-      .select("name role style battingStyle bowlingStyle keeper isRegistered jerseyNumber jerseySize jerseyName age mobile photo basePrice isSold soldTo soldPrice")
+      .select("name role style battingStyle bowlingStyle keeper isRegistered jerseyNumber registrationNumber jerseySize jerseyName age mobile photo basePrice isSold soldTo soldPrice")
       .populate("tournamentId", "name");
 
     res.json(players);

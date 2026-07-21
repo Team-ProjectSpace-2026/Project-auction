@@ -105,8 +105,7 @@ export const validatePlayer = [
     .withMessage('Base price must be a positive number'),
 
   body('tournamentId')
-    .notEmpty()
-    .withMessage('Tournament ID is required')
+    .optional({ nullable: true, checkFalsy: true })
     .isMongoId()
     .withMessage('Invalid Tournament ID format')
 ];
@@ -121,8 +120,8 @@ export const validateTeam = [
   body('short')
     .notEmpty()
     .withMessage('Team abbreviation is required')
-    .isLength({ min: 1, max: 3 })
-    .withMessage('Team abbreviation must be 1-3 characters'),
+    .isLength({ min: 1, max: 5 })
+    .withMessage('Team abbreviation must be 1-5 characters'),
   
   body('budget')
     .optional()
@@ -140,8 +139,7 @@ export const validateTeam = [
     .withMessage('Max players must be a positive integer'),
 
   body('tournamentId')
-    .notEmpty()
-    .withMessage('Tournament ID is required')
+    .optional({ nullable: true, checkFalsy: true })
     .isMongoId()
     .withMessage('Invalid Tournament ID format'),
 

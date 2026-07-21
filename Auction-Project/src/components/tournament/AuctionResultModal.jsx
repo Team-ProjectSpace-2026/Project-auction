@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { Trophy, AlertTriangle } from "lucide-react";
+import { Trophy, AlertTriangle, X } from "lucide-react";
 import { formatCurrency } from "../../utils/formatCurrency";
 import { playerPhotoUrl } from "../../utils/playerPhotoUrl";
 import "./AuctionResult.css";
@@ -213,16 +213,47 @@ const AuctionResultModal = ({
   const hasPhoto = !!playerPhoto;
   const photoUrl = playerPhotoUrl(playerPhoto);
 
-  // Dynamic colors for SOLD theme
+  // Helper to convert hex to rgb object for dynamic shading
+  const hexToRgb = (hexStr, fallback = { r: 30, g: 58, b: 138 }) => {
+    if (!hexStr || typeof hexStr !== "string") return fallback;
+    let c = hexStr.replace("#", "").trim();
+    if (c.length === 3) {
+      c = c.split("").map((x) => x + x).join("");
+    }
+    if (c.length !== 6) return fallback;
+    const num = parseInt(c, 16);
+    if (isNaN(num)) return fallback;
+    return {
+      r: (num >> 16) & 255,
+      g: (num >> 8) & 255,
+      b: num & 255,
+    };
+  };
+
+  // Dynamic colors for SOLD theme using exact primary color selected at team creation
   const dynamicStyles = status === "sold" ? (() => {
     const hex = winningTeam?.primaryColor || "#1e3a8a";
-    const r = parseInt(hex.slice(1, 3), 16);
-    const g = parseInt(hex.slice(3, 5), 16);
-    const b = parseInt(hex.slice(5, 7), 16);
+    const rgb = hexToRgb(hex);
+
+    const lightR = Math.min(255, Math.round(rgb.r + (255 - rgb.r) * 0.4));
+    const lightG = Math.min(255, Math.round(rgb.g + (255 - rgb.g) * 0.4));
+    const lightB = Math.min(255, Math.round(rgb.b + (255 - rgb.b) * 0.4));
+
+    const darkR = Math.max(0, Math.round(rgb.r * 0.2));
+    const darkG = Math.max(0, Math.round(rgb.g * 0.2));
+    const darkB = Math.max(0, Math.round(rgb.b * 0.2));
+
+    const accentR = Math.min(255, Math.round(rgb.r + (255 - rgb.r) * 0.65));
+    const accentG = Math.min(255, Math.round(rgb.g + (255 - rgb.g) * 0.65));
+    const accentB = Math.min(255, Math.round(rgb.b + (255 - rgb.b) * 0.65));
+
     return {
       "--primary-color": hex,
-      "--secondary-color": winningTeam?.secondaryColor || "#1e293b",
-      "--primary-color-rgb": `${r}, ${g}, ${b}`,
+      "--primary-color-rgb": `${rgb.r}, ${rgb.g}, ${rgb.b}`,
+      "--primary-color-light": `rgb(${lightR}, ${lightG}, ${lightB})`,
+      "--primary-color-dark": `rgb(${darkR}, ${darkG}, ${darkB})`,
+      "--primary-color-accent": `rgb(${accentR}, ${accentG}, ${accentB})`,
+      "--secondary-color": winningTeam?.secondaryColor || "#0f172a",
     };
   })() : {};
 
@@ -231,7 +262,7 @@ const AuctionResultModal = ({
       className={`result-overlay ${status === "sold" ? "sold-theme" : "unsold-theme"}`}
       style={dynamicStyles}
     >
-      {/* Background Watermark */}
+      {/* Background Watermark - Only Team Logo in big light color */}
       <div className="watermark-container">
         {status === "unsold" ? (
           <div className="unsold-watermark">UNSOLD</div>
@@ -242,8 +273,8 @@ const AuctionResultModal = ({
             className="sold-watermark"
           />
         ) : (
-          <div className="unsold-watermark" style={{ color: "rgba(255,255,255,0.02)", WebkitTextStroke: "2px rgba(255,255,255,0.03)" }}>
-            {winningTeam?.short || "SOLD"}
+          <div className="sold-text-watermark">
+            {winningTeam?.short || winningTeam?.name || "SOLD"}
           </div>
         )}
       </div>
@@ -263,6 +294,16 @@ const AuctionResultModal = ({
         
         {/* Player Image Centerpiece with Spotlight Glow */}
         <div className="focus-player-wrapper">
+          <button
+            className="card-top-close-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }}
+            title="Close"
+          >
+            <X size={18} />
+          </button>
           {hasPhoto ? (
             <img
               src={photoUrl}

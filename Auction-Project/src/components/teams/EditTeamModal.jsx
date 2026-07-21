@@ -132,6 +132,9 @@ const EditTeamModal = ({ isOpen, onClose, onSubmit, team }) => {
         logo: logoPreview || "",
         maxPlayers: parsedMaxPlayers,
         primaryColor,
+        budget: team.budget || team.totalBudget || undefined,
+        totalBudget: team.totalBudget || team.budget || undefined,
+        tournamentId: team.tournamentId || undefined,
       });
     } finally {
       setIsSubmitting(false);

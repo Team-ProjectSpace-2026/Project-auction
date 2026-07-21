@@ -67,7 +67,10 @@ const EditTournamentPage = () => {
             await updateTournament(tournament._id, payload);
             setShowSuccess(true);
         } catch (err) {
-            alert(err.response?.data?.message || "Failed to update tournament");
+            const msg = err.response?.data?.message || "Failed to update tournament";
+            const details = err.response?.data?.errors;
+            const detailMsg = details ? details.map((e) => `${e.path || e.param || ""}: ${e.msg}`).join("\n") : "";
+            alert(detailMsg ? `${msg}\n\n${detailMsg}` : msg);
         } finally {
             setSaving(false);
         }
