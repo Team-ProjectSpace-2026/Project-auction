@@ -440,6 +440,7 @@ export const initializeSocket = (server) => {
 
         tournament.auctionStatus = "idle";
         tournament.currentPlayerId = null;
+        tournament.unsoldPlayerIds = [];
         await tournament.save();
 
         io.to(`tournament-${tournamentId}`).emit("auction-ended", {
@@ -566,6 +567,9 @@ export const initializeSocket = (server) => {
 
         tournament.currentPlayerId = null;
         tournament.auctionStatus = "unsold";
+        if (!tournament.unsoldPlayerIds.includes(sanitizedPlayerId)) {
+          tournament.unsoldPlayerIds.push(sanitizedPlayerId);
+        }
         await tournament.save();
 
         const player = await Player.findById(sanitizedPlayerId);
@@ -622,6 +626,7 @@ export const initializeSocket = (server) => {
           currentBid,
           highestBidder,
           auctionStatus: tournament.auctionStatus,
+          unsoldPlayerIds: tournament.unsoldPlayerIds || [],
           tournament: { playerBasePrice: tournament.playerBasePrice || 0 },
         });
       } catch (error) {

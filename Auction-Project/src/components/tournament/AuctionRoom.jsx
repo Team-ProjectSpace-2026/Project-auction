@@ -6,7 +6,7 @@ import PlayerRevealModal from "./PlayerRevealModal";
 import AuctionResultModal from "./AuctionResultModal";
 import BidControls from "../auction/BidControls";
 import ActivityFeed from "../auction/ActivityFeed";
-import BidLedger from "../auction/BidLedger";
+
 import cricLogo from "../../assets/cricauctionlogo1.png";
 
 const TEAM_COLORS = [
@@ -401,7 +401,6 @@ const AuctionRoom = () => {
 
           <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
             <ActivityFeed />
-            <BidLedger />
           </div>
         </div>
       </div>
