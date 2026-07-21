@@ -4,6 +4,12 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    alias: {
+      'pdfmake/build/pdfmake': 'pdfmake/build/pdfmake.js',
+      'pdfmake/build/vfs_fonts': 'pdfmake/build/vfs_fonts.js',
+    },
+  },
   test: {
     globals: true,
     environment: 'jsdom',
