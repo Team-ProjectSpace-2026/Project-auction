@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import Sidebar from '../../components/layout/Sidebar';
 import Avatar from '../../components/common/Avatar';
 import InputField from '../../components/common/InputField';
@@ -6,11 +7,13 @@ import Button from '../../components/common/Button';
 import bgStadium from '../../assets/bgstadium2.png';
 
 const ProfilePage = () => {
+  const { user } = useAuth();
+
   const [formData, setFormData] = useState({
-    fullName: 'Rahul Organizer',
-    email: 'rahul.organizer@cricauction.com',
-    phone: '+91 98765 43210',
-    company: 'CricAuction Events',
+    fullName: user?.name || '',
+    email: user?.email || '',
+    phone: user?.mobile || '',
+    company: user?.organization || '',
     password: '*************'
   });
 
@@ -85,8 +88,8 @@ const ProfilePage = () => {
                   />
                   <InputField 
                     label="Role" 
-                    value="Organizer" 
-                    disabled={true} 
+                    value={user?.role || 'Organizer'}
+                    disabled={true}
                   />
                 </div>
 

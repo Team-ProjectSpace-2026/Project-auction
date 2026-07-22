@@ -113,7 +113,6 @@ const LandingPage = () => {
 
     // Section internal depth — subtle drift for depth feel
     const sectionDepthConfigs = [
-      { selector: '#recent-auctions .section-header', y: -25 },
       { selector: '#our-auctions .features-grid', y: 15 },
       { selector: '#about .content-stats', y: -20 },
       { selector: '#features .features-grid', y: 12 },
@@ -139,7 +138,7 @@ const LandingPage = () => {
        3. Enhanced section reveal animations
        ────────────────────────────────────────────── */
     const revealSections = sections.querySelectorAll(
-      '#recent-auctions, #our-auctions, #about, #features'
+      '#our-auctions, #about, #features'
     );
 
     revealSections.forEach((section) => {
@@ -203,6 +202,84 @@ const LandingPage = () => {
     });
 
     /* ──────────────────────────────────────────────
+       5. Gavel Slam Section Divider (About → Features)
+       ────────────────────────────────────────────── */
+    const gavelDivider = sections.querySelector('.gavel-slam-divider');
+    if (gavelDivider) {
+      const gavel = gavelDivider.querySelector('.gavel-icon-slam');
+      const shockwave = gavelDivider.querySelector('.shockwave-ring');
+      const dividerLine = gavelDivider.querySelector('.divider-line');
+
+      if (gavel && shockwave && dividerLine) {
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: gavelDivider,
+            start: 'top 80%',
+            once: true,
+          },
+        });
+
+        tl.fromTo(gavel,
+          { y: -60, opacity: 0, rotation: -30 },
+          { y: 0, opacity: 1, rotation: 0, duration: 0.5, ease: 'power3.in' }
+        )
+        .to(gavel, { scale: 1.15, duration: 0.08, ease: 'power2.in' })
+        .to(gavel, { scale: 1, duration: 0.15, ease: 'elastic.out(1, 0.3)' })
+        .fromTo(shockwave,
+          { scale: 0, opacity: 0.8 },
+          { scale: 3, opacity: 0, duration: 0.8, ease: 'power2.out' },
+          '-=0.2'
+        )
+        .fromTo(dividerLine,
+          { scaleX: 0 },
+          { scaleX: 1, duration: 0.6, ease: 'power2.out' },
+          '-=0.6'
+        );
+      }
+    }
+
+    /* ──────────────────────────────────────────────
+       6. Floating Parallax Bid Tags (About section)
+       ────────────────────────────────────────────── */
+    const bidTags = sections.querySelectorAll('.floating-bid-tag');
+    bidTags.forEach((tag, i) => {
+      const speeds = [-30, 20, -15, 25];
+      gsap.to(tag, {
+        y: speeds[i % speeds.length],
+        ease: 'none',
+        scrollTrigger: {
+          trigger: tag.closest('section'),
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: 1.5 + (i * 0.3),
+        },
+      });
+    });
+
+    /* ──────────────────────────────────────────────
+       7. Feature cards enhanced stagger with rotation
+       ────────────────────────────────────────────── */
+    const featureCards = sections.querySelectorAll('#features .feature-card');
+    if (featureCards.length > 0) {
+      gsap.fromTo(featureCards,
+        { opacity: 0, y: 50, rotateY: -5 },
+        {
+          opacity: 1,
+          y: 0,
+          rotateY: 0,
+          duration: 0.6,
+          stagger: 0.1,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: '#features .features-grid',
+            start: 'top 85%',
+            once: true,
+          },
+        }
+      );
+    }
+
+    /* ──────────────────────────────────────────────
        Cleanup
        ────────────────────────────────────────────── */
     return () => {
@@ -218,6 +295,25 @@ const LandingPage = () => {
         <RecentAuctions />
         <OurAuctions />
         <AboutSection />
+
+        {/* ── Gavel Slam Divider ── */}
+        <div className="gavel-slam-divider" aria-hidden="true">
+          <div className="divider-line" />
+          <div className="gavel-slam-center">
+            <span className="gavel-icon-slam">🔨</span>
+            <div className="shockwave-ring" />
+          </div>
+          <div className="divider-line" />
+        </div>
+
+        {/* ── Floating Bid Tags (absolute positioned, parallax) ── */}
+        <div className="floating-bid-tags-container" aria-hidden="true">
+          <span className="floating-bid-tag tag-1">₹18.5 CR</span>
+          <span className="floating-bid-tag tag-2">SOLD!</span>
+          <span className="floating-bid-tag tag-3">₹12 CR</span>
+          <span className="floating-bid-tag tag-4">🏏 GOING...</span>
+        </div>
+
         <FeaturesSection />
       </main>
       <Footer />

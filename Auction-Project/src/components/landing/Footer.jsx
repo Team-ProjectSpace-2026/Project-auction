@@ -1,10 +1,20 @@
 import { motion } from 'framer-motion';
-import { FiTwitter, FiLinkedin, FiInstagram, FiYoutube, FiFacebook } from 'react-icons/fi';
+import {
+  FiTwitter, FiLinkedin, FiInstagram, FiYoutube, FiFacebook,
+  FiActivity, FiZap, FiShield
+} from 'react-icons/fi';
 import './Footer.css';
 
 const Footer = () => {
   return (
     <footer className="footer-section" aria-labelledby="footer-title">
+
+      {/* ── Animated Gold Crease Line ── */}
+      <div className="footer-crease-line" aria-hidden="true" />
+
+      {/* ── Giant Watermark ── */}
+      <div className="footer-watermark" aria-hidden="true">CRICAUCTION</div>
+
       <div className="footer-container">
         <div className="footer-content">
           {/* Column 1: Brand & Social Links */}
@@ -16,11 +26,26 @@ const Footer = () => {
               The ultimate platform for organizing and participating in cricket auctions.
             </p>
             <div className="social-links">
-              <motion.a href="#" aria-label="Twitter" whileHover={{ scale: 1.2 }}><FiTwitter size={20} /></motion.a>
-              <motion.a href="#" aria-label="LinkedIn" whileHover={{ scale: 1.2 }}><FiLinkedin size={20} /></motion.a>
-              <motion.a href="#" aria-label="Instagram" whileHover={{ scale: 1.2 }}><FiInstagram size={20} /></motion.a>
-              <motion.a href="#" aria-label="YouTube" whileHover={{ scale: 1.2 }}><FiYoutube size={20} /></motion.a>
-              <motion.a href="#" aria-label="Facebook" whileHover={{ scale: 1.2 }}><FiFacebook size={20} /></motion.a>
+              <motion.a href="#" className="social-pill" aria-label="Twitter" whileHover={{ scale: 1.08 }}>
+                <FiTwitter size={18} />
+                <span>Twitter</span>
+              </motion.a>
+              <motion.a href="#" className="social-pill" aria-label="LinkedIn" whileHover={{ scale: 1.08 }}>
+                <FiLinkedin size={18} />
+                <span>LinkedIn</span>
+              </motion.a>
+              <motion.a href="#" className="social-pill" aria-label="Instagram" whileHover={{ scale: 1.08 }}>
+                <FiInstagram size={18} />
+                <span>Insta</span>
+              </motion.a>
+              <motion.a href="#" className="social-pill" aria-label="YouTube" whileHover={{ scale: 1.08 }}>
+                <FiYoutube size={18} />
+                <span>YouTube</span>
+              </motion.a>
+              <motion.a href="#" className="social-pill" aria-label="Facebook" whileHover={{ scale: 1.08 }}>
+                <FiFacebook size={18} />
+                <span>Facebook</span>
+              </motion.a>
             </div>
           </div>
 
@@ -59,6 +84,22 @@ const Footer = () => {
             <p className="contact-info">
               <span className="contact-label">Location:</span> India
             </p>
+          </div>
+        </div>
+
+        {/* ── System Status Bar ── */}
+        <div className="system-status-bar">
+          <div className="status-pill status-pill--green">
+            <FiActivity size={14} />
+            <span>Auction Engine: Operational</span>
+          </div>
+          <div className="status-pill status-pill--blue">
+            <FiZap size={14} />
+            <span>WebSockets: Active</span>
+          </div>
+          <div className="status-pill status-pill--purple">
+            <FiShield size={14} />
+            <span>Bank-Grade Security</span>
           </div>
         </div>
 

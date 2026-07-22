@@ -14,6 +14,82 @@ export const getTournaments = async (req, res, next) => {
   }
 };
 
+/**
+ * Public endpoint — no auth required.
+ * Returns the 8 most recent tournaments with aggregated stats for the landing page.
+ */
+export const getPublicRecentTournaments = async (req, res, next) => {
+  try {
+    const tournaments = await Tournament.find()
+      .sort({ date: -1 })
+      .limit(8)
+      .select('name date teams logo status');
+
+    const results = await Promise.all(
+      tournaments.map(async (t) => {
+        const tournamentId = t._id;
+
+        // Compute dynamic status based on date
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const auctionDate = new Date(t.date);
+        auctionDate.setHours(0, 0, 0, 0);
+        let dynamicStatus = 'Upcoming';
+        let statusLabel = 'Upcoming';
+        if (auctionDate < today) {
+          dynamicStatus = 'Completed';
+          statusLabel = 'Completed';
+        } else if (auctionDate.getTime() === today.getTime()) {
+          dynamicStatus = 'Active';
+          statusLabel = 'Live Now';
+        }
+
+        // Aggregate stats from Teams and Bids
+        const [teamCount, totalSpentAgg, topBidAgg, playerCount] = await Promise.all([
+          Team.countDocuments({ tournamentId }),
+          Bid.aggregate([
+            { $match: { tournamentId, isWinningBid: true } },
+            { $group: { _id: null, total: { $sum: '$amount' } } },
+          ]),
+          Bid.aggregate([
+            { $match: { tournamentId } },
+            { $group: { _id: null, max: { $max: '$amount' } } },
+          ]),
+          Player.countDocuments({ tournamentId, deleted: { $ne: true } }),
+        ]);
+
+        const totalSpent = totalSpentAgg.length > 0 ? totalSpentAgg[0].total : 0;
+        const topBid = topBidAgg.length > 0 ? topBidAgg[0].max : 0;
+
+        // Format currency in Cr / Lakh
+        const formatCurrency = (amount) => {
+          if (amount >= 10000000) return `₹${(amount / 10000000).toFixed(1)} Cr`;
+          if (amount >= 100000) return `₹${(amount / 100000).toFixed(1)} Lakh`;
+          if (amount > 0) return `₹${amount.toLocaleString('en-IN')}`;
+          return '₹0';
+        };
+
+        return {
+          id: tournamentId,
+          name: t.name,
+          status: dynamicStatus.toLowerCase(),
+          statusLabel,
+          date: t.date,
+          teams: teamCount || t.teams || 0,
+          players: playerCount,
+          totalSpent: formatCurrency(totalSpent),
+          topBid: formatCurrency(topBid),
+          logo: t.logo || '',
+        };
+      })
+    );
+
+    res.json(results);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const createTournament = async (req, res, next) => {
   try {
     const name = String(req.body.name || "");
