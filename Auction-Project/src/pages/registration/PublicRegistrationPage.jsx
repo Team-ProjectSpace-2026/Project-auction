@@ -191,7 +191,8 @@ export default function PublicRegistrationPage() {
                 name: "Pay via UPI (GPay, PhonePe, Paytm)",
                 instruments: [
                   {
-                    method: "upi"
+                    method: "upi",
+                    flows: ["collect", "intent", "qr"]
                   }
                 ]
               },
