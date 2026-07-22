@@ -176,6 +176,12 @@ export default function PublicRegistrationPage() {
             setBanner({ type: "error", message: "Payment was cancelled." });
           }
         },
+        method: {
+          upi: true,
+          card: true,
+          netbanking: true,
+          wallet: true
+        },
         prefill: {
           name: rawForm.playerName || "",
           contact: rawForm.mobile || "",
