@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import mongoose from 'mongoose';
 import Tournament from '../models/Tournament.js';
 import { getRazorpayInstance } from '../config/razorpay.js';
 
@@ -14,11 +15,12 @@ export const createOrder = async (req, res) => {
   try {
     const { tournamentId } = req.body;
 
-    if (!tournamentId) {
-      return res.status(400).json({ success: false, message: 'Tournament ID is required' });
+    if (!tournamentId || typeof tournamentId !== 'string' || !mongoose.Types.ObjectId.isValid(tournamentId)) {
+      return res.status(400).json({ success: false, message: 'Invalid or missing Tournament ID' });
     }
 
-    const tournament = await Tournament.findById(tournamentId);
+    const cleanTournamentId = String(tournamentId).trim();
+    const tournament = await Tournament.findById(cleanTournamentId);
     if (!tournament) {
       return res.status(404).json({ success: false, message: 'Tournament not found' });
     }
