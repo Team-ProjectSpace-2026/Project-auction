@@ -183,6 +183,38 @@ export default function PublicRegistrationPage() {
         },
         theme: {
           color: "#2563eb"
+        },
+        config: {
+          display: {
+            blocks: {
+              upi: {
+                name: "Pay via UPI (GPay, PhonePe, Paytm)",
+                instruments: [
+                  {
+                    method: "upi"
+                  }
+                ]
+              },
+              other: {
+                name: "Other Payment Options",
+                instruments: [
+                  {
+                    method: "card"
+                  },
+                  {
+                    method: "netbanking"
+                  },
+                  {
+                    method: "wallet"
+                  }
+                ]
+              }
+            },
+            sequence: ["block.upi", "block.other"],
+            preferences: {
+              show_default_blocks: true
+            }
+          }
         }
       };
 
