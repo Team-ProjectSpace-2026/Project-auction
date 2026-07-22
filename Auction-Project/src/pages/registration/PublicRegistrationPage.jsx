@@ -176,35 +176,10 @@ export default function PublicRegistrationPage() {
             setBanner({ type: "error", message: "Payment was cancelled." });
           }
         },
-        config: {
-          display: {
-            blocks: {
-              upi: {
-                name: "UPI / QR Code (GPay, PhonePe, Paytm)",
-                instruments: [
-                  {
-                    method: "upi"
-                  }
-                ]
-              },
-              other: {
-                name: "Other Options",
-                instruments: [
-                  { method: "card" },
-                  { method: "netbanking" },
-                  { method: "wallet" }
-                ]
-              }
-            },
-            sequence: ["block.upi", "block.other"],
-            preferences: {
-              show_default_blocks: true
-            }
-          }
-        },
         prefill: {
           name: rawForm.playerName || "",
           contact: rawForm.mobile || "",
+          email: rawForm.email || "player@cricauction.com"
         },
         theme: {
           color: "#2563eb"
