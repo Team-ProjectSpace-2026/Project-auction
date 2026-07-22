@@ -16,6 +16,7 @@ import playerRoutes from './src/routes/player.routes.js';
 import teamRoutes from './src/routes/team.routes.js';
 import auctionRoutes from './src/routes/auction.routes.js';
 import dashboardRoutes from './src/routes/dashboard.routes.js';
+import paymentRoutes from './src/routes/payment.routes.js';
 
 // Import middleware
 import { errorHandler } from './src/middleware/errorHandler.js';
@@ -54,10 +55,11 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://checkout.razorpay.com"],
       styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "blob:", SERVER_URL, CLIENT_URL],
-      connectSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "blob:", SERVER_URL, CLIENT_URL, "https://*.razorpay.com"],
+      connectSrc: ["'self'", "https://lumberjack.razorpay.com", "https://api.razorpay.com"],
+      frameSrc: ["'self'", "https://api.razorpay.com", "https://checkout.razorpay.com"],
       fontSrc: ["'self'"],
       objectSrc: ["'none'"],
       frameAncestors: ["'none'"],
@@ -109,6 +111,7 @@ app.use('/api/players', playerRoutes);
 app.use('/api/teams', express.json({ limit: '10mb' }), teamRoutes);
 app.use('/api/auction', auctionRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/payment', paymentRoutes);
 
 // Health check endpoint with dependency checks
 app.get('/api/health', async (req, res) => {

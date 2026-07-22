@@ -255,7 +255,6 @@ const TournamentsListPage = () => {
                     }}
                   >
                     {filtered.map((tournament) => {
-                      const budgetPerTeam = tournament.budgetPerTeam;
                       return (
 <div
                           key={tournament._id}
@@ -471,37 +470,65 @@ const TournamentsListPage = () => {
 
                           <div style={{ display: "flex", justifyContent: "space-between" }}>
                             <span style={{ color: "var(--text-secondary-light)", transition: "color 0.2s ease", display: "flex", alignItems: "center", gap: "6px" }}>
-                              <IndianRupee size={14} strokeWidth={2} /> Budget/Team
+                              <IndianRupee size={14} strokeWidth={2} /> Registration
                             </span>
-                            <strong style={{ color: "var(--text-primary-light)", transition: "color 0.2s ease" }}>
-                              {budgetPerTeam ? `₹${Number(budgetPerTeam).toLocaleString("en-IN")}` : "—"}
+                            <strong style={{ color: tournament.isPaid ? "#2563eb" : "#16a34a", transition: "color 0.2s ease" }}>
+                              {tournament.isPaid ? `Paid (₹${tournament.registrationFee})` : "Free"}
                             </strong>
                           </div>
                         </div>
 
-                        <button
-                          onClick={() =>
-                            navigate(`/tournament-details/${tournament._id}`, {
-                              state: { tournament },
-                            })
-                          }
-                          style={{
-                            width: "100%",
-                            marginTop: "16px",
-                            height: "44px",
-                            borderRadius: "10px",
-                            border: "1px solid var(--accent-light)",
-                            background: "var(--glass-bg-hover)",
-                            color: "var(--accent-light)",
-                            fontWeight: "700",
-                            cursor: "pointer",
-                            backdropFilter: "blur(16px)",
-                            WebkitBackdropFilter: "blur(16px)",
-                            transition: "background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease",
-                          }}
-                        >
-                          View Details →
-                        </button>
+                        <div style={{ display: "flex", gap: "8px", marginTop: "16px" }}>
+                          <button
+                            onClick={() => {
+                              const shareUrl = `${window.location.origin}/register/${tournament._id}`;
+                              const text = `Register as a player for *${tournament.name}*!\n${tournament.isPaid ? `Entry Fee: ₹${tournament.registrationFee}` : 'Free Registration'}\n\nClick link to register: ${shareUrl}`;
+                              window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+                            }}
+                            style={{
+                              flex: "1",
+                              height: "44px",
+                              borderRadius: "10px",
+                              border: "1px solid #25d366",
+                              background: "rgba(37, 211, 102, 0.1)",
+                              color: "#25d366",
+                              fontWeight: "700",
+                              cursor: "pointer",
+                              fontSize: "13px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: "6px",
+                              transition: "all 0.2s ease",
+                            }}
+                            title="Share Registration Link on WhatsApp"
+                          >
+                            📲 Share Link
+                          </button>
+
+                          <button
+                            onClick={() =>
+                              navigate(`/tournament-details/${tournament._id}`, {
+                                state: { tournament },
+                              })
+                            }
+                            style={{
+                              flex: "1.5",
+                              height: "44px",
+                              borderRadius: "10px",
+                              border: "1px solid var(--accent-light)",
+                              background: "var(--glass-bg-hover)",
+                              color: "var(--accent-light)",
+                              fontWeight: "700",
+                              cursor: "pointer",
+                              backdropFilter: "blur(16px)",
+                              WebkitBackdropFilter: "blur(16px)",
+                              transition: "background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease",
+                            }}
+                          >
+                            Details →
+                          </button>
+                        </div>
                       </div>
                       );
                     })}

@@ -69,6 +69,24 @@ const tournamentSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  isPaid: {
+    type: Boolean,
+    default: false
+  },
+  registrationFee: {
+    type: Number,
+    default: 0,
+    min: [0, 'Registration fee cannot be negative']
+  },
+  payoutUpiId: {
+    type: String,
+    trim: true,
+    default: ''
+  },
+  currency: {
+    type: String,
+    default: 'INR'
+  },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
