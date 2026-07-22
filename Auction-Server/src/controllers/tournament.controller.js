@@ -101,6 +101,10 @@ export const createTournament = async (req, res, next) => {
     const maxPlayersPerTeam = Number(req.body.maxPlayersPerTeam) || 0;
     const playerBasePrice = Number(req.body.playerBasePrice) || 0;
     const description = String(req.body.description || "");
+    const isPaid = req.body.isPaid === true || req.body.isPaid === 'true';
+    const registrationFee = Number(req.body.registrationFee) || 0;
+    const payoutUpiId = String(req.body.payoutUpiId || "").trim();
+    const currency = String(req.body.currency || "INR").trim();
     const logo = req.file ? req.file.path : "";
     const tournament = new Tournament({
       name,
@@ -112,6 +116,10 @@ export const createTournament = async (req, res, next) => {
       maxPlayersPerTeam,
       playerBasePrice,
       description,
+      isPaid,
+      registrationFee,
+      payoutUpiId,
+      currency,
       logo,
       owner: req.user._id,
       createdBy: req.user._id,
@@ -155,7 +163,26 @@ export const updateTournament = async (req, res, next) => {
     const maxPlayersPerTeam = Number(req.body.maxPlayersPerTeam) || 0;
     const playerBasePrice = Number(req.body.playerBasePrice) || 0;
     const description = String(req.body.description || "");
-    const updateData = { name, status, date, teams, venue, budgetPerTeam, maxPlayersPerTeam, playerBasePrice, description };
+    const isPaid = req.body.isPaid === true || req.body.isPaid === 'true';
+    const registrationFee = Number(req.body.registrationFee) || 0;
+    const payoutUpiId = String(req.body.payoutUpiId || "").trim();
+    const currency = String(req.body.currency || "INR").trim();
+
+    const updateData = {
+      name,
+      status,
+      date,
+      teams,
+      venue,
+      budgetPerTeam,
+      maxPlayersPerTeam,
+      playerBasePrice,
+      description,
+      isPaid,
+      registrationFee,
+      payoutUpiId,
+      currency
+    };
     if (req.body.registrationEndDate !== undefined) {
       updateData.registrationEndDate = req.body.registrationEndDate ? new Date(req.body.registrationEndDate) : null;
     }

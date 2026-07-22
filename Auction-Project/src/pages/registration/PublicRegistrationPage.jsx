@@ -67,11 +67,24 @@ export default function PublicRegistrationPage() {
 
   const isClosed = tournamentData?.registrationEndDate && now > new Date(tournamentData.registrationEndDate);
 
-  async function handleSubmit(formData, rawForm) {
-    setLoading(true);
-    setBanner(null);
+  // Helper to load Razorpay script
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      if (window.Razorpay) {
+        resolve(true);
+        return;
+      }
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  const finalizePlayerRegistration = async (payload, rawForm) => {
     try {
-      const res = await playerService.registerPlayer(tournamentId, formData);
+      const res = await playerService.registerPlayer(tournamentId, payload);
       const createdPlayer = res?.data?.player;
       const list = Array.from({ length: 25 }).map((_, i) => ({
         id: i,
@@ -98,7 +111,112 @@ export default function PublicRegistrationPage() {
           || "Registration failed. Please try again.";
       }
       setBanner({ type: "error", message: msg });
-    } finally {
+    }
+  };
+
+  async function handleSubmit(formData, rawForm) {
+    setLoading(true);
+    setBanner(null);
+
+    // Free registration flow
+    if (!tournamentData?.isPaid || !tournamentData?.registrationFee || tournamentData?.registrationFee <= 0) {
+      try {
+        await finalizePlayerRegistration(formData, rawForm);
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
+    // Paid registration flow via Razorpay
+    try {
+      // 1. Create order
+      const orderRes = await import("../../services/paymentService.js").then(m => m.createPaymentOrder(tournamentId));
+      if (!orderRes.success) {
+        setBanner({ type: "error", message: orderRes.message || "Failed to create payment order." });
+        setLoading(false);
+        return;
+      }
+
+      // 2. Load script
+      const isLoaded = await loadRazorpayScript();
+      if (!isLoaded) {
+        setBanner({ type: "error", message: "Razorpay SDK failed to load. Please check your internet connection." });
+        setLoading(false);
+        return;
+      }
+
+      // 3. Trigger Razorpay modal
+      const options = {
+        key: orderRes.keyId,
+        amount: orderRes.amountPaise,
+        currency: orderRes.currency || "INR",
+        name: "CricAuction",
+        description: `Entry Fee for ${tournamentData.name || "Tournament"}`,
+        order_id: orderRes.orderId,
+        handler: async function (response) {
+          try {
+            // Append payment response to formData
+            formData.append("razorpayOrderId", response.razorpay_order_id);
+            formData.append("razorpayPaymentId", response.razorpay_payment_id);
+            formData.append("razorpaySignature", response.razorpay_signature);
+            formData.append("amountPaid", orderRes.amount);
+
+            await finalizePlayerRegistration(formData, rawForm);
+          } catch (err) {
+            console.error("Payment handler error:", err);
+            setBanner({ type: "error", message: "Payment verification or registration failed." });
+          } finally {
+            setLoading(false);
+          }
+        },
+        modal: {
+          ondismiss: function () {
+            setLoading(false);
+            setBanner({ type: "error", message: "Payment was cancelled." });
+          }
+        },
+        config: {
+          display: {
+            blocks: {
+              upi: {
+                name: "UPI / QR Code (GPay, PhonePe, Paytm)",
+                instruments: [
+                  {
+                    method: "upi"
+                  }
+                ]
+              },
+              other: {
+                name: "Other Options",
+                instruments: [
+                  { method: "card" },
+                  { method: "netbanking" },
+                  { method: "wallet" }
+                ]
+              }
+            },
+            sequence: ["block.upi", "block.other"],
+            preferences: {
+              show_default_blocks: true
+            }
+          }
+        },
+        prefill: {
+          name: rawForm.playerName || "",
+          contact: rawForm.mobile || "",
+        },
+        theme: {
+          color: "#2563eb"
+        }
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+
+    } catch (err) {
+      console.error("Payment error:", err);
+      setBanner({ type: "error", message: err.response?.data?.message || err.message || "Failed to initiate payment." });
       setLoading(false);
     }
   }
@@ -255,9 +373,52 @@ export default function PublicRegistrationPage() {
 
       {/* ── Body ── */}
       <div style={{ maxWidth: 920, margin: "0 auto", padding: "36px 16px 60px" }}>
+
+        {/* Paid Tournament Fee Banner */}
+        {tournamentData?.isPaid && tournamentData?.registrationFee > 0 && (
+          <div style={{
+            background: "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)",
+            border: "1px solid #bfdbfe",
+            borderRadius: "16px",
+            padding: "20px 24px",
+            marginBottom: "24px",
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: "16px"
+          }}>
+            <div>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "#2563eb", color: "#fff", padding: "4px 12px", borderRadius: "12px", fontSize: "12px", fontWeight: "700", marginBottom: "8px" }}>
+                💳 PAID REGISTRATION
+              </div>
+              <h3 style={{ margin: "0 0 4px", fontSize: "18px", fontWeight: "700", color: "#1e3a8a" }}>
+                {tournamentData.name} Registration Fee
+              </h3>
+              <p style={{ margin: 0, fontSize: "13px", color: "#3b82f6" }}>
+                Secure payment powered by Razorpay (UPI, GPay, PhonePe, Cards)
+              </p>
+            </div>
+
+            <div style={{ textAlign: "right", background: "#ffffff", padding: "12px 20px", borderRadius: "12px", border: "1px solid #93c5fd" }}>
+              <div style={{ fontSize: "12px", color: "#64748b", fontWeight: "500" }}>Total Payable</div>
+              <div style={{ fontSize: "22px", fontWeight: "800", color: "#1e3a8a" }}>
+                ₹{(Number(tournamentData.registrationFee) * 1.025).toFixed(2)}
+              </div>
+              <div style={{ fontSize: "11px", color: "#94a3b8" }}>
+                (₹{tournamentData.registrationFee} fee + ₹{(Number(tournamentData.registrationFee) * 0.025).toFixed(2)} conv. fee)
+              </div>
+            </div>
+          </div>
+        )}
+
         <PlayerRegistrationForm
           onSubmit={handleSubmit}
-          submitLabel="Submit Registration"
+          submitLabel={
+            tournamentData?.isPaid && tournamentData?.registrationFee > 0
+              ? `Pay ₹${(Number(tournamentData.registrationFee) * 1.025).toFixed(2)} & Register`
+              : "Submit Registration"
+          }
           loading={loading}
           banner={banner}
           resetOnSubmit={true}

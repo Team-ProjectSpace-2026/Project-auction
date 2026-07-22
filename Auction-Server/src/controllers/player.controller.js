@@ -221,7 +221,7 @@ export const getPublicTournament = async (req, res, next) => {
       return res.status(400).json({ message: 'Invalid tournament ID format' });
     }
 
-    const tournament = await Tournament.findById(tournamentId).select('name registrationEndDate');
+    const tournament = await Tournament.findById(tournamentId).select('name registrationEndDate isPaid registrationFee currency payoutUpiId logo venue date');
     if (!tournament) {
       return res.status(404).json({ message: 'Tournament not found' });
     }
@@ -267,6 +267,30 @@ export const registerPlayer = async (req, res, next) => {
       return res.status(409).json({ message: 'This mobile number is already registered for this tournament' });
     }
 
+    // Payment validation if tournament is paid
+    let paymentStatus = 'free';
+    let paymentDetailsObj = {};
+
+    if (tournament.isPaid && tournament.registrationFee > 0) {
+      const razorpayOrderId = req.body.razorpayOrderId;
+      const razorpayPaymentId = req.body.razorpayPaymentId;
+      const razorpaySignature = req.body.razorpaySignature;
+      const amountPaid = Number(req.body.amountPaid) || (tournament.registrationFee * 1.025);
+
+      if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
+        return res.status(402).json({ message: 'Payment completion required for paid tournament registration' });
+      }
+
+      paymentStatus = 'completed';
+      paymentDetailsObj = {
+        razorpayOrderId,
+        razorpayPaymentId,
+        razorpaySignature,
+        amountPaid,
+        paidAt: new Date()
+      };
+    }
+
     // Calculate sequential registration number for this tournament
     const currentRegisteredCount = await Player.countDocuments({
       tournamentId,
@@ -291,6 +315,8 @@ export const registerPlayer = async (req, res, next) => {
       photo: req.file ? req.file.path : null,
       tournamentId,
       isRegistered: true,
+      paymentStatus,
+      paymentDetails: paymentDetailsObj,
       basePrice: tournament.playerBasePrice || 0,
     });
 
@@ -314,7 +340,7 @@ export const getRegisteredPlayers = async (req, res, next) => {
       isRegistered: true,
       deleted: false,
     })
-      .select("name role style battingStyle bowlingStyle keeper isRegistered jerseyNumber registrationNumber jerseySize jerseyName age mobile photo basePrice isSold soldTo soldPrice")
+      .select("name role style battingStyle bowlingStyle keeper isRegistered jerseyNumber registrationNumber jerseySize jerseyName age mobile photo basePrice isSold soldTo soldPrice paymentStatus paymentDetails")
       .populate("tournamentId", "name");
 
     res.json(players);

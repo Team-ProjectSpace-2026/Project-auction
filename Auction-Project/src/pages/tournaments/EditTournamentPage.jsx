@@ -22,12 +22,18 @@ const EditTournamentPage = () => {
         playerBasePrice: tournament?.playerBasePrice || "",
         venue: tournament?.venue || "",
         auctionDateTime: tournament?.date ? new Date(tournament.date).toISOString().slice(0, 16) : "",
+        isPaid: tournament?.isPaid || false,
+        registrationFee: tournament?.registrationFee || "",
+        payoutUpiId: tournament?.payoutUpiId || "",
     });
     const navigate = useNavigate();
 
     const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
+        const { name, value, type, checked } = e.target;
+        setFormData((prev) => ({
+            ...prev,
+            [name]: type === 'checkbox' ? checked : value
+        }));
     };
 
     const handleLogoChange = (e) => {
@@ -50,6 +56,10 @@ const EditTournamentPage = () => {
 
     const handleSave = async () => {
         if (!tournament?._id) return;
+        if (formData.isPaid && (!formData.registrationFee || Number(formData.registrationFee) <= 0)) {
+            alert("Please enter a valid Registration Fee for a Paid tournament.");
+            return;
+        }
         setSaving(true);
         try {
             const payload = new FormData();
@@ -61,6 +71,9 @@ const EditTournamentPage = () => {
             payload.append("playerBasePrice", Number(formData.playerBasePrice));
             payload.append("venue", formData.venue);
             payload.append("date", formData.auctionDateTime);
+            payload.append("isPaid", formData.isPaid);
+            payload.append("registrationFee", formData.isPaid ? Number(formData.registrationFee) : 0);
+            payload.append("payoutUpiId", formData.isPaid ? formData.payoutUpiId : "");
             if (logoFile) {
                 payload.append("logo", logoFile);
             }
@@ -294,6 +307,77 @@ const EditTournamentPage = () => {
 
     </div>
 
+</div>
+
+{/* Row 5: Registration Type & Payment Options */}
+<div style={{
+  marginTop: '20px',
+  marginBottom: '24px',
+  padding: '18px',
+  borderRadius: '12px',
+  background: 'rgba(255, 255, 255, 0.05)',
+  border: '1px solid rgba(255, 255, 255, 0.1)'
+}}>
+  <label style={{ display: 'block', fontWeight: '600', marginBottom: '12px', fontSize: '15px' }}>
+    Player Registration Type <span>*</span>
+  </label>
+  <div style={{ display: 'flex', gap: '20px', marginBottom: formData.isPaid ? '16px' : '0' }}>
+    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: '500' }}>
+      <input
+        type="radio"
+        name="isPaidRadioEdit"
+        checked={!formData.isPaid}
+        onChange={() => setFormData(prev => ({ ...prev, isPaid: false }))}
+      />
+      🎉 Free Registration
+    </label>
+    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: '500' }}>
+      <input
+        type="radio"
+        name="isPaidRadioEdit"
+        checked={formData.isPaid}
+        onChange={() => setFormData(prev => ({ ...prev, isPaid: true }))}
+      />
+      💳 Paid Registration
+    </label>
+  </div>
+
+  {formData.isPaid && (
+    <div className="form-row" style={{ marginTop: '16px' }}>
+      <div className="form-group">
+        <label>
+          Entry Fee per Player (₹) <span>*</span>
+        </label>
+        <input
+          type="number"
+          name="registrationFee"
+          value={formData.registrationFee}
+          onChange={handleInputChange}
+          placeholder="e.g. 100"
+          min="1"
+        />
+        <small style={{ color: 'var(--text-secondary-light)', marginTop: '4px', display: 'block' }}>
+          Player pays Entry Fee + 2.5% convenience fee at checkout.
+        </small>
+      </div>
+
+      <div className="form-group">
+        <label>
+          Organizer Payout UPI ID (GPay / PhonePe / Paytm)
+        </label>
+        <input
+          type="text"
+          name="payoutUpiId"
+          value={formData.payoutUpiId}
+          onChange={handleInputChange}
+          placeholder="e.g. yourname@gpay"
+        />
+        <small style={{ color: 'var(--text-secondary-light)', marginTop: '4px', display: 'block' }}>
+          Your tournament registration earnings will be sent here.
+        </small>
+      </div>
+    </div>
+  )}
 </div>
 
 

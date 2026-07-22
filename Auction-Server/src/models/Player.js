@@ -103,6 +103,18 @@ const playerSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    paymentStatus: {
+      type: String,
+      enum: ["free", "pending", "completed", "failed"],
+      default: "free",
+    },
+    paymentDetails: {
+      razorpayOrderId: { type: String, default: "" },
+      razorpayPaymentId: { type: String, default: "" },
+      razorpaySignature: { type: String, default: "" },
+      amountPaid: { type: Number, default: 0 },
+      paidAt: { type: Date, default: null },
+    },
     deleted: {
       type: Boolean,
       default: false,
