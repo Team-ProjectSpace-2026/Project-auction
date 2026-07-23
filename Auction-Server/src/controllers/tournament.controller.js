@@ -106,6 +106,12 @@ export const createTournament = async (req, res, next) => {
     const payoutUpiId = String(req.body.payoutUpiId || "").trim();
     const currency = String(req.body.currency || "INR").trim();
     const logo = req.file ? req.file.path : "";
+    if (date) {
+      const auctionDate = new Date(date);
+      if (auctionDate <= new Date()) {
+        return res.status(400).json({ message: "Auction date must be in the future" });
+      }
+    }
     const tournament = new Tournament({
       name,
       status,
@@ -167,6 +173,13 @@ export const updateTournament = async (req, res, next) => {
     const registrationFee = Number(req.body.registrationFee) || 0;
     const payoutUpiId = String(req.body.payoutUpiId || "").trim();
     const currency = String(req.body.currency || "INR").trim();
+
+    if (date) {
+      const auctionDate = new Date(date);
+      if (auctionDate <= new Date()) {
+        return res.status(400).json({ message: "Auction date must be in the future" });
+      }
+    }
 
     const updateData = {
       name,
@@ -262,15 +275,21 @@ export const updateRegistrationDeadline = async (req, res, next) => {
       ? new Date(req.body.registrationEndDate)
       : null;
 
-    const tournament = await Tournament.findByIdAndUpdate(
-      tournamentId,
-      { registrationEndDate },
-      { new: true, runValidators: true },
-    );
+    if (registrationEndDate && registrationEndDate <= new Date()) {
+      return res.status(400).json({ message: "Registration deadline must be in the future" });
+    }
 
+    const tournament = await Tournament.findById(tournamentId);
     if (!tournament) {
       return res.status(404).json({ message: "Tournament not found" });
     }
+
+    if (registrationEndDate && tournament.date && registrationEndDate >= new Date(tournament.date)) {
+      return res.status(400).json({ message: "Registration deadline must be before auction date" });
+    }
+
+    tournament.registrationEndDate = registrationEndDate;
+    await tournament.save();
 
     res.json(tournament);
   } catch (error) {

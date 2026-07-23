@@ -175,7 +175,7 @@ const TournamentHubPage = () => {
 
             {activeTab === "players" && <PlayersTab tournamentId={tournament?._id || tournamentId} />}
 
-            {activeTab === "auction" && <LiveAuctionTab tournamentId={tournamentId} />}
+            {activeTab === "auction" && <LiveAuctionTab tournamentId={tournamentId} tournament={tournament} />}
 
           </div>
         </main>

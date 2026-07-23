@@ -15,25 +15,47 @@ const enterFullscreen = () => {
   }
 };
 
-const LiveAuctionTab = ({ tournamentId: propTournamentId }) => {
+const LiveAuctionTab = ({ tournamentId: propTournamentId, tournament }) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const tournamentId = propTournamentId || searchParams.get("tournamentId");
-  const { 
-    auctionStatus, 
-    joinAndListen, 
-    players, 
-    currentPlayer, 
-    currentBid, 
-    highestBidder, 
+  const {
+    auctionStatus,
+    joinAndListen,
+    players,
+    currentPlayer,
+    currentBid,
+    highestBidder,
     error,
     clearError
   } = useAuction();
 
-  const statusLabel = auctionStatus === "bidding" ? "Live"
+  const isPastDate = tournament?.date && new Date(tournament.date) < new Date();
+  const isBeforeDate = !isPastDate && tournament?.date && new Date(tournament.date) > new Date();
+
+  const [now, setNow] = useState(new Date());
+  useEffect(() => {
+    const interval = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const getTimeRemaining = () => {
+    if (!tournament?.date) return null;
+    const diff = new Date(tournament.date) - now;
+    if (diff <= 0) return null;
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const minutes = Math.floor((diff / (1000 * 60)) % 60);
+    const seconds = Math.floor((diff / 1000) % 60);
+    return { days, hours, minutes, seconds };
+  };
+
+  const statusLabel = isPastDate ? "Completed"
+    : auctionStatus === "bidding" ? "Live"
     : auctionStatus === "sold" ? "Sold"
     : auctionStatus === "unsold" ? "Unsold"
     : auctionStatus === "completed" ? "Completed"
+    : isBeforeDate ? "Scheduled"
     : "Not Started";
 
   // Load auction state AND connect to socket when tab mounts
@@ -82,6 +104,125 @@ const LiveAuctionTab = ({ tournamentId: propTournamentId }) => {
         </div>
       )}
 
+      {isPastDate && (
+        <div style={{
+          background: "linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)",
+          border: "1px solid #bbf7d0",
+          borderRadius: "14px",
+          padding: "32px",
+          textAlign: "center",
+        }}>
+          <div style={{ fontSize: "48px", marginBottom: "12px" }}>&#127942;</div>
+          <h2 style={{ margin: "0 0 8px", fontSize: "22px", fontWeight: "700", color: "#15803d" }}>
+            Auction Completed
+          </h2>
+          <p style={{ margin: 0, fontSize: "14px", color: "#166534" }}>
+            This auction was held on {new Date(tournament.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}.
+          </p>
+        </div>
+      )}
+
+      {isBeforeDate && (() => {
+        const time = getTimeRemaining();
+        if (!time) return null;
+        return (
+          <div style={{
+            background: "var(--glass-bg)",
+            backdropFilter: "blur(16px)",
+            WebkitBackdropFilter: "blur(16px)",
+            border: "1px solid var(--glass-border)",
+            borderRadius: "16px",
+            padding: "40px",
+            textAlign: "center",
+          }}>
+            <div
+              style={{
+                width: "80px",
+                height: "80px",
+                borderRadius: "50%",
+                background: "var(--info-bg)",
+                margin: "0 auto",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Hammer size={40} strokeWidth={1.5} style={{ color: "var(--accent-light)" }} />
+            </div>
+
+            <h2
+              style={{
+                marginTop: "20px",
+                fontSize: "26px",
+                fontWeight: "700",
+                color: "var(--text-primary-light)",
+              }}
+            >
+              Auction Starts In
+            </h2>
+
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                gap: "16px",
+                marginTop: "24px",
+              }}
+            >
+              {[
+                { value: time.days, label: "Days" },
+                { value: time.hours, label: "Hours" },
+                { value: time.minutes, label: "Mins" },
+                { value: time.seconds, label: "Secs" },
+              ].map((item) => (
+                <div key={item.label} style={{ textAlign: "center" }}>
+                  <div
+                    style={{
+                      width: "72px",
+                      height: "72px",
+                      borderRadius: "14px",
+                      background: "var(--info-bg)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "28px",
+                      fontWeight: "800",
+                      color: "var(--accent-light)",
+                      fontVariantNumeric: "tabular-nums",
+                    }}
+                  >
+                    {String(item.value).padStart(2, "0")}
+                  </div>
+                  <div
+                    style={{
+                      marginTop: "8px",
+                      fontSize: "11px",
+                      fontWeight: "600",
+                      color: "var(--text-secondary-light)",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    {item.label}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <p
+              style={{
+                marginTop: "20px",
+                color: "var(--text-secondary-light)",
+                fontSize: "14px",
+              }}
+            >
+              Scheduled for {new Date(tournament.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+            </p>
+          </div>
+        );
+      })()}
+
+      {!isPastDate && !isBeforeDate && (
       <div
         style={{
           display: "grid",
@@ -159,76 +300,78 @@ const LiveAuctionTab = ({ tournamentId: propTournamentId }) => {
             marginTop: "60px",
           }}
         >
-          <div
-            style={{
-              width: "120px",
-              height: "120px",
-              borderRadius: "50%",
-              background: "var(--info-bg)",
-              margin: "0 auto",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Hammer size={56} strokeWidth={1.5} style={{ color: "var(--accent-light)" }} />
-          </div>
+              <>
+                <div
+                  style={{
+                    width: "120px",
+                    height: "120px",
+                    borderRadius: "50%",
+                    background: "var(--info-bg)",
+                    margin: "0 auto",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Hammer size={56} strokeWidth={1.5} style={{ color: "var(--accent-light)" }} />
+                </div>
 
-          <h2
-            style={{
-              marginTop: "24px",
-              fontSize: "34px",
-              fontWeight: "700",
-              color: "var(--text-primary-light)",
-              transition: "color 0.2s ease",
-            }}
-          >
-            Ready to Start the Auction?
-          </h2>
+                <h2
+                  style={{
+                    marginTop: "24px",
+                    fontSize: "34px",
+                    fontWeight: "700",
+                    color: "var(--text-primary-light)",
+                    transition: "color 0.2s ease",
+                  }}
+                >
+                  Ready to Start the Auction?
+                </h2>
 
-          <p
-            style={{
-              color: "var(--text-secondary-light)",
-              marginTop: "12px",
-              fontSize: "15px",
-              transition: "color 0.2s ease",
-            }}
-          >
-            Once you start the auction, teams will be able to
-            place bids on players.
-          </p>
+                <p
+                  style={{
+                    color: "var(--text-secondary-light)",
+                    marginTop: "12px",
+                    fontSize: "15px",
+                    transition: "color 0.2s ease",
+                  }}
+                >
+                  Once you start the auction, teams will be able to
+                  place bids on players.
+                </p>
 
-          <button
-            onClick={() => { enterFullscreen(); setShowRevealModal(true); }}
-            disabled={!players || players.length === 0}
-            style={{
-              marginTop: "28px",
-              background: "var(--accent-light)",
-              color: "#fff",
-              border: "none",
-              borderRadius: "10px",
-              padding: "14px 36px",
-              fontSize: "16px",
-              fontWeight: "600",
-              cursor: (!players || players.length === 0) ? "not-allowed" : "pointer",
-              opacity: (!players || players.length === 0) ? 0.5 : 1,
-              transition: "background-color 0.2s ease",
-            }}
-          >
-            ▶ Start Auction
-            {(!players || players.length === 0) && ' — Loading players...'}
-          </button>
+                <button
+                  onClick={() => { enterFullscreen(); setShowRevealModal(true); }}
+                  disabled={!players || players.length === 0}
+                  style={{
+                    marginTop: "28px",
+                    background: "var(--accent-light)",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "10px",
+                    padding: "14px 36px",
+                    fontSize: "16px",
+                    fontWeight: "600",
+                    cursor: (!players || players.length === 0) ? "not-allowed" : "pointer",
+                    opacity: (!players || players.length === 0) ? 0.5 : 1,
+                    transition: "background-color 0.2s ease",
+                  }}
+                >
+                  ▶ Start Auction
+                  {(!players || players.length === 0) && ' — Loading players...'}
+                </button>
 
-          <p
-            style={{
-              marginTop: "20px",
-              color: "var(--text-secondary-light)",
-              fontSize: "13px",
-              transition: "color 0.2s ease",
-            }}
-          >
-            ℹ️ You can't pause or reset the auction once it has started.
-          </p>
+                <p
+                  style={{
+                    marginTop: "20px",
+                    color: "var(--text-secondary-light)",
+                    fontSize: "13px",
+                    transition: "color 0.2s ease",
+                  }}
+                >
+                  ℹ️ You can't pause or reset the auction once it has started.
+                </p>
+              </>
         </div>
       </div>
 
@@ -426,6 +569,8 @@ const LiveAuctionTab = ({ tournamentId: propTournamentId }) => {
           </div>
         </div>
       </div>
+      </div>
+      )}
 
       {showRevealModal && (
         <PlayerRevealModal
@@ -450,7 +595,6 @@ const LiveAuctionTab = ({ tournamentId: propTournamentId }) => {
           }}  
         />
       )}
-      </div>
     </div>
   );
 };

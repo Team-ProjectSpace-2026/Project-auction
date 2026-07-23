@@ -302,6 +302,7 @@ const EditTournamentPage = () => {
             type="datetime-local"
             name="auctionDateTime"
             value={formData.auctionDateTime}
+            min={new Date().toISOString().slice(0, 16)}
             onChange={handleInputChange}
         />
 
@@ -439,7 +440,7 @@ const EditTournamentPage = () => {
     message="Tournament details have been updated successfully."
     onClose={() => {
       setShowSuccess(false);
-      navigate("/tournament-details");
+      navigate(`/tournament-details/${tournament._id}`);
     }}
   />
 )}

@@ -35,6 +35,10 @@ export const createOrder = async (req, res) => {
       });
     }
 
+    if (tournament.registrationEndDate && new Date() > new Date(tournament.registrationEndDate)) {
+      return res.status(403).json({ success: false, message: 'Registration deadline has passed' });
+    }
+
     const entryFee = Number(tournament.registrationFee);
     const convenienceFee = Math.round(entryFee * CONVENIENCE_FEE_PERCENT * 100) / 100;
     const totalAmount = entryFee + convenienceFee;
