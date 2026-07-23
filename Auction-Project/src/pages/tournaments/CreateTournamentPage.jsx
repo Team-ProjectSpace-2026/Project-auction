@@ -330,6 +330,7 @@ const CreateTournamentPage = () => {
                     type="datetime-local"
                     name="auctionDateTime"
                     value={formData.auctionDateTime}
+                    min={new Date().toISOString().slice(0, 16)}
                     onChange={handleInputChange}
                 />
 

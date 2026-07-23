@@ -50,7 +50,7 @@ const TournamentRow = ({ tournament, onView }) => {
           {status}
         </span>
       </td>
-      <td style={{ padding: '14px 16px', color: 'var(--text-secondary-light)', fontSize: '14px', transition: 'color 0.2s ease' }}>{auctionDate}</td>
+      <td style={{ padding: '14px 16px', color: 'var(--text-secondary-light)', fontSize: '14px', transition: 'color 0.2s ease' }}>{auctionDate ? new Date(auctionDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"}</td>
       <td style={{ padding: '14px 16px', color: 'var(--text-secondary-light)', fontSize: '14px', textAlign: 'center', transition: 'color 0.2s ease' }}>{teamsCount}</td>
       <td style={{ padding: '14px 16px' }}>
         <button
