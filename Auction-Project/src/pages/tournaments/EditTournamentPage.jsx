@@ -77,7 +77,7 @@ const EditTournamentPage = () => {
             if (logoFile) {
                 payload.append("logo", logoFile);
             }
-            const res = await updateTournament(tournament._id, payload);
+            await updateTournament(tournament._id, payload);
             setShowSuccess(true);
         } catch (err) {
             const msg = err.response?.data?.message || "Failed to update tournament";
