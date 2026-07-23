@@ -166,6 +166,82 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
     pdfMake.createPdf(docDefinition).download("player-list.pdf");
   };
 
+  const [selectedScreenshot, setSelectedScreenshot] = useState(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape" && selectedScreenshot) {
+        setSelectedScreenshot(null);
+      }
+    };
+    if (selectedScreenshot) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedScreenshot]);
+
+  const handleVerifyPayment = async (playerId, status) => {
+    try {
+      const res = await playerService.verifyPlayerPayment(playerId, status);
+      if (res.data?.success && res.data?.player) {
+        const updatedPlayer = res.data.player;
+        setPlayers((prev) =>
+          prev.map((p) => (p._id === playerId ? updatedPlayer : p))
+        );
+      }
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to update payment status");
+    }
+  };
+
+  const getPaymentStatusBadge = (player) => {
+    const status = player.paymentStatus || "free";
+    const utr = player.paymentDetails?.utrLast4;
+    const screenshot = player.paymentDetails?.paymentScreenshot;
+
+    if (status === "verified" || status === "completed") {
+      return (
+        <span style={{ padding: "4px 10px", borderRadius: "999px", fontSize: "11px", fontWeight: "700", background: "#dcfce7", color: "#15803d" }}>
+          ✓ VERIFIED
+        </span>
+      );
+    }
+    if (status === "pending_verification") {
+      return (
+        <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+          <span style={{ padding: "4px 10px", borderRadius: "999px", fontSize: "11px", fontWeight: "700", background: "#fef3c7", color: "#b45309" }}>
+            ⏳ PENDING
+          </span>
+          {utr && (
+            <span style={{ fontSize: "11px", color: "#64748b", fontWeight: "600" }}>
+              UTR: ...{utr}
+            </span>
+          )}
+          {screenshot && (
+            <button
+              onClick={() => setSelectedScreenshot(playerPhotoUrl(screenshot))}
+              style={{ background: "#eff6ff", border: "1px solid #93c5fd", borderRadius: "6px", padding: "2px 6px", fontSize: "10px", color: "#2563eb", fontWeight: "600", cursor: "pointer" }}
+            >
+              📸 View Receipt
+            </button>
+          )}
+        </div>
+      );
+    }
+    if (status === "rejected") {
+      return (
+        <span style={{ padding: "4px 10px", borderRadius: "999px", fontSize: "11px", fontWeight: "700", background: "#fef2f2", color: "#b91c1c" }}>
+          ✕ REJECTED
+        </span>
+      );
+    }
+    return (
+      <span style={{ padding: "4px 10px", borderRadius: "999px", fontSize: "11px", fontWeight: "600", background: "#f3f4f6", color: "#6b7280" }}>
+        Free
+      </span>
+    );
+  };
+
   if (loading) {
     return <CricketLoader text="Loading players..." />;
   }
@@ -185,7 +261,7 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
           Players
         </h2>
         <p style={{ color: "var(--text-secondary-light)", fontSize: "14px" }}>
-          Manage all players in this tournament.
+          Manage all registered players and verify entry fee payments.
         </p>
       </div>
 
@@ -255,10 +331,9 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
                 <th style={{ padding: "16px" }}>#</th>
                 <th>Player Name</th>
                 <th>Role</th>
-                <th>Batting Style</th>
-                <th>Bowling Style</th>
-                <th>All Rounder</th>
-                <th>Wicket Keeper</th>
+                <th>Batting</th>
+                <th>Bowling</th>
+                <th>Payment</th>
                 <th>Source</th>
                 <th>Action</th>
               </tr>
@@ -266,7 +341,7 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
             <tbody>
               {filteredPlayers.length === 0 ? (
                 <tr>
-                  <td colSpan="9" style={{ padding: "40px", textAlign: "center", color: "var(--text-secondary-light)" }}>
+                  <td colSpan="8" style={{ padding: "40px", textAlign: "center", color: "var(--text-secondary-light)" }}>
                     No players found.
                   </td>
                 </tr>
@@ -300,17 +375,8 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
                     }}>
                       {(player.bowlingStyle && player.bowlingStyle !== "Not Applicable") ? <Check size={14} strokeWidth={3} /> : <X size={14} strokeWidth={3} />}
                     </td>
-                    <td style={{
-                      fontSize: "18px", fontWeight: "700",
-                      color: player.role === "All Rounder" ? "#16a34a" : "#ef4444",
-                    }}>
-                      {player.role === "All Rounder" ? <Check size={14} strokeWidth={3} /> : <X size={14} strokeWidth={3} />}
-                    </td>
-                    <td style={{
-                      fontSize: "18px", fontWeight: "700",
-                      color: player.keeper ? "#16a34a" : "#ef4444",
-                    }}>
-                      {player.keeper ? <Check size={14} strokeWidth={3} /> : <X size={14} strokeWidth={3} />}
+                    <td>
+                      {getPaymentStatusBadge(player)}
                     </td>
                     <td>
                       {player.isRegistered ? (
@@ -332,18 +398,46 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
                       )}
                     </td>
                     <td>
-                      <button
-                        onClick={() => navigate(`/player-details/${player._id}`)}
-                        style={{ border: "none", background: "transparent", cursor: "pointer", marginRight: "12px", fontSize: "16px" }}
-                      >
-                        <Pencil size={16} strokeWidth={2} />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(player._id)}
-                        style={{ border: "none", background: "transparent", cursor: "pointer", fontSize: "16px" }}
-                      >
-                        <Trash2 size={16} strokeWidth={2} />
-                      </button>
+                      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                        {player.paymentStatus === "pending_verification" && (
+                          <>
+                            <button
+                              onClick={() => {
+                                if (window.confirm("Are you sure you want to approve this payment?")) {
+                                  handleVerifyPayment(player._id, "verified");
+                                }
+                              }}
+                              title="Approve Payment"
+                              style={{ background: "#16a34a", color: "#fff", border: "none", borderRadius: "6px", padding: "4px 8px", fontSize: "11px", fontWeight: "700", cursor: "pointer" }}
+                            >
+                              Approve
+                            </button>
+                            <button
+                              onClick={() => {
+                                if (window.confirm("Are you sure you want to reject this payment?")) {
+                                  handleVerifyPayment(player._id, "rejected");
+                                }
+                              }}
+                              title="Reject Payment"
+                              style={{ background: "#ef4444", color: "#fff", border: "none", borderRadius: "6px", padding: "4px 8px", fontSize: "11px", fontWeight: "700", cursor: "pointer" }}
+                            >
+                              Reject
+                            </button>
+                          </>
+                        )}
+                        <button
+                          onClick={() => navigate(`/player-details/${player._id}`)}
+                          style={{ border: "none", background: "transparent", cursor: "pointer", fontSize: "16px" }}
+                        >
+                          <Pencil size={16} strokeWidth={2} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(player._id)}
+                          style={{ border: "none", background: "transparent", cursor: "pointer", fontSize: "16px" }}
+                        >
+                          <Trash2 size={16} strokeWidth={2} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -352,6 +446,36 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
           </table>
         </div>
       </div>
+
+      {/* Payment Receipt Image Preview Modal */}
+      {selectedScreenshot && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Payment Receipt Proof"
+          onClick={() => setSelectedScreenshot(null)}
+          style={{
+            position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+            background: "rgba(0,0,0,0.75)", zIndex: 9999,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: "20px"
+          }}
+        >
+          <div onClick={(e) => e.stopPropagation()} style={{ background: "#fff", padding: "20px", borderRadius: "16px", maxWidth: "90vw", maxHeight: "90vh", overflow: "auto", textAlign: "center" }}>
+            <h3 style={{ margin: "0 0 12px", fontSize: "16px", fontWeight: "700" }}>Payment Receipt Proof</h3>
+            <img src={selectedScreenshot} alt="Payment Screenshot Proof" style={{ maxWidth: "100%", maxHeight: "70vh", borderRadius: "8px", objectFit: "contain" }} />
+            <div style={{ marginTop: "16px" }}>
+              <button
+                autoFocus
+                onClick={() => setSelectedScreenshot(null)}
+                style={{ background: "#2563eb", color: "#fff", border: "none", padding: "8px 20px", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}
+              >
+                Close (Esc)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

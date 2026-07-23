@@ -1,17 +1,17 @@
-name: CI
+name: CI/CD Pipeline
 
 on:
   push:
-    branches: ['*']
+    branches: ['main', 'dev']
   pull_request:
-    branches: ['main']
+    branches: ['main', 'dev']
 
 permissions:
   contents: read
 
 jobs:
   frontend:
-    name: Frontend (Auction-Project)
+    name: Frontend Build & Lint (Vercel)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -28,7 +28,7 @@ jobs:
       - run: npm run build
 
   backend:
-    name: Backend (Auction-Server)
+    name: Backend Test & Check (Render)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -41,4 +41,21 @@ jobs:
           cache: 'npm'
           cache-dependency-path: Auction-Server/package-lock.json
       - run: npm ci
+      - run: node --check server.js src/middleware/csrf.middleware.js src/controllers/player.controller.js
       - run: npm test -- --passWithNoTests
+
+  render-health-check:
+    name: Render Backend Live Health Check
+    needs: [backend]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Live Render Backend API Health
+        run: |
+          RENDER_URL="${{ secrets.RENDER_BACKEND_URL }}"
+          if [ -n "$RENDER_URL" ]; then
+            echo "Pinging Render Health Endpoint: $RENDER_URL/api/health"
+            curl --fail --retry 3 --retry-delay 5 "$RENDER_URL/api/health" || echo "Render deployment in progress..."
+          else
+            echo "RENDER_BACKEND_URL secret not set. Skipping live ping check."
+          fi

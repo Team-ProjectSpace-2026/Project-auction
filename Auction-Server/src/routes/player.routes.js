@@ -7,7 +7,8 @@ import {
   deletePlayer,
   registerPlayer,
   getRegisteredPlayers,
-  getPublicTournament
+  getPublicTournament,
+  verifyPlayerPayment
 } from '../controllers/player.controller.js';
 import {
   validatePlayer,
@@ -25,7 +26,16 @@ router.use(apiLimiter);
 
 // Public routes - no auth required (must be before auth middleware)
 router.get('/public/:tournamentId', sanitizeIdParams(['tournamentId']), getPublicTournament);
-router.post('/register/:tournamentId', upload.single('photo'), validatePublicRegistration, handleValidationErrors, registerPlayer);
+router.post(
+  '/register/:tournamentId',
+  upload.fields([
+    { name: 'photo', maxCount: 1 },
+    { name: 'paymentScreenshot', maxCount: 1 }
+  ]),
+  validatePublicRegistration,
+  handleValidationErrors,
+  registerPlayer
+);
 router.get('/registered/:tournamentId', getRegisteredPlayers);
 
 // All routes below require authentication
@@ -35,6 +45,7 @@ router.get('/', sanitizeQueryIds(['tournamentId']), getPlayers);
 router.post('/', validatePlayer, handleValidationErrors, createPlayer);
 router.get('/:id', sanitizeIdParams(['id']), getPlayer);
 router.put('/:id', sanitizeIdParams(['id']), upload.single('photo'), updatePlayer);
+router.put('/:playerId/verify-payment', sanitizeIdParams(['playerId']), verifyPlayerPayment);
 router.delete('/:id', sanitizeIdParams(['id']), deletePlayer);
 
 export default router;

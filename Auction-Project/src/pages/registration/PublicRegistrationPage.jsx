@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import QRCode from "qrcode";
 import { SkeletonRect, SkeletonText } from "../../components/common/SkeletonLoader";
 import "../../components/common/SkeletonLoader.css";
 import * as playerService from "../../services/playerService.js";
@@ -64,23 +65,23 @@ export default function PublicRegistrationPage() {
 
   const [registeredPlayer, setRegisteredPlayer] = useState(null);
   const [confettiList, setConfettiList] = useState([]);
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState("");
 
   const isClosed = tournamentData?.registrationEndDate && now > new Date(tournamentData.registrationEndDate);
+  const payoutUpiId = (tournamentData?.payoutUpiId || "").trim();
 
-  // Helper to load Razorpay script
-  const loadRazorpayScript = () => {
-    return new Promise((resolve) => {
-      if (window.Razorpay) {
-        resolve(true);
-        return;
-      }
-      const script = document.createElement("script");
-      script.src = "https://checkout.razorpay.com/v1/checkout.js";
-      script.onload = () => resolve(true);
-      script.onerror = () => resolve(false);
-      document.body.appendChild(script);
-    });
-  };
+  useEffect(() => {
+    if (tournamentData?.isPaid && tournamentData?.registrationFee > 0 && payoutUpiId) {
+      const fee = Number(tournamentData.registrationFee);
+      const upiUri = `upi://pay?pa=${encodeURIComponent(payoutUpiId)}&pn=${encodeURIComponent(tournamentData.name || "CricAuction")}&am=${fee}&cu=INR`;
+      QRCode.toDataURL(upiUri, { width: 200, margin: 1 })
+        .then((url) => setQrCodeDataUrl(url))
+        .catch(() => setQrCodeDataUrl(""));
+    } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setQrCodeDataUrl("");
+    }
+  }, [tournamentData, payoutUpiId]);
 
   const finalizePlayerRegistration = async (payload, rawForm) => {
     try {
@@ -117,114 +118,9 @@ export default function PublicRegistrationPage() {
   async function handleSubmit(formData, rawForm) {
     setLoading(true);
     setBanner(null);
-
-    // Free registration flow
-    if (!tournamentData?.isPaid || !tournamentData?.registrationFee || tournamentData?.registrationFee <= 0) {
-      try {
-        await finalizePlayerRegistration(formData, rawForm);
-      } finally {
-        setLoading(false);
-      }
-      return;
-    }
-
-    // Paid registration flow via Razorpay
     try {
-      // 1. Create order
-      const orderRes = await import("../../services/paymentService.js").then(m => m.createPaymentOrder(tournamentId));
-      if (!orderRes.success) {
-        setBanner({ type: "error", message: orderRes.message || "Failed to create payment order." });
-        setLoading(false);
-        return;
-      }
-
-      // 2. Load script
-      const isLoaded = await loadRazorpayScript();
-      if (!isLoaded) {
-        setBanner({ type: "error", message: "Razorpay SDK failed to load. Please check your internet connection." });
-        setLoading(false);
-        return;
-      }
-
-      // 3. Trigger Razorpay modal
-      const options = {
-        key: orderRes.keyId,
-        amount: orderRes.amountPaise,
-        currency: orderRes.currency || "INR",
-        name: "CricAuction",
-        description: `Entry Fee for ${tournamentData.name || "Tournament"}`,
-        order_id: orderRes.orderId,
-        handler: async function (response) {
-          try {
-            // Append payment response to formData
-            formData.append("razorpayOrderId", response.razorpay_order_id);
-            formData.append("razorpayPaymentId", response.razorpay_payment_id);
-            formData.append("razorpaySignature", response.razorpay_signature);
-            formData.append("amountPaid", orderRes.amount);
-
-            await finalizePlayerRegistration(formData, rawForm);
-          } catch (err) {
-            console.error("Payment handler error:", err);
-            setBanner({ type: "error", message: "Payment verification or registration failed." });
-          } finally {
-            setLoading(false);
-          }
-        },
-        modal: {
-          ondismiss: function () {
-            setLoading(false);
-            setBanner({ type: "error", message: "Payment was cancelled." });
-          }
-        },
-        prefill: {
-          name: rawForm.playerName || "",
-          contact: rawForm.mobile || "",
-          email: rawForm.email || "player@cricauction.com"
-        },
-        theme: {
-          color: "#2563eb"
-        },
-        config: {
-          display: {
-            blocks: {
-              upi: {
-                name: "Pay via UPI (GPay, PhonePe, Paytm)",
-                instruments: [
-                  {
-                    method: "upi",
-                    flows: ["collect", "intent", "qr"]
-                  }
-                ]
-              },
-              other: {
-                name: "Other Payment Options",
-                instruments: [
-                  {
-                    method: "card"
-                  },
-                  {
-                    method: "netbanking"
-                  },
-                  {
-                    method: "wallet"
-                  }
-                ]
-              }
-            },
-            sequence: ["block.upi", "block.other"],
-            preferences: {
-              show_default_blocks: true
-            }
-          }
-        }
-      };
-
-      const rzp = new window.Razorpay(options);
-      rzp.open();
-
-    } catch (err) {
-      console.error("Payment error:", err);
-      setBanner({ type: "error", message: err.response?.data?.message || err.message || "Failed to initiate payment." });
+      await finalizePlayerRegistration(formData, rawForm);
+    } finally {
       setLoading(false);
     }
   }
@@ -382,51 +278,138 @@ export default function PublicRegistrationPage() {
       {/* ── Body ── */}
       <div style={{ maxWidth: 920, margin: "0 auto", padding: "36px 16px 60px" }}>
 
-        {/* Paid Tournament Fee Banner */}
-        {tournamentData?.isPaid && tournamentData?.registrationFee > 0 && (
-          <div style={{
-            background: "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)",
-            border: "1px solid #bfdbfe",
-            borderRadius: "16px",
-            padding: "20px 24px",
-            marginBottom: "24px",
-            display: "flex",
-            flexWrap: "wrap",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: "16px"
-          }}>
-            <div>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "#2563eb", color: "#fff", padding: "4px 12px", borderRadius: "12px", fontSize: "12px", fontWeight: "700", marginBottom: "8px" }}>
-                💳 PAID REGISTRATION
-              </div>
-              <h3 style={{ margin: "0 0 4px", fontSize: "18px", fontWeight: "700", color: "#1e3a8a" }}>
-                {tournamentData.name} Registration Fee
-              </h3>
-              <p style={{ margin: 0, fontSize: "13px", color: "#3b82f6" }}>
-                Secure payment powered by Razorpay (UPI, GPay, PhonePe, Cards)
-              </p>
-            </div>
+        {/* Paid Tournament Fee Banner with UPI QR & App Launcher */}
+        {tournamentData?.isPaid && tournamentData?.registrationFee > 0 && (() => {
+          const fee = Number(tournamentData.registrationFee);
 
-            <div style={{ textAlign: "right", background: "#ffffff", padding: "12px 20px", borderRadius: "12px", border: "1px solid #93c5fd" }}>
-              <div style={{ fontSize: "12px", color: "#64748b", fontWeight: "500" }}>Total Payable</div>
-              <div style={{ fontSize: "22px", fontWeight: "800", color: "#1e3a8a" }}>
-                ₹{(Number(tournamentData.registrationFee) * 1.025).toFixed(2)}
+          if (!payoutUpiId) {
+            return (
+              <div style={{
+                background: "#fffbebf5",
+                border: "1px solid #fde68a",
+                borderRadius: "16px",
+                padding: "20px 24px",
+                marginBottom: "28px",
+                color: "#92400e",
+              }}>
+                <div style={{ fontWeight: "700", fontSize: "16px", marginBottom: "4px" }}>
+                  ⚠️ Payment Not Configured
+                </div>
+                <div style={{ fontSize: "14px", lineHeight: "1.5" }}>
+                  Registration fee is ₹{fee}, but the tournament organizer has not set up a UPI ID yet. Please contact the tournament organizer to complete registration.
+                </div>
               </div>
-              <div style={{ fontSize: "11px", color: "#94a3b8" }}>
-                (₹{tournamentData.registrationFee} fee + ₹{(Number(tournamentData.registrationFee) * 0.025).toFixed(2)} conv. fee)
+            );
+          }
+
+          const upiUri = `upi://pay?pa=${encodeURIComponent(payoutUpiId)}&pn=${encodeURIComponent(tournamentData.name || "CricAuction")}&am=${fee}&cu=INR`;
+
+          return (
+            <div style={{
+              background: "#ffffff",
+              border: "2px solid #2563eb",
+              borderRadius: "20px",
+              padding: "24px",
+              marginBottom: "28px",
+              boxShadow: "0 10px 30px rgba(37,99,235,0.08)",
+            }}>
+              <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "20px" }}>
+                
+                {/* Left Info & Mobile Action */}
+                <div style={{ flex: "1 1 320px" }}>
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "#eff6ff", border: "1px solid #bfdbfe", color: "#1d4ed8", padding: "4px 12px", borderRadius: "20px", fontSize: "12px", fontWeight: "700", marginBottom: "12px" }}>
+                    📲 100% DIRECT UPI PAYMENT
+                  </div>
+                  <h3 style={{ margin: "0 0 6px", fontSize: "20px", fontWeight: "800", color: "#0f172a" }}>
+                    Entry Fee: ₹{fee}
+                  </h3>
+                  <p style={{ margin: "0 0 16px", fontSize: "14px", color: "#64748b", lineHeight: "1.5" }}>
+                    Scan QR code or click the button below to pay directly using <strong>Google Pay, PhonePe, Paytm, or BHIM</strong>.
+                  </p>
+
+                  {/* Mobile Deep Link Button */}
+                  <a
+                    href={upiUri}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "8px",
+                      background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
+                      color: "#ffffff",
+                      fontWeight: "700",
+                      fontSize: "15px",
+                      padding: "14px 24px",
+                      borderRadius: "12px",
+                      textDecoration: "none",
+                      boxShadow: "0 4px 14px rgba(37,99,235,0.3)",
+                      marginBottom: "14px",
+                    }}
+                  >
+                    ⚡ Open GPay / PhonePe & Pay ₹{fee}
+                  </a>
+
+                  {/* UPI ID Copy Line */}
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "#f8fafc", padding: "8px 12px", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
+                    <span style={{ fontSize: "12px", color: "#64748b", fontWeight: "600" }}>UPI ID:</span>
+                    <code style={{ fontSize: "13px", fontWeight: "700", color: "#1e293b" }}>{payoutUpiId}</code>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(payoutUpiId);
+                        alert("UPI ID copied to clipboard!");
+                      }}
+                      style={{
+                        marginLeft: "auto",
+                        background: "#ffffff",
+                        border: "1px solid #cbd5e1",
+                        borderRadius: "6px",
+                        padding: "4px 8px",
+                        fontSize: "11px",
+                        fontWeight: "600",
+                        cursor: "pointer",
+                        color: "#2563eb"
+                      }}
+                    >
+                      Copy
+                    </button>
+                  </div>
+                </div>
+
+                {/* Right Desktop QR Code */}
+                {qrCodeDataUrl && (
+                  <div style={{
+                    textAlign: "center",
+                    background: "#f8fafc",
+                    padding: "16px",
+                    borderRadius: "16px",
+                    border: "1px solid #e2e8f0",
+                    flexShrink: 0
+                  }}>
+                    <img
+                      src={qrCodeDataUrl}
+                      alt="UPI QR Code"
+                      style={{ width: 160, height: 160, borderRadius: "8px", display: "block", margin: "0 auto 8px" }}
+                    />
+                    <div style={{ fontSize: "11px", fontWeight: "600", color: "#64748b" }}>
+                      Scan with any UPI app
+                    </div>
+                  </div>
+                )}
+
               </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         <PlayerRegistrationForm
           onSubmit={handleSubmit}
           submitLabel={
-            tournamentData?.isPaid && tournamentData?.registrationFee > 0
-              ? `Pay ₹${(Number(tournamentData.registrationFee) * 1.025).toFixed(2)} & Register`
+            tournamentData?.isPaid && tournamentData?.registrationFee > 0 && payoutUpiId
+              ? `Submit Player Registration`
               : "Submit Registration"
           }
+          isPaid={Boolean(tournamentData?.isPaid && tournamentData?.registrationFee > 0 && payoutUpiId)}
           loading={loading}
           banner={banner}
           resetOnSubmit={true}
