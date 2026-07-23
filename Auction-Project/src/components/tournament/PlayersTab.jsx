@@ -168,12 +168,25 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
 
   const [selectedScreenshot, setSelectedScreenshot] = useState(null);
 
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape" && selectedScreenshot) {
+        setSelectedScreenshot(null);
+      }
+    };
+    if (selectedScreenshot) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedScreenshot]);
+
   const handleVerifyPayment = async (playerId, status) => {
     try {
       const res = await playerService.verifyPlayerPayment(playerId, status);
-      if (res.data?.success || res.status === 200) {
+      if (res.data?.success && res.data?.player) {
+        const updatedPlayer = res.data.player;
         setPlayers((prev) =>
-          prev.map((p) => (p._id === playerId ? { ...p, paymentStatus: status } : p))
+          prev.map((p) => (p._id === playerId ? updatedPlayer : p))
         );
       }
     } catch (err) {
@@ -389,14 +402,22 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
                         {player.paymentStatus === "pending_verification" && (
                           <>
                             <button
-                              onClick={() => handleVerifyPayment(player._id, "verified")}
+                              onClick={() => {
+                                if (window.confirm("Are you sure you want to approve this payment?")) {
+                                  handleVerifyPayment(player._id, "verified");
+                                }
+                              }}
                               title="Approve Payment"
                               style={{ background: "#16a34a", color: "#fff", border: "none", borderRadius: "6px", padding: "4px 8px", fontSize: "11px", fontWeight: "700", cursor: "pointer" }}
                             >
                               Approve
                             </button>
                             <button
-                              onClick={() => handleVerifyPayment(player._id, "rejected")}
+                              onClick={() => {
+                                if (window.confirm("Are you sure you want to reject this payment?")) {
+                                  handleVerifyPayment(player._id, "rejected");
+                                }
+                              }}
                               title="Reject Payment"
                               style={{ background: "#ef4444", color: "#fff", border: "none", borderRadius: "6px", padding: "4px 8px", fontSize: "11px", fontWeight: "700", cursor: "pointer" }}
                             >
@@ -429,6 +450,9 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
       {/* Payment Receipt Image Preview Modal */}
       {selectedScreenshot && (
         <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Payment Receipt Proof"
           onClick={() => setSelectedScreenshot(null)}
           style={{
             position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
@@ -437,15 +461,16 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
             padding: "20px"
           }}
         >
-          <div onClick={(e) => e.stopPropagation()} style={{ background: "#fff", padding: "16px", borderRadius: "16px", maxWidth: "90vw", maxHeight: "90vh", overflow: "auto", textAlign: "center" }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ background: "#fff", padding: "20px", borderRadius: "16px", maxWidth: "90vw", maxHeight: "90vh", overflow: "auto", textAlign: "center" }}>
             <h3 style={{ margin: "0 0 12px", fontSize: "16px", fontWeight: "700" }}>Payment Receipt Proof</h3>
             <img src={selectedScreenshot} alt="Payment Screenshot Proof" style={{ maxWidth: "100%", maxHeight: "70vh", borderRadius: "8px", objectFit: "contain" }} />
             <div style={{ marginTop: "16px" }}>
               <button
+                autoFocus
                 onClick={() => setSelectedScreenshot(null)}
                 style={{ background: "#2563eb", color: "#fff", border: "none", padding: "8px 20px", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}
               >
-                Close
+                Close (Esc)
               </button>
             </div>
           </div>

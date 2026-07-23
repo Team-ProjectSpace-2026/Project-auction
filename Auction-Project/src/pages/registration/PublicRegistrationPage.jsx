@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import QRCode from "qrcode";
 import { SkeletonRect, SkeletonText } from "../../components/common/SkeletonLoader";
 import "../../components/common/SkeletonLoader.css";
 import * as playerService from "../../services/playerService.js";
@@ -64,8 +65,23 @@ export default function PublicRegistrationPage() {
 
   const [registeredPlayer, setRegisteredPlayer] = useState(null);
   const [confettiList, setConfettiList] = useState([]);
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState("");
 
   const isClosed = tournamentData?.registrationEndDate && now > new Date(tournamentData.registrationEndDate);
+  const payoutUpiId = (tournamentData?.payoutUpiId || "").trim();
+
+  useEffect(() => {
+    if (tournamentData?.isPaid && tournamentData?.registrationFee > 0 && payoutUpiId) {
+      const fee = Number(tournamentData.registrationFee);
+      const upiUri = `upi://pay?pa=${encodeURIComponent(payoutUpiId)}&pn=${encodeURIComponent(tournamentData.name || "CricAuction")}&am=${fee}&cu=INR`;
+      QRCode.toDataURL(upiUri, { width: 200, margin: 1 })
+        .then((url) => setQrCodeDataUrl(url))
+        .catch(() => setQrCodeDataUrl(""));
+    } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setQrCodeDataUrl("");
+    }
+  }, [tournamentData, payoutUpiId]);
 
   const finalizePlayerRegistration = async (payload, rawForm) => {
     try {
@@ -264,10 +280,29 @@ export default function PublicRegistrationPage() {
 
         {/* Paid Tournament Fee Banner with UPI QR & App Launcher */}
         {tournamentData?.isPaid && tournamentData?.registrationFee > 0 && (() => {
-          const upiId = tournamentData.payoutUpiId || "prathamappuachar@gmail.com";
           const fee = Number(tournamentData.registrationFee);
-          const upiUri = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(tournamentData.name || "CricAuction")}&am=${fee}&cu=INR`;
-          const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiUri)}`;
+
+          if (!payoutUpiId) {
+            return (
+              <div style={{
+                background: "#fffbebf5",
+                border: "1px solid #fde68a",
+                borderRadius: "16px",
+                padding: "20px 24px",
+                marginBottom: "28px",
+                color: "#92400e",
+              }}>
+                <div style={{ fontWeight: "700", fontSize: "16px", marginBottom: "4px" }}>
+                  ⚠️ Payment Not Configured
+                </div>
+                <div style={{ fontSize: "14px", lineHeight: "1.5" }}>
+                  Registration fee is ₹{fee}, but the tournament organizer has not set up a UPI ID yet. Please contact the tournament organizer to complete registration.
+                </div>
+              </div>
+            );
+          }
+
+          const upiUri = `upi://pay?pa=${encodeURIComponent(payoutUpiId)}&pn=${encodeURIComponent(tournamentData.name || "CricAuction")}&am=${fee}&cu=INR`;
 
           return (
             <div style={{
@@ -317,11 +352,11 @@ export default function PublicRegistrationPage() {
                   {/* UPI ID Copy Line */}
                   <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "#f8fafc", padding: "8px 12px", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
                     <span style={{ fontSize: "12px", color: "#64748b", fontWeight: "600" }}>UPI ID:</span>
-                    <code style={{ fontSize: "13px", fontWeight: "700", color: "#1e293b" }}>{upiId}</code>
+                    <code style={{ fontSize: "13px", fontWeight: "700", color: "#1e293b" }}>{payoutUpiId}</code>
                     <button
                       type="button"
                       onClick={() => {
-                        navigator.clipboard.writeText(upiId);
+                        navigator.clipboard.writeText(payoutUpiId);
                         alert("UPI ID copied to clipboard!");
                       }}
                       style={{
@@ -342,23 +377,25 @@ export default function PublicRegistrationPage() {
                 </div>
 
                 {/* Right Desktop QR Code */}
-                <div style={{
-                  textAlign: "center",
-                  background: "#f8fafc",
-                  padding: "16px",
-                  borderRadius: "16px",
-                  border: "1px solid #e2e8f0",
-                  flexShrink: 0
-                }}>
-                  <img
-                    src={qrCodeUrl}
-                    alt="UPI QR Code"
-                    style={{ width: 160, height: 160, borderRadius: "8px", display: "block", margin: "0 auto 8px" }}
-                  />
-                  <div style={{ fontSize: "11px", fontWeight: "600", color: "#64748b" }}>
-                    Scan with any UPI app
+                {qrCodeDataUrl && (
+                  <div style={{
+                    textAlign: "center",
+                    background: "#f8fafc",
+                    padding: "16px",
+                    borderRadius: "16px",
+                    border: "1px solid #e2e8f0",
+                    flexShrink: 0
+                  }}>
+                    <img
+                      src={qrCodeDataUrl}
+                      alt="UPI QR Code"
+                      style={{ width: 160, height: 160, borderRadius: "8px", display: "block", margin: "0 auto 8px" }}
+                    />
+                    <div style={{ fontSize: "11px", fontWeight: "600", color: "#64748b" }}>
+                      Scan with any UPI app
+                    </div>
                   </div>
-                </div>
+                )}
 
               </div>
             </div>
@@ -368,11 +405,11 @@ export default function PublicRegistrationPage() {
         <PlayerRegistrationForm
           onSubmit={handleSubmit}
           submitLabel={
-            tournamentData?.isPaid && tournamentData?.registrationFee > 0
+            tournamentData?.isPaid && tournamentData?.registrationFee > 0 && payoutUpiId
               ? `Submit Player Registration`
               : "Submit Registration"
           }
-          isPaid={Boolean(tournamentData?.isPaid && tournamentData?.registrationFee > 0)}
+          isPaid={Boolean(tournamentData?.isPaid && tournamentData?.registrationFee > 0 && payoutUpiId)}
           loading={loading}
           banner={banner}
           resetOnSubmit={true}
