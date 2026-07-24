@@ -327,9 +327,20 @@ export default function PublicRegistrationPage() {
                     Scan QR code or click the button below to pay directly using <strong>Google Pay, PhonePe, Paytm, or BHIM</strong>.
                   </p>
 
-                  {/* Mobile Deep Link Button */}
+                  {/* Mobile Deep Link & Desktop Smart Button */}
                   <a
                     href={upiUri}
+                    onClick={(e) => {
+                      // Copy UPI ID to clipboard automatically on click
+                      navigator.clipboard.writeText(payoutUpiId);
+                      
+                      // Check if user is on a desktop/laptop browser
+                      const isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                      if (!isMobile) {
+                        e.preventDefault();
+                        alert(`UPI ID "${payoutUpiId}" copied to clipboard!\n\nSince you are on a computer, please scan the QR code on the right using Google Pay, PhonePe, or Paytm on your mobile phone to complete the ₹${fee} payment.`);
+                      }
+                    }}
                     style={{
                       display: "inline-flex",
                       alignItems: "center",
@@ -344,6 +355,7 @@ export default function PublicRegistrationPage() {
                       textDecoration: "none",
                       boxShadow: "0 4px 14px rgba(37,99,235,0.3)",
                       marginBottom: "14px",
+                      cursor: "pointer",
                     }}
                   >
                     ⚡ Open GPay / PhonePe & Pay ₹{fee}
