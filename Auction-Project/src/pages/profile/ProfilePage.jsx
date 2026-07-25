@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { updateProfile, updateProfilePhoto } from '../../services/authService';
 import Sidebar from '../../components/layout/Sidebar';
@@ -10,25 +10,14 @@ import bgStadium from '../../assets/bgstadium2.png';
 const ProfilePage = () => {
   const { user, setUser } = useAuth();
 
-  const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
+  const [formData, setFormData] = useState(() => ({
+    fullName: user?.name || '',
+    email: user?.email || '',
+    phone: user?.mobile || '',
     password: '*************'
-  });
+  }));
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
-
-  useEffect(() => {
-    if (user) {
-      setFormData({
-        fullName: user.name || '',
-        email: user.email || '',
-        phone: user.mobile || '',
-        password: '*************'
-      });
-    }
-  }, [user]);
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));

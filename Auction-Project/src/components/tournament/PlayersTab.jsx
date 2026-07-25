@@ -180,20 +180,6 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [selectedScreenshot]);
 
-  const handleVerifyPayment = async (playerId, status) => {
-    try {
-      const res = await playerService.verifyPlayerPayment(playerId, status);
-      if (res.data?.success && res.data?.player) {
-        const updatedPlayer = res.data.player;
-        setPlayers((prev) =>
-          prev.map((p) => (p._id === playerId ? updatedPlayer : p))
-        );
-      }
-    } catch (err) {
-      alert(err.response?.data?.message || "Failed to update payment status");
-    }
-  };
-
   const getPaymentStatusBadge = (player) => {
     const status = player.paymentStatus || "free";
     const utr = player.paymentDetails?.utrLast4;
@@ -398,52 +384,12 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
                       )}
                     </td>
                     <td>
-<<<<<<< HEAD
-                      <button
-                        onClick={() => navigate(`/player-details/${player._id}`, { state: { tournamentId: propTournamentId } })}
-                        style={{ border: "none", background: "transparent", cursor: "pointer", marginRight: "12px", fontSize: "16px" }}
-                      >
-                        <Eye size={16} strokeWidth={2} />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(player._id)}
-                        style={{ border: "none", background: "transparent", cursor: "pointer", fontSize: "16px" }}
-                      >
-                        <Trash2 size={16} strokeWidth={2} />
-                      </button>
-=======
                       <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                        {player.paymentStatus === "pending_verification" && (
-                          <>
-                            <button
-                              onClick={() => {
-                                if (window.confirm("Are you sure you want to approve this payment?")) {
-                                  handleVerifyPayment(player._id, "verified");
-                                }
-                              }}
-                              title="Approve Payment"
-                              style={{ background: "#16a34a", color: "#fff", border: "none", borderRadius: "6px", padding: "4px 8px", fontSize: "11px", fontWeight: "700", cursor: "pointer" }}
-                            >
-                              Approve
-                            </button>
-                            <button
-                              onClick={() => {
-                                if (window.confirm("Are you sure you want to reject this payment?")) {
-                                  handleVerifyPayment(player._id, "rejected");
-                                }
-                              }}
-                              title="Reject Payment"
-                              style={{ background: "#ef4444", color: "#fff", border: "none", borderRadius: "6px", padding: "4px 8px", fontSize: "11px", fontWeight: "700", cursor: "pointer" }}
-                            >
-                              Reject
-                            </button>
-                          </>
-                        )}
                         <button
-                          onClick={() => navigate(`/player-details/${player._id}`)}
+                          onClick={() => navigate(`/player-details/${player._id}`, { state: { tournamentId: propTournamentId } })}
                           style={{ border: "none", background: "transparent", cursor: "pointer", fontSize: "16px" }}
                         >
-                          <Pencil size={16} strokeWidth={2} />
+                          <Eye size={16} strokeWidth={2} />
                         </button>
                         <button
                           onClick={() => handleDelete(player._id)}
@@ -452,7 +398,6 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
                           <Trash2 size={16} strokeWidth={2} />
                         </button>
                       </div>
->>>>>>> bf23fdbb626173ef8c03404d07124f9d625bb9e2
                     </td>
                   </tr>
                 ))
