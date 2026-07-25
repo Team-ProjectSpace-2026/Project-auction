@@ -21,6 +21,7 @@ import paymentRoutes from './src/routes/payment.routes.js';
 // Import middleware
 import { errorHandler } from './src/middleware/errorHandler.js';
 import { xssSanitize } from './src/middleware/sanitize.js';
+import { csrfProtection } from './src/middleware/csrf.middleware.js';
 import logger from './src/utils/logger.js';
 
 // Load environment variables
@@ -86,6 +87,8 @@ app.use(cors({
   credentials: true
 }));
 app.use(cookieParser());
+// CSRF protection middleware for cookie authentication
+app.use(csrfProtection);
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 

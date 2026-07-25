@@ -15,6 +15,7 @@
     "gsap": "^3.15.0",
     "lucide-react": "^1.24.0",
     "pdfmake": "^0.3.11",
+    "qrcode": "^1.5.4",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-easy-crop": "^6.1.0",

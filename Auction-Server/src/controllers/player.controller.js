@@ -272,21 +272,21 @@ export const registerPlayer = async (req, res, next) => {
     let paymentDetailsObj = {};
 
     if (tournament.isPaid && tournament.registrationFee > 0) {
-      const razorpayOrderId = req.body.razorpayOrderId;
-      const razorpayPaymentId = req.body.razorpayPaymentId;
-      const razorpaySignature = req.body.razorpaySignature;
-      const amountPaid = Number(req.body.amountPaid) || (tournament.registrationFee * 1.025);
-
-      if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
-        return res.status(402).json({ message: 'Payment completion required for paid tournament registration' });
+      const utrLast4 = String(req.body.utrLast4 || "").trim();
+      let screenshotUrl = "";
+      if (req.files && req.files.paymentScreenshot && req.files.paymentScreenshot.length > 0) {
+        screenshotUrl = req.files.paymentScreenshot[0].path;
       }
 
-      paymentStatus = 'completed';
+      if (!utrLast4 && !screenshotUrl) {
+        return res.status(400).json({ message: 'Please provide the last 4 digits of UTR or a payment screenshot' });
+      }
+
+      paymentStatus = 'pending_verification';
       paymentDetailsObj = {
-        razorpayOrderId,
-        razorpayPaymentId,
-        razorpaySignature,
-        amountPaid,
+        utrLast4,
+        paymentScreenshot: screenshotUrl,
+        amountPaid: Number(tournament.registrationFee) || 0,
         paidAt: new Date()
       };
     }
@@ -297,6 +297,13 @@ export const registerPlayer = async (req, res, next) => {
       deleted: false,
     });
     const registrationNumber = currentRegisteredCount + 1;
+
+    let photoUrl = null;
+    if (req.files && req.files.photo && req.files.photo.length > 0) {
+      photoUrl = req.files.photo[0].path;
+    } else if (req.file) {
+      photoUrl = req.file.path;
+    }
 
     const player = new Player({
       name: playerName,
@@ -312,7 +319,7 @@ export const registerPlayer = async (req, res, next) => {
       registrationNumber,
       jerseySize: jerseySize || undefined,
       jerseyName: jerseyName || undefined,
-      photo: req.file ? req.file.path : null,
+      photo: photoUrl,
       tournamentId,
       isRegistered: true,
       paymentStatus,
@@ -344,6 +351,50 @@ export const getRegisteredPlayers = async (req, res, next) => {
       .populate("tournamentId", "name");
 
     res.json(players);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const verifyPlayerPayment = async (req, res, next) => {
+  try {
+    const { playerId } = req.params;
+    const { status } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(playerId)) {
+      return res.status(400).json({ message: 'Invalid player ID format' });
+    }
+
+    if (!['verified', 'rejected'].includes(status)) {
+      return res.status(400).json({ message: 'Status must be verified or rejected' });
+    }
+
+    const player = await Player.findById(playerId);
+    if (!player || player.deleted) {
+      return res.status(404).json({ message: 'Player not found' });
+    }
+
+    const tournament = await Tournament.findById(player.tournamentId);
+    if (!tournament) {
+      return res.status(404).json({ message: 'Tournament not found' });
+    }
+
+    if (
+      tournament.owner.toString() !== req.user._id.toString() &&
+      (!tournament.createdBy || tournament.createdBy.toString() !== req.user._id.toString())
+    ) {
+      return res.status(403).json({ message: 'Access denied. Only the tournament owner can verify payments.' });
+    }
+
+    player.paymentStatus = status;
+    if (!player.paymentDetails) {
+      player.paymentDetails = {};
+    }
+    player.paymentDetails.verifiedAt = new Date();
+    player.paymentDetails.verifiedBy = req.user._id;
+
+    await player.save();
+    res.json({ success: true, message: `Player payment ${status} successfully`, player });
   } catch (error) {
     next(error);
   }

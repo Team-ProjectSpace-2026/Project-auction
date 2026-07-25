@@ -18,3 +18,6 @@ export const registerPlayer = (tournamentId, data) =>
   api.post(`/players/register/${tournamentId}`, data);
 export const getPublicTournament = (tournamentId) =>
   api.get(`/players/public/${tournamentId}`);
+
+export const verifyPlayerPayment = (playerId, status) =>
+  api.put(`/players/${playerId}/verify-payment`, { status });
