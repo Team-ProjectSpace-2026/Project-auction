@@ -3,6 +3,8 @@ import api from "./api";
 export const getPlayers = (tournamentId) =>
   api.get("/players", { params: tournamentId ? { tournamentId } : {} });
 
+export const getPlayer = (id) => api.get(`/players/${id}`);
+
 export const getRegisteredPlayers = (tournamentId) =>
   api.get(`/players/registered/${tournamentId}`);
 

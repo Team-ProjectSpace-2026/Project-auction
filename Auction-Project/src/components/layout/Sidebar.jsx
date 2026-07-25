@@ -53,7 +53,7 @@ const Sidebar = ({ activePage = "dashboard", onNavigate }) => {
         <div style={{ marginBottom: "4px" }}>
           <span style={{ fontSize: "22px", fontWeight: 800 }}>
             <span style={{ color: "#fff" }}>Cric</span>
-            <span style={{ color: "#f59e0b" }}>Auction</span>
+            <span style={{ color: "#f59e0b" }}>AuctionHub</span>
           </span>
         </div>
         <div

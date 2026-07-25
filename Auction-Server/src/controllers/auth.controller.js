@@ -53,6 +53,7 @@ export const register = async (req, res, next) => {
         email: user.email,
         mobile: user.mobile,
         role: user.role,
+        photo: user.photo || "",
       },
     });
   } catch (error) {
@@ -95,6 +96,7 @@ export const login = async (req, res, next) => {
         email: user.email,
         mobile: user.mobile,
         role: user.role,
+        photo: user.photo || "",
       },
     });
   } catch (error) {
@@ -110,6 +112,65 @@ export const getProfile = async (req, res, next) => {
       return res.status(404).json({ message: "User not found" });
     }
     res.json({ user });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateProfile = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { name, email, mobile } = req.body;
+
+    // Check if email or mobile is taken by another user
+    if (email || mobile) {
+      const query = { _id: { $ne: userId } };
+      if (email) query.email = String(email).toLowerCase().trim();
+      if (mobile) query.mobile = String(mobile).trim();
+      const existing = await User.findOne(query);
+      if (existing) {
+        return res.status(400).json({ message: "Email or mobile already in use" });
+      }
+    }
+
+    const updates = {};
+    if (name) updates.name = String(name).trim();
+    if (email) updates.email = String(email).toLowerCase().trim();
+    if (mobile) updates.mobile = String(mobile).trim();
+
+    const user = await User.findByIdAndUpdate(userId, updates, { new: true, runValidators: true }).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({ message: "Profile updated successfully", user });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateProfilePhoto = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No photo uploaded" });
+    }
+
+    const photoUrl = typeof req.file.path === "string" ? req.file.path.trim() : "";
+    if (!photoUrl || !/^https?:\/\//.test(photoUrl)) {
+      return res.status(400).json({ message: "Invalid photo URL" });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { photo: photoUrl },
+      { new: true }
+    ).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({ message: "Photo updated successfully", user });
   } catch (error) {
     next(error);
   }

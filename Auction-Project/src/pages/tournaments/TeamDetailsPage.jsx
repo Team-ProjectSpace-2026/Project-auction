@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import Sidebar from "../../components/layout/Sidebar";
 import CricketLoader from "../../components/common/CricketLoader";
 import { getTeam } from "../../services/teamService";
@@ -25,7 +25,9 @@ const formatCurrency = (amount) => {
 
 const TeamDetailsPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { teamId } = useParams();
+  const tournamentId = location.state?.tournamentId;
   const [team, setTeam] = useState(null);
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -46,7 +48,6 @@ const TeamDetailsPage = () => {
         setError(null);
         const start = Date.now();
         const { data } = await getTeam(teamId, { signal: controller.signal });
-        // Ensure loader shows for at least 2 seconds
         const elapsed = Date.now() - start;
         const minDelay = 2000;
         if (elapsed < minDelay) {
@@ -54,11 +55,11 @@ const TeamDetailsPage = () => {
         }
         setTeam(data);
         setPlayers(data.players || []);
+        setLoading(false);
       } catch (err) {
         if (err.name === "CanceledError" || err.name === "AbortError") return;
         console.error("Failed to fetch team:", err);
         setError("Failed to load team details. Please try again.");
-      } finally {
         setLoading(false);
       }
     };
@@ -190,7 +191,7 @@ const TeamDetailsPage = () => {
 
         <main style={{ padding: "28px 32px 32px", overflow: "visible", position: "relative", zIndex: 1 }}>
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => tournamentId ? navigate(`/tournament-details/${tournamentId}`, { state: { activeTab: "teams" } }) : navigate(-1)}
             style={{
               border: "none",
               background: "transparent",

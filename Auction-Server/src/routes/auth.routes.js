@@ -3,6 +3,8 @@ import {
   register,
   login,
   getProfile,
+  updateProfile,
+  updateProfilePhoto,
   logout,
   refreshToken,
 } from "../controllers/auth.controller.js";
@@ -11,6 +13,7 @@ import { handleValidationErrors } from "../middleware/errorHandler.js";
 import { authLimiter } from "../middleware/rateLimiter.js";
 import auth from "../middleware/auth.middleware.js";
 import { generateCaptcha, verifyCaptcha } from "../middleware/verifyCaptcha.js";
+import upload from "../middleware/upload.js";
 
 const router = express.Router();
 
@@ -37,6 +40,8 @@ router.post(
 
 // Protected routes
 router.get("/profile", auth, getProfile);
+router.put("/profile", auth, updateProfile);
+router.put("/profile/photo", auth, upload.single("photo"), updateProfilePhoto);
 router.post("/logout", auth, logout);
 router.post("/refresh", auth, refreshToken);
 

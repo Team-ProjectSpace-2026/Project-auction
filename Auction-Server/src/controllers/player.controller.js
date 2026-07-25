@@ -112,7 +112,7 @@ export const createPlayer = async (req, res, next) => {
 export const getPlayer = async (req, res, next) => {
   try {
     const playerId = new mongoose.Types.ObjectId(req.params.id);
-    const player = await Player.findById(playerId).populate('tournamentId', 'name');
+    const player = await Player.findById(playerId).populate('tournamentId', 'name').populate('soldTo', 'name short logo primaryColor');
     if (!player || player.deleted) {
       return res.status(404).json({ message: 'Player not found' });
     }

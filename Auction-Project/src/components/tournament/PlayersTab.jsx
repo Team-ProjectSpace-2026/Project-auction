@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Pencil, Trash2, Check, X, Download } from "lucide-react";
+import { Eye, Trash2, Check, X, Download } from "lucide-react";
 import pdfMake from "pdfmake/build/pdfmake.js";
 import vfsModule from "pdfmake/build/vfs_fonts.js";
 import * as playerService from "../../services/playerService";
@@ -180,20 +180,6 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [selectedScreenshot]);
 
-  const handleVerifyPayment = async (playerId, status) => {
-    try {
-      const res = await playerService.verifyPlayerPayment(playerId, status);
-      if (res.data?.success && res.data?.player) {
-        const updatedPlayer = res.data.player;
-        setPlayers((prev) =>
-          prev.map((p) => (p._id === playerId ? updatedPlayer : p))
-        );
-      }
-    } catch (err) {
-      alert(err.response?.data?.message || "Failed to update payment status");
-    }
-  };
-
   const getPaymentStatusBadge = (player) => {
     const status = player.paymentStatus || "free";
     const utr = player.paymentDetails?.utrLast4;
@@ -350,7 +336,7 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
                   <tr key={player._id} style={{ borderTop: "1px solid var(--table-row-border)" }}>
                     <td style={{ padding: "16px" }}>{index + 1}</td>
                     <td
-                      onClick={() => navigate(`/player-details/${player._id}`)}
+                      onClick={() => navigate(`/player-details/${player._id}`, { state: { tournamentId: propTournamentId } })}
                       style={{ fontWeight: "600", color: "var(--accent-light)", cursor: "pointer" }}
                     >
                       {player.name}
@@ -399,37 +385,11 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
                     </td>
                     <td>
                       <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                        {player.paymentStatus === "pending_verification" && (
-                          <>
-                            <button
-                              onClick={() => {
-                                if (window.confirm("Are you sure you want to approve this payment?")) {
-                                  handleVerifyPayment(player._id, "verified");
-                                }
-                              }}
-                              title="Approve Payment"
-                              style={{ background: "#16a34a", color: "#fff", border: "none", borderRadius: "6px", padding: "4px 8px", fontSize: "11px", fontWeight: "700", cursor: "pointer" }}
-                            >
-                              Approve
-                            </button>
-                            <button
-                              onClick={() => {
-                                if (window.confirm("Are you sure you want to reject this payment?")) {
-                                  handleVerifyPayment(player._id, "rejected");
-                                }
-                              }}
-                              title="Reject Payment"
-                              style={{ background: "#ef4444", color: "#fff", border: "none", borderRadius: "6px", padding: "4px 8px", fontSize: "11px", fontWeight: "700", cursor: "pointer" }}
-                            >
-                              Reject
-                            </button>
-                          </>
-                        )}
                         <button
-                          onClick={() => navigate(`/player-details/${player._id}`)}
+                          onClick={() => navigate(`/player-details/${player._id}`, { state: { tournamentId: propTournamentId } })}
                           style={{ border: "none", background: "transparent", cursor: "pointer", fontSize: "16px" }}
                         >
-                          <Pencil size={16} strokeWidth={2} />
+                          <Eye size={16} strokeWidth={2} />
                         </button>
                         <button
                           onClick={() => handleDelete(player._id)}

@@ -2,7 +2,7 @@
   "name": "auction-server",
   "version": "1.0.0",
   "type": "module",
-  "description": "CricAuction backend API with real-time auction functionality",
+  "description": "CricAuctionHub backend API with real-time auction functionality",
   "main": "server.js",
   "scripts": {
     "dev": "nodemon server.js",
@@ -48,6 +48,6 @@
     "express",
     "mongodb"
   ],
-  "author": "CricAuction Team",
+  "author": "CricAuctionHub Team",
   "license": "MIT"
 }
