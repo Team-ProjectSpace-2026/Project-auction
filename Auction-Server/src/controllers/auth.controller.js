@@ -155,9 +155,14 @@ export const updateProfilePhoto = async (req, res, next) => {
       return res.status(400).json({ message: "No photo uploaded" });
     }
 
+    const photoUrl = typeof req.file.path === "string" ? req.file.path.trim() : "";
+    if (!photoUrl || !/^https?:\/\//.test(photoUrl)) {
+      return res.status(400).json({ message: "Invalid photo URL" });
+    }
+
     const user = await User.findByIdAndUpdate(
       req.user.id,
-      { photo: req.file.path },
+      { photo: photoUrl },
       { new: true }
     ).select("-password");
 
