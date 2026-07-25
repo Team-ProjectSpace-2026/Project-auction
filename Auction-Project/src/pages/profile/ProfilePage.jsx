@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { updateProfile, updateProfilePhoto } from '../../services/authService';
 import Sidebar from '../../components/layout/Sidebar';
 import Avatar from '../../components/common/Avatar';
 import InputField from '../../components/common/InputField';
@@ -7,22 +8,61 @@ import Button from '../../components/common/Button';
 import bgStadium from '../../assets/bgstadium2.png';
 
 const ProfilePage = () => {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
 
   const [formData, setFormData] = useState({
-    fullName: user?.name || '',
-    email: user?.email || '',
-    phone: user?.mobile || '',
-    company: user?.organization || '',
+    fullName: '',
+    email: '',
+    phone: '',
     password: '*************'
   });
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        fullName: user.name || '',
+        email: user.email || '',
+        phone: user.mobile || '',
+        password: '*************'
+      });
+    }
+  }, [user]);
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSave = () => {
-    console.log('Saving profile data:', formData);
+  const handleSave = async () => {
+    try {
+      setSaving(true);
+      setMessage('');
+      const res = await updateProfile({
+        name: formData.fullName,
+        email: formData.email,
+        mobile: formData.phone,
+      });
+      setUser(res.data.user);
+      setMessage('Profile updated successfully');
+    } catch (err) {
+      setMessage(err.response?.data?.message || 'Failed to update profile');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handlePhotoChange = async (file) => {
+    try {
+      setMessage('');
+      const fd = new FormData();
+      fd.append('photo', file);
+      const res = await updateProfilePhoto(fd);
+      setUser(res.data.user);
+      setMessage('Photo updated successfully');
+    } catch (err) {
+      setMessage(err.response?.data?.message || 'Failed to upload photo');
+    }
   };
 
   return (
@@ -61,8 +101,8 @@ const ProfilePage = () => {
             <div className="settings-grid">
               <div className="settings-left-col">
                 <Avatar 
-                  imageSrc={null} 
-                  onPhotoChange={() => console.log('Open file picker')} 
+                  imageSrc={user?.photo || null} 
+                  onPhotoChange={handlePhotoChange} 
                 />
               </div>
 
@@ -93,12 +133,6 @@ const ProfilePage = () => {
                   />
                 </div>
 
-                <InputField 
-                  label="Organization / Company" 
-                  value={formData.company} 
-                  onChange={(e) => handleInputChange('company', e.target.value)} 
-                />
-
                 <div className="password-row">
                   <div className="password-input-wrapper">
                     <InputField 
@@ -110,12 +144,20 @@ const ProfilePage = () => {
                   </div>
                   <Button variant="outline" className="change-pwd-btn">Change Password</Button>
                 </div>
+
+                {message && (
+                  <p style={{ marginTop: 12, fontSize: 14, color: message.includes('successfully') ? '#16a34a' : '#dc2626' }}>
+                    {message}
+                  </p>
+                )}
               </div>
             </div>
 
             <div className="settings-footer">
               <Button variant="outline" className="cancel-btn">Cancel</Button>
-              <Button variant="primary" onClick={handleSave}>Save Changes</Button>
+              <Button variant="primary" onClick={handleSave} disabled={saving}>
+                {saving ? 'Saving...' : 'Save Changes'}
+              </Button>
             </div>
           </div>
 

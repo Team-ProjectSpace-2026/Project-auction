@@ -267,7 +267,15 @@ const TournamentsListPage = () => {
                             padding: "16px",
                             position: "relative",
                             boxShadow: "0 8px 32px rgba(0, 0, 0, 0.08)",
-                            transition: "background-color 0.2s ease, border-color 0.2s ease",
+                            transition: "transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, border-color 0.2s ease",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = "translateY(-4px)";
+                            e.currentTarget.style.boxShadow = "0 16px 40px rgba(0,0,0,0.12)";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = "translateY(0)";
+                            e.currentTarget.style.boxShadow = "0 8px 32px rgba(0, 0, 0, 0.08)";
                           }}
                         >
                         {/* 3-Dot Menu */}
@@ -488,22 +496,35 @@ const TournamentsListPage = () => {
                             style={{
                               flex: "1",
                               height: "44px",
-                              borderRadius: "10px",
-                              border: "1px solid #25d366",
-                              background: "rgba(37, 211, 102, 0.1)",
-                              color: "#25d366",
+                              borderRadius: "999px",
+                              border: "none",
+                              background: "var(--accent-light)",
+                              color: "#fff",
                               fontWeight: "700",
                               cursor: "pointer",
                               fontSize: "13px",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
-                              gap: "6px",
-                              transition: "all 0.2s ease",
+                              gap: "8px",
+                              boxShadow: "0 4px 14px rgba(37, 99, 235, 0.3)",
+                              transition: "transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease",
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.transform = "translateY(-2px)";
+                              e.currentTarget.style.boxShadow = "0 6px 20px rgba(37, 99, 235, 0.45)";
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.transform = "translateY(0)";
+                              e.currentTarget.style.boxShadow = "0 4px 14px rgba(37, 99, 235, 0.3)";
                             }}
                             title="Share Registration Link on WhatsApp"
                           >
-                            📲 Share Link
+                            Share
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                            </svg>
                           </button>
 
                           <button
@@ -515,15 +536,38 @@ const TournamentsListPage = () => {
                             style={{
                               flex: "1.5",
                               height: "44px",
-                              borderRadius: "10px",
+                              padding: "0 24px",
+                              borderRadius: "45px",
                               border: "1px solid var(--accent-light)",
-                              background: "var(--glass-bg-hover)",
+                              background: "var(--glass-bg)",
                               color: "var(--accent-light)",
-                              fontWeight: "700",
+                              fontWeight: "600",
+                              fontSize: "13px",
+                              textTransform: "uppercase",
+                              letterSpacing: "2px",
                               cursor: "pointer",
+                              boxShadow: "0px 8px 15px rgba(37, 99, 235, 0.1)",
                               backdropFilter: "blur(16px)",
                               WebkitBackdropFilter: "blur(16px)",
-                              transition: "background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease",
+                              transition: "all 0.3s ease",
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.backgroundColor = "var(--accent-light)";
+                              e.currentTarget.style.color = "#fff";
+                              e.currentTarget.style.boxShadow = "0px 15px 20px rgba(37, 99, 235, 0.4)";
+                              e.currentTarget.style.transform = "translateY(-7px)";
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.backgroundColor = "var(--glass-bg)";
+                              e.currentTarget.style.color = "var(--accent-light)";
+                              e.currentTarget.style.boxShadow = "0px 8px 15px rgba(37, 99, 235, 0.1)";
+                              e.currentTarget.style.transform = "translateY(0)";
+                            }}
+                            onMouseDown={(e) => {
+                              e.currentTarget.style.transform = "translateY(-1px)";
+                            }}
+                            onMouseUp={(e) => {
+                              e.currentTarget.style.transform = "translateY(-7px)";
                             }}
                           >
                             Details →

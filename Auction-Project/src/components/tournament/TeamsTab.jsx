@@ -10,6 +10,7 @@ const TeamsTab = ({ tournamentId }) => {
   const navigate = useNavigate();
   const [showAddModal, setShowAddModal] = useState(false);
   const [editTeam, setEditTeam] = useState(null);
+  const [teamToDelete, setTeamToDelete] = useState(null);
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -77,22 +78,24 @@ const TeamsTab = ({ tournamentId }) => {
   };
 
   const handleDeleteTeam = async (team) => {
-    const confirmed = window.confirm(
-      `Are you sure you want to delete "${team.name}"? This will release all purchased players back to the pool.`
-    );
-    if (!confirmed) return;
+    setTeamToDelete(team);
+  };
 
+  const confirmDelete = async () => {
+    if (!teamToDelete) return;
     try {
-      await deleteTeam(team._id);
-      setTeams((prev) => prev.filter((t) => t._id !== team._id));
+      await deleteTeam(teamToDelete._id);
+      setTeams((prev) => prev.filter((t) => t._id !== teamToDelete._id));
     } catch (err) {
       console.error("Failed to delete team:", err);
       alert("Failed to delete team. Please try again.");
+    } finally {
+      setTeamToDelete(null);
     }
   };
 
   const handleViewTeam = (team) => {
-    navigate(`/team-details/${team._id}`);
+    navigate(`/team-details/${team._id}`, { state: { tournamentId } });
   };
 
   return (
@@ -196,6 +199,56 @@ const TeamsTab = ({ tournamentId }) => {
         onSubmit={handleEditTeam}
         team={editTeam}
       />
+
+      {teamToDelete && (
+        <div
+          style={{
+            position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
+            display: "flex", justifyContent: "center", alignItems: "center", zIndex: 9999,
+          }}
+          onClick={(e) => { if (e.target === e.currentTarget) setTeamToDelete(null); }}
+        >
+          <div style={{
+            width: "380px", background: "var(--card-bg-light)", borderRadius: "16px",
+            padding: "32px", textAlign: "center", boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+          }}>
+            <div style={{
+              width: "56px", height: "56px", borderRadius: "50%", background: "#fef3c7",
+              display: "flex", justifyContent: "center", alignItems: "center",
+              margin: "0 auto 20px", fontSize: "28px", color: "#d97706",
+            }}>
+              🗑️
+            </div>
+            <h3 style={{ fontSize: "18px", fontWeight: "700", color: "var(--text-primary-light)", marginBottom: "8px" }}>
+              Delete Team
+            </h3>
+            <p style={{ fontSize: "14px", color: "var(--text-secondary-light)", marginBottom: "28px" }}>
+              Are you sure you want to delete "{teamToDelete.name}"? This will release all purchased players back to the pool.
+            </p>
+            <div style={{ display: "flex", gap: "12px" }}>
+              <button
+                onClick={() => setTeamToDelete(null)}
+                style={{
+                  flex: 1, padding: "12px", borderRadius: "10px",
+                  border: "1px solid var(--border-light)", background: "var(--card-bg-light)",
+                  color: "var(--text-primary-light)", fontSize: "14px", fontWeight: "600", cursor: "pointer",
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                style={{
+                  flex: 1, padding: "12px", borderRadius: "10px", border: "none",
+                  background: "#ef4444", color: "#fff", fontSize: "14px", fontWeight: "600", cursor: "pointer",
+                }}
+              >
+                Yes, Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Pencil, Trash2, Check, X, Download } from "lucide-react";
+import { Eye, Trash2, Check, X, Download } from "lucide-react";
 import pdfMake from "pdfmake/build/pdfmake.js";
 import vfsModule from "pdfmake/build/vfs_fonts.js";
 import * as playerService from "../../services/playerService";
@@ -275,7 +275,7 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
                   <tr key={player._id} style={{ borderTop: "1px solid var(--table-row-border)" }}>
                     <td style={{ padding: "16px" }}>{index + 1}</td>
                     <td
-                      onClick={() => navigate(`/player-details/${player._id}`)}
+                      onClick={() => navigate(`/player-details/${player._id}`, { state: { tournamentId: propTournamentId } })}
                       style={{ fontWeight: "600", color: "var(--accent-light)", cursor: "pointer" }}
                     >
                       {player.name}
@@ -333,10 +333,10 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
                     </td>
                     <td>
                       <button
-                        onClick={() => navigate(`/player-details/${player._id}`)}
+                        onClick={() => navigate(`/player-details/${player._id}`, { state: { tournamentId: propTournamentId } })}
                         style={{ border: "none", background: "transparent", cursor: "pointer", marginRight: "12px", fontSize: "16px" }}
                       >
-                        <Pencil size={16} strokeWidth={2} />
+                        <Eye size={16} strokeWidth={2} />
                       </button>
                       <button
                         onClick={() => handleDelete(player._id)}

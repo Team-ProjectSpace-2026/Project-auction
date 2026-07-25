@@ -1,11 +1,22 @@
+import { useRef } from "react";
 import Button from "./Button";
 
 const Avatar = ({ imageSrc, onPhotoChange }) => {
+  const fileInputRef = useRef(null);
+
+  const handleClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) onPhotoChange(file);
+  };
+
   return (
     <div className="avatar-section">
       <h3 className="section-title">Profile Photo</h3>
       <div className="avatar-wrapper">
-        {/* Placeholder image logic - in reality, point to your assets */}
         <div className="avatar-circle">
           {imageSrc ? (
             <img src={imageSrc} alt="Profile" className="avatar-img" />
@@ -14,11 +25,10 @@ const Avatar = ({ imageSrc, onPhotoChange }) => {
           )}
         </div>
 
-        {/* Camera overlay button */}
         <button
           type="button"
           className="camera-badge"
-          onClick={onPhotoChange}
+          onClick={handleClick}
           aria-label="Upload Photo"
         >
           <svg
@@ -39,8 +49,16 @@ const Avatar = ({ imageSrc, onPhotoChange }) => {
 
       <p className="upload-hint">JPG, PNG or GIF. Max size of 2MB.</p>
 
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/jpeg,image/png"
+        onChange={handleChange}
+        style={{ display: "none" }}
+      />
+
       <div className="avatar-actions">
-        <Button variant="outline" onClick={onPhotoChange}>
+        <Button variant="outline" onClick={handleClick}>
           Change Photo
         </Button>
       </div>

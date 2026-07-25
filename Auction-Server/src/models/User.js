@@ -34,6 +34,10 @@ const userSchema = new mongoose.Schema(
       enum: ["Organizer"],
       default: "Organizer",
     },
+    photo: {
+      type: String,
+      default: "",
+    },
   },
   {
     timestamps: true,

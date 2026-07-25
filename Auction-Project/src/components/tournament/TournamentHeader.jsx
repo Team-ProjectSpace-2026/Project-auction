@@ -46,16 +46,40 @@ const TournamentHeader = ({ tournament }) => {
       <button
         onClick={() => navigate("/tournaments")}
         style={{
-          border: "none",
-          background: "transparent",
+          border: "1px solid var(--accent-light)",
+          background: "var(--glass-bg)",
           color: "var(--accent-light)",
           fontWeight: "600",
           cursor: "pointer",
           marginBottom: "14px",
-          fontSize: "14px",
+          fontSize: "13px",
+          padding: "8px 20px",
+          borderRadius: "45px",
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
+          boxShadow: "0px 4px 10px rgba(37, 99, 235, 0.08)",
+          transition: "all 0.3s ease",
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "6px",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = "var(--accent-light)";
+          e.currentTarget.style.color = "#fff";
+          e.currentTarget.style.boxShadow = "0px 8px 16px rgba(37, 99, 235, 0.3)";
+          e.currentTarget.style.transform = "translateY(-2px)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = "var(--glass-bg)";
+          e.currentTarget.style.color = "var(--accent-light)";
+          e.currentTarget.style.boxShadow = "0px 4px 10px rgba(37, 99, 235, 0.08)";
+          e.currentTarget.style.transform = "translateY(0)";
         }}
       >
-        ← Back to Tournaments
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
+        Back to Tournaments
       </button>
 
       <div

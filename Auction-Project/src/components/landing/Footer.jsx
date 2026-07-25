@@ -13,14 +13,14 @@ const Footer = () => {
       <div className="footer-crease-line" aria-hidden="true" />
 
       {/* ── Giant Watermark ── */}
-      <div className="footer-watermark" aria-hidden="true">CRICAUCTION</div>
+      <div className="footer-watermark" aria-hidden="true">CRICAUCTIONHUB</div>
 
       <div className="footer-container">
         <div className="footer-content">
           {/* Column 1: Brand & Social Links */}
           <div className="footer-col brand-col">
             <div className="brand-logo">
-              <img src="/images/cricauction-logo-footer.png" alt="CricAuction Footer Logo" />
+              <img src="/images/cricauction-logo-footer.png" alt="CricAuctionHub Footer Logo" />
             </div>
             <p className="brand-description">
               The ultimate platform for organizing and participating in cricket auctions.
@@ -76,7 +76,7 @@ const Footer = () => {
           <div className="footer-col contact-col">
             <h4 className="footer-col-title">Contact Us</h4>
             <p className="contact-info">
-              <span className="contact-label">Email:</span> info@cricauction.com
+              <span className="contact-label">Email:</span> info@cricauctionhub.com
             </p>
             <p className="contact-info">
               <span className="contact-label">Phone:</span> +91 9891586666
@@ -105,7 +105,7 @@ const Footer = () => {
 
         {/* Bottom Bar */}
         <div className="footer-bottom">
-          <p>&copy; {new Date().getFullYear()} CricAuction. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} CricAuctionHub. All rights reserved.</p>
           <p>Crafted with passion for cricket lovers. 🏏</p>
         </div>
       </div>
