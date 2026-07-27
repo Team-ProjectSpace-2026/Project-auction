@@ -63,9 +63,14 @@ const SimpleCaptcha = forwardRef(({ onVerify, onExpire }, ref) => {
       setError(null);
       setUserInput("");
 
+      const csrfMatch = document.cookie.match(new RegExp("(^| )csrfToken=([^;]+)"));
       const res = await fetch(`${API_BASE}/auth/captcha/new`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-Requested-With": "XMLHttpRequest",
+          ...(csrfMatch?.[2] && { "X-CSRF-Token": csrfMatch[2] }),
+        },
       });
       const data = await res.json();
 

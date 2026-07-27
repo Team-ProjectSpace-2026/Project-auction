@@ -13,6 +13,7 @@ export default defineConfig({
     alias: {
       'pdfmake/build/pdfmake': 'pdfmake/build/pdfmake.js',
       'pdfmake/build/vfs_fonts': 'pdfmake/build/vfs_fonts.js',
+      'qrcode': 'qrcode/lib/browser.js',
     },
   },
   test: {

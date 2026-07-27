@@ -7,10 +7,18 @@ import { useState, useRef } from "react";
 import { createTournament } from "../../services/tournamentService";
 import bgStadium from "../../assets/bgstadium2.png";
 
-// const MOCK_USER = {
-//   name: "Rahul Organizer",
-//   role: "Organizer",
-// };
+// Converts "YYYY-MM-DDTHH:MM" (datetime-local value) to ISO with timezone offset
+const toISOWithOffset = (dtLocal) => {
+  const d = new Date(dtLocal);
+  if (isNaN(d)) return dtLocal;
+  return d.toISOString();
+};
+
+// Returns "YYYY-MM-DDTHH:MM" in local time for datetime-local input
+const localNowISO = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}T${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+};
 
 const CreateTournamentPage = () => {
   const [showSuccess, setShowSuccess] = useState(false);
@@ -75,7 +83,7 @@ const CreateTournamentPage = () => {
       const payload = new FormData();
       payload.append("name", tournamentName);
       payload.append("status", "Upcoming");
-      payload.append("date", auctionDateTime);
+      payload.append("date", toISOWithOffset(auctionDateTime));
       payload.append("teams", Number(numTeams));
       payload.append("venue", venue);
       payload.append("budgetPerTeam", Number(budgetPerTeam));
@@ -330,7 +338,7 @@ const CreateTournamentPage = () => {
                     type="datetime-local"
                     name="auctionDateTime"
                     value={formData.auctionDateTime}
-                    min={new Date().toISOString().slice(0, 16)}
+                    min={localNowISO()}
                     onChange={handleInputChange}
                 />
 

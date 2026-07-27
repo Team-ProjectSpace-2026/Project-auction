@@ -30,8 +30,7 @@ const LiveAuctionTab = ({ tournamentId: propTournamentId, tournament }) => {
     clearError
   } = useAuction();
 
-  const isPastDate = tournament?.date && new Date(tournament.date) < new Date();
-  const isBeforeDate = !isPastDate && tournament?.date && new Date(tournament.date) > new Date();
+  const isBeforeDate = tournament?.date && new Date(tournament.date) > new Date();
 
   const [now, setNow] = useState(new Date());
   useEffect(() => {
@@ -50,8 +49,7 @@ const LiveAuctionTab = ({ tournamentId: propTournamentId, tournament }) => {
     return { days, hours, minutes, seconds };
   };
 
-  const statusLabel = isPastDate ? "Completed"
-    : auctionStatus === "bidding" ? "Live"
+  const statusLabel = auctionStatus === "bidding" ? "Live"
     : auctionStatus === "sold" ? "Sold"
     : auctionStatus === "unsold" ? "Unsold"
     : auctionStatus === "completed" ? "Completed"
@@ -101,24 +99,6 @@ const LiveAuctionTab = ({ tournamentId: propTournamentId, tournament }) => {
           >
             Dismiss
           </button>
-        </div>
-      )}
-
-      {isPastDate && (
-        <div style={{
-          background: "linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)",
-          border: "1px solid #bbf7d0",
-          borderRadius: "14px",
-          padding: "32px",
-          textAlign: "center",
-        }}>
-          <div style={{ fontSize: "48px", marginBottom: "12px" }}>&#127942;</div>
-          <h2 style={{ margin: "0 0 8px", fontSize: "22px", fontWeight: "700", color: "#15803d" }}>
-            Auction Completed
-          </h2>
-          <p style={{ margin: 0, fontSize: "14px", color: "#166534" }}>
-            This auction was held on {new Date(tournament.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}.
-          </p>
         </div>
       )}
 
@@ -222,7 +202,7 @@ const LiveAuctionTab = ({ tournamentId: propTournamentId, tournament }) => {
         );
       })()}
 
-      {!isPastDate && !isBeforeDate && (
+      {!isBeforeDate && (
       <div
         style={{
           display: "grid",
