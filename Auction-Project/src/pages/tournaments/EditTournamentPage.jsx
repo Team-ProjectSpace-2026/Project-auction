@@ -6,6 +6,24 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useRef } from "react";
 import { updateTournament } from "../../services/tournamentService";
 
+const toISOWithOffset = (dtLocal) => {
+  const d = new Date(dtLocal);
+  if (isNaN(d)) return dtLocal;
+  return d.toISOString();
+};
+
+const toLocalISO = (dateVal) => {
+  if (!dateVal) return "";
+  const d = new Date(dateVal);
+  if (isNaN(d)) return "";
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}T${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+};
+
+const localNowISO = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}T${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+};
+
 const EditTournamentPage = () => {
     const location = useLocation();
     const tournament = location.state?.tournament;
@@ -21,7 +39,7 @@ const EditTournamentPage = () => {
         maxPlayersPerTeam: tournament?.maxPlayersPerTeam || "",
         playerBasePrice: tournament?.playerBasePrice || "",
         venue: tournament?.venue || "",
-        auctionDateTime: tournament?.date ? new Date(tournament.date).toISOString().slice(0, 16) : "",
+        auctionDateTime: toLocalISO(tournament?.date),
         isPaid: tournament?.isPaid || false,
         registrationFee: tournament?.registrationFee || "",
         payoutUpiId: tournament?.payoutUpiId || "",
@@ -70,7 +88,7 @@ const EditTournamentPage = () => {
             payload.append("maxPlayersPerTeam", Number(formData.maxPlayersPerTeam));
             payload.append("playerBasePrice", Number(formData.playerBasePrice));
             payload.append("venue", formData.venue);
-            payload.append("date", formData.auctionDateTime);
+            payload.append("date", toISOWithOffset(formData.auctionDateTime));
             payload.append("isPaid", formData.isPaid);
             payload.append("registrationFee", formData.isPaid ? Number(formData.registrationFee) : 0);
             payload.append("payoutUpiId", formData.isPaid ? formData.payoutUpiId : "");
@@ -302,7 +320,7 @@ const EditTournamentPage = () => {
             type="datetime-local"
             name="auctionDateTime"
             value={formData.auctionDateTime}
-            min={new Date().toISOString().slice(0, 16)}
+            min={localNowISO()}
             onChange={handleInputChange}
         />
 

@@ -25,13 +25,10 @@ const AuctionRoom = () => {
     isConnected,
     connectionError,
     error,
-    tournament,
     clearSoldInfo,
     clearUnsoldInfo,
     clearError,
   } = useAuction();
-
-  const isPastDate = tournament?.date && new Date(tournament.date) < new Date();
 
   const [showRevealModal, setShowRevealModal] = useState(false);
 
@@ -115,25 +112,6 @@ const AuctionRoom = () => {
         </div>
       )}
 
-      {isPastDate && (
-        <div style={{
-          background: "linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)",
-          border: "1px solid #bbf7d0",
-          borderRadius: "14px",
-          padding: "48px 32px",
-          textAlign: "center",
-        }}>
-          <div style={{ fontSize: "56px", marginBottom: "16px" }}>&#127942;</div>
-          <h2 style={{ margin: "0 0 8px", fontSize: "24px", fontWeight: "700", color: "#15803d" }}>
-            Auction Completed
-          </h2>
-          <p style={{ margin: 0, fontSize: "15px", color: "#166534" }}>
-            This auction was held on {new Date(tournament.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}.
-          </p>
-        </div>
-      )}
-
-      {!isPastDate && (
       <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 400px", gap: "20px" }}>
           {/* Player Card */}
@@ -451,7 +429,6 @@ const AuctionRoom = () => {
           </div>
         </div>
       </div>
-      )}
 
       {showRevealModal && (
         <PlayerRevealModal onClose={() => setShowRevealModal(false)} onContinue={handleRevealContinue} />
