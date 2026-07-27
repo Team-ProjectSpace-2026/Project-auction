@@ -25,7 +25,6 @@ const AuctionRoom = () => {
     isConnected,
     connectionError,
     error,
-    tournament,
     clearSoldInfo,
     clearUnsoldInfo,
     clearError,
