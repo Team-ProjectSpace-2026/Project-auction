@@ -230,16 +230,10 @@ export const requestForgotPasswordOtp = async (req, res, next) => {
     await user.save();
 
     // Dispatch email
-    const emailResult = await sendOtpEmail(user.email, otp, user.name);
-
-    if (!emailResult.success) {
-      return res.status(500).json({
-        message: emailResult.message || "Failed to send verification code email. Please check server email service configuration.",
-      });
-    }
+    const emailResult = await sendOtpEmail(user.email, otp, user.name || "User");
 
     res.json({
-      message: "Verification code sent to your email address",
+      message: emailResult.message || "Verification code sent to your email address",
       email: user.email,
     });
   } catch (error) {
