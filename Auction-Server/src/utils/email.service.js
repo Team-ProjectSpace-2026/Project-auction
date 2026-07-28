@@ -8,7 +8,7 @@ import logger from "./logger.js";
  */
 export const sendOtpEmail = async (email, otp, name = "User") => {
   const emailUser = process.env.EMAIL_USER;
-  const emailPass = process.env.EMAIL_PASS;
+  const emailPass = String(process.env.EMAIL_PASS || "").replace(/\s+/g, ""); // Strip any accidental spaces
 
   // Always log OTP to server console/logs for easy debugging & emergency recovery
   logger.info(`==================================================`);
@@ -27,23 +27,6 @@ export const sendOtpEmail = async (email, otp, name = "User") => {
 
   try {
     const nodemailer = await import("nodemailer");
-    const transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST || "smtp.gmail.com",
-      port: parseInt(process.env.EMAIL_PORT || "587"),
-      secure: process.env.EMAIL_SECURE === "true", // false for 587 STARTTLS
-      requireTLS: true,
-      family: 4, // CRITICAL FIX FOR RENDER: Force IPv4 connection to prevent ENETUNREACH on IPv6
-      tls: {
-        rejectUnauthorized: false, // Prevents TLS handshake failures on cloud servers
-      },
-      auth: {
-        user: emailUser,
-        pass: emailPass,
-      },
-      connectionTimeout: 15000, // 15 seconds connection timeout for cloud TLS handshake
-      greetingTimeout: 15000,
-      socketTimeout: 15000,
-    });
 
     const mailOptions = {
       from: `"CricAuction Security" <${process.env.EMAIL_FROM || emailUser}>`,
@@ -78,11 +61,43 @@ export const sendOtpEmail = async (email, otp, name = "User") => {
       `,
     };
 
-    await transporter.sendMail(mailOptions);
-    logger.info(`Email successfully dispatched via SMTP to ${email}`);
-    return { success: true, mode: "smtp", message: "Verification code sent to your email address!" };
+    // Helper to attempt dispatch with given port and security settings
+    const attemptSend = async (port, secure) => {
+      const transporter = nodemailer.createTransport({
+        host: process.env.EMAIL_HOST || "smtp.gmail.com",
+        port,
+        secure,
+        family: 4, // Force IPv4 connection to prevent ENETUNREACH on Render
+        tls: {
+          rejectUnauthorized: false, // Prevents TLS handshake failures on cloud servers
+        },
+        auth: {
+          user: emailUser,
+          pass: emailPass,
+        },
+        connectionTimeout: 10000,
+        greetingTimeout: 10000,
+        socketTimeout: 10000,
+      });
+
+      return await transporter.sendMail(mailOptions);
+    };
+
+    // Attempt 1: Port 465 (SSL - most reliable on cloud platforms like Render)
+    try {
+      logger.info("Attempting primary SMTP dispatch via Port 465 (SSL)...");
+      await attemptSend(465, true);
+      logger.info(`Email successfully dispatched via Port 465 SSL to ${email}`);
+      return { success: true, mode: "smtp-465", message: "Verification code sent to your email address!" };
+    } catch (err465) {
+      logger.warn(`Port 465 SSL failed (${err465.message}). Retrying via Port 587 (STARTTLS)...`);
+      // Attempt 2: Port 587 (STARTTLS)
+      await attemptSend(587, false);
+      logger.info(`Email successfully dispatched via Port 587 STARTTLS to ${email}`);
+      return { success: true, mode: "smtp-587", message: "Verification code sent to your email address!" };
+    }
   } catch (error) {
-    logger.error("SMTP sending error:", error.message);
+    logger.error("Both SMTP attempts (Port 465 & 587) failed:", error.message);
     return {
       success: true,
       mode: "smtp-fallback",
