@@ -79,15 +79,19 @@ app.use(helmet({
 // CORS with strict origin validation
 const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
   .split(',')
-  .map((o) => o.trim());
+  .map((o) => o.trim().replace(/\/$/, ''));
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin in development only
-    if ((process.env.NODE_ENV !== "production" && !origin) || allowedOrigins.includes(origin)) {
-      callback(null, true);
+    // Allow requests with no origin (e.g. server-to-server, curl, Render health checks)
+    if (!origin) {
+      return callback(null, true);
+    }
+    const normalizedOrigin = origin.replace(/\/$/, '');
+    if (allowedOrigins.includes(origin) || allowedOrigins.includes(normalizedOrigin)) {
+      return callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      return callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true
@@ -112,6 +116,16 @@ app.use('/api/', limiter);
 
 // Request logging
 app.use(logger.requestMiddleware);
+
+// Root endpoint for status and deployment health checks
+app.get('/', (req, res) => {
+  res.json({
+    name: 'CricAuction API Server',
+    status: 'Running',
+    version: '1.0.0',
+    health: '/api/health'
+  });
+});
 
 // Routes
 app.use('/api/auth', authRoutes);

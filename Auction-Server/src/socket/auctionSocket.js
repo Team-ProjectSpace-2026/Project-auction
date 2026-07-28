@@ -72,10 +72,12 @@ export const initializeSocket = (server) => {
   io = new Server(server, {
     cors: {
       origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
         const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
           .split(',')
-          .map((o) => o.trim());
-        if (!origin || allowedOrigins.includes(origin)) {
+          .map((o) => o.trim().replace(/\/$/, ''));
+        const normalizedOrigin = origin.replace(/\/$/, '');
+        if (allowedOrigins.includes(origin) || allowedOrigins.includes(normalizedOrigin)) {
           callback(null, true);
         } else {
           callback(new Error('Not allowed by CORS'));
@@ -92,9 +94,12 @@ export const initializeSocket = (server) => {
       const origin = socket.handshake.headers.origin;
       const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
         .split(',')
-        .map((o) => o.trim());
-      if (origin && !allowedOrigins.includes(origin)) {
-        return next(new Error("Unauthorized origin"));
+        .map((o) => o.trim().replace(/\/$/, ''));
+      if (origin) {
+        const normalizedOrigin = origin.replace(/\/$/, '');
+        if (!allowedOrigins.includes(origin) && !allowedOrigins.includes(normalizedOrigin)) {
+          return next(new Error("Unauthorized origin"));
+        }
       }
 
       // Try cookie first (primary auth), then fall back to handshake.auth.token
