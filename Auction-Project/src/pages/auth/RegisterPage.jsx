@@ -76,85 +76,23 @@ const RegisterPage = () => {
       <CricketStumpsAnimation />
       <div className="spring-sunburst" />
 
-      {/* LEFT SIDE - branding panel */}
-      <div className="register-left">
-        <div className="register-left-content">
-          <div className="brand">
-            <img
-              src={batsmanLogo}
-              alt="CricAuctionHub logo"
-              className="brand-logo-lg"
-            />
-            <div>
-              <h1 className="brand-title-lg">
-                Cric<span className="accent-gold">Auction</span><span className="accent-cyan">Hub</span>
-              </h1>
-              <p className="brand-tagline">CRICKET LEAGUE AUCTION MANAGEMENT</p>
-            </div>
+      <div className="register-card glass-card">
+        <div className="auth-brand-header">
+          <img
+            src={batsmanLogo}
+            alt="CricAuctionHub Logo"
+            className="auth-brand-logo"
+          />
+          <div className="auth-brand-info">
+            <h1 className="auth-brand-title">
+              Cric<span className="accent-gold">Auction</span><span className="accent-cyan">Hub</span>
+            </h1>
+            <p className="auth-brand-tagline">CRICKET LEAGUE AUCTION MANAGEMENT</p>
           </div>
-
-          <h2 className="headline">
-            Create Your <br />
-            <span className="accent-gold">Organizer Account</span>
-          </h2>
-
-          <p className="subtext">
-            Join CricAuctionHub and manage your cricket tournaments, players, and
-            live auctions all in one powerful platform.
-          </p>
-
-          <ul className="feature-list">
-            <li>
-              <span className="feature-icon">🏆</span>
-              <div>
-                <strong>Easy Tournament Setup</strong>
-                <p>Create and configure tournaments in just a few steps.</p>
-              </div>
-            </li>
-            <li>
-              <span className="feature-icon">👥</span>
-              <div>
-                <strong>Manage Players &amp; Teams</strong>
-                <p>Approve players, manage teams and build the perfect squads.</p>
-              </div>
-            </li>
-            <li>
-              <span className="feature-icon">🔨</span>
-              <div>
-                <strong>Live Auction Experience</strong>
-                <p>Conduct real-time auctions with dynamic bidding.</p>
-              </div>
-            </li>
-            <li>
-              <span className="feature-icon">📊</span>
-              <div>
-                <strong>Reports &amp; Analytics</strong>
-                <p>Get detailed insights and downloadable reports instantly.</p>
-              </div>
-            </li>
-          </ul>
         </div>
-      </div>
 
-      {/* RIGHT SIDE - register form */}
-      <div className="register-right">
-        <div className="register-card glass-card">
-          <div className="auth-brand-header">
-            <img
-              src={batsmanLogo}
-              alt="CricAuctionHub Logo"
-              className="auth-brand-logo"
-            />
-            <div className="auth-brand-info">
-              <h1 className="auth-brand-title">
-                Cric<span className="accent-gold">Auction</span><span className="accent-cyan">Hub</span>
-              </h1>
-              <p className="auth-brand-tagline">CRICKET LEAGUE AUCTION MANAGEMENT</p>
-            </div>
-          </div>
-
-          <h2 className="welcome-title">Create Organizer Account</h2>
-          <p className="welcome-subtitle">Fill in the details below to get started</p>
+        <h2 className="welcome-title">Create Organizer Account</h2>
+        <p className="welcome-subtitle">Fill in the details below to get started</p>
 
           {error && (
             <div
@@ -419,7 +357,6 @@ const RegisterPage = () => {
             </Link>
           </p>
         </div>
-      </div>
     </div>
   );
 };
