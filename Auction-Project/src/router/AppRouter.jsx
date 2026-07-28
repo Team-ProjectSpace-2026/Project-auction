@@ -7,6 +7,7 @@ import {
 import ProtectedRoute from "../components/common/ProtectedRoute";
 import LoginPage from "../pages/auth/LoginPage";
 import RegisterPage from "../pages/auth/RegisterPage";
+import ForgotPasswordPage from "../pages/auth/ForgotPasswordPage";
 import DashboardPage from "../pages/dashboard/DashboardPage";
 import CreateTournamentPage from "../pages/tournaments/CreateTournamentPage";
 import TournamentsListPage from "../pages/tournaments/TournamentsListPage";
@@ -26,6 +27,7 @@ const AppRouter = () => (
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/register/:tournamentId" element={<PublicRegistrationPage />} />
 
         {/* Protected routes */}

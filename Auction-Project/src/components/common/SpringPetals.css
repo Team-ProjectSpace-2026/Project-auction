@@ -1,0 +1,123 @@
+.cricket-particles-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* ===== Wrappers for different particle fall/rise behaviors ===== */
+
+.cricket-particle-wrapper {
+  position: absolute;
+  top: -60px;
+  will-change: transform;
+  animation: particle-fall linear infinite;
+}
+
+.cricket-particle-wrapper.bid-rise {
+  top: auto;
+  bottom: -60px;
+  animation: particle-rise linear infinite;
+}
+
+.cricket-particle-wrapper.sparkle-drift {
+  animation: sparkle-fall linear infinite;
+}
+
+.cricket-particle-wrapper.confetti-fall {
+  animation: confetti-cascade linear infinite;
+}
+
+/* ===== Cricket Ball ===== */
+.cricket-ball {
+  font-size: 28px;
+  will-change: transform;
+  animation: ball-spin linear infinite;
+  filter: drop-shadow(0 2px 6px rgba(239, 68, 68, 0.5));
+}
+
+@keyframes ball-spin {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.15); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+/* ===== Bid Price Tags ===== */
+.bid-tag-bubble {
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.85), rgba(245, 158, 11, 0.9));
+  color: #0f172a;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.4);
+  will-change: transform;
+  animation: bid-sway ease-in-out infinite alternate;
+}
+
+@keyframes bid-sway {
+  0% { transform: translateX(0px) scale(1); }
+  50% { transform: translateX(15px) scale(1.05); }
+  100% { transform: translateX(-10px) scale(0.95); }
+}
+
+/* ===== Sparkle Dots ===== */
+.sparkle-dot {
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(96, 165, 250, 0.6) 60%, transparent 100%);
+  will-change: transform, opacity;
+  animation: sparkle-pulse ease-in-out infinite alternate;
+}
+
+@keyframes sparkle-pulse {
+  0% { transform: scale(0.5); opacity: 0.3; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(0.7); opacity: 0.5; }
+}
+
+/* ===== Confetti Pieces ===== */
+.confetti-piece {
+  border-radius: 2px;
+  will-change: transform;
+  animation: confetti-tumble linear infinite;
+}
+
+@keyframes confetti-tumble {
+  0% { transform: rotate(0deg) translateX(0); }
+  25% { transform: rotate(90deg) translateX(20px); }
+  50% { transform: rotate(180deg) translateX(-15px); }
+  75% { transform: rotate(270deg) translateX(10px); }
+  100% { transform: rotate(360deg) translateX(0); }
+}
+
+/* ===== Movement Keyframes ===== */
+
+/* Falls top to bottom */
+@keyframes particle-fall {
+  0% { transform: translate3d(0, -60px, 0); }
+  100% { transform: translate3d(0, 105vh, 0); }
+}
+
+/* Rises bottom to top — bid tags float up like auction bids */
+@keyframes particle-rise {
+  0% { transform: translate3d(0, 60px, 0); }
+  100% { transform: translate3d(0, -105vh, 0); }
+}
+
+/* Sparkles drift diagonally */
+@keyframes sparkle-fall {
+  0% { transform: translate3d(0, -40px, 0); }
+  100% { transform: translate3d(30px, 105vh, 0); }
+}
+
+/* Confetti cascades with lateral drift */
+@keyframes confetti-cascade {
+  0% { transform: translate3d(0, -50px, 0); }
+  100% { transform: translate3d(-20px, 105vh, 0); }
+}
