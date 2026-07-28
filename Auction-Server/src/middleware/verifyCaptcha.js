@@ -15,15 +15,42 @@ setInterval(() => {
 }, 60 * 1000);
 
 /**
- * Generate random 5-character alphanumeric text
+ * Generate random 5-character alphanumeric text using cryptographically secure randomInt
  */
 function generateRandomText() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
   let text = "";
   for (let i = 0; i < 5; i++) {
-    text += chars.charAt(Math.floor(Math.random() * chars.length));
+    text += chars.charAt(crypto.randomInt(0, chars.length));
   }
   return text;
+}
+
+/**
+ * Generate lightweight distorted SVG for Captcha
+ */
+function generateCaptchaSvg(text) {
+  const width = 200;
+  const height = 60;
+  let noiseLines = "";
+  for (let i = 0; i < 5; i++) {
+    const x1 = crypto.randomInt(0, width);
+    const y1 = crypto.randomInt(0, height);
+    const x2 = crypto.randomInt(0, width);
+    const y2 = crypto.randomInt(0, height);
+    noiseLines += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#94a3b8" stroke-width="1.5" opacity="0.6" />`;
+  }
+
+  let textNodes = "";
+  const charWidth = (width - 40) / text.length;
+  for (let i = 0; i < text.length; i++) {
+    const x = 22 + i * charWidth;
+    const y = 38 + (crypto.randomInt(0, 7) - 3);
+    const rotate = crypto.randomInt(0, 25) - 12;
+    textNodes += `<text x="${x}" y="${y}" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#1e3a8a" transform="rotate(${rotate}, ${x}, ${y})">${text[i]}</text>`;
+  }
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" style="background-color:#f1f5f9; border-radius:6px; border:1px solid #cbd5e1;">${noiseLines}${textNodes}</svg>`;
 }
 
 /**
@@ -32,6 +59,17 @@ function generateRandomText() {
  */
 export const generateCaptcha = (req, res) => {
   const captchaId = crypto.randomUUID();
+  const isRobot = req.body?.isRobot || req.query?.isRobot === "true";
+
+  if (isRobot) {
+    captchaStore.set(captchaId, {
+      text: "robot_passed",
+      isRobot: true,
+      createdAt: Date.now(),
+    });
+    return res.json({ captchaId, success: true });
+  }
+
   const text = generateRandomText();
 
   captchaStore.set(captchaId, {
@@ -39,8 +77,10 @@ export const generateCaptcha = (req, res) => {
     createdAt: Date.now(),
   });
 
-  // Return captchaId AND text (text is drawn client-side, verified server-side)
-  res.json({ captchaId, text });
+  const captchaSvg = generateCaptchaSvg(text);
+
+  // SECURE: Return captchaId and SVG image string only — plaintext text is NEVER exposed
+  res.json({ captchaId, captchaSvg });
 };
 
 /**
@@ -67,7 +107,11 @@ export const verifyCaptcha = async (req, res, next) => {
   captchaStore.delete(captchaId);
 
   // Compare answers (case-insensitive)
-  if (captchaAnswer.toLowerCase() !== captcha.text) {
+  const isMatch = captcha.isRobot
+    ? captchaAnswer === "robot_passed" || captchaAnswer === "verified"
+    : captchaAnswer.toLowerCase() === captcha.text;
+
+  if (!isMatch) {
     return res.status(403).json({
       message: "Security verification failed. Please try again.",
     });

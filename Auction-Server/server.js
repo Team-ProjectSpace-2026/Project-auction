@@ -68,6 +68,12 @@ app.use(helmet({
   },
   crossOriginEmbedderPolicy: false,
   crossOriginResourcePolicy: { policy: "cross-origin" },
+  hsts: {
+    maxAge: 31536000, // 1 year
+    includeSubDomains: true,
+    preload: true,
+  },
+  referrerPolicy: { policy: "strict-origin-when-cross-origin" },
 }));
 
 // CORS with strict origin validation
@@ -77,8 +83,8 @@ const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (server-to-server, mobile apps, curl)
-    if (!origin || allowedOrigins.includes(origin)) {
+    // Allow requests with no origin in development only
+    if ((process.env.NODE_ENV !== "production" && !origin) || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
@@ -92,8 +98,8 @@ app.use(csrfProtection);
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-// XSS sanitization for all API request bodies
-app.use('/api', xssSanitize);
+// XSS sanitization for all request bodies
+app.use(xssSanitize);
 
 // Rate limiting
 import rateLimit from 'express-rate-limit';

@@ -7,6 +7,9 @@ import {
   updateProfilePhoto,
   logout,
   refreshToken,
+  requestForgotPasswordOtp,
+  verifyForgotPasswordOtp,
+  resetPassword,
 } from "../controllers/auth.controller.js";
 import { validateRegister, validateLogin } from "../utils/validators.js";
 import { handleValidationErrors } from "../middleware/errorHandler.js";
@@ -36,6 +39,24 @@ router.post(
   validateLogin,
   handleValidationErrors,
   login
+);
+
+// Forgot Password routes
+router.post(
+  "/forgot-password/request-otp",
+  authLimiter,
+  verifyCaptcha,
+  requestForgotPasswordOtp
+);
+router.post(
+  "/forgot-password/verify-otp",
+  authLimiter,
+  verifyForgotPasswordOtp
+);
+router.post(
+  "/forgot-password/reset-password",
+  authLimiter,
+  resetPassword
 );
 
 // Protected routes

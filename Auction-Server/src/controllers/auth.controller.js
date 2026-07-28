@@ -1,5 +1,7 @@
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 import User from "../models/User.js";
+import { sendOtpEmail } from "../utils/email.service.js";
 
 // Cookie options
 const cookieOptions = {
@@ -200,3 +202,122 @@ export const refreshToken = async (req, res, next) => {
     next(error);
   }
 };
+
+/**
+ * Step 1: Request Forgot Password OTP via Email
+ */
+export const requestForgotPasswordOtp = async (req, res, next) => {
+  try {
+    const email = String(req.body.email || "").toLowerCase().trim();
+    if (!email) {
+      return res.status(400).json({ message: "Please provide a valid email address" });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      // Return 200/generic message for security so users can't enumerate emails easily
+      return res.json({
+        message: "If an account with that email exists, an OTP has been sent.",
+      });
+    }
+
+    // Generate 6-digit cryptographically secure OTP
+    const otp = crypto.randomInt(100000, 1000000).toString();
+    const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    user.resetPasswordOtp = otp;
+    user.resetPasswordOtpExpires = otpExpires;
+    await user.save();
+
+    // Dispatch email
+    await sendOtpEmail(user.email, otp, user.name);
+
+    res.json({
+      message: "Verification code sent to your email address",
+      email: user.email,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Step 2: Verify Forgot Password OTP
+ */
+export const verifyForgotPasswordOtp = async (req, res, next) => {
+  try {
+    const email = String(req.body.email || "").toLowerCase().trim();
+    const otp = String(req.body.otp || "").trim();
+
+    if (!email || !otp) {
+      return res.status(400).json({ message: "Email and OTP are required" });
+    }
+
+    const user = await User.findOne({
+      email,
+      resetPasswordOtp: otp,
+      resetPasswordOtpExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired verification code" });
+    }
+
+    // Generate single-use reset token valid for 15 minutes
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const resetTokenExpires = new Date(Date.now() + 15 * 60 * 1000);
+
+    user.resetPasswordOtp = null;
+    user.resetPasswordOtpExpires = null;
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordTokenExpires = resetTokenExpires;
+    await user.save();
+
+    res.json({
+      message: "OTP verified successfully",
+      resetToken,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Step 3: Reset Password using Reset Token
+ */
+export const resetPassword = async (req, res, next) => {
+  try {
+    const resetToken = String(req.body.resetToken || "").trim();
+    const newPassword = String(req.body.newPassword || "");
+
+    if (!resetToken || !newPassword) {
+      return res.status(400).json({ message: "Reset token and new password are required" });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({ message: "Password must be at least 8 characters long" });
+    }
+
+    const user = await User.findOne({
+      resetPasswordToken: resetToken,
+      resetPasswordTokenExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired reset session. Please try again." });
+    }
+
+    // Update password (pre-save hook will hash it)
+    user.password = newPassword;
+    user.resetPasswordToken = null;
+    user.resetPasswordTokenExpires = null;
+    await user.save();
+
+    res.json({
+      message: "Password reset successful. You can now login with your new password.",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+

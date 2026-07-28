@@ -15,25 +15,31 @@ import {
 
 let io;
 
-// --- Socket rate limiting (per-connection) ---
+// --- User-based socket rate limiting ---
 const RATE_LIMIT_WINDOW_MS = 600;  // 600ms window
-const RATE_LIMIT_MAX_BIDS = 1;     // max 1 bid per 600ms per connection
-const RATE_LIMIT_MAX_EVENTS = 10;  // max 10 any events per 600ms
+const RATE_LIMIT_MAX_BIDS = 1;     // max 1 bid per 600ms per user
+const RATE_LIMIT_MAX_EVENTS = 10;  // max 10 events per 600ms per user
 
-const createRateLimiter = (maxRequests, windowMs) => {
-  const timestamps = [];
-  return () => {
-    const now = Date.now();
-    // Remove expired timestamps
-    while (timestamps.length > 0 && timestamps[0] <= now - windowMs) {
-      timestamps.shift();
-    }
-    if (timestamps.length >= maxRequests) {
-      return false; // rate limited
-    }
-    timestamps.push(now);
-    return true; // allowed
-  };
+const userRateLimitStore = new Map(); // userId -> { bids: [], events: [] }
+
+const checkUserRateLimit = (userId, type, maxRequests, windowMs) => {
+  if (!userRateLimitStore.has(userId)) {
+    userRateLimitStore.set(userId, { bids: [], events: [] });
+  }
+  const userLimits = userRateLimitStore.get(userId);
+  const timestamps = userLimits[type] || [];
+  const now = Date.now();
+
+  // Remove expired timestamps
+  while (timestamps.length > 0 && timestamps[0] <= now - windowMs) {
+    timestamps.shift();
+  }
+  if (timestamps.length >= maxRequests) {
+    return false; // rate limited
+  }
+  timestamps.push(now);
+  userLimits[type] = timestamps;
+  return true; // allowed
 };
 
 // --- Input validation helpers ---
@@ -82,6 +88,15 @@ export const initializeSocket = (server) => {
   // Authentication middleware for socket connections
   io.use(async (socket, next) => {
     try {
+      // Validate Origin header if present
+      const origin = socket.handshake.headers.origin;
+      const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
+        .split(',')
+        .map((o) => o.trim());
+      if (origin && !allowedOrigins.includes(origin)) {
+        return next(new Error("Unauthorized origin"));
+      }
+
       // Try cookie first (primary auth), then fall back to handshake.auth.token
       const cookieHeader = socket.handshake.headers?.cookie || "";
       const cookieToken = cookieHeader
@@ -111,9 +126,10 @@ export const initializeSocket = (server) => {
   });
 
   io.on("connection", (socket) => {
-    // Create per-event rate limiters
-    const bidRateLimiter = createRateLimiter(RATE_LIMIT_MAX_BIDS, RATE_LIMIT_WINDOW_MS);
-    const eventRateLimiter = createRateLimiter(RATE_LIMIT_MAX_EVENTS, RATE_LIMIT_WINDOW_MS);
+    const userId = socket.user._id.toString();
+
+    const bidRateLimiter = () => checkUserRateLimit(userId, "bids", RATE_LIMIT_MAX_BIDS, RATE_LIMIT_WINDOW_MS);
+    const eventRateLimiter = () => checkUserRateLimit(userId, "events", RATE_LIMIT_MAX_EVENTS, RATE_LIMIT_WINDOW_MS);
 
     // --- join-tournament ---
     socket.on("join-tournament", async (data) => {

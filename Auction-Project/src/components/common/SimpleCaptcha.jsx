@@ -52,6 +52,7 @@ const drawCaptcha = (canvas, text) => {
 const SimpleCaptcha = forwardRef(({ onVerify, onExpire }, ref) => {
   const canvasRef = useRef(null);
   const [captchaId, setCaptchaId] = useState(null);
+  const [captchaSvg, setCaptchaSvg] = useState("");
   const [captchaText, setCaptchaText] = useState("");
   const [userInput, setUserInput] = useState("");
   const [status, setStatus] = useState("loading");
@@ -77,10 +78,11 @@ const SimpleCaptcha = forwardRef(({ onVerify, onExpire }, ref) => {
       if (!res.ok) throw new Error(data.message || "Failed to load captcha");
 
       setCaptchaId(data.captchaId);
-      setCaptchaText(data.text);
+      setCaptchaSvg(data.captchaSvg || "");
+      setCaptchaText(data.text || "");
       setStatus("ready");
 
-      // Draw captcha on canvas using server-provided text
+      // Draw captcha on canvas if server provided text fallback
       if (canvasRef.current && data.text) {
         drawCaptcha(canvasRef.current, data.text);
       }
@@ -150,18 +152,27 @@ const SimpleCaptcha = forwardRef(({ onVerify, onExpire }, ref) => {
       {status !== "loading" && (
         <>
           <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-            <canvas
-              ref={canvasRef}
-              width={200}
-              height={60}
-              style={{
-                border: "1px solid var(--border-light)",
-                borderRadius: "6px",
-                cursor: "pointer",
-              }}
-              onClick={handleRefresh}
-              title="Click to refresh"
-            />
+            {captchaSvg ? (
+              <div
+                dangerouslySetInnerHTML={{ __html: captchaSvg }}
+                onClick={handleRefresh}
+                title="Click to refresh"
+                style={{ cursor: "pointer", display: "inline-block" }}
+              />
+            ) : (
+              <canvas
+                ref={canvasRef}
+                width={200}
+                height={60}
+                style={{
+                  border: "1px solid var(--border-light)",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                }}
+                onClick={handleRefresh}
+                title="Click to refresh"
+              />
+            )}
             <button
               type="button"
               onClick={handleRefresh}

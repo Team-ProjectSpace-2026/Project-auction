@@ -11,6 +11,7 @@ const storage = new CloudinaryStorage({
         ? "cricauction/profile"
         : "cricauction/players",
     allowed_formats: ["jpg", "jpeg", "png"],
+    resource_type: "image",
     transformation: [{ width: 800, height: 1067, crop: "limit" }],
   }),
 });
