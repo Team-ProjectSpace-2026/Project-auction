@@ -15,13 +15,13 @@ setInterval(() => {
 }, 60 * 1000);
 
 /**
- * Generate random 5-character alphanumeric text
+ * Generate random 5-character alphanumeric text using cryptographically secure randomInt
  */
 function generateRandomText() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
   let text = "";
   for (let i = 0; i < 5; i++) {
-    text += chars.charAt(Math.floor(Math.random() * chars.length));
+    text += chars.charAt(crypto.randomInt(0, chars.length));
   }
   return text;
 }
@@ -34,10 +34,10 @@ function generateCaptchaSvg(text) {
   const height = 60;
   let noiseLines = "";
   for (let i = 0; i < 5; i++) {
-    const x1 = Math.floor(Math.random() * width);
-    const y1 = Math.floor(Math.random() * height);
-    const x2 = Math.floor(Math.random() * width);
-    const y2 = Math.floor(Math.random() * height);
+    const x1 = crypto.randomInt(0, width);
+    const y1 = crypto.randomInt(0, height);
+    const x2 = crypto.randomInt(0, width);
+    const y2 = crypto.randomInt(0, height);
     noiseLines += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#94a3b8" stroke-width="1.5" opacity="0.6" />`;
   }
 
@@ -45,8 +45,8 @@ function generateCaptchaSvg(text) {
   const charWidth = (width - 40) / text.length;
   for (let i = 0; i < text.length; i++) {
     const x = 22 + i * charWidth;
-    const y = 38 + (Math.random() * 6 - 3);
-    const rotate = Math.floor(Math.random() * 24 - 12);
+    const y = 38 + (crypto.randomInt(0, 7) - 3);
+    const rotate = crypto.randomInt(0, 25) - 12;
     textNodes += `<text x="${x}" y="${y}" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#1e3a8a" transform="rotate(${rotate}, ${x}, ${y})">${text[i]}</text>`;
   }
 

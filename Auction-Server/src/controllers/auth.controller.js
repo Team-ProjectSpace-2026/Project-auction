@@ -221,8 +221,8 @@ export const requestForgotPasswordOtp = async (req, res, next) => {
       });
     }
 
-    // Generate 6-digit OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    // Generate 6-digit cryptographically secure OTP
+    const otp = crypto.randomInt(100000, 1000000).toString();
     const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
     user.resetPasswordOtp = otp;
