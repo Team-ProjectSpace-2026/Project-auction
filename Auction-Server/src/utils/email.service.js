@@ -17,7 +17,15 @@ export const sendOtpEmail = async (email, otp, name = "User") => {
   logger.info(`==================================================`);
 
   if (!emailUser || !emailPass) {
-    // If SMTP credentials are not set, return simulated success
+    if (process.env.NODE_ENV === "production") {
+      logger.error("SMTP credentials (EMAIL_USER & EMAIL_PASS) missing in production environment");
+      return {
+        success: false,
+        mode: "production-error",
+        message: "Email service is not configured on the server. Please contact support.",
+      };
+    }
+    // If SMTP credentials are not set in dev, return simulated success for local testing
     return {
       success: true,
       mode: "dev-simulated",
@@ -74,7 +82,13 @@ export const sendOtpEmail = async (email, otp, name = "User") => {
     return { success: true, mode: "smtp" };
   } catch (error) {
     logger.error("Failed to send real SMTP email:", error);
-    // Still return success in dev so application flow continues seamlessly
+    if (process.env.NODE_ENV === "production") {
+      return {
+        success: false,
+        mode: "smtp-error",
+        message: `Failed to send verification email: ${error.message}`,
+      };
+    }
     return {
       success: true,
       mode: "dev-fallback",

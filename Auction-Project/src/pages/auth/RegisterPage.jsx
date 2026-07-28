@@ -4,6 +4,8 @@ import { useAuth } from "../../context/AuthContext";
 import InputField from "../../components/common/InputField";
 import Button from "../../components/common/Button";
 import SimpleCaptcha from "../../components/common/SimpleCaptcha";
+import CricketParticles from "../../components/common/SpringPetals";
+import CricketStumpsAnimation from "../../components/common/CyclingBoyAnimation";
 import "./RegisterPage.css";
 import batsmanLogo from "../../assets/cricauctionlogo1.png";
 
@@ -69,24 +71,23 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="register-page">
+    <div className="register-page spring-theme-bg">
+      <CricketParticles count={30} />
+      <CricketStumpsAnimation />
+      <div className="spring-sunburst" />
+
       {/* LEFT SIDE - branding panel */}
       <div className="register-left">
         <div className="register-left-content">
           <div className="brand">
             <img
               src={batsmanLogo}
-              alt="CricAuction logo"
-              style={{
-                width: "120px",
-                height: "120px",
-                borderRadius: "50%",
-                objectFit: "cover",
-              }}
+              alt="CricAuctionHub logo"
+              className="brand-logo-lg"
             />
             <div>
-              <h1>
-                Cric<span className="accent">Auction</span>
+              <h1 className="brand-title-lg">
+                Cric<span className="accent-gold">Auction</span><span className="accent-cyan">Hub</span>
               </h1>
               <p className="brand-tagline">CRICKET LEAGUE AUCTION MANAGEMENT</p>
             </div>
@@ -94,11 +95,11 @@ const RegisterPage = () => {
 
           <h2 className="headline">
             Create Your <br />
-            <span className="accent">Organizer Account</span>
+            <span className="accent-gold">Organizer Account</span>
           </h2>
 
           <p className="subtext">
-            Join CricAuction and manage your cricket tournaments, players, and
+            Join CricAuctionHub and manage your cricket tournaments, players, and
             live auctions all in one powerful platform.
           </p>
 
@@ -137,18 +138,19 @@ const RegisterPage = () => {
 
       {/* RIGHT SIDE - register form */}
       <div className="register-right">
-        <div className="register-card">
-          <div className="register-card-icon">
+        <div className="register-card glass-card">
+          <div className="auth-brand-header">
             <img
               src={batsmanLogo}
-              alt="CricAuction logo"
-              style={{
-                width: "100px",
-                height: "100px",
-                borderRadius: "50%",
-                objectFit: "cover",
-              }}
+              alt="CricAuctionHub Logo"
+              className="auth-brand-logo"
             />
+            <div className="auth-brand-info">
+              <h1 className="auth-brand-title">
+                Cric<span className="accent-gold">Auction</span><span className="accent-cyan">Hub</span>
+              </h1>
+              <p className="auth-brand-tagline">CRICKET LEAGUE AUCTION MANAGEMENT</p>
+            </div>
           </div>
 
           <h2 className="welcome-title">Create Organizer Account</h2>
