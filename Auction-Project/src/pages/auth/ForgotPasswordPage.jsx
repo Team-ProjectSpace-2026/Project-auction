@@ -72,7 +72,7 @@ const ForgotPasswordPage = () => {
           captchaId: captchaData.captchaId,
           captchaAnswer: captchaData.answer,
         },
-        { timeout: 12000 }
+        { timeout: 18000 }
       );
 
       setInfoMessage(res.data.message || "OTP code sent to your email address!");
@@ -104,7 +104,7 @@ const ForgotPasswordPage = () => {
           captchaId: captchaData?.captchaId || `resend-${Date.now()}`,
           captchaAnswer: captchaData?.answer || "verified",
         },
-        { timeout: 12000 }
+        { timeout: 18000 }
       );
 
       setInfoMessage(res.data.message || "A new verification code has been sent to your email.");
