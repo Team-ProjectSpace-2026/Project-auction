@@ -32,6 +32,7 @@ export const sendOtpEmail = async (email, otp, name = "User") => {
       port: parseInt(process.env.EMAIL_PORT || "587"),
       secure: process.env.EMAIL_SECURE === "true", // false for 587 STARTTLS
       requireTLS: true,
+      family: 4, // CRITICAL FIX FOR RENDER: Force IPv4 connection to prevent ENETUNREACH on IPv6
       tls: {
         rejectUnauthorized: false, // Prevents TLS handshake failures on cloud servers
       },
