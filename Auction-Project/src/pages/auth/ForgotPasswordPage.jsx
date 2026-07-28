@@ -72,7 +72,7 @@ const ForgotPasswordPage = () => {
           captchaId: captchaData.captchaId,
           captchaAnswer: captchaData.answer,
         },
-        { timeout: 18000 }
+        { timeout: 30000 }
       );
 
       setInfoMessage(res.data.message || "OTP code sent to your email address!");
