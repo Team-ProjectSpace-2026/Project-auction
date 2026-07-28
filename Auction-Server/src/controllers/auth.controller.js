@@ -229,12 +229,15 @@ export const requestForgotPasswordOtp = async (req, res, next) => {
     user.resetPasswordOtpExpires = otpExpires;
     await user.save();
 
-    // Dispatch email
-    const emailResult = await sendOtpEmail(user.email, otp, user.name || "User");
-
+    // Send instant HTTP response to prevent gateway/proxy timeouts
     res.json({
-      message: emailResult.message || "Verification code sent to your email address",
+      message: "Verification code sent to your email address",
       email: user.email,
+    });
+
+    // Dispatch email asynchronously in the background
+    sendOtpEmail(user.email, otp, user.name || "User").catch((err) => {
+      logger.error("Background OTP email dispatch failed:", err.message);
     });
   } catch (error) {
     next(error);
