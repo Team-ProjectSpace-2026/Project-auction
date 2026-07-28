@@ -76,21 +76,22 @@ const RegisterPage = () => {
       <CricketStumpsAnimation />
       <div className="spring-sunburst" />
 
-      <div className="register-card glass-card">
-        <div className="auth-brand-header">
-          <img
-            src={batsmanLogo}
-            alt="CricAuctionHub Logo"
-            className="auth-brand-logo"
-          />
-          <div className="auth-brand-info">
-            <h1 className="auth-brand-title">
-              Cric<span className="accent-gold">Auction</span><span className="accent-cyan">Hub</span>
-            </h1>
-            <p className="auth-brand-tagline">CRICKET LEAGUE AUCTION MANAGEMENT</p>
-          </div>
+      {/* TOP LEFT BRANDING LOGO */}
+      <Link to="/" className="top-left-brand">
+        <img
+          src={batsmanLogo}
+          alt="CricAuctionHub Logo"
+          className="top-left-logo"
+        />
+        <div className="top-left-info">
+          <h1 className="top-left-title">
+            Cric<span className="accent-gold">Auction</span><span className="accent-cyan">Hub</span>
+          </h1>
+          <p className="top-left-tagline">CRICKET LEAGUE AUCTION MANAGEMENT</p>
         </div>
+      </Link>
 
+      <div className="register-card glass-card">
         <h2 className="welcome-title">Create Organizer Account</h2>
         <p className="welcome-subtitle">Fill in the details below to get started</p>
 

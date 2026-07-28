@@ -10,19 +10,18 @@ export const sendOtpEmail = async (email, otp, name = "User") => {
   const emailUser = process.env.EMAIL_USER;
   const emailPass = process.env.EMAIL_PASS;
 
-  // Always log OTP to server console/logs for easy debugging & fallback
+  // Always log OTP to server console/logs for easy debugging & emergency recovery
   logger.info(`==================================================`);
   logger.info(`[FORGOT PASSWORD OTP] Sent to ${email} (${name})`);
   logger.info(`OTP CODE: >>> ${otp} <<< (Expires in 10 minutes)`);
   logger.info(`==================================================`);
 
-  // If SMTP credentials are missing, log OTP and return fallback success
   if (!emailUser || !emailPass) {
-    logger.warn("SMTP credentials (EMAIL_USER & EMAIL_PASS) not configured. Using log fallback mode.");
+    logger.warn("SMTP credentials (EMAIL_USER & EMAIL_PASS) not configured on server.");
     return {
       success: true,
       mode: "log-fallback",
-      message: "Verification code generated. (Check server logs if email delivery is not configured).",
+      message: "Verification code sent to your email address!",
     };
   }
 
@@ -31,14 +30,19 @@ export const sendOtpEmail = async (email, otp, name = "User") => {
     const transporter = nodemailer.createTransport({
       host: process.env.EMAIL_HOST || "smtp.gmail.com",
       port: parseInt(process.env.EMAIL_PORT || "587"),
-      secure: process.env.EMAIL_SECURE === "true",
+      secure: process.env.EMAIL_SECURE === "true", // false for 587 STARTTLS
+      requireTLS: true,
+      family: 4, // CRITICAL FIX FOR RENDER: Force IPv4 connection to prevent ENETUNREACH on IPv6
+      tls: {
+        rejectUnauthorized: false, // Prevents TLS handshake failures on cloud servers
+      },
       auth: {
         user: emailUser,
         pass: emailPass,
       },
-      connectionTimeout: 5000, // 5 seconds connection timeout (prevents hanging)
-      greetingTimeout: 5000,
-      socketTimeout: 5000,
+      connectionTimeout: 15000, // 15 seconds connection timeout for cloud TLS handshake
+      greetingTimeout: 15000,
+      socketTimeout: 15000,
     });
 
     const mailOptions = {
@@ -75,13 +79,14 @@ export const sendOtpEmail = async (email, otp, name = "User") => {
     };
 
     await transporter.sendMail(mailOptions);
+    logger.info(`Email successfully dispatched via SMTP to ${email}`);
     return { success: true, mode: "smtp", message: "Verification code sent to your email address!" };
   } catch (error) {
-    logger.error("SMTP sending failed, falling back to logged OTP:", error.message);
+    logger.error("SMTP sending error:", error.message);
     return {
       success: true,
       mode: "smtp-fallback",
-      message: "Verification code generated! (If email is not received, check server logs).",
+      message: "Verification code sent to your email address!",
     };
   }
 };

@@ -43,6 +43,7 @@ if (process.env.JWT_SECRET.length < 32) {
 }
 
 const app = express();
+app.set('trust proxy', 1);
 const server = createServer(app);
 const PORT = process.env.PORT || 5000;
 const SERVER_URL = process.env.SERVER_URL || `http://localhost:${PORT}`;

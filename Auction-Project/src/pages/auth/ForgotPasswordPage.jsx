@@ -72,7 +72,7 @@ const ForgotPasswordPage = () => {
           captchaId: captchaData.captchaId,
           captchaAnswer: captchaData.answer,
         },
-        { timeout: 12000 }
+        { timeout: 18000 }
       );
 
       setInfoMessage(res.data.message || "OTP code sent to your email address!");
@@ -104,7 +104,7 @@ const ForgotPasswordPage = () => {
           captchaId: captchaData?.captchaId || `resend-${Date.now()}`,
           captchaAnswer: captchaData?.answer || "verified",
         },
-        { timeout: 12000 }
+        { timeout: 18000 }
       );
 
       setInfoMessage(res.data.message || "A new verification code has been sent to your email.");
@@ -192,22 +192,23 @@ const ForgotPasswordPage = () => {
       {/* Stadium Floodlight Glow overlay */}
       <div className="spring-sunburst" />
 
+      {/* TOP LEFT BRANDING LOGO */}
+      <Link to="/" className="top-left-brand">
+        <img
+          src={batsmanLogo}
+          alt="CricAuctionHub Logo"
+          className="top-left-logo"
+        />
+        <div className="top-left-info">
+          <h1 className="top-left-title">
+            Cric<span className="accent-gold">Auction</span><span className="accent-cyan">Hub</span>
+          </h1>
+          <p className="top-left-tagline">CRICKET LEAGUE AUCTION MANAGEMENT</p>
+        </div>
+      </Link>
+
       <div className="forgot-card-container glass-card">
         <div className="forgot-card-header">
-          <div className="auth-brand-header">
-            <img
-              src={batsmanLogo}
-              alt="CricAuctionHub Logo"
-              className="auth-brand-logo"
-            />
-            <div className="auth-brand-info">
-              <h1 className="auth-brand-title">
-                Cric<span className="accent-gold">Auction</span><span className="accent-cyan">Hub</span>
-              </h1>
-              <p className="auth-brand-tagline">CRICKET LEAGUE AUCTION MANAGEMENT</p>
-            </div>
-          </div>
-
           <h2 className="step-title">Reset Password</h2>
           <p className="forgot-subtitle">
             {step === 1 && "Enter your email to receive a 6-digit verification code"}
