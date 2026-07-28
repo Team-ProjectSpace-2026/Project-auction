@@ -65,17 +65,25 @@ const ForgotPasswordPage = () => {
     setIsSubmitting(true);
 
     try {
-      const res = await api.post("/auth/forgot-password/request-otp", {
-        email,
-        captchaId: captchaData.captchaId,
-        captchaAnswer: captchaData.answer,
-      });
+      const res = await api.post(
+        "/auth/forgot-password/request-otp",
+        {
+          email,
+          captchaId: captchaData.captchaId,
+          captchaAnswer: captchaData.answer,
+        },
+        { timeout: 12000 }
+      );
 
       setInfoMessage(res.data.message || "OTP code sent to your email address!");
       setStep(2);
       setTimer(60);
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to send OTP code. Please try again.");
+      const msg =
+        err.code === "ECONNABORTED"
+          ? "Server request timed out. Please try again."
+          : err.response?.data?.message || "Failed to send OTP code. Please try again.";
+      setError(msg);
     } finally {
       setIsSubmitting(false);
     }
@@ -89,16 +97,24 @@ const ForgotPasswordPage = () => {
     setIsSubmitting(true);
 
     try {
-      await api.post("/auth/forgot-password/request-otp", {
-        email,
-        captchaId: captchaData?.captchaId || `resend-${Date.now()}`,
-        captchaAnswer: captchaData?.answer || "verified",
-      });
+      const res = await api.post(
+        "/auth/forgot-password/request-otp",
+        {
+          email,
+          captchaId: captchaData?.captchaId || `resend-${Date.now()}`,
+          captchaAnswer: captchaData?.answer || "verified",
+        },
+        { timeout: 12000 }
+      );
 
-      setInfoMessage("A new verification code has been sent to your email.");
+      setInfoMessage(res.data.message || "A new verification code has been sent to your email.");
       setTimer(60);
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to resend OTP.");
+      const msg =
+        err.code === "ECONNABORTED"
+          ? "Server request timed out. Please try again."
+          : err.response?.data?.message || "Failed to resend OTP.";
+      setError(msg);
     } finally {
       setIsSubmitting(false);
     }
