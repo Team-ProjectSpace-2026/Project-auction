@@ -4,6 +4,8 @@ import { useAuth } from "../../context/AuthContext";
 import InputField from "../../components/common/InputField";
 import Button from "../../components/common/Button";
 import SimpleCaptcha from "../../components/common/SimpleCaptcha";
+import CricketParticles from "../../components/common/SpringPetals";
+import CricketStumpsAnimation from "../../components/common/CyclingBoyAnimation";
 import "./LoginPage.css";
 import batsmanLogo from "../../assets/cricauctionlogo1.png";
 
@@ -59,90 +61,28 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="login-page">
-      {/* LEFT SIDE - branding panel */}
-      <div className="login-left">
-        <div className="login-left-content">
-          <div className="brand">
-            <img
-              src={batsmanLogo}
-              alt="CricAuction logo"
-              style={{
-                width: "120px",
-                height: "120px",
-                borderRadius: "50%",
-                objectFit: "cover",
-              }}
-            />
-            <div>
-              <h1>
-                Cric<span className="accent">Auction</span>
-              </h1>
-              <p className="brand-tagline">CRICKET LEAGUE AUCTION MANAGEMENT</p>
-            </div>
+    <div className="login-page spring-theme-bg">
+      <CricketParticles count={30} />
+      <CricketStumpsAnimation />
+      <div className="spring-sunburst" />
+
+      <div className="login-card glass-card">
+        <div className="auth-brand-header">
+          <img
+            src={batsmanLogo}
+            alt="CricAuctionHub Logo"
+            className="auth-brand-logo"
+          />
+          <div className="auth-brand-info">
+            <h1 className="auth-brand-title">
+              Cric<span className="accent-gold">Auction</span><span className="accent-cyan">Hub</span>
+            </h1>
+            <p className="auth-brand-tagline">CRICKET LEAGUE AUCTION MANAGEMENT</p>
           </div>
-
-          <h2 className="headline">
-            Manage. Auction. <br />
-            <span className="accent">Build Champions.</span>
-          </h2>
-
-          <p className="subtext">
-            CricAuction is a complete platform to manage cricket tournaments,
-            player registrations, live auctions and squad management with ease.
-          </p>
-
-          <ul className="feature-list">
-            <li>
-              <span className="feature-icon">🏆</span>
-              <div>
-                <strong>Create &amp; Manage Tournaments</strong>
-                <p>Set up and manage your tournaments effortlessly.</p>
-              </div>
-            </li>
-            <li>
-              <span className="feature-icon">🔨</span>
-              <div>
-                <strong>Live Auction Experience</strong>
-                <p>Conduct real-time auctions with dynamic bidding.</p>
-              </div>
-            </li>
-            <li>
-              <span className="feature-icon">👥</span>
-              <div>
-                <strong>Team &amp; Player Management</strong>
-                <p>Manage teams, players and auction pools.</p>
-              </div>
-            </li>
-            <li>
-              <span className="feature-icon">📊</span>
-              <div>
-                <strong>Reports &amp; Analytics</strong>
-                <p>Get detailed insights and downloadable reports.</p>
-              </div>
-            </li>
-          </ul>
         </div>
-      </div>
 
-      {/* RIGHT SIDE - login form */}
-      <div className="login-right">
-        <div className="login-card">
-          <div className="login-card-icon">
-            <img
-              src={batsmanLogo}
-              alt="CricAuction logo"
-              style={{
-                width: "100px",
-                height: "100px",
-                borderRadius: "50%",
-                objectFit: "cover",
-              }}
-            />
-          </div>
-
-          <h2 className="welcome-title">Welcome Back!</h2>
-          <p className="welcome-subtitle">Login to your organizer account</p>
+        <h2 className="welcome-title">Welcome Back!</h2>
+        <p className="welcome-subtitle">Login to your organizer account</p>
 
           {error && (
             <div
@@ -301,7 +241,6 @@ const LoginPage = () => {
             </Link>
           </p>
         </div>
-      </div>
     </div>
   );
 };
