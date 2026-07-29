@@ -46,7 +46,40 @@ export const sendOtpEmail = async (email, otp, name = "User") => {
     </div>
   `;
 
-  // --- 1. RESEND API (Recommended 100% Guaranteed Cloud Email Delivery) ---
+  const brevoApiKey = process.env.BREVO_API_KEY || (emailPass.startsWith("xkeysib-") ? emailPass : null);
+
+  // --- 1. BREVO REST API (Primary Cloud Email Provider) ---
+  if (brevoApiKey) {
+    try {
+      logger.info(`Attempting email dispatch via Brevo REST API to ${email}...`);
+      const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: {
+          "accept": "application/json",
+          "api-key": brevoApiKey,
+          "content-type": "application/json"
+        },
+        body: JSON.stringify({
+          sender: { name: "CricAuction Security", email: process.env.EMAIL_FROM || "heyprojectspace@gmail.com" },
+          to: [{ email, name }],
+          subject: "CricAuction - Password Reset Verification Code",
+          htmlContent: mailHtml,
+        })
+      });
+
+      const resData = await response.json();
+      if (response.ok || response.status === 201) {
+        logger.info(`Email successfully delivered via Brevo API (MessageId: ${resData?.messageId}) to ${email}`);
+        return { success: true, mode: "brevo-api", message: "Verification code sent to your email address!" };
+      } else {
+        logger.error("Brevo API dispatch error:", resData);
+      }
+    } catch (brevoErr) {
+      logger.error("Brevo execution error:", brevoErr.message);
+    }
+  }
+
+  // --- 2. RESEND API ---
   if (resendApiKey) {
     try {
       const { Resend } = await import("resend");
