@@ -264,6 +264,10 @@ const PlayerRegistrationForm = ({
   basePriceValue = 0,
   onBasePriceChange,
   isPaid = false,
+  payoutUpiId = "",
+  registrationFee = 0,
+  qrCodeDataUrl = "",
+  tournamentName = "",
   loading = false,
   error: externalError = null,
   banner: externalBanner = null,
@@ -626,65 +630,9 @@ const PlayerRegistrationForm = ({
           </Card>
         )}
 
-        {/* Paid Tournament: Payment Proof Input */}
-        {isPaid && (
-          <Card style={{ marginBottom: 24, border: "2px solid #2563eb", background: "#f8fafc" }}>
-            <SectionHeading number={8} title="Payment Verification Proof" />
-            <p style={{ margin: "0 0 16px", fontSize: 13, color: C.muted }}>
-              Provide the last 4 digits of your UPI Transaction / UTR ID after paying, or upload a payment screenshot for fast verification.
-            </p>
-
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 20, alignItems: "start" }}>
-              <InputField
-                label="Last 4 Digits of UTR / Ref Number"
-                id="utrLast4"
-                type="text"
-                maxLength={4}
-                value={form.utrLast4}
-                onChange={(e) => {
-                  const val = e.target.value.replace(/\D/g, "").slice(0, 4);
-                  setForm((f) => ({ ...f, utrLast4: val }));
-                }}
-                placeholder="e.g. 4421"
-              />
-
-              <div>
-                <label style={{ display: "block", marginBottom: 6, fontSize: 14, fontWeight: 600, color: C.dark }}>
-                  Payment Screenshot (Optional if UTR given)
-                </label>
-                <input
-                  ref={screenshotRef}
-                  type="file"
-                  accept="image/jpeg,image/png"
-                  style={{ display: "none" }}
-                  onChange={(e) => handleScreenshot(e.target.files[0])}
-                />
-                <button
-                  type="button"
-                  onClick={() => screenshotRef.current?.click()}
-                  style={{
-                    width: "100%",
-                    padding: "10px 14px",
-                    border: `1.5px dashed ${screenshotPreview ? C.green : C.blue}`,
-                    borderRadius: 10,
-                    background: screenshotPreview ? "#f0fdf4" : "#ffffff",
-                    color: screenshotPreview ? "#166534" : C.blue,
-                    fontWeight: 600,
-                    fontSize: 13,
-                    cursor: "pointer",
-                    textAlign: "center",
-                  }}
-                >
-                  {screenshotPreview ? "✓ Screenshot Attached (Change)" : "📸 Upload Payment Screenshot"}
-                </button>
-              </div>
-            </div>
-          </Card>
-        )}
-
-        {/* Section 8/9 - Upload Photo */}
-        <Card style={{ marginBottom: 32 }}>
-          <SectionHeading number={isPaid ? 9 : (showBasePrice ? 9 : 8)} title="Upload Player Photo" />
+        {/* Upload Photo Section */}
+        <Card style={{ marginBottom: 24 }}>
+          <SectionHeading number={showBasePrice ? 9 : 8} title="Upload Player Photo" />
 
           {!photoPreview ? (
             <div
@@ -799,6 +747,209 @@ const PlayerRegistrationForm = ({
             onChange={(e) => handlePhoto(e.target.files[0])}
           />
         </Card>
+
+        {/* Paid Tournament: Payment Details & Proof Input */}
+        {isPaid && (() => {
+          const fee = Number(registrationFee);
+          const upiUri = payoutUpiId ? `upi://pay?pa=${encodeURIComponent(payoutUpiId)}&pn=${encodeURIComponent(tournamentName || "CricAuction")}&am=${fee}&cu=INR` : "";
+
+          return (
+            <Card style={{ marginBottom: 32, border: "2px solid #2563eb", background: "#ffffff", boxShadow: "0 8px 24px rgba(37,99,235,0.08)" }}>
+              <SectionHeading number={showBasePrice ? 10 : 9} title="Entry Fee & Payment Verification" />
+
+              {/* Payment Info Card */}
+              {payoutUpiId ? (
+                <div style={{
+                  background: "#f8fafc",
+                  border: "1px solid #e2e8f0",
+                  borderRadius: "16px",
+                  padding: "20px",
+                  marginBottom: "24px",
+                }}>
+                  <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "20px" }}>
+                    
+                    {/* Left Info & Mobile Action */}
+                    <div style={{ flex: "1 1 300px" }}>
+                      <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "#eff6ff", border: "1px solid #bfdbfe", color: "#1d4ed8", padding: "4px 12px", borderRadius: "20px", fontSize: "12px", fontWeight: "700", marginBottom: "10px" }}>
+                        📲 100% DIRECT UPI PAYMENT
+                      </div>
+                      <h4 style={{ margin: "0 0 6px", fontSize: "20px", fontWeight: "800", color: "#0f172a" }}>
+                        Entry Fee: ₹{fee}
+                      </h4>
+                      <p style={{ margin: "0 0 14px", fontSize: "13px", color: "#64748b", lineHeight: "1.5" }}>
+                        Scan QR code or click the button below to pay directly using <strong>Google Pay, PhonePe, Paytm, or BHIM</strong>.
+                      </p>
+
+                      {/* Mobile Deep Link & Desktop Smart Button */}
+                      <a
+                        href={upiUri}
+                        onClick={(e) => {
+                          navigator.clipboard.writeText(payoutUpiId);
+                          const isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                          if (!isMobile) {
+                            e.preventDefault();
+                            alert(`UPI ID "${payoutUpiId}" copied to clipboard!\n\nSince you are on a computer, please scan the QR code on the right using Google Pay, PhonePe, or Paytm on your mobile phone to complete the ₹${fee} payment.`);
+                          }
+                        }}
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "8px",
+                          background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
+                          color: "#ffffff",
+                          fontWeight: "700",
+                          fontSize: "14px",
+                          padding: "12px 20px",
+                          borderRadius: "10px",
+                          textDecoration: "none",
+                          boxShadow: "0 4px 12px rgba(37,99,235,0.25)",
+                          marginBottom: "12px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        ⚡ Open GPay / PhonePe & Pay ₹{fee}
+                      </a>
+
+                      {/* UPI ID Copy Line */}
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "#ffffff", padding: "8px 12px", borderRadius: "8px", border: "1px solid #cbd5e1" }}>
+                        <span style={{ fontSize: "12px", color: "#64748b", fontWeight: "600" }}>UPI ID:</span>
+                        <code style={{ fontSize: "13px", fontWeight: "700", color: "#1e293b" }}>{payoutUpiId}</code>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText(payoutUpiId);
+                            alert("UPI ID copied to clipboard!");
+                          }}
+                          style={{
+                            marginLeft: "auto",
+                            background: "#eff6ff",
+                            border: "1px solid #bfdbfe",
+                            borderRadius: "6px",
+                            padding: "4px 10px",
+                            fontSize: "11px",
+                            fontWeight: "700",
+                            cursor: "pointer",
+                            color: "#2563eb"
+                          }}
+                        >
+                          Copy
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Right Desktop QR Code */}
+                    {qrCodeDataUrl && (
+                      <div style={{
+                        textAlign: "center",
+                        background: "#ffffff",
+                        padding: "14px",
+                        borderRadius: "14px",
+                        border: "1px solid #e2e8f0",
+                        flexShrink: 0
+                      }}>
+                        <img
+                          src={qrCodeDataUrl}
+                          alt="UPI QR Code"
+                          style={{ width: 140, height: 140, borderRadius: "8px", display: "block", margin: "0 auto 6px" }}
+                        />
+                        <div style={{ fontSize: "11px", fontWeight: "600", color: "#64748b" }}>
+                          Scan with any UPI app
+                        </div>
+                      </div>
+                    )}
+
+                  </div>
+
+                  {/* Helpful guidance note */}
+                  <div style={{
+                    marginTop: "16px",
+                    padding: "10px 14px",
+                    background: "#eff6ff",
+                    border: "1px solid #bfdbfe",
+                    borderRadius: "10px",
+                    fontSize: "13px",
+                    color: "#1e40af",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px"
+                  }}>
+                    <span>💡</span>
+                    <span><strong>Already paid?</strong> You don't need to tap the GPay button again! Simply enter the last 4 digits of your UTR transaction ID or upload a screenshot below.</span>
+                  </div>
+                </div>
+              ) : (
+                <div style={{
+                  background: "#fffbebf5",
+                  border: "1px solid #fde68a",
+                  borderRadius: "12px",
+                  padding: "16px",
+                  marginBottom: "20px",
+                  color: "#92400e",
+                  fontSize: "14px",
+                }}>
+                  <strong>⚠️ Payment Not Configured:</strong> Registration fee is ₹{fee}, but the tournament organizer has not set up a UPI ID yet.
+                </div>
+              )}
+
+              {/* Payment Proof Inputs */}
+              <div>
+                <h5 style={{ margin: "0 0 6px", fontSize: "14px", fontWeight: "700", color: C.dark }}>
+                  Payment Verification Proof
+                </h5>
+                <p style={{ margin: "0 0 14px", fontSize: "13px", color: C.muted }}>
+                  Provide the last 4 digits of your UPI Transaction / UTR ID after paying, or upload a payment screenshot for fast verification.
+                </p>
+
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 20, alignItems: "start" }}>
+                  <InputField
+                    label="Last 4 Digits of UTR / Ref Number"
+                    id="utrLast4"
+                    type="text"
+                    maxLength={4}
+                    value={form.utrLast4}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, "").slice(0, 4);
+                      setForm((f) => ({ ...f, utrLast4: val }));
+                    }}
+                    placeholder="e.g. 4421"
+                  />
+
+                  <div>
+                    <label style={{ display: "block", marginBottom: 6, fontSize: 14, fontWeight: 600, color: C.dark }}>
+                      Payment Screenshot (Optional if UTR given)
+                    </label>
+                    <input
+                      ref={screenshotRef}
+                      type="file"
+                      accept="image/jpeg,image/png"
+                      style={{ display: "none" }}
+                      onChange={(e) => handleScreenshot(e.target.files[0])}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => screenshotRef.current?.click()}
+                      style={{
+                        width: "100%",
+                        padding: "10px 14px",
+                        border: `1.5px dashed ${screenshotPreview ? C.green : C.blue}`,
+                        borderRadius: 10,
+                        background: screenshotPreview ? "#f0fdf4" : "#ffffff",
+                        color: screenshotPreview ? "#166534" : C.blue,
+                        fontWeight: 600,
+                        fontSize: 13,
+                        cursor: "pointer",
+                        textAlign: "center",
+                      }}
+                    >
+                      {screenshotPreview ? "✓ Screenshot Attached (Change)" : "📸 Upload Payment Screenshot"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          );
+        })()}
 
         {/* Submit */}
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 14 }}>
