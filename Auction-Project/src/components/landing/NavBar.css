@@ -61,6 +61,11 @@
   -webkit-text-fill-color: var(--accent-gold);
 }
 
+.logo-hub {
+  color: #fff;
+  -webkit-text-fill-color: #fff;
+}
+
 /* Desktop Navigation */
 .navbar-nav {
   flex: 1;

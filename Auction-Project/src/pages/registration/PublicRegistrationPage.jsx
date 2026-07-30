@@ -73,7 +73,7 @@ export default function PublicRegistrationPage() {
   useEffect(() => {
     if (tournamentData?.isPaid && tournamentData?.registrationFee > 0 && payoutUpiId) {
       const fee = Number(tournamentData.registrationFee);
-      const upiUri = `upi://pay?pa=${encodeURIComponent(payoutUpiId)}&pn=${encodeURIComponent(tournamentData.name || "CricAuction")}&am=${fee}&cu=INR`;
+      const upiUri = `upi://pay?pa=${encodeURIComponent(payoutUpiId)}&pn=${encodeURIComponent(tournamentData.name || "CricAuctionHub")}&am=${fee}&cu=INR`;
       QRCode.toDataURL(upiUri, { width: 200, margin: 1 })
         .then((url) => setQrCodeDataUrl(url))
         .catch(() => setQrCodeDataUrl(""));
@@ -233,7 +233,7 @@ export default function PublicRegistrationPage() {
           color: "rgba(255,255,255,.45)",
           fontSize: 13,
         }}>
-          &copy; {new Date().getFullYear()} CricAuction &middot; All rights reserved &nbsp;|&nbsp; Secure Registration Portal
+          &copy; {new Date().getFullYear()} CricAuctionHub &middot; All rights reserved &nbsp;|&nbsp; Secure Registration Portal
         </div>
       </div>
     );
@@ -361,7 +361,7 @@ export default function PublicRegistrationPage() {
         color: "rgba(255,255,255,.45)",
         fontSize: 13,
       }}>
-        &copy; {new Date().getFullYear()} CricAuction &middot; All rights reserved &nbsp;|&nbsp; Secure Registration Portal
+        &copy; {new Date().getFullYear()} CricAuctionHub &middot; All rights reserved &nbsp;|&nbsp; Secure Registration Portal
       </div>
     </div>
   );

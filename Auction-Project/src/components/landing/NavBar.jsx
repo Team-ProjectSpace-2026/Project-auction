@@ -49,9 +49,9 @@ const NavBar = () => {
     >
       <div className="navbar-container">
         {/* Logo */}
-        <Link to="/" className="navbar-logo" aria-label="CricAuction Home">
-          <img src={batsmanLogo} alt="CricAuction" className="logo-img" />
-          <span className="logo-text">Cric<span className="logo-accent">Auction</span></span>
+        <Link to="/" className="navbar-logo" aria-label="CricAuctionHub Home">
+          <img src={batsmanLogo} alt="CricAuctionHub" className="logo-img" />
+          <span className="logo-text">Cric<span className="logo-accent">Auction</span><span className="logo-hub">Hub</span></span>
         </Link>
 
         {/* Desktop Navigation */}

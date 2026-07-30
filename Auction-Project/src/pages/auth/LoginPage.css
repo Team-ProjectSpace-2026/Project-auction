@@ -394,3 +394,11 @@
   color: #bfdbfe;
   text-decoration: underline;
 }
+
+.accent-gold {
+  color: #fbbf24 !important;
+}
+
+.accent-white {
+  color: #ffffff !important;
+}

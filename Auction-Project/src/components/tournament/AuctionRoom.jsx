@@ -143,7 +143,7 @@ const AuctionRoom = () => {
                   overflow: "hidden",
                   flexShrink: 0,
                 }}>
-                  <img src={cricLogo} alt="Cricket Auction Hub" style={{ width: "100px", height: "100px", objectFit: "contain" }} />
+                  <img src={cricLogo} alt="CricAuctionHub" style={{ width: "100px", height: "100px", objectFit: "contain" }} />
                 </div>
                 <div>
                   <h2 style={{ margin: 0, fontSize: "18px", fontWeight: "800", color: "#fff", letterSpacing: "-0.3px" }}>

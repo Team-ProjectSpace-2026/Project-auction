@@ -75,7 +75,7 @@ const LoginPage = () => {
         />
         <div className="top-left-info">
           <h1 className="top-left-title">
-            Cric<span className="accent-gold">Auction</span><span className="accent-cyan">Hub</span>
+            Cric<span className="accent-gold">Auction</span><span className="accent-white">Hub</span>
           </h1>
           <p className="top-left-tagline">CRICKET LEAGUE AUCTION MANAGEMENT</p>
         </div>
