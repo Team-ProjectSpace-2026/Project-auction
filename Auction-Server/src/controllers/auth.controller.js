@@ -332,6 +332,7 @@ export const resetPasswordByMobile = async (req, res, next) => {
   try {
     const mobile = String(req.body.mobile || "").replace(/[^0-9]/g, "").slice(-10);
     const newPassword = String(req.body.newPassword || "");
+    const smsVerificationToken = String(req.body.smsVerificationToken || "").trim();
 
     if (!mobile || mobile.length !== 10) {
       return res.status(400).json({ message: "Valid 10-digit mobile number is required" });
@@ -341,12 +342,24 @@ export const resetPasswordByMobile = async (req, res, next) => {
       return res.status(400).json({ message: "Password must be at least 8 characters long" });
     }
 
-    const user = await User.findOne({ mobile });
-    if (!user) {
-      return res.status(404).json({ message: "No account found with this registered mobile number." });
+    if (!smsVerificationToken) {
+      return res.status(400).json({ message: "SMS verification token is required" });
     }
 
+    const user = await User.findOne({
+      mobile,
+      smsVerificationToken,
+      smsVerificationTokenExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired SMS verification. Please verify your OTP again." });
+    }
+
+    // Update password and clear verification token
     user.password = newPassword;
+    user.smsVerificationToken = null;
+    user.smsVerificationTokenExpires = null;
     await user.save();
 
     res.json({
@@ -363,14 +376,30 @@ export const resetPasswordByMobile = async (req, res, next) => {
 export const loginByMobile = async (req, res, next) => {
   try {
     const mobile = String(req.body.mobile || "").replace(/[^0-9]/g, "").slice(-10);
+    const smsVerificationToken = String(req.body.smsVerificationToken || "").trim();
+
     if (!mobile || mobile.length !== 10) {
       return res.status(400).json({ message: "Please provide a valid 10-digit mobile number" });
     }
 
-    const user = await User.findOne({ mobile });
-    if (!user) {
-      return res.status(404).json({ message: "No account found with this mobile number. Please register first." });
+    if (!smsVerificationToken) {
+      return res.status(400).json({ message: "SMS verification token is required" });
     }
+
+    const user = await User.findOne({
+      mobile,
+      smsVerificationToken,
+      smsVerificationTokenExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired SMS verification. Please verify your OTP again." });
+    }
+
+    // Clear the SMS verification token (single-use)
+    user.smsVerificationToken = null;
+    user.smsVerificationTokenExpires = null;
+    await user.save();
 
     // Generate JWT token and set cookie
     const token = generateToken(user._id);
@@ -402,15 +431,22 @@ export const sendSmsOtpHandler = async (req, res, next) => {
       return res.status(400).json({ message: "Please provide a valid 10-digit mobile number" });
     }
 
+    const user = await User.findOne({ mobile });
+
+    // Return generic success for unknown mobile numbers to prevent enumeration
+    if (!user) {
+      return res.json({
+        message: `SMS verification code sent to +91 ${mobile}`,
+        mobile,
+      });
+    }
+
     const otp = crypto.randomInt(100000, 1000000).toString();
     const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-    let user = await User.findOne({ mobile });
-    if (user) {
-      user.smsOtp = otp;
-      user.smsOtpExpires = otpExpires;
-      await user.save();
-    }
+    user.smsOtp = otp;
+    user.smsOtpExpires = otpExpires;
+    await user.save();
 
     const smsResult = await sendSmsOtp(mobile, otp);
 
@@ -450,13 +486,20 @@ export const verifySmsOtpHandler = async (req, res, next) => {
       return res.status(400).json({ message: "Invalid or expired SMS OTP code. Please try again." });
     }
 
+    // Generate single-use SMS verification token valid for 15 minutes
+    const smsVerificationToken = crypto.randomBytes(32).toString("hex");
+    const smsVerificationTokenExpires = new Date(Date.now() + 15 * 60 * 1000);
+
     user.smsOtp = null;
     user.smsOtpExpires = null;
+    user.smsVerificationToken = smsVerificationToken;
+    user.smsVerificationTokenExpires = smsVerificationTokenExpires;
     await user.save();
 
     res.json({
       success: true,
       message: "SMS OTP verified successfully!",
+      smsVerificationToken,
     });
   } catch (error) {
     next(error);

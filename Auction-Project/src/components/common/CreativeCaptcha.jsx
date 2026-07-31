@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import "./CreativeCaptcha.css";
 
 // Fun pools of interactive visual challenges
@@ -81,23 +81,46 @@ const CreativeCaptcha = ({ onVerify }) => {
   const [shake, setShake] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [captchaId, setCaptchaId] = useState("");
+  const [isReplacing, setIsReplacing] = useState(false);
+  const timeoutRef = useRef(null);
 
   const currentChallenge = CHALLENGES[challengeIndex];
 
   const loadChallenge = useCallback((index = null) => {
+    // Cancel any pending timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+
     const nextIdx = index !== null ? index : randomIndex();
     setChallengeIndex(nextIdx);
     setShuffledOptions(shuffleOptions(CHALLENGES[nextIdx].options));
     setVerified(false);
     setShake(false);
     setFeedback("");
+    setIsReplacing(false);
     setCaptchaId(`fun-captcha-${Date.now()}`);
   }, []);
 
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleSelectOption = useCallback((option) => {
-    if (verified) return;
+    if (verified || isReplacing) return;
 
     if (option.emoji === currentChallenge.target) {
+      // Cancel any pending timeout
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
       setVerified(true);
       setFeedback("Awesome! Verification Complete ✓");
       if (onVerify) {
@@ -105,17 +128,25 @@ const CreativeCaptcha = ({ onVerify }) => {
       }
     } else {
       setShake(true);
+      setIsReplacing(true);
       setFeedback("Oops! Wrong pick. Try this new challenge 👇");
-      setTimeout(() => {
+
+      // Cancel any existing timeout
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+
+      timeoutRef.current = setTimeout(() => {
         setShake(false);
         let newIdx = randomIndex();
         if (newIdx === challengeIndex) {
           newIdx = (challengeIndex + 1) % CHALLENGES.length;
         }
         loadChallenge(newIdx);
+        timeoutRef.current = null;
       }, 700);
     }
-  }, [verified, currentChallenge, captchaId, onVerify, challengeIndex, loadChallenge]);
+  }, [verified, isReplacing, currentChallenge, captchaId, onVerify, challengeIndex, loadChallenge]);
 
   return (
     <div className={`creative-captcha-box ${shake ? "captcha-shake" : ""} ${verified ? "captcha-verified" : ""}`}>

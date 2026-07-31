@@ -62,6 +62,14 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    smsVerificationToken: {
+      type: String,
+      default: null,
+    },
+    smsVerificationTokenExpires: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,
