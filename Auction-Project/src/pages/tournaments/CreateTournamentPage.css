@@ -255,3 +255,235 @@ body.dark-mode .form-group input[type="datetime-local"]{
     background:var(--accent-hover-light);
     transform:translateY(-1px);
 }
+
+/* ==========================
+   Pricing Tier Badges
+========================== */
+
+.pricing-tier-indicator {
+    margin-top: 8px;
+}
+
+.tier-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.vip-badge {
+    background: linear-gradient(135deg, rgba(234, 179, 8, 0.2), rgba(202, 138, 4, 0.2));
+    border: 1px solid rgba(234, 179, 8, 0.5);
+    color: #eab308;
+}
+
+.free-badge {
+    background: rgba(34, 197, 94, 0.15);
+    border: 1px solid rgba(34, 197, 94, 0.4);
+    color: #22c55e;
+}
+
+.paid-badge {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(147, 51, 234, 0.15));
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    color: #60a5fa;
+}
+
+.error-badge {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: #f87171;
+}
+
+/* ==========================
+   Payment Checkout Modal
+========================== */
+
+.payment-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.payment-modal-card {
+    background: #0f172a;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+    overflow: hidden;
+    color: #f8fafc;
+}
+
+.payment-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.payment-modal-header h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin: 0;
+    color: #f8fafc;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+.close-btn:hover {
+    color: #ffffff;
+}
+
+.payment-modal-body {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.tournament-summary-box {
+    background: rgba(255, 255, 255, 0.04);
+    padding: 12px 16px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+}
+
+.summary-label {
+    color: #94a3b8;
+}
+
+.summary-value {
+    font-weight: 600;
+    color: #38bdf8;
+}
+
+.plan-summary-card {
+    background: linear-gradient(135deg, rgba(30, 58, 138, 0.4), rgba(15, 23, 42, 0.8));
+    border: 1px solid #3b82f6;
+    border-radius: 14px;
+    padding: 20px;
+    text-align: center;
+}
+
+.plan-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.plan-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.plan-teams {
+    font-size: 0.85rem;
+    color: #60a5fa;
+    font-weight: 600;
+}
+
+.plan-price-large {
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: #ffffff;
+    margin: 8px 0;
+}
+
+.plan-price-large span {
+    font-size: 0.9rem;
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+.plan-breakdown {
+    font-size: 0.85rem;
+    color: #c084fc;
+    font-weight: 600;
+}
+
+.checkout-perks {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+.perk-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.88rem;
+    color: #cbd5e1;
+}
+
+.perk-icon {
+    color: #22c55e;
+    flex-shrink: 0;
+}
+
+.payment-modal-footer {
+    padding: 16px 24px 24px;
+    display: flex;
+    gap: 12px;
+}
+
+.cancel-pay-btn {
+    flex: 1;
+    height: 46px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #cbd5e1;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.cancel-pay-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.confirm-pay-btn {
+    flex: 2;
+    height: 46px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    border: none;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+}
+
+.confirm-pay-btn:hover {
+    background: linear-gradient(135deg, #1d4ed8, #1e40af);
+}
+

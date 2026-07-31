@@ -6,6 +6,9 @@ import { useNavigate } from "react-router-dom";
 import { useState, useRef } from "react";
 import { createTournament } from "../../services/tournamentService";
 import bgStadium from "../../assets/bgstadium2.png";
+import { getPlanForTeamCount } from "../../constants/pricing";
+import { useAuth } from "../../context/AuthContext";
+import { FiCheckCircle, FiShield, FiX, FiAward, FiZap } from "react-icons/fi";
 
 // Converts "YYYY-MM-DDTHH:MM" (datetime-local value) to ISO with timezone offset
 const toISOWithOffset = (dtLocal) => {
@@ -21,7 +24,9 @@ const localNowISO = () => {
 };
 
 const CreateTournamentPage = () => {
+  const { user } = useAuth();
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [logoFile, setLogoFile] = useState(null);
   const [logoPreview, setLogoPreview] = useState(null);
@@ -39,6 +44,9 @@ const CreateTournamentPage = () => {
     payoutUpiId: "",
   });
   const navigate = useNavigate();
+
+  const userEmail = user?.email || "";
+  const currentPlanInfo = getPlanForTeamCount(formData.numTeams, userEmail);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -66,10 +74,15 @@ const CreateTournamentPage = () => {
     }
   };
 
-  const handleCreate = async () => {
-    const { tournamentName, numTeams, budgetPerTeam, maxPlayersPerTeam, playerBasePrice, venue, auctionDateTime, isPaid, registrationFee, payoutUpiId } = formData;
+  const handleInitiateCreate = () => {
+    const { tournamentName, numTeams, budgetPerTeam, maxPlayersPerTeam, playerBasePrice, venue, auctionDateTime, isPaid, registrationFee } = formData;
     if (!tournamentName || !numTeams || !budgetPerTeam || !maxPlayersPerTeam || !playerBasePrice || !venue || !auctionDateTime) {
       alert("Please fill in all required fields.");
+      return;
+    }
+
+    if (currentPlanInfo.exceedsLimit) {
+      alert("Exceeds maximum allowed limit of 20 teams per auction.");
       return;
     }
 
@@ -78,20 +91,30 @@ const CreateTournamentPage = () => {
       return;
     }
 
+    // Check if payment is required (paid plan and not VIP)
+    if (currentPlanInfo.requiresPayment) {
+      setShowPaymentModal(true);
+    } else {
+      executeTournamentCreation();
+    }
+  };
+
+  const executeTournamentCreation = async () => {
     setLoading(true);
+    setShowPaymentModal(false);
     try {
       const payload = new FormData();
-      payload.append("name", tournamentName);
+      payload.append("name", formData.tournamentName);
       payload.append("status", "Upcoming");
-      payload.append("date", toISOWithOffset(auctionDateTime));
-      payload.append("teams", Number(numTeams));
-      payload.append("venue", venue);
-      payload.append("budgetPerTeam", Number(budgetPerTeam));
-      payload.append("maxPlayersPerTeam", Number(maxPlayersPerTeam));
-      payload.append("playerBasePrice", Number(playerBasePrice));
-      payload.append("isPaid", isPaid);
-      payload.append("registrationFee", isPaid ? Number(registrationFee) : 0);
-      payload.append("payoutUpiId", isPaid ? payoutUpiId : "");
+      payload.append("date", toISOWithOffset(formData.auctionDateTime));
+      payload.append("teams", Number(formData.numTeams));
+      payload.append("venue", formData.venue);
+      payload.append("budgetPerTeam", Number(formData.budgetPerTeam));
+      payload.append("maxPlayersPerTeam", Number(formData.maxPlayersPerTeam));
+      payload.append("playerBasePrice", Number(formData.playerBasePrice));
+      payload.append("isPaid", formData.isPaid);
+      payload.append("registrationFee", formData.isPaid ? Number(formData.registrationFee) : 0);
+      payload.append("payoutUpiId", formData.isPaid ? formData.payoutUpiId : "");
       if (logoFile) {
         payload.append("logo", logoFile);
       }
@@ -237,8 +260,32 @@ const CreateTournamentPage = () => {
                     name="numTeams"
                     value={formData.numTeams}
                     onChange={handleInputChange}
-                    placeholder="Enter number of teams"
+                    placeholder="Enter number of teams (1 - 20)"
+                    min="1"
+                    max="20"
                 />
+
+                {formData.numTeams && (
+                  <div className="pricing-tier-indicator" style={{ marginTop: "8px" }}>
+                    {currentPlanInfo.isVip ? (
+                      <div className="tier-badge vip-badge">
+                        <FiAward /> {currentPlanInfo.badgeText}
+                      </div>
+                    ) : currentPlanInfo.exceedsLimit ? (
+                      <div className="tier-badge error-badge">
+                        ⚠️ {currentPlanInfo.message}
+                      </div>
+                    ) : currentPlanInfo.plan?.isFree ? (
+                      <div className="tier-badge free-badge">
+                        <FiZap /> {currentPlanInfo.badgeText}
+                      </div>
+                    ) : (
+                      <div className="tier-badge paid-badge">
+                        <FiCheckCircle /> {currentPlanInfo.badgeText}
+                      </div>
+                    )}
+                  </div>
+                )}
         </div>
 
     </div>
@@ -453,7 +500,7 @@ const CreateTournamentPage = () => {
     </button>
 
     <button
-        onClick={handleCreate}
+        onClick={handleInitiateCreate}
         className="create-btn"
         type="submit"
         disabled={loading}
@@ -471,6 +518,69 @@ const CreateTournamentPage = () => {
 </div>
         </main>
       </div>
+      {/* Payment Confirmation Modal */}
+      {showPaymentModal && currentPlanInfo?.plan && (
+        <div className="payment-modal-overlay">
+          <div className="payment-modal-card">
+            <div className="payment-modal-header">
+              <h3>Auction Host Subscription Checkout</h3>
+              <button className="close-btn" onClick={() => setShowPaymentModal(false)}>
+                <FiX />
+              </button>
+            </div>
+
+            <div className="payment-modal-body">
+              <div className="tournament-summary-box">
+                <span className="summary-label">Tournament:</span>
+                <span className="summary-value">{formData.tournamentName || "Unnamed Tournament"}</span>
+              </div>
+
+              <div className="plan-summary-card">
+                <div className="plan-row">
+                  <span className="plan-title">{currentPlanInfo.plan.name}</span>
+                  <span className="plan-teams">Up to {currentPlanInfo.plan.maxTeams} Teams</span>
+                </div>
+                <div className="plan-price-large">
+                  ₹{currentPlanInfo.plan.price} <span>/ auction</span>
+                </div>
+                <div className="plan-breakdown">
+                  Effective cost: ~₹{currentPlanInfo.plan.effectivePerTeam} per team
+                </div>
+              </div>
+
+              <div className="checkout-perks">
+                <div className="perk-item">
+                  <FiCheckCircle className="perk-icon" /> Live Player Bidding & Auctioneer Console
+                </div>
+                <div className="perk-item">
+                  <FiCheckCircle className="perk-icon" /> Instant Activation upon checkout
+                </div>
+                <div className="perk-item">
+                  <FiShield className="perk-icon" /> 100% Secure Transaction
+                </div>
+              </div>
+            </div>
+
+            <div className="payment-modal-footer">
+              <button
+                className="cancel-pay-btn"
+                onClick={() => setShowPaymentModal(false)}
+                disabled={loading}
+              >
+                Cancel
+              </button>
+              <button
+                className="confirm-pay-btn"
+                onClick={executeTournamentCreation}
+                disabled={loading}
+              >
+                {loading ? "Activating..." : `Pay ₹${currentPlanInfo.plan.price} & Create`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showSuccess && (
   <SuccessModal
     title="Tournament Created!"

@@ -80,7 +80,7 @@ const CreativeCaptcha = ({ onVerify }) => {
   const [verified, setVerified] = useState(false);
   const [shake, setShake] = useState(false);
   const [feedback, setFeedback] = useState("");
-  const [captchaId, setCaptchaId] = useState("");
+  const [captchaId, setCaptchaId] = useState(() => `fun-captcha-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`);
   const [isReplacing, setIsReplacing] = useState(false);
   const timeoutRef = useRef(null);
 

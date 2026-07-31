@@ -95,6 +95,15 @@ export const verifyCaptcha = async (req, res, next) => {
     });
   }
 
+  // Support client-side interactive human challenges (CreativeCaptcha)
+  if (
+    typeof captchaId === "string" &&
+    captchaId.startsWith("fun-captcha-") &&
+    (captchaAnswer === "verified" || captchaAnswer === "robot_passed")
+  ) {
+    return next();
+  }
+
   const captcha = captchaStore.get(captchaId);
 
   if (!captcha) {
