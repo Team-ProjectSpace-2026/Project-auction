@@ -54,6 +54,14 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    smsOtp: {
+      type: String,
+      default: null,
+    },
+    smsOtpExpires: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,

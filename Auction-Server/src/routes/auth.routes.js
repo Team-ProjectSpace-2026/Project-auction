@@ -2,6 +2,7 @@ import express from "express";
 import {
   register,
   login,
+  loginByMobile,
   getProfile,
   updateProfile,
   updateProfilePhoto,
@@ -10,20 +11,24 @@ import {
   requestForgotPasswordOtp,
   verifyForgotPasswordOtp,
   resetPassword,
+  resetPasswordByMobile,
+  sendSmsOtpHandler,
+  verifySmsOtpHandler,
 } from "../controllers/auth.controller.js";
 import { validateRegister, validateLogin } from "../utils/validators.js";
 import { handleValidationErrors } from "../middleware/errorHandler.js";
 import { authLimiter } from "../middleware/rateLimiter.js";
 import auth from "../middleware/auth.middleware.js";
-import { generateCaptcha, verifyCaptcha } from "../middleware/verifyCaptcha.js";
+import { verifyCaptcha } from "../middleware/verifyCaptcha.js";
 import upload from "../middleware/upload.js";
 
 const router = express.Router();
 
-// Captcha routes
-router.post("/captcha/new", generateCaptcha);
+// Fast2SMS Endpoints
+router.post("/send-sms-otp", authLimiter, sendSmsOtpHandler);
+router.post("/verify-sms-otp", authLimiter, verifySmsOtpHandler);
 
-// Public routes with captcha verification
+// Public auth routes with Creative Captcha verification
 router.post(
   "/register",
   authLimiter,
@@ -40,12 +45,16 @@ router.post(
   handleValidationErrors,
   login
 );
+router.post(
+  "/login-mobile",
+  authLimiter,
+  loginByMobile
+);
 
 // Forgot Password routes
 router.post(
   "/forgot-password/request-otp",
   authLimiter,
-  verifyCaptcha,
   requestForgotPasswordOtp
 );
 router.post(
@@ -57,6 +66,11 @@ router.post(
   "/forgot-password/reset-password",
   authLimiter,
   resetPassword
+);
+router.post(
+  "/forgot-password/reset-mobile",
+  authLimiter,
+  resetPasswordByMobile
 );
 
 // Protected routes
