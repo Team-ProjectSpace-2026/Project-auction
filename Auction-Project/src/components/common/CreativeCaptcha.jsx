@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useCallback } from "react";
 import "./CreativeCaptcha.css";
 
 // Fun pools of interactive visual challenges
@@ -71,9 +71,12 @@ const CHALLENGES = [
   },
 ];
 
+const randomIndex = () => Math.floor(Math.random() * CHALLENGES.length);
+const shuffleOptions = (options) => [...options].sort(() => Math.random() - 0.5);
+
 const CreativeCaptcha = ({ onVerify }) => {
-  const [challengeIndex, setChallengeIndex] = useState(0);
-  const [shuffledOptions, setShuffledOptions] = useState([]);
+  const [challengeIndex, setChallengeIndex] = useState(randomIndex);
+  const [shuffledOptions, setShuffledOptions] = useState(() => shuffleOptions(CHALLENGES[randomIndex()].options));
   const [verified, setVerified] = useState(false);
   const [shake, setShake] = useState(false);
   const [feedback, setFeedback] = useState("");
@@ -81,27 +84,17 @@ const CreativeCaptcha = ({ onVerify }) => {
 
   const currentChallenge = CHALLENGES[challengeIndex];
 
-  // Initialize or shuffle challenge
-  const loadChallenge = (index = null) => {
-    const nextIdx = index !== null ? index : Math.floor(Math.random() * CHALLENGES.length);
+  const loadChallenge = useCallback((index = null) => {
+    const nextIdx = index !== null ? index : randomIndex();
     setChallengeIndex(nextIdx);
-
-    const challenge = CHALLENGES[nextIdx];
-    // Shuffle options order
-    const shuffled = [...challenge.options].sort(() => Math.random() - 0.5);
-    setShuffledOptions(shuffled);
-
+    setShuffledOptions(shuffleOptions(CHALLENGES[nextIdx].options));
     setVerified(false);
     setShake(false);
     setFeedback("");
     setCaptchaId(`fun-captcha-${Date.now()}`);
-  };
-
-  useEffect(() => {
-    loadChallenge();
   }, []);
 
-  const handleSelectOption = (option) => {
+  const handleSelectOption = useCallback((option) => {
     if (verified) return;
 
     if (option.emoji === currentChallenge.target) {
@@ -115,15 +108,14 @@ const CreativeCaptcha = ({ onVerify }) => {
       setFeedback("Oops! Wrong pick. Try this new challenge 👇");
       setTimeout(() => {
         setShake(false);
-        // Load new random challenge
-        let newIdx = Math.floor(Math.random() * CHALLENGES.length);
+        let newIdx = randomIndex();
         if (newIdx === challengeIndex) {
           newIdx = (challengeIndex + 1) % CHALLENGES.length;
         }
         loadChallenge(newIdx);
       }, 700);
     }
-  };
+  }, [verified, currentChallenge, captchaId, onVerify, challengeIndex, loadChallenge]);
 
   return (
     <div className={`creative-captcha-box ${shake ? "captcha-shake" : ""} ${verified ? "captcha-verified" : ""}`}>
