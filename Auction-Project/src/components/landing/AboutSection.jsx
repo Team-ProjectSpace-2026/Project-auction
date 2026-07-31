@@ -34,7 +34,7 @@ const AboutSection = () => {
             }}
           >
             <motion.p variants={statCounterVariants}>
-              CricAuction is India's premier online platform designed to revolutionize how cricket tournaments and player auctions are managed. Our mission is to bring cricket lovers, gamers, and organizers together on one seamless and powerful platform.
+              CricAuctionHub is India's premier online platform designed to revolutionize how cricket tournaments and player auctions are managed. Our mission is to bring cricket lovers, gamers, and organizers together on one seamless and powerful platform.
             </motion.p>
 
             <motion.p variants={statCounterVariants}>

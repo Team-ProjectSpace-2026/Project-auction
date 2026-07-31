@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import InputField from "../../components/common/InputField";
 import Button from "../../components/common/Button";
-import RobotCaptcha from "../../components/common/RobotCaptcha";
 import AnimatedOtpInput from "../../components/common/AnimatedOtpInput";
 import CricketParticles from "../../components/common/SpringPetals";
 import CricketStumpsAnimation from "../../components/common/CyclingBoyAnimation";
@@ -11,9 +10,8 @@ import "./ForgotPasswordPage.css";
 import batsmanLogo from "../../assets/cricauctionlogo1.png";
 
 const ForgotPasswordPage = () => {
-  const [step, setStep] = useState(1); // 1: Email/Captcha, 2: OTP, 3: New Password, 4: Success
+  const [step, setStep] = useState(1); // 1: Email Input, 2: OTP, 3: New Password, 4: Success
   const [email, setEmail] = useState("");
-  const [captchaData, setCaptchaData] = useState(null);
   const [otp, setOtp] = useState("");
   const [resetToken, setResetToken] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -41,12 +39,7 @@ const ForgotPasswordPage = () => {
     return () => clearInterval(interval);
   }, [step, timer]);
 
-  const handleCaptchaVerify = (answer, captchaId) => {
-    setCaptchaData({ answer, captchaId });
-    setError("");
-  };
-
-  // Step 1: Request OTP
+  // Step 1: Request OTP via Email (100% Free Forever)
   const handleRequestOtp = async (e) => {
     e.preventDefault();
     setError("");
@@ -57,33 +50,16 @@ const ForgotPasswordPage = () => {
       return;
     }
 
-    if (!captchaData) {
-      setError("Please complete the 'I am not a robot' security check");
-      return;
-    }
-
     setIsSubmitting(true);
 
     try {
-      const res = await api.post(
-        "/auth/forgot-password/request-otp",
-        {
-          email,
-          captchaId: captchaData.captchaId,
-          captchaAnswer: captchaData.answer,
-        },
-        { timeout: 30000 }
-      );
-
-      setInfoMessage(res.data.message || "OTP code sent to your email address!");
+      const res = await api.post("/auth/forgot-password/request-otp", { email });
+      setInfoMessage(res.data.message || "A 6-digit verification code has been sent to your email!");
       setStep(2);
       setTimer(60);
     } catch (err) {
-      const msg =
-        err.code === "ECONNABORTED"
-          ? "Server request timed out. Please try again."
-          : err.response?.data?.message || "Failed to send OTP code. Please try again.";
-      setError(msg);
+      console.error("Email OTP Request Error:", err);
+      setError(err.response?.data?.message || "Failed to send verification code. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -97,30 +73,17 @@ const ForgotPasswordPage = () => {
     setIsSubmitting(true);
 
     try {
-      const res = await api.post(
-        "/auth/forgot-password/request-otp",
-        {
-          email,
-          captchaId: captchaData?.captchaId || `resend-${Date.now()}`,
-          captchaAnswer: captchaData?.answer || "verified",
-        },
-        { timeout: 18000 }
-      );
-
+      const res = await api.post("/auth/forgot-password/request-otp", { email });
       setInfoMessage(res.data.message || "A new verification code has been sent to your email.");
       setTimer(60);
     } catch (err) {
-      const msg =
-        err.code === "ECONNABORTED"
-          ? "Server request timed out. Please try again."
-          : err.response?.data?.message || "Failed to resend OTP.";
-      setError(msg);
+      setError(err.response?.data?.message || "Failed to resend verification code.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Step 2: Verify OTP
+  // Step 2: Verify Email OTP
   const handleVerifyOtp = async (e) => {
     if (e) e.preventDefault();
     setError("");
@@ -134,13 +97,9 @@ const ForgotPasswordPage = () => {
     setIsSubmitting(true);
 
     try {
-      const res = await api.post("/auth/forgot-password/verify-otp", {
-        email,
-        otp,
-      });
-
+      const res = await api.post("/auth/forgot-password/verify-otp", { email, otp });
       setResetToken(res.data.resetToken);
-      setInfoMessage("Code verified! Please enter your new password.");
+      setInfoMessage("Verification code accepted! Create your new password below.");
       setStep(3);
     } catch (err) {
       setError(err.response?.data?.message || "Invalid or expired verification code.");
@@ -183,13 +142,8 @@ const ForgotPasswordPage = () => {
 
   return (
     <div className="forgot-password-page spring-theme-bg">
-      {/* Cricket Auction Particles — balls, bid tags, confetti, sparkles */}
       <CricketParticles count={30} />
-
-      {/* Cricket Stumps + Flying Ball + Auction Ticker */}
       <CricketStumpsAnimation />
-
-      {/* Stadium Floodlight Glow overlay */}
       <div className="spring-sunburst" />
 
       {/* TOP LEFT BRANDING LOGO */}
@@ -201,7 +155,7 @@ const ForgotPasswordPage = () => {
         />
         <div className="top-left-info">
           <h1 className="top-left-title">
-            Cric<span className="accent-gold">Auction</span><span className="accent-cyan">Hub</span>
+            Cric<span className="accent-gold">Auction</span><span className="accent-white">Hub</span>
           </h1>
           <p className="top-left-tagline">CRICKET LEAGUE AUCTION MANAGEMENT</p>
         </div>
@@ -209,9 +163,9 @@ const ForgotPasswordPage = () => {
 
       <div className="forgot-card-container glass-card">
         <div className="forgot-card-header">
-          <h2 className="step-title">Reset Password</h2>
+          <h2 className="step-title">Reset Password via Email</h2>
           <p className="forgot-subtitle">
-            {step === 1 && "Enter your email to receive a 6-digit verification code"}
+            {step === 1 && "Enter your registered email address to receive a 6-digit verification code"}
             {step === 2 && `Enter the 6-digit code sent to ${email}`}
             {step === 3 && "Create a new strong password for your account"}
             {step === 4 && "Your password has been successfully updated"}
@@ -221,7 +175,7 @@ const ForgotPasswordPage = () => {
         {error && <div className="forgot-alert error-alert">{error}</div>}
         {infoMessage && <div className="forgot-alert info-alert">{infoMessage}</div>}
 
-        {/* STEP 1: Email & Robot Captcha */}
+        {/* STEP 1: Email Input */}
         {step === 1 && (
           <form onSubmit={handleRequestOtp} className="forgot-form">
             <label className="field-label" htmlFor="email">
@@ -253,13 +207,10 @@ const ForgotPasswordPage = () => {
               />
             </div>
 
-            {/* Interactive Free Robot Captcha */}
-            <RobotCaptcha onVerify={handleCaptchaVerify} />
-
             <Button
               type="submit"
               className="action-btn"
-              disabled={isSubmitting || !captchaData}
+              disabled={isSubmitting || !email}
             >
               {isSubmitting ? "Sending Code..." : "Send Verification Code"}
             </Button>
@@ -272,7 +223,7 @@ const ForgotPasswordPage = () => {
           </form>
         )}
 
-        {/* STEP 2: Animated OTP Verification */}
+        {/* STEP 2: Email OTP Verification */}
         {step === 2 && (
           <form onSubmit={handleVerifyOtp} className="forgot-form">
             <AnimatedOtpInput
@@ -294,7 +245,7 @@ const ForgotPasswordPage = () => {
                   onClick={handleResendOtp}
                   disabled={isSubmitting}
                 >
-                  Resend Code
+                  Resend Verification Code
                 </button>
               )}
             </div>

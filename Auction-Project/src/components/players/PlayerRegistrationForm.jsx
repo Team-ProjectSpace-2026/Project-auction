@@ -751,7 +751,7 @@ const PlayerRegistrationForm = ({
         {/* Paid Tournament: Payment Details & Proof Input */}
         {isPaid && (() => {
           const fee = Number(registrationFee);
-          const upiUri = payoutUpiId ? `upi://pay?pa=${encodeURIComponent(payoutUpiId)}&pn=${encodeURIComponent(tournamentName || "CricAuction")}&am=${fee}&cu=INR` : "";
+          const upiUri = payoutUpiId ? `upi://pay?pa=${encodeURIComponent(payoutUpiId)}&pn=${encodeURIComponent(tournamentName || "CricAuctionHub")}&am=${fee}&cu=INR` : "";
 
           return (
             <Card style={{ marginBottom: 32, border: "2px solid #2563eb", background: "#ffffff", boxShadow: "0 8px 24px rgba(37,99,235,0.08)" }}>

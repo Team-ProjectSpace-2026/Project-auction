@@ -446,7 +446,7 @@ const HeroSection = forwardRef((props, ref) => {
               <div className="video-info-bar">
                 <div className="video-info-left">
                   <span className="video-info-badge">DEMO</span>
-                  <span className="video-info-title">How CricAuction Works</span>
+                  <span className="video-info-title">How CricAuctionHub Works</span>
                 </div>
                 <div className="video-info-right">
                   <span className="video-info-duration">2:45</span>

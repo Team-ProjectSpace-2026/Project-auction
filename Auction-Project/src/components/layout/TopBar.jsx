@@ -21,8 +21,8 @@ const TopBar = ({ user }) => {
         {/* Logo link to landing page - always visible except on landing page itself */}
         {location.pathname !== '/' && (
           <Link to="/" className="topbar-brand" aria-label="Go to Landing Page">
-            <img src={batsmanLogo} alt="CricAuction logo" className="topbar-logo" />
-            <span className="brand-text">Cric<span className="accent">Auction</span></span>
+            <img src={batsmanLogo} alt="CricAuctionHub logo" className="topbar-logo" />
+            <span className="brand-text">Cric<span className="accent">Auction</span><span className="brand-hub">Hub</span></span>
           </Link>
         )}
       </div>
