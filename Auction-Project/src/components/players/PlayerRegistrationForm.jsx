@@ -242,6 +242,7 @@ const DEFAULT_FORM = {
   playerName:     "",
   age:            "",
   mobile:         "",
+  email:          "",
   jerseyNumber:   "",
   jerseySize:     "",
   jerseyName:     "",
@@ -459,6 +460,14 @@ const PlayerRegistrationForm = ({
               value={form.mobile}
               onChange={set("mobile")}
               placeholder="Enter mobile number"
+            />
+            <InputField
+              label="Email Address (for Digital Pass & Receipt)"
+              id="email"
+              type="email"
+              value={form.email}
+              onChange={set("email")}
+              placeholder="e.g. player@gmail.com"
             />
           </div>
         </Card>

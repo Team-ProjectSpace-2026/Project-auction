@@ -70,6 +70,18 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
     return () => { cancelled = true; };
   }, [tournamentId]);
 
+  const handleVerifyPayment = async (playerId, status) => {
+    try {
+      await playerService.verifyPlayerPayment(playerId, status);
+      setPlayers((prev) =>
+        prev.map((p) => (p._id === playerId ? { ...p, paymentStatus: status } : p))
+      );
+    } catch (err) {
+      console.error("Failed to verify player payment:", err);
+      alert(err.response?.data?.message || "Failed to update payment status");
+    }
+  };
+
   const filteredPlayers = useMemo(() => {
     return players.filter((p) => {
       const name = p.name || "";
@@ -385,15 +397,35 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
                     </td>
                     <td>
                       <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                        {player.paymentStatus === "pending_verification" && (
+                          <>
+                            <button
+                              title="Approve / Verify Payment"
+                              onClick={() => handleVerifyPayment(player._id, "verified")}
+                              style={{ border: "none", background: "#dcfce7", color: "#15803d", padding: "4px 8px", borderRadius: "6px", cursor: "pointer", fontSize: "11px", fontWeight: "700", display: "inline-flex", alignItems: "center", gap: "3px" }}
+                            >
+                              <Check size={13} /> Approve
+                            </button>
+                            <button
+                              title="Reject Payment"
+                              onClick={() => handleVerifyPayment(player._id, "rejected")}
+                              style={{ border: "none", background: "#fef2f2", color: "#dc2626", padding: "4px 8px", borderRadius: "6px", cursor: "pointer", fontSize: "11px", fontWeight: "700", display: "inline-flex", alignItems: "center", gap: "3px" }}
+                            >
+                              <X size={13} /> Reject
+                            </button>
+                          </>
+                        )}
                         <button
                           onClick={() => navigate(`/player-details/${player._id}`, { state: { tournamentId: propTournamentId } })}
                           style={{ border: "none", background: "transparent", cursor: "pointer", fontSize: "16px" }}
+                          title="View Player Details"
                         >
                           <Eye size={16} strokeWidth={2} />
                         </button>
                         <button
                           onClick={() => handleDelete(player._id)}
                           style={{ border: "none", background: "transparent", cursor: "pointer", fontSize: "16px" }}
+                          title="Delete Player"
                         >
                           <Trash2 size={16} strokeWidth={2} />
                         </button>
