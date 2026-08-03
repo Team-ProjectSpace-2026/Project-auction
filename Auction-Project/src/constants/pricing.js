@@ -14,12 +14,12 @@ export const AUCTION_PRICING_PLANS = [
   },
   {
     planNumber: 2,
-    name: "Plan 2",
+    name: "Plan 2 (Live Test)",
     maxTeams: 4,
-    price: 249,
+    price: 20,
     isFree: false,
-    effectivePerTeam: 62,
-    description: "Ideal for small community leagues.",
+    effectivePerTeam: 5,
+    description: "Temporary ₹20 Live Test Tier.",
   },
   {
     planNumber: 3,
