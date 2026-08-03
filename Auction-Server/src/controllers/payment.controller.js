@@ -1,139 +1,136 @@
-import crypto from 'crypto';
 import mongoose from 'mongoose';
 import Tournament from '../models/Tournament.js';
-import { getRazorpayInstance } from '../config/razorpay.js';
-
-// Calculate convenience fee (Option 2: 2.5% passed to player)
-const CONVENIENCE_FEE_PERCENT = 0.025;
+import { getCashfreeConfig, createCashfreeOrder } from '../config/cashfree.js';
 
 /**
- * @desc    Create Razorpay Order for tournament registration
- * @route   POST /api/payment/create-order
- * @access  Public
+ * @desc    Initiate Cashfree Payment Session for tournament hosting fee or player registration fee
+ * @route   POST /api/payment/initiate-payment
+ * @access  Private / Public
  */
-export const createOrder = async (req, res) => {
+export const initiatePayment = async (req, res) => {
   try {
-    const { tournamentId } = req.body;
+    const { tournamentId, numTeams, amount, type = 'tournament_hosting', firstname, email, phone } = req.body;
 
-    if (!tournamentId || typeof tournamentId !== 'string' || !mongoose.Types.ObjectId.isValid(tournamentId)) {
-      return res.status(400).json({ success: false, message: 'Invalid or missing Tournament ID' });
+    const { env } = getCashfreeConfig();
+
+    let cleanAmount = 0;
+    let orderId = `cf_${type.slice(0, 4)}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+
+    if (type === 'tournament_hosting') {
+      if (numTeams && Number(numTeams) > 0) {
+        const teams = Number(numTeams);
+        if (teams <= 3) cleanAmount = 0;
+        else if (teams <= 4) cleanAmount = 249;
+        else if (teams <= 6) cleanAmount = 349;
+        else if (teams <= 8) cleanAmount = 449;
+        else if (teams <= 12) cleanAmount = 599;
+        else if (teams <= 16) cleanAmount = 749;
+        else cleanAmount = 899;
+      } else if (amount && Number(amount) > 0) {
+        cleanAmount = Number(amount);
+      }
+    } else if (type === 'player_registration') {
+      if (!tournamentId || !mongoose.Types.ObjectId.isValid(tournamentId)) {
+        return res.status(400).json({ success: false, message: 'Invalid or missing Tournament ID' });
+      }
+      const tournament = await Tournament.findById(tournamentId);
+      if (!tournament) {
+        return res.status(404).json({ success: false, message: 'Tournament not found' });
+      }
+      cleanAmount = Number(tournament.registrationFee || 0);
     }
 
-    const cleanTournamentId = String(tournamentId).trim();
-    const tournament = await Tournament.findById(cleanTournamentId);
-    if (!tournament) {
-      return res.status(404).json({ success: false, message: 'Tournament not found' });
-    }
-
-    // If tournament is free, no order needed
-    if (!tournament.isPaid || !tournament.registrationFee || tournament.registrationFee <= 0) {
+    if (cleanAmount <= 0) {
       return res.status(200).json({
         success: true,
-        isPaid: false,
+        isFree: true,
         amount: 0,
-        message: 'This tournament is free. No payment required.'
+        message: 'No payment required for this tier.'
       });
     }
 
-    if (tournament.registrationEndDate && new Date() > new Date(tournament.registrationEndDate)) {
-      return res.status(403).json({ success: false, message: 'Registration deadline has passed' });
-    }
+    const userFirstName = (firstname || req.user?.name || 'Customer').trim();
+    const userEmail = (email || req.user?.email || 'customer@example.com').trim();
+    const userPhone = (phone || req.user?.mobile || '9999999999').trim();
 
-    const entryFee = Number(tournament.registrationFee);
-    const convenienceFee = Math.round(entryFee * CONVENIENCE_FEE_PERCENT * 100) / 100;
-    const totalAmount = entryFee + convenienceFee;
-
-    // Amount in paise (1 INR = 100 Paise)
-    const amountInPaise = Math.round(totalAmount * 100);
-
-    const razorpay = getRazorpayInstance();
-
-    const options = {
-      amount: amountInPaise,
-      currency: tournament.currency || 'INR',
-      receipt: `treg_${tournamentId.toString().slice(-6)}_${Date.now().toString().slice(-6)}`,
-      notes: {
-        tournamentId: tournament._id.toString(),
-        tournamentName: tournament.name,
-        entryFee,
-        convenienceFee
-      }
-    };
-
-    const order = await razorpay.orders.create(options);
+    // Call Cashfree API to create Order & obtain payment_session_id
+    const cashfreeOrder = await createCashfreeOrder({
+      orderId,
+      orderAmount: cleanAmount,
+      customerId: req.user?._id?.toString() || 'user_' + Date.now(),
+      customerName: userFirstName,
+      customerEmail: userEmail,
+      customerPhone: userPhone,
+      returnUrl: `${process.env.CLIENT_URL || 'http://localhost:5173'}/payment-success?order_id=${orderId}`
+    });
 
     return res.status(200).json({
       success: true,
-      isPaid: true,
-      orderId: order.id,
-      amount: totalAmount,
-      amountPaise: order.amount,
-      currency: order.currency,
-      entryFee,
-      convenienceFee,
-      keyId: process.env.RAZORPAY_KEY_ID || '',
-      tournamentName: tournament.name
+      isFree: false,
+      orderId: cashfreeOrder.order_id,
+      paymentSessionId: cashfreeOrder.payment_session_id,
+      amount: cleanAmount,
+      env,
+      message: 'Cashfree payment session created successfully'
     });
 
   } catch (error) {
-    console.error('Error creating Razorpay order:', error);
+    console.error('Error initiating Cashfree payment:', error);
     return res.status(500).json({
       success: false,
-      message: 'Failed to create payment order',
+      message: 'Failed to initiate Cashfree payment',
       error: error.message
     });
   }
 };
 
 /**
- * @desc    Verify Razorpay payment signature
+ * @desc    Verify Cashfree Payment Status
  * @route   POST /api/payment/verify-payment
- * @access  Public
+ * @access  Private / Public
  */
 export const verifyPayment = async (req, res) => {
   try {
-    const { razorpayOrderId, razorpayPaymentId, razorpaySignature } = req.body;
+    const { orderId } = req.body;
 
-    if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
-      return res.status(400).json({
-        success: false,
-        message: 'Missing required payment verification parameters'
-      });
+    if (!orderId) {
+      return res.status(400).json({ success: false, message: 'Missing orderId parameter' });
     }
 
-    const keySecret = process.env.RAZORPAY_KEY_SECRET;
-    if (!keySecret) {
-      return res.status(500).json({
-        success: false,
-        message: 'Server payment configuration missing (RAZORPAY_KEY_SECRET)'
-      });
-    }
+    const { appId, secretKey, baseUrl } = getCashfreeConfig();
 
-    const body = `${razorpayOrderId}|${razorpayPaymentId}`;
-    const expectedSignature = crypto
-      .createHmac('sha256', keySecret)
-      .update(body.toString())
-      .digest('hex');
+    const response = await fetch(`${baseUrl}/orders/${orderId}`, {
+      method: 'GET',
+      headers: {
+        'x-api-version': '2023-08-01',
+        'x-client-id': appId,
+        'x-client-secret': secretKey
+      }
+    });
 
-    const isValid = expectedSignature === razorpaySignature;
+    const data = await response.json();
 
-    if (isValid) {
+    if (response.ok && data.order_status === 'PAID') {
       return res.status(200).json({
         success: true,
-        message: 'Payment verified successfully'
+        orderId: data.order_id,
+        amount: data.order_amount,
+        status: data.order_status,
+        message: 'Cashfree payment verified successfully'
       });
     } else {
       return res.status(400).json({
         success: false,
-        message: 'Invalid payment signature verification failed'
+        status: data.order_status || 'UNPAID',
+        message: 'Payment verification failed or payment is pending'
       });
     }
 
   } catch (error) {
-    console.error('Error verifying payment signature:', error);
+    console.error('Error verifying Cashfree payment:', error);
     return res.status(500).json({
       success: false,
-      message: 'Failed to verify payment',
+      message: 'Failed to verify Cashfree payment',
       error: error.message
     });
   }

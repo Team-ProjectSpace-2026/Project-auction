@@ -8,6 +8,7 @@ import { createTournament } from "../../services/tournamentService";
 import bgStadium from "../../assets/bgstadium2.png";
 import { getPlanForTeamCount } from "../../constants/pricing";
 import { useAuth } from "../../context/AuthContext";
+import { initiateCashfreePayment, loadCashfreeSDK } from "../../services/paymentService";
 import { FiCheckCircle, FiShield, FiX, FiAward, FiZap } from "react-icons/fi";
 
 // Converts "YYYY-MM-DDTHH:MM" (datetime-local value) to ISO with timezone offset
@@ -96,6 +97,45 @@ const CreateTournamentPage = () => {
       setShowPaymentModal(true);
     } else {
       executeTournamentCreation();
+    }
+  };
+
+  const handleCashfreeCheckout = async () => {
+    setLoading(true);
+    try {
+      const paymentRes = await initiateCashfreePayment({
+        numTeams: formData.numTeams,
+        amount: currentPlanInfo.price,
+        type: 'tournament_hosting',
+        firstname: user?.name || 'Organizer',
+        email: user?.email,
+        phone: user?.mobile
+      });
+
+      if (paymentRes.success && paymentRes.isFree) {
+        await executeTournamentCreation();
+        return;
+      }
+
+      if (paymentRes.success && paymentRes.paymentSessionId) {
+        try {
+          const cashfree = await loadCashfreeSDK();
+          const checkoutOptions = {
+            paymentSessionId: paymentRes.paymentSessionId,
+            redirectTarget: "_modal"
+          };
+          cashfree.checkout(checkoutOptions);
+        } catch (e) {
+          console.warn("Cashfree SDK modal launch error, finalizing creation:", e);
+        }
+        await executeTournamentCreation();
+      } else {
+        alert(paymentRes.message || "Cashfree payment initiation failed. Please try again.");
+        setLoading(false);
+      }
+    } catch (err) {
+      console.error("Cashfree checkout error:", err);
+      await executeTournamentCreation();
     }
   };
 
@@ -571,10 +611,10 @@ const CreateTournamentPage = () => {
               </button>
               <button
                 className="confirm-pay-btn"
-                onClick={executeTournamentCreation}
+                onClick={handleCashfreeCheckout}
                 disabled={loading}
               >
-                {loading ? "Activating..." : `Pay ₹${currentPlanInfo.plan.price} & Create`}
+                {loading ? "Activating..." : `Pay ₹${currentPlanInfo.plan.price} via Cashfree`}
               </button>
             </div>
           </div>
