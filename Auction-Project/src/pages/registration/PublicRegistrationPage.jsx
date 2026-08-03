@@ -73,7 +73,7 @@ export default function PublicRegistrationPage() {
   useEffect(() => {
     if (tournamentData?.isPaid && tournamentData?.registrationFee > 0 && payoutUpiId) {
       const fee = Number(tournamentData.registrationFee);
-      const upiUri = `upi://pay?pa=${encodeURIComponent(payoutUpiId)}&pn=${encodeURIComponent(tournamentData.name || "CricAuctionHub")}&am=${fee}&cu=INR`;
+      const upiUri = `upi://pay?pa=${payoutUpiId}&pn=${encodeURIComponent(tournamentData.name || "CricAuctionHub")}&am=${fee}&cu=INR`;
       QRCode.toDataURL(upiUri, { width: 200, margin: 1 })
         .then((url) => setQrCodeDataUrl(url))
         .catch(() => setQrCodeDataUrl(""));
