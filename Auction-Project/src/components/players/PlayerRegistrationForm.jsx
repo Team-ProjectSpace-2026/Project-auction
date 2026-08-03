@@ -365,16 +365,6 @@ const PlayerRegistrationForm = ({
     if (battingEnabled && !form.battingStyle) return setInternalBanner({ type: "error", message: "Please select batting style." });
     if (bowlingEnabled && !form.bowlingStyle) return setInternalBanner({ type: "error", message: "Please select bowling style." });
 
-    if (isPaid) {
-      const cleanUtr = (form.utrLast4 || "").trim();
-      if (!cleanUtr && !form.paymentScreenshot) {
-        return setInternalBanner({ type: "error", message: "Please enter the last 4 digits of UTR or upload a payment screenshot." });
-      }
-      if (cleanUtr && cleanUtr.length !== 4) {
-        return setInternalBanner({ type: "error", message: "UTR must be exactly the last 4 digits (e.g. 4421)." });
-      }
-    }
-
     let croppedFile = null;
     if (form.photo && photoPreview && croppedAreaPixels) {
       try {
@@ -927,62 +917,6 @@ const PlayerRegistrationForm = ({
                   <strong>⚠️ Payment Not Configured:</strong> Registration fee is ₹{fee}, but the tournament organizer has not set up a UPI ID yet.
                 </div>
               )}
-
-              {/* Payment Proof Inputs */}
-              <div>
-                <h5 style={{ margin: "0 0 6px", fontSize: "14px", fontWeight: "700", color: C.dark }}>
-                  Payment Verification Proof
-                </h5>
-                <p style={{ margin: "0 0 14px", fontSize: "13px", color: C.muted }}>
-                  Provide the last 4 digits of your UPI Transaction / UTR ID after paying, or upload a payment screenshot for fast verification.
-                </p>
-
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 20, alignItems: "start" }}>
-                  <InputField
-                    label="Last 4 Digits of UTR / Ref Number"
-                    id="utrLast4"
-                    type="text"
-                    maxLength={4}
-                    value={form.utrLast4}
-                    onChange={(e) => {
-                      const val = e.target.value.replace(/\D/g, "").slice(0, 4);
-                      setForm((f) => ({ ...f, utrLast4: val }));
-                    }}
-                    placeholder="e.g. 4421"
-                  />
-
-                  <div>
-                    <label style={{ display: "block", marginBottom: 6, fontSize: 14, fontWeight: 600, color: C.dark }}>
-                      Payment Screenshot (Optional if UTR given)
-                    </label>
-                    <input
-                      ref={screenshotRef}
-                      type="file"
-                      accept="image/jpeg,image/png"
-                      style={{ display: "none" }}
-                      onChange={(e) => handleScreenshot(e.target.files[0])}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => screenshotRef.current?.click()}
-                      style={{
-                        width: "100%",
-                        padding: "10px 14px",
-                        border: `1.5px dashed ${screenshotPreview ? C.green : C.blue}`,
-                        borderRadius: 10,
-                        background: screenshotPreview ? "#f0fdf4" : "#ffffff",
-                        color: screenshotPreview ? "#166534" : C.blue,
-                        fontWeight: 600,
-                        fontSize: 13,
-                        cursor: "pointer",
-                        textAlign: "center",
-                      }}
-                    >
-                      {screenshotPreview ? "✓ Screenshot Attached (Change)" : "📸 Upload Payment Screenshot"}
-                    </button>
-                  </div>
-                </div>
-              </div>
             </Card>
           );
         })()}
