@@ -252,8 +252,6 @@ const DEFAULT_FORM = {
   isKeeper:       "",
   isAllRounder:   "",
   photo:          null,
-  utrLast4:       "",
-  paymentScreenshot: null,
 };
 
 // ─── Main Component ──────────────────────────────────────────────────────────
@@ -276,14 +274,12 @@ const PlayerRegistrationForm = ({
 }) => {
   const [form, setForm] = useState(() => ({ ...DEFAULT_FORM, ...initialData }));
   const [photoPreview, setPhotoPreview] = useState(initialData?.photoPreview || null);
-  const [screenshotPreview, setScreenshotPreview] = useState(null);
   const [dragOver, setDragOver]         = useState(false);
   const [crop, setCrop]                 = useState({ x: 0, y: 0 });
   const [zoom, setZoom]                 = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const [internalBanner, setInternalBanner] = useState(null);
   const fileRef = useRef(null);
-  const screenshotRef = useRef(null);
 
   const banner = externalBanner || internalBanner;
 
@@ -309,21 +305,6 @@ const PlayerRegistrationForm = ({
     setPhotoPreview(createPhotoPreviewUrl(file));
     setCrop({ x: 0, y: 0 });
     setZoom(1);
-    setInternalBanner(null);
-  }
-
-  function handleScreenshot(file) {
-    if (!file) return;
-    if (!["image/jpeg", "image/png"].includes(file.type)) {
-      setInternalBanner({ type: "error", message: "Only JPG / PNG files are allowed for payment screenshot." });
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      setInternalBanner({ type: "error", message: "Screenshot file size must be under 5 MB." });
-      return;
-    }
-    setForm((f) => ({ ...f, paymentScreenshot: file }));
-    setScreenshotPreview(createPhotoPreviewUrl(file));
     setInternalBanner(null);
   }
 
@@ -379,17 +360,15 @@ const PlayerRegistrationForm = ({
 
     const formData = new FormData();
     Object.entries(form).forEach(([k, v]) => {
-      if (v !== null && k !== "photo" && k !== "paymentScreenshot") formData.append(k, v);
+      if (v !== null && k !== "photo") formData.append(k, v);
     });
     if (croppedFile) formData.append("photo", croppedFile);
-    if (form.paymentScreenshot) formData.append("paymentScreenshot", form.paymentScreenshot);
 
     try {
       await onSubmit(formData, form);
       if (resetOnSubmit) {
         setForm({ ...DEFAULT_FORM });
         setPhotoPreview(null);
-        setScreenshotPreview(null);
       }
     } catch (err) {
       const serverErrors = err?.response?.data?.errors;
