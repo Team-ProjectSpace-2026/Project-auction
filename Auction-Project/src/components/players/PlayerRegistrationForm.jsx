@@ -789,46 +789,71 @@ const PlayerRegistrationForm = ({
                         Scan QR code or click the button below to pay directly using <strong>Google Pay, PhonePe, Paytm, or BHIM</strong>.
                       </p>
 
-                      {/* Mobile Deep Link & Desktop Smart Button */}
-                      <a
-                        href={upiUri}
-                        onClick={(e) => {
-                          navigator.clipboard.writeText(payoutUpiId);
-                          const isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-                          if (!isMobile) {
-                            e.preventDefault();
-                            alert(`UPI ID "${payoutUpiId}" copied to clipboard!\n\nSince you are on a computer, please scan the QR code on the right using Google Pay, PhonePe, or Paytm on your mobile phone to complete the ₹${fee} payment.`);
-                          }
-                        }}
-                        style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          gap: "8px",
-                          background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
-                          color: "#ffffff",
-                          fontWeight: "700",
-                          fontSize: "14px",
-                          padding: "12px 20px",
-                          borderRadius: "10px",
-                          textDecoration: "none",
-                          boxShadow: "0 4px 12px rgba(37,99,235,0.25)",
-                          marginBottom: "12px",
-                          cursor: "pointer",
-                        }}
-                      >
-                        ⚡ Open GPay / PhonePe & Pay ₹{fee}
-                      </a>
+                      {/* Mobile Deep Link & Smart Copy Action Buttons */}
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginBottom: "14px" }}>
+                        <a
+                          href={upiUri}
+                          onClick={(e) => {
+                            navigator.clipboard.writeText(payoutUpiId);
+                            const isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                            if (!isMobile) {
+                              e.preventDefault();
+                              alert(`UPI ID "${payoutUpiId}" copied to clipboard!\n\nSince you are on a computer, please scan the QR code on the right using Google Pay, PhonePe, or Paytm on your mobile phone to complete the ₹${fee} payment.`);
+                            }
+                          }}
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: "8px",
+                            background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
+                            color: "#ffffff",
+                            fontWeight: "700",
+                            fontSize: "14px",
+                            padding: "12px 18px",
+                            borderRadius: "10px",
+                            textDecoration: "none",
+                            boxShadow: "0 4px 12px rgba(37,99,235,0.25)",
+                            cursor: "pointer",
+                          }}
+                        >
+                          ⚡ Pay via UPI App (₹{fee})
+                        </a>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText(payoutUpiId);
+                            alert(`UPI ID "${payoutUpiId}" copied to clipboard!\n\n1. Open Google Pay, PhonePe, or Paytm.\n2. Tap "Pay UPI ID" and paste: ${payoutUpiId}\n3. Pay ₹${fee} and enter the last 4 digits of UTR below.`);
+                          }}
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: "6px",
+                            background: "#f1f5f9",
+                            border: "1px solid #cbd5e1",
+                            color: "#334155",
+                            fontWeight: "700",
+                            fontSize: "13px",
+                            padding: "12px 16px",
+                            borderRadius: "10px",
+                            cursor: "pointer",
+                          }}
+                        >
+                          📋 Copy UPI ID & Pay Manually
+                        </button>
+                      </div>
 
                       {/* UPI ID Copy Line */}
-                      <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "#ffffff", padding: "8px 12px", borderRadius: "8px", border: "1px solid #cbd5e1" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "#ffffff", padding: "8px 12px", borderRadius: "8px", border: "1px solid #cbd5e1", marginBottom: "12px" }}>
                         <span style={{ fontSize: "12px", color: "#64748b", fontWeight: "600" }}>UPI ID:</span>
                         <code style={{ fontSize: "13px", fontWeight: "700", color: "#1e293b" }}>{payoutUpiId}</code>
                         <button
                           type="button"
                           onClick={() => {
                             navigator.clipboard.writeText(payoutUpiId);
-                            alert("UPI ID copied to clipboard!");
+                            alert(`UPI ID "${payoutUpiId}" copied to clipboard!`);
                           }}
                           style={{
                             marginLeft: "auto",
@@ -863,28 +888,30 @@ const PlayerRegistrationForm = ({
                           style={{ width: 140, height: 140, borderRadius: "8px", display: "block", margin: "0 auto 6px" }}
                         />
                         <div style={{ fontSize: "11px", fontWeight: "600", color: "#64748b" }}>
-                          Scan with any UPI app
+                          Scan with GPay / PhonePe
                         </div>
                       </div>
                     )}
 
                   </div>
 
-                  {/* Helpful guidance note */}
+                  {/* Helpful GPay Warning Explanation Box */}
                   <div style={{
                     marginTop: "16px",
-                    padding: "10px 14px",
-                    background: "#eff6ff",
-                    border: "1px solid #bfdbfe",
+                    padding: "12px 16px",
+                    background: "#fffbebf5",
+                    border: "1px solid #fde68a",
                     borderRadius: "10px",
                     fontSize: "13px",
-                    color: "#1e40af",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px"
+                    color: "#92400e",
+                    lineHeight: "1.5"
                   }}>
-                    <span>💡</span>
-                    <span><strong>Already paid?</strong> You don't need to tap the GPay button again! Simply enter the last 4 digits of your UTR transaction ID or upload a screenshot below.</span>
+                    <strong style={{ display: "block", marginBottom: "4px", fontSize: "13px" }}>
+                      ⚠️ Notice for Google Pay Users:
+                    </strong>
+                    Google Pay blocks direct web-link transfers to personal UPI accounts for security reasons (showing <em>"Money not debited / Bank limit exceeded"</em>). 
+                    <br />
+                    👉 <strong>Solution:</strong> Tap <strong>"📋 Copy UPI ID"</strong> above, open Google Pay on your phone, select <strong>Pay UPI ID</strong>, paste <code>{payoutUpiId}</code>, and complete the ₹{fee} payment.
                   </div>
                 </div>
               ) : (
