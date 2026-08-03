@@ -57,6 +57,11 @@ const playerSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    email: {
+      type: String,
+      trim: true,
+      default: "",
+    },
     countryCode: {
       type: String,
       default: "+91",

@@ -3,6 +3,7 @@ import { v2 as cloudinary } from "cloudinary";
 import Player from "../models/Player.js";
 import Tournament from "../models/Tournament.js";
 import Bid from "../models/Bid.js";
+import { sendPlayerRegistrationEmail } from "../services/email.service.js";
 
 export const getPlayers = async (req, res, next) => {
   try {
@@ -253,6 +254,7 @@ export const registerPlayer = async (req, res, next) => {
     const playerName = String(req.body.playerName || "").trim();
     const age = Number(req.body.age) || 0;
     const mobile = String(req.body.mobile || "").trim();
+    const email = String(req.body.email || "").trim().toLowerCase();
     const countryCode = String(req.body.countryCode || "+91").trim();
     const primaryRole = String(req.body.primaryRole || "").trim();
     const battingStyle = String(req.body.battingStyle || "").trim();
@@ -313,6 +315,7 @@ export const registerPlayer = async (req, res, next) => {
       keeper: isKeeper === 'Yes',
       age: Number(age),
       mobile,
+      email,
       countryCode: countryCode || '+91',
       battingStyle,
       bowlingStyle,
@@ -329,6 +332,14 @@ export const registerPlayer = async (req, res, next) => {
     });
 
     await player.save();
+
+    // Trigger automated registration confirmation email in background
+    if (email) {
+      sendPlayerRegistrationEmail({ player, tournament }).catch((err) =>
+        console.error("Error sending registration email:", err)
+      );
+    }
+
     res.status(201).json({ message: 'Registration successful', player });
   } catch (error) {
     next(error);
