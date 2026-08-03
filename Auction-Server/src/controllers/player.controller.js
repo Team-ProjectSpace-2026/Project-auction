@@ -269,7 +269,7 @@ export const registerPlayer = async (req, res, next) => {
       return res.status(409).json({ message: 'This mobile number is already registered for this tournament' });
     }
 
-    // Payment validation if tournament is paid
+    // Payment status tracking if tournament is paid
     let paymentStatus = 'free';
     let paymentDetailsObj = {};
 
@@ -280,14 +280,10 @@ export const registerPlayer = async (req, res, next) => {
         screenshotUrl = req.files.paymentScreenshot[0].path;
       }
 
-      if (!utrLast4 && !screenshotUrl) {
-        return res.status(400).json({ message: 'Please provide the last 4 digits of UTR or a payment screenshot' });
-      }
-
       paymentStatus = 'verified';
       paymentDetailsObj = {
-        utrLast4,
-        paymentScreenshot: screenshotUrl,
+        utrLast4: utrLast4 || "N/A",
+        paymentScreenshot: screenshotUrl || "",
         amountPaid: Number(tournament.registrationFee) || 0,
         paidAt: new Date(),
         verifiedAt: new Date()
