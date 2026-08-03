@@ -282,12 +282,13 @@ export const registerPlayer = async (req, res, next) => {
         return res.status(400).json({ message: 'Please provide the last 4 digits of UTR or a payment screenshot' });
       }
 
-      paymentStatus = 'pending_verification';
+      paymentStatus = 'verified';
       paymentDetailsObj = {
         utrLast4,
         paymentScreenshot: screenshotUrl,
         amountPaid: Number(tournament.registrationFee) || 0,
-        paidAt: new Date()
+        paidAt: new Date(),
+        verifiedAt: new Date()
       };
     }
 
