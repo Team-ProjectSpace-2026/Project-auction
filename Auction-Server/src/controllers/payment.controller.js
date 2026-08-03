@@ -93,13 +93,20 @@ export const verifyPayment = async (req, res) => {
   try {
     const { orderId } = req.body;
 
-    if (!orderId) {
-      return res.status(400).json({ success: false, message: 'Missing orderId parameter' });
+    if (!orderId || typeof orderId !== 'string') {
+      return res.status(400).json({ success: false, message: 'Invalid or missing orderId parameter' });
+    }
+
+    const sanitizedOrderId = String(orderId).trim();
+    if (!/^[a-zA-Z0-9_-]{3,100}$/.test(sanitizedOrderId)) {
+      return res.status(400).json({ success: false, message: 'Malformed orderId parameter' });
     }
 
     const { appId, secretKey, baseUrl } = getCashfreeConfig();
 
-    const response = await fetch(`${baseUrl}/orders/${orderId}`, {
+    const safeEndpoint = new URL(`/pg/orders/${encodeURIComponent(sanitizedOrderId)}`, baseUrl).toString();
+
+    const response = await fetch(safeEndpoint, {
       method: 'GET',
       headers: {
         'x-api-version': '2023-08-01',
