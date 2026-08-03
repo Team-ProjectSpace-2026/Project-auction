@@ -7,6 +7,7 @@ import RecentAuctions from '../../components/landing/RecentAuctions';
 import OurAuctions from '../../components/landing/OurAuctions';
 import AboutSection from '../../components/landing/AboutSection';
 import FeaturesSection from '../../components/landing/FeaturesSection';
+import PricingSection from '../../components/landing/PricingSection';
 import Footer from '../../components/landing/Footer';
 import './LandingPage.css';
 
@@ -315,6 +316,7 @@ const LandingPage = () => {
         </div>
 
         <FeaturesSection />
+        <PricingSection />
       </main>
       <Footer />
     </div>

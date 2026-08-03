@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { FiMenu, FiX, FiHome, FiClock, FiAward, FiInfo, FiStar, FiLogIn } from 'react-icons/fi';
+import { FiMenu, FiX, FiHome, FiClock, FiAward, FiInfo, FiStar, FiLogIn, FiTag } from 'react-icons/fi';
 import batsmanLogo from '../../assets/cricauctionlogo1.png';
 import './NavBar.css';
 
@@ -11,6 +11,7 @@ const navItems = [
   { id: 'our-auctions', label: 'Our Auctions', icon: FiAward },
   { id: 'about', label: 'About', icon: FiInfo },
   { id: 'features', label: 'Features', icon: FiStar },
+  { id: 'pricing', label: 'Pricing', icon: FiTag },
 ];
 
 const NavBar = () => {

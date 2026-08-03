@@ -95,11 +95,11 @@ export const verifyCaptcha = async (req, res, next) => {
     });
   }
 
-  // Handle creative interactive captchas (fun-captcha- prefix)
+  // Support client-side interactive human challenges (CreativeCaptcha)
   if (
     typeof captchaId === "string" &&
     captchaId.startsWith("fun-captcha-") &&
-    (captchaAnswer === "verified" || captchaAnswer === "human_passed")
+    (captchaAnswer === "verified" || captchaAnswer === "robot_passed")
   ) {
     return next();
   }
