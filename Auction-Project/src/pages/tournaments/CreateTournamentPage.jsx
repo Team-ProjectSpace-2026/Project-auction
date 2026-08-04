@@ -121,7 +121,7 @@ const CreateTournamentPage = () => {
 
       if (paymentRes.success && paymentRes.paymentSessionId) {
         // Step 2: Load Cashfree SDK and open checkout modal
-        const cashfree = await loadCashfreeSDK();
+        const cashfree = await loadCashfreeSDK(paymentRes.env);
         const checkoutOptions = {
           paymentSessionId: paymentRes.paymentSessionId,
           redirectTarget: "_modal"

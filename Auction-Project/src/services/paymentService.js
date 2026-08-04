@@ -1,22 +1,60 @@
 import api from "./api";
 
 /**
- * Dynamically load Cashfree JS SDK v3
+ * Dynamically load & initialize Cashfree JS SDK v3 with CDN fallback
+ * @param {string} env - 'PROD' | 'PRODUCTION' | 'TEST'
  */
-export const loadCashfreeSDK = () => {
+export const loadCashfreeSDK = (env = "TEST") => {
   return new Promise((resolve, reject) => {
-    if (window.Cashfree) {
-      return resolve(window.Cashfree);
-    }
-    const script = document.createElement("script");
-    script.src = "https://sdk.cashfreepayments.com/js/v3/cashfree.js";
-    script.async = true;
-    script.onload = () => {
-      if (window.Cashfree) resolve(window.Cashfree);
-      else reject(new Error("Cashfree SDK failed to initialize"));
+    const isProduction = String(env).toUpperCase() === "PROD" || String(env).toUpperCase() === "PRODUCTION";
+    const mode = isProduction ? "production" : "sandbox";
+
+    const getSDKInstance = () => {
+      try {
+        if (typeof window.Cashfree === "function") {
+          return window.Cashfree({ mode });
+        }
+        if (window.Cashfree && typeof window.Cashfree.checkout === "function") {
+          return window.Cashfree;
+        }
+      } catch (e) {
+        console.warn("Cashfree constructor invocation note:", e);
+      }
+      return null;
     };
-    script.onerror = () => reject(new Error("Failed to load Cashfree JS SDK"));
-    document.body.appendChild(script);
+
+    const existingInstance = getSDKInstance();
+    if (existingInstance) {
+      return resolve(existingInstance);
+    }
+
+    const primaryUrl = "https://sdk.cashfree.com/js/v3/cashfree.js";
+    const fallbackUrl = "https://sdk.cashfreepayments.com/js/v3/cashfree.js";
+
+    const loadScript = (url, isFallback = false) => {
+      const script = document.createElement("script");
+      script.src = url;
+      script.async = true;
+      script.onload = () => {
+        const instance = getSDKInstance();
+        if (instance) {
+          resolve(instance);
+        } else {
+          reject(new Error("Cashfree SDK loaded but failed to initialize instance."));
+        }
+      };
+      script.onerror = () => {
+        if (!isFallback) {
+          script.remove();
+          loadScript(fallbackUrl, true);
+        } else {
+          reject(new Error("Failed to load Cashfree JS SDK from primary or fallback CDN."));
+        }
+      };
+      document.body.appendChild(script);
+    };
+
+    loadScript(primaryUrl, false);
   });
 };
 
@@ -48,5 +86,26 @@ export const createPaymentOrder = async (tournamentId) => {
  */
 export const verifyPaymentSignature = async (orderId) => {
   const response = await api.post("/payment/verify-payment", { orderId });
+  return response.data;
+};
+
+/**
+ * Initiate Cashfree payment for player registration (public, no auth)
+ */
+export const initiatePlayerPayment = async ({ tournamentId, firstname, email, phone }) => {
+  const response = await api.post("/payment/public/initiate-player-payment", {
+    tournamentId,
+    firstname,
+    email,
+    phone
+  });
+  return response.data;
+};
+
+/**
+ * Verify Cashfree payment for player registration (public, no auth)
+ */
+export const verifyPlayerPaymentPublic = async (orderId) => {
+  const response = await api.post("/payment/public/verify-player-payment", { orderId });
   return response.data;
 };
