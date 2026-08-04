@@ -1,4 +1,5 @@
-import { getPlanForTeamCount, VIP_EMAILS, AUCTION_PRICING_PLANS } from '../constants/pricing.js';
+/* global describe, test, expect */
+import { getPlanForTeamCount, VIP_EMAILS } from '../constants/pricing.js';
 
 describe('Auction Pricing Constants & Rules', () => {
   test('Returns free plan for 3 teams', () => {
