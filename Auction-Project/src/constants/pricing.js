@@ -14,12 +14,12 @@ export const AUCTION_PRICING_PLANS = [
   },
   {
     planNumber: 2,
-    name: "Plan 2 (Live Test)",
+    name: "Plan 2",
     maxTeams: 4,
-    price: 20,
+    price: 249,
     isFree: false,
-    effectivePerTeam: 5,
-    description: "Temporary ₹20 Live Test Tier.",
+    effectivePerTeam: 62,
+    description: "Ideal for 4-team leagues.",
   },
   {
     planNumber: 3,
@@ -66,6 +66,15 @@ export const AUCTION_PRICING_PLANS = [
     effectivePerTeam: 45,
     description: "Maximum scale for major grand auctions.",
   },
+  {
+    planNumber: 8,
+    name: "Plan 8",
+    maxTeams: 30,
+    price: 1199,
+    isFree: false,
+    effectivePerTeam: 40,
+    description: "Mega scale for grand tournaments up to 30 teams.",
+  },
 ];
 
 /**
@@ -108,8 +117,8 @@ export const getPlanForTeamCount = (teamCount, userEmail = '') => {
       isVip: false,
       requiresPayment: true,
       exceedsLimit: true,
-      maxAllowed: 20,
-      message: "Exceeds maximum limit of 20 teams. Please contact support for custom plans.",
+      maxAllowed: 30,
+      message: "Exceeds maximum limit of 30 teams. Please contact support for custom plans.",
     };
   }
 

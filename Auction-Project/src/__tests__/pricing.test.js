@@ -9,16 +9,23 @@ describe('Auction Pricing Constants & Rules', () => {
     expect(res.plan.name).toBe('Plan 1');
   });
 
-  test('Returns ₹20 test plan for 4 teams', () => {
+  test('Returns ₹249 plan for 4 teams', () => {
     const res = getPlanForTeamCount(4);
     expect(res.requiresPayment).toBe(true);
-    expect(res.price).toBe(20);
+    expect(res.price).toBe(249);
   });
 
   test('Returns ₹349 plan for 6 teams', () => {
     const res = getPlanForTeamCount(6);
     expect(res.requiresPayment).toBe(true);
     expect(res.price).toBe(349);
+  });
+
+  test('Returns ₹1199 plan for 30 teams', () => {
+    const res = getPlanForTeamCount(30);
+    expect(res.requiresPayment).toBe(true);
+    expect(res.price).toBe(1199);
+    expect(res.plan.name).toBe('Plan 8');
   });
 
   test('Bypasses payment for VIP email address', () => {
@@ -29,8 +36,8 @@ describe('Auction Pricing Constants & Rules', () => {
     expect(res.price).toBe(0);
   });
 
-  test('Flags error when exceeding 20 teams', () => {
-    const res = getPlanForTeamCount(25);
+  test('Flags error when exceeding 30 teams', () => {
+    const res = getPlanForTeamCount(35);
     expect(res.exceedsLimit).toBe(true);
     expect(res.requiresPayment).toBe(true);
   });

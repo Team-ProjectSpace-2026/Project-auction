@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { FiPlay, FiChevronDown, FiArrowDown, FiX } from 'react-icons/fi';
+import { FiPlay, FiChevronDown, FiArrowDown, FiX, FiZap, FiTrendingUp, FiClock, FiCheck } from 'react-icons/fi';
+import { getPublicPlatformStats } from '../../services/tournamentService';
 import Button from '../../components/common/Button';
+import batsmanImg from '../../assets/Batsman_Logo1.png';
 import './HeroSection.css';
 
 const particles = Array.from({ length: 20 }, (_, i) => ({
@@ -26,11 +28,63 @@ const gavels = Array.from({ length: 8 }, (_, i) => ({
 
 const HeroSection = forwardRef((props, ref) => {
   const [showVideo, setShowVideo] = useState(false);
+  const [platformStats, setPlatformStats] = useState({
+    tournamentsHosted: '0+',
+    playersAuctioned: '0+',
+    teamsCreated: '0+',
+    uptimeGuarantee: '99.9%',
+  });
+
+  // Live Interactive Mini Bidding Card State
+  const [currentBid, setCurrentBid] = useState(8.50);
+  const [bidCount, setBidCount] = useState(14);
+  const [lastBidTeam, setLastBidTeam] = useState('Mumbai Indians');
+  const [isBidding, setIsBidding] = useState(false);
+  const [bidSuccessMessage, setBidSuccessMessage] = useState('');
+  const [timerSeconds, setTimerSeconds] = useState(18);
+
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
   const heroRef = useRef(null);
 
   useImperativeHandle(ref, () => heroRef.current, []);
+
+  // Timer countdown simulation
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimerSeconds((prev) => (prev > 1 ? prev - 1 : 20));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const handleQuickBid = () => {
+    setIsBidding(true);
+    const nextBid = parseFloat((currentBid + 0.25).toFixed(2));
+    setCurrentBid(nextBid);
+    setBidCount((prev) => prev + 1);
+    setLastBidTeam('Your Team (Bidder)');
+    setTimerSeconds(20);
+    setBidSuccessMessage(`Bid Placed: ₹${nextBid.toFixed(2)} CR!`);
+
+    setTimeout(() => setIsBidding(false), 500);
+    setTimeout(() => setBidSuccessMessage(''), 2500);
+  };
+
+  useEffect(() => {
+    getPublicPlatformStats()
+      .then((res) => {
+        if (res.data) {
+          const { tournamentsHosted, playersAuctioned, teamsCreated, uptimeGuarantee } = res.data;
+          setPlatformStats({
+            tournamentsHosted: `${(tournamentsHosted || 0).toLocaleString()}+`,
+            playersAuctioned: playersAuctioned >= 1000 ? `${(playersAuctioned / 1000).toFixed(1)}K+` : `${playersAuctioned || 0}+`,
+            teamsCreated: `${(teamsCreated || 0).toLocaleString()}+`,
+            uptimeGuarantee: uptimeGuarantee || '99.9%',
+          });
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Canvas-based animated video background
   const initCanvas = useCallback(() => {
@@ -285,112 +339,198 @@ const HeroSection = forwardRef((props, ref) => {
 
       {/* Main Content */}
       <div className="hero-content">
-        <div className="hero-inner">
-          {/* Badge */}
-          <motion.div
-            className="hero-badge"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
-          >
-            <span className="badge-dot" aria-hidden="true" />
-            <span>🏏 Cricket League Auction Platform</span>
-          </motion.div>
+        <div className="hero-split-grid">
+          {/* Left Column: Text & CTAs */}
+          <div className="hero-text-col">
+            {/* Badge */}
+            <motion.div
+              className="hero-badge"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
+            >
+              <span className="badge-dot" aria-hidden="true" />
+              <span>🏏 Cricket League Auction Platform</span>
+            </motion.div>
 
-          {/* Main Headline — chars marked for GSAP SplitText */}
-          <h1
-            id="hero-title"
-            className="hero-headline"
-          >
-            <span data-char-split="true">Where Champions</span>
-            <br />
-            <span className="hero-accent" data-char-split="true">Are Born</span>
-          </h1>
+            {/* Main Headline */}
+            <h1 id="hero-title" className="hero-headline">
+              <span>Where Champions</span>
+              <br />
+              <span className="hero-accent">Are Born</span>
+            </h1>
 
-          {/* Sub-headline */}
-          <motion.p
-            className="hero-subheadline"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.6, ease: 'easeOut' }}
-          >
-            Experience the thrill of live cricket auctions. Build your dream team,
-            manage tournaments, and create legends with the most advanced auction platform.
-          </motion.p>
+            {/* Sub-headline */}
+            <motion.p
+              className="hero-subheadline"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.6, ease: 'easeOut' }}
+            >
+              Experience the thrill of live cricket auctions. Build your dream team,
+              manage tournaments, and create legends with the most advanced auction platform.
+            </motion.p>
 
-          {/* CTA Buttons */}
-          <motion.div
-            className="hero-cta-group"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.8, ease: 'easeOut' }}
-          >
-            <Link to="/login">
+            {/* CTA Buttons */}
+            <motion.div
+              className="hero-cta-group"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.8, ease: 'easeOut' }}
+            >
+              <Link to="/login">
+                <Button
+                  className="hero-btn-primary"
+                  variant="primary"
+                  size="lg"
+                  whileHover={{ scale: 1.05, y: -3 }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  <FiPlay className="btn-icon" size={20} />
+                  Start Auction Now
+                </Button>
+              </Link>
               <Button
-                className="hero-btn-primary"
-                variant="primary"
+                className="hero-btn-secondary hero-btn-video"
+                variant="outline"
                 size="lg"
+                onClick={handleOpenVideo}
                 whileHover={{ scale: 1.05, y: -3 }}
                 whileTap={{ scale: 0.97 }}
               >
-                <FiPlay className="btn-icon" size={20} />
-                Start Auction Now
+                <span className="video-play-ring" aria-hidden="true">
+                  <FiPlay className="video-play-icon" size={14} />
+                </span>
+                Watch Demo
               </Button>
-            </Link>
-            <Button
-              className="hero-btn-secondary hero-btn-video"
-              variant="outline"
-              size="lg"
-              onClick={handleOpenVideo}
-              whileHover={{ scale: 1.05, y: -3 }}
-              whileTap={{ scale: 0.97 }}
-            >
-              <span className="video-play-ring" aria-hidden="true">
-                <FiPlay className="video-play-icon" size={14} />
-              </span>
-              Watch Demo
-            </Button>
-          </motion.div>
+            </motion.div>
+          </div>
 
-          {/* Trust indicators */}
+          {/* Right Column: Interactive Smart Mini Bidding Card */}
           <motion.div
-            className="hero-trust"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 1.0, ease: 'easeOut' }}
+            className="hero-card-col"
+            initial={{ opacity: 0, scale: 0.92, y: 30 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.4, ease: 'easeOut' }}
           >
-            <div className="trust-item">
-              <span className="trust-number">500+</span>
-              <span className="trust-label">Tournaments Hosted</span>
-            </div>
-            <div className="trust-divider" aria-hidden="true" />
-            <div className="trust-item">
-              <span className="trust-number">50K+</span>
-              <span className="trust-label">Players Auctioned</span>
-            </div>
-            <div className="trust-divider" aria-hidden="true" />
-            <div className="trust-item">
-              <span className="trust-number">1000+</span>
-              <span className="trust-label">Teams Created</span>
-            </div>
-            <div className="trust-divider" aria-hidden="true" />
-            <div className="trust-item">
-              <span className="trust-number">99.9%</span>
-              <span className="trust-label">Uptime Guarantee</span>
-            </div>
-          </motion.div>
+            <div className={`mini-bidding-card ${isBidding ? 'bidding-active-pulse' : ''}`}>
+              {/* Card Header Status */}
+              <div className="card-top-bar">
+                <div className="live-status-pill">
+                  <span className="live-pulse-dot" />
+                  <span>LIVE DEMO AUCTION</span>
+                </div>
+                <div className="timer-chip">
+                  <FiClock size={12} />
+                  <span>{timerSeconds}s</span>
+                </div>
+              </div>
 
-          {/* Scroll indicator */}
-          <motion.div
-            className="scroll-indicator"
-            initial={{ opacity: 0, y: 0 }}
-            animate={{ opacity: 1, y: [0, 10, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 1.5 }}
-          >
-            <FiChevronDown className="scroll-mouse" size={24} />
-            <FiArrowDown className="scroll-arrow" size={16} />
+              {/* Player Info Box */}
+              <div className="card-player-row">
+                <div className="player-avatar-circle">
+                  <img src={batsmanImg} alt="Star Player" />
+                  <span className="player-role-badge">ALL-ROUNDER</span>
+                </div>
+                <div className="player-meta">
+                  <h3 className="player-name">Virat Kohli (Mock)</h3>
+                  <div className="player-stats-mini">
+                    <span>Base: ₹2.00 CR</span>
+                    <span className="bullet-sep">•</span>
+                    <span>Bids: <strong>{bidCount}</strong></span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Current Bid Display Box */}
+              <div className="bid-price-box">
+                <div className="price-label">Current Highest Bid</div>
+                <div className="price-value-row">
+                  <span className="bid-currency">₹</span>
+                  <motion.span
+                    key={currentBid}
+                    className="bid-amount"
+                    initial={{ scale: 1.2, color: '#fbbf24' }}
+                    animate={{ scale: 1, color: '#ffffff' }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {currentBid.toFixed(2)}
+                  </motion.span>
+                  <span className="bid-unit">CR</span>
+                </div>
+                <div className="highest-bidder-info">
+                  <FiTrendingUp className="trending-icon" size={14} />
+                  <span>Leading Bidder: <strong>{lastBidTeam}</strong></span>
+                </div>
+              </div>
+
+              {/* Success Notification Banner */}
+              <AnimatePresence>
+                {bidSuccessMessage && (
+                  <motion.div
+                    className="bid-success-toast"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                  >
+                    <FiCheck size={14} /> {bidSuccessMessage}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Interactive Quick Bid Button */}
+              <motion.button
+                className="interactive-bid-paddle-btn"
+                onClick={handleQuickBid}
+                whileHover={{ scale: 1.03, y: -2 }}
+                whileTap={{ scale: 0.96 }}
+              >
+                <FiZap size={18} className="zap-icon" />
+                <span>⚡ Place Quick Bid (+ ₹0.25 CR)</span>
+              </motion.button>
+              <p className="card-interactive-hint">Click above to test live real-time bidding action!</p>
+            </div>
           </motion.div>
         </div>
+
+        {/* Trust indicators */}
+        <motion.div
+          className="hero-trust"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 1.0, ease: 'easeOut' }}
+        >
+          <div className="trust-item">
+            <span className="trust-number">{platformStats.tournamentsHosted}</span>
+            <span className="trust-label">Tournaments Hosted</span>
+          </div>
+          <div className="trust-divider" aria-hidden="true" />
+          <div className="trust-item">
+            <span className="trust-number">{platformStats.playersAuctioned}</span>
+            <span className="trust-label">Players Auctioned</span>
+          </div>
+          <div className="trust-divider" aria-hidden="true" />
+          <div className="trust-item">
+            <span className="trust-number">{platformStats.teamsCreated}</span>
+            <span className="trust-label">Teams Created</span>
+          </div>
+          <div className="trust-divider" aria-hidden="true" />
+          <div className="trust-item">
+            <span className="trust-number">{platformStats.uptimeGuarantee}</span>
+            <span className="trust-label">Uptime Guarantee</span>
+          </div>
+        </motion.div>
+
+        {/* Scroll indicator */}
+        <motion.div
+          className="scroll-indicator"
+          initial={{ opacity: 0, y: 0 }}
+          animate={{ opacity: 1, y: [0, 10, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 1.5 }}
+        >
+          <FiChevronDown className="scroll-mouse" size={24} />
+          <FiArrowDown className="scroll-arrow" size={16} />
+        </motion.div>
       </div>
 
       {/* ─── Video Modal ─── */}

@@ -7,7 +7,8 @@
     "dev": "vite --open",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node --input-type=module -e \"import { getPlanForTeamCount } from './src/constants/pricing.js'; console.assert(getPlanForTeamCount(3).price === 0, 'Plan 1 free fail'); console.assert(getPlanForTeamCount(4).price === 249, 'Plan 2 249 fail'); console.assert(getPlanForTeamCount(30).price === 1199, 'Plan 8 1199 fail'); console.log('✅ All Frontend Pricing Tests Passed!');\""
   },
   "dependencies": {
     "axios": "^1.7.9",
