@@ -43,13 +43,13 @@ export const register = async (req, res, next) => {
 
     await user.save();
 
-    // Generate JWT token and set as httpOnly cookie
+    // Generate JWT token and set as httpOnly cookie & return in body for cross-domain auth
     const token = generateToken(user._id);
     res.cookie("token", token, cookieOptions);
 
-    // Do NOT return token in response body — httpOnly cookie is sufficient
     res.status(201).json({
       message: "User registered successfully",
+      token,
       user: {
         id: user._id,
         name: user.name,
@@ -86,13 +86,13 @@ export const login = async (req, res, next) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // Generate JWT token and set as httpOnly cookie
+    // Generate JWT token and set as httpOnly cookie & return in body for cross-domain auth
     const token = generateToken(user._id);
     res.cookie("token", token, cookieOptions);
 
-    // Do NOT return token in response body — httpOnly cookie is sufficient
     res.json({
       message: "Login successful",
+      token,
       user: {
         id: user._id,
         name: user.name,
@@ -401,12 +401,13 @@ export const loginByMobile = async (req, res, next) => {
     user.smsVerificationTokenExpires = null;
     await user.save();
 
-    // Generate JWT token and set cookie
+    // Generate JWT token and set cookie & return in body for cross-domain auth
     const token = generateToken(user._id);
     res.cookie("token", token, cookieOptions);
 
     res.json({
       message: "Login successful",
+      token,
       user: {
         id: user._id,
         name: user.name,

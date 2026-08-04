@@ -26,8 +26,11 @@ export const AuthProvider = ({ children }) => {
         const res = await getProfile();
         if (!cancelled) setUser(res.data.user);
       } catch {
-        // Not authenticated - that's fine
-        if (!cancelled) setUser(null);
+        // Not authenticated - clear invalid token if any
+        if (!cancelled) {
+          localStorage.removeItem("token");
+          setUser(null);
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -40,14 +43,18 @@ export const AuthProvider = ({ children }) => {
 
   const login = useCallback(async (credentials) => {
     const res = await apiLogin(credentials);
-    // Token is stored as httpOnly cookie by server — do NOT store in localStorage
+    if (res.data.token) {
+      localStorage.setItem("token", res.data.token);
+    }
     setUser(res.data.user);
     return res.data;
   }, []);
 
   const register = useCallback(async (data) => {
     const res = await apiRegister(data);
-    // Token is stored as httpOnly cookie by server — do NOT store in localStorage
+    if (res.data.token) {
+      localStorage.setItem("token", res.data.token);
+    }
     setUser(res.data.user);
     return res.data;
   }, []);
@@ -56,7 +63,7 @@ export const AuthProvider = ({ children }) => {
     try {
       await apiLogout();
     } finally {
-      // httpOnly cookie is cleared by server; no localStorage to clean
+      localStorage.removeItem("token");
       setUser(null);
     }
   }, []);

@@ -5,9 +5,16 @@ const api = axios.create({
   withCredentials: true, // Send cookies with every request
 });
 
-// Attach Anti-CSRF headers for state-modifying requests
+// Attach Authorization Bearer token & Anti-CSRF headers for state-modifying requests
 api.interceptors.request.use((config) => {
   config.headers["X-Requested-With"] = "XMLHttpRequest";
+
+  // Attach token from localStorage for cross-domain Vercel+Render compatibility
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers["Authorization"] = `Bearer ${token}`;
+  }
+
   const match = document.cookie.match(new RegExp("(^| )csrfToken=([^;]+)"));
   if (match && match[2]) {
     config.headers["X-CSRF-Token"] = match[2];
