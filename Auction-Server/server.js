@@ -57,12 +57,12 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https://checkout.razorpay.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://checkout.razorpay.com", "https://sdk.cashfree.com", "https://sdk.cashfreepayments.com"],
       styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "blob:", SERVER_URL, CLIENT_URL, "https://*.razorpay.com"],
-      connectSrc: ["'self'", "https://lumberjack.razorpay.com", "https://api.razorpay.com"],
-      frameSrc: ["'self'", "https://api.razorpay.com", "https://checkout.razorpay.com"],
-      fontSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "blob:", SERVER_URL, CLIENT_URL, "https://*.razorpay.com", "https://*.cashfree.com"],
+      connectSrc: ["'self'", "https://lumberjack.razorpay.com", "https://api.razorpay.com", "https://api.cashfree.com", "https://sandbox.cashfree.com", "https://sdk.cashfree.com", "https://sdk.cashfreepayments.com"],
+      frameSrc: ["'self'", "https://api.razorpay.com", "https://checkout.razorpay.com", "https://sdk.cashfree.com", "https://sdk.cashfreepayments.com", "https://*.cashfree.com"],
+      fontSrc: ["'self'", "https://fonts.googleapis.com", "https://fonts.gstatic.com"],
       objectSrc: ["'none'"],
       frameAncestors: ["'none'"],
     },
