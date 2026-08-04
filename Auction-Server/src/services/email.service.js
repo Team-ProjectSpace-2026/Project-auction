@@ -37,7 +37,6 @@ export const sendPlayerRegistrationEmail = async ({ player, tournament }) => {
   }
 
   try {
-    const transporter = createTransporter();
     const fromEmail = process.env.EMAIL_FROM || 'heyprojectspace@gmail.com';
 
     const tournamentName = tournament?.name || 'Esports Tournament';
@@ -169,6 +168,41 @@ export const sendPlayerRegistrationEmail = async ({ player, tournament }) => {
     </html>
     `;
 
+    const brevoApiKey = process.env.BREVO_API_KEY || (process.env.EMAIL_PASS?.startsWith('xkeysib-') ? process.env.EMAIL_PASS : null);
+
+    // 1. Primary: Brevo REST API (Cloud API, 300 free emails/day)
+    if (brevoApiKey) {
+      try {
+        console.log(`✉️ Attempting registration email dispatch via Brevo REST API to ${player.email}...`);
+        const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+          method: "POST",
+          headers: {
+            "accept": "application/json",
+            "api-key": brevoApiKey,
+            "content-type": "application/json"
+          },
+          body: JSON.stringify({
+            sender: { name: "CricAuction Hub", email: fromEmail },
+            to: [{ email: player.email, name: player.name }],
+            subject: `🎉 Registration Confirmed: ${tournamentName} (Pass #${regNo})`,
+            htmlContent
+          })
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          console.log(`✅ Registration email successfully sent via Brevo REST API to ${player.email}. Message ID: ${data.messageId}`);
+          return data;
+        } else {
+          console.warn(`⚠️ Brevo API returned error:`, data);
+        }
+      } catch (brevoErr) {
+        console.error(`⚠️ Brevo REST API dispatch error:`, brevoErr);
+      }
+    }
+
+    // 2. Fallback: Nodemailer SMTP
+    const transporter = createTransporter();
     const mailOptions = {
       from: `"CricAuction Hub" <${fromEmail}>`,
       to: player.email,
@@ -177,7 +211,7 @@ export const sendPlayerRegistrationEmail = async ({ player, tournament }) => {
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log(`✅ Registration email successfully sent to ${player.email}. Message ID: ${info.messageId}`);
+    console.log(`✅ Registration email successfully sent via SMTP to ${player.email}. Message ID: ${info.messageId}`);
     return info;
 
   } catch (error) {
