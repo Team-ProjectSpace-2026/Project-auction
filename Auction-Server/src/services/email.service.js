@@ -13,7 +13,8 @@ const createTransporter = () => {
   const pass = process.env.EMAIL_PASS || process.env.BREVO_API_KEY || '';
 
   if (!pass) {
-    console.warn('⚠️ SMTP password/key missing in EMAIL_PASS');
+    console.warn('⚠️ SMTP password/key missing in EMAIL_PASS. Using jsonTransport fallback.');
+    return nodemailer.createTransport({ jsonTransport: true });
   }
 
   return nodemailer.createTransport({

@@ -1,7 +1,25 @@
-import { describe, test, expect } from '@jest/globals';
+import { describe, test, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { sendPlayerRegistrationEmail } from '../services/email.service.js';
 
 describe('Player Registration Email Service Tests', () => {
+  const originalEnv = { ...process.env };
+  const originalFetch = global.fetch;
+
+  beforeEach(() => {
+    process.env = { ...originalEnv, BREVO_API_KEY: 'xkeysib-mock-test-key-12345' };
+    global.fetch = jest.fn().mockImplementation(() =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ messageId: '<test-message-id-12345@mailin.fr>' })
+      })
+    );
+  });
+
+  afterEach(() => {
+    process.env = originalEnv;
+    global.fetch = originalFetch;
+  });
+
   test('Skips email dispatch gracefully if player has no email address', async () => {
     const result = await sendPlayerRegistrationEmail({
       player: { name: 'Player No Email' },
@@ -10,10 +28,10 @@ describe('Player Registration Email Service Tests', () => {
     expect(result).toBeUndefined();
   });
 
-  test('Executes email dispatch with valid player details without throwing error', async () => {
+  test('Executes email dispatch with valid player details via Brevo API', async () => {
     const mockPlayer = {
       name: 'Rahul Sharma',
-      email: 'heyprojectspace@gmail.com',
+      email: 'test@example.com',
       role: 'Batsman',
       registrationNumber: 15,
       jerseyName: 'RAHUL',
@@ -28,6 +46,6 @@ describe('Player Registration Email Service Tests', () => {
     });
 
     expect(result).toBeDefined();
-    expect(result.messageId || result.id).toBeTruthy();
+    expect(result.messageId).toBe('<test-message-id-12345@mailin.fr>');
   });
 });
