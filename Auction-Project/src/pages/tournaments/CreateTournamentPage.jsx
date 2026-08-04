@@ -8,7 +8,7 @@ import { createTournament } from "../../services/tournamentService";
 import bgStadium from "../../assets/bgstadium2.png";
 import { getPlanForTeamCount } from "../../constants/pricing";
 import { useAuth } from "../../context/AuthContext";
-import { initiateCashfreePayment, loadCashfreeSDK } from "../../services/paymentService";
+import { initiateCashfreePayment, loadCashfreeSDK, verifyPaymentSignature } from "../../services/paymentService";
 import { FiCheckCircle, FiShield, FiX, FiAward, FiZap } from "react-icons/fi";
 
 // Converts "YYYY-MM-DDTHH:MM" (datetime-local value) to ISO with timezone offset
@@ -103,6 +103,7 @@ const CreateTournamentPage = () => {
   const handleCashfreeCheckout = async () => {
     setLoading(true);
     try {
+      // Step 1: Create Cashfree order on server
       const paymentRes = await initiateCashfreePayment({
         numTeams: formData.numTeams,
         amount: currentPlanInfo.price,
@@ -112,30 +113,47 @@ const CreateTournamentPage = () => {
         phone: user?.mobile
       });
 
+      // Free tier — no payment needed
       if (paymentRes.success && paymentRes.isFree) {
         await executeTournamentCreation();
         return;
       }
 
       if (paymentRes.success && paymentRes.paymentSessionId) {
-        try {
-          const cashfree = await loadCashfreeSDK();
-          const checkoutOptions = {
-            paymentSessionId: paymentRes.paymentSessionId,
-            redirectTarget: "_modal"
-          };
-          cashfree.checkout(checkoutOptions);
-        } catch (e) {
-          console.warn("Cashfree SDK modal launch error, finalizing creation:", e);
+        // Step 2: Load Cashfree SDK and open checkout modal
+        const cashfree = await loadCashfreeSDK();
+        const checkoutOptions = {
+          paymentSessionId: paymentRes.paymentSessionId,
+          redirectTarget: "_modal"
+        };
+
+        // Step 3: AWAIT checkout — wait for user to pay/cancel
+        const result = await cashfree.checkout(checkoutOptions);
+
+        // Step 4: Verify payment on server BEFORE creating tournament
+        if (result && result.paymentDetails) {
+          const verifyRes = await verifyPaymentSignature(paymentRes.orderId);
+          if (verifyRes.success) {
+            // Payment confirmed — now create tournament
+            await executeTournamentCreation();
+          } else {
+            alert("Payment verification failed. Your payment may be pending — please try again or contact support.");
+            setLoading(false);
+          }
+        } else {
+          // User cancelled or payment failed
+          alert("Payment was cancelled or failed. Tournament was not created.");
+          setLoading(false);
         }
-        await executeTournamentCreation();
       } else {
-        alert(paymentRes.message || "Cashfree payment initiation failed. Please try again.");
+        alert(paymentRes.message || "Payment initiation failed. Please try again.");
         setLoading(false);
       }
     } catch (err) {
       console.error("Cashfree checkout error:", err);
-      await executeTournamentCreation();
+      alert("Payment error: " + (err.message || "Something went wrong. Please try again."));
+      setLoading(false);
+      // DO NOT create tournament on error
     }
   };
 

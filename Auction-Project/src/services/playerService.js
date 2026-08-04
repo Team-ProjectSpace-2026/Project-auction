@@ -21,3 +21,24 @@ export const getPublicTournament = (tournamentId) =>
 
 export const verifyPlayerPayment = (playerId, status) =>
   api.put(`/players/${playerId}/verify-payment`, { status });
+
+/**
+ * Initiate Cashfree payment for player registration (public, no auth)
+ */
+export const initiatePlayerPayment = async ({ tournamentId, firstname, email, phone }) => {
+  const response = await api.post("/payment/public/initiate-player-payment", {
+    tournamentId,
+    firstname,
+    email,
+    phone
+  });
+  return response.data;
+};
+
+/**
+ * Verify Cashfree payment for player registration (public, no auth)
+ */
+export const verifyPlayerPaymentPublic = async (orderId) => {
+  const response = await api.post("/payment/public/verify-player-payment", { orderId });
+  return response.data;
+};

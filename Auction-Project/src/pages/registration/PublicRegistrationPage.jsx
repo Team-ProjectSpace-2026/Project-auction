@@ -112,6 +112,7 @@ export default function PublicRegistrationPage() {
           || "Registration failed. Please try again.";
       }
       setBanner({ type: "error", message: msg });
+      throw err;
     }
   };
 
@@ -239,6 +240,8 @@ export default function PublicRegistrationPage() {
     );
   }
 
+  const isPaidTournament = Boolean(tournamentData?.isPaid && tournamentData?.registrationFee > 0);
+
   // ── Layout ──
   return (
     <div style={{ minHeight: "100vh", background: C.bg, fontFamily: "'Inter', 'Segoe UI', sans-serif" }}>
@@ -280,12 +283,8 @@ export default function PublicRegistrationPage() {
 
         <PlayerRegistrationForm
           onSubmit={handleSubmit}
-          submitLabel={
-            tournamentData?.isPaid && tournamentData?.registrationFee > 0
-              ? `Submit Player Registration`
-              : "Submit Registration"
-          }
-          isPaid={Boolean(tournamentData?.isPaid && tournamentData?.registrationFee > 0)}
+          submitLabel={isPaidTournament ? "Submit Registration & Proof" : "Submit Registration"}
+          isPaid={isPaidTournament}
           payoutUpiId={payoutUpiId}
           registrationFee={tournamentData?.registrationFee}
           tournamentName={tournamentData?.name}

@@ -142,3 +142,128 @@ export const verifyPayment = async (req, res) => {
     });
   }
 };
+
+/**
+ * @desc    Initiate Cashfree Payment for player registration (PUBLIC - no auth)
+ * @route   POST /api/payment/public/initiate-player-payment
+ * @access  Public
+ */
+export const initiatePlayerPayment = async (req, res) => {
+  try {
+    const { tournamentId, firstname, email, phone } = req.body;
+
+    if (!tournamentId || !mongoose.Types.ObjectId.isValid(tournamentId)) {
+      return res.status(400).json({ success: false, message: 'Invalid or missing Tournament ID' });
+    }
+
+    const tournament = await Tournament.findById(tournamentId);
+    if (!tournament) {
+      return res.status(404).json({ success: false, message: 'Tournament not found' });
+    }
+
+    const cleanAmount = Number(tournament.registrationFee || 0);
+
+    if (cleanAmount <= 0) {
+      return res.status(200).json({
+        success: true,
+        isFree: true,
+        amount: 0,
+        message: 'No payment required — free registration.'
+      });
+    }
+
+    const { env } = getCashfreeConfig();
+    const orderId = `cf_preg_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+
+    const userFirstName = (firstname || 'Player').trim();
+    const userEmail = (email || 'player@example.com').trim();
+    const userPhone = (phone || '9999999999').trim();
+
+    const cashfreeOrder = await createCashfreeOrder({
+      orderId,
+      orderAmount: cleanAmount,
+      customerId: 'player_' + Date.now(),
+      customerName: userFirstName,
+      customerEmail: userEmail,
+      customerPhone: userPhone,
+      returnUrl: `${process.env.CLIENT_URL || 'http://localhost:5173'}/register/${tournamentId}?payment_status=success&order_id=${orderId}`
+    });
+
+    return res.status(200).json({
+      success: true,
+      isFree: false,
+      orderId: cashfreeOrder.order_id,
+      paymentSessionId: cashfreeOrder.payment_session_id,
+      amount: cleanAmount,
+      env,
+      message: 'Cashfree payment session created for player registration'
+    });
+
+  } catch (error) {
+    console.error('Error initiating player registration payment:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to initiate payment',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * @desc    Verify Cashfree Payment for player registration (PUBLIC - no auth)
+ * @route   POST /api/payment/public/verify-player-payment
+ * @access  Public
+ */
+export const verifyPlayerPayment = async (req, res) => {
+  try {
+    const { orderId } = req.body;
+
+    if (!orderId || typeof orderId !== 'string') {
+      return res.status(400).json({ success: false, message: 'Invalid or missing orderId' });
+    }
+
+    const sanitizedOrderId = String(orderId).trim();
+    if (!/^[a-zA-Z0-9_-]{3,100}$/.test(sanitizedOrderId)) {
+      return res.status(400).json({ success: false, message: 'Malformed orderId' });
+    }
+
+    const { appId, secretKey, baseUrl } = getCashfreeConfig();
+
+    const safeEndpoint = new URL(`/pg/orders/${encodeURIComponent(sanitizedOrderId)}`, baseUrl).toString();
+
+    const response = await fetch(safeEndpoint, {
+      method: 'GET',
+      headers: {
+        'x-api-version': '2023-08-01',
+        'x-client-id': appId,
+        'x-client-secret': secretKey
+      }
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.order_status === 'PAID') {
+      return res.status(200).json({
+        success: true,
+        orderId: data.order_id,
+        amount: data.order_amount,
+        status: data.order_status,
+        message: 'Player registration payment verified successfully'
+      });
+    } else {
+      return res.status(400).json({
+        success: false,
+        status: data.order_status || 'UNPAID',
+        message: 'Payment not completed or verification failed'
+      });
+    }
+
+  } catch (error) {
+    console.error('Error verifying player payment:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to verify payment',
+      error: error.message
+    });
+  }
+};

@@ -4,6 +4,7 @@ import Player from "../models/Player.js";
 import Tournament from "../models/Tournament.js";
 import Bid from "../models/Bid.js";
 import { sendPlayerRegistrationEmail } from "../services/email.service.js";
+import { getCashfreeConfig } from "../config/cashfree.js";
 
 export const getPlayers = async (req, res, next) => {
   try {
@@ -264,6 +265,11 @@ export const registerPlayer = async (req, res, next) => {
     const jerseySize = String(req.body.jerseySize || "").trim();
     const jerseyName = String(req.body.jerseyName || "").trim();
 
+    // Email is required for confirmation
+    if (!email) {
+      return res.status(400).json({ message: 'Email address is required for registration confirmation' });
+    }
+
     const existing = await Player.findOne({ mobile, tournamentId, deleted: false });
     if (existing) {
       return res.status(409).json({ message: 'This mobile number is already registered for this tournament' });
@@ -280,13 +286,12 @@ export const registerPlayer = async (req, res, next) => {
         screenshotUrl = req.files.paymentScreenshot[0].path;
       }
 
-      paymentStatus = 'verified';
+      paymentStatus = 'pending_verification';
       paymentDetailsObj = {
         utrLast4: utrLast4 || "N/A",
         paymentScreenshot: screenshotUrl || "",
         amountPaid: Number(tournament.registrationFee) || 0,
-        paidAt: new Date(),
-        verifiedAt: new Date()
+        paidAt: new Date()
       };
     }
 
@@ -330,11 +335,10 @@ export const registerPlayer = async (req, res, next) => {
     await player.save();
 
     // Trigger automated registration confirmation email in background
-    if (email) {
-      sendPlayerRegistrationEmail({ player, tournament }).catch((err) =>
-        console.error("Error sending registration email:", err)
-      );
-    }
+    console.log(`📧 Sending registration confirmation email to: ${email}`);
+    sendPlayerRegistrationEmail({ player, tournament }).catch((err) =>
+      console.error("Error sending registration email:", err)
+    );
 
     res.status(201).json({ message: 'Registration successful', player });
   } catch (error) {
