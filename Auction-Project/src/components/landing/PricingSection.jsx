@@ -54,7 +54,7 @@ const PricingSection = () => {
               id="team-count-slider"
               type="range"
               min="1"
-              max="20"
+              max="30"
               value={selectedTeams}
               onChange={(e) => setSelectedTeams(Number(e.target.value))}
               className="team-range-input"
@@ -66,6 +66,7 @@ const PricingSection = () => {
               <span>12 Teams</span>
               <span>16 Teams</span>
               <span>20 Teams</span>
+              <span>30 Teams</span>
             </div>
           </div>
         </div>
@@ -108,16 +109,16 @@ const PricingSection = () => {
 
                 <ul className="card-features">
                   <li>
-                    <FiCheckCircle className="feature-icon" /> Full Live Auction Console
+                    <FiCheckCircle className="pricing-check-icon" /> Full Live Auction Console
                   </li>
                   <li>
-                    <FiCheckCircle className="feature-icon" /> Real-time Player Bidding
+                    <FiCheckCircle className="pricing-check-icon" /> Real-time Player Bidding
                   </li>
                   <li>
-                    <FiCheckCircle className="feature-icon" /> Custom Budget & Squad Limits
+                    <FiCheckCircle className="pricing-check-icon" /> Custom Budget & Squad Limits
                   </li>
                   <li>
-                    <FiCheckCircle className="feature-icon" /> Automated Team Squad Exports
+                    <FiCheckCircle className="pricing-check-icon" /> Automated Team Squad Exports
                   </li>
                 </ul>
 

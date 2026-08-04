@@ -236,25 +236,26 @@
 }
 
 .social-pill span {
-  display: none;
-}
-
-.social-pill:hover {
-  background: rgba(251, 191, 36, 0.1);
-  border-color: rgba(251, 191, 36, 0.3);
-  color: #fbbf24;
-  box-shadow: 0 0 16px rgba(251, 191, 36, 0.15);
-}
-
-.social-pill:hover span {
   display: inline;
 }
 
-.social-pill:nth-child(1):hover { color: #1DA1F2; border-color: rgba(29, 161, 242, 0.3); box-shadow: 0 0 16px rgba(29, 161, 242, 0.15); background: rgba(29, 161, 242, 0.08); }
-.social-pill:nth-child(2):hover { color: #0A66C2; border-color: rgba(10, 102, 194, 0.3); box-shadow: 0 0 16px rgba(10, 102, 194, 0.15); background: rgba(10, 102, 194, 0.08); }
-.social-pill:nth-child(3):hover { color: #E4405F; border-color: rgba(228, 64, 95, 0.3); box-shadow: 0 0 16px rgba(228, 64, 95, 0.15); background: rgba(228, 64, 95, 0.08); }
-.social-pill:nth-child(4):hover { color: #FF0000; border-color: rgba(255, 0, 0, 0.3); box-shadow: 0 0 16px rgba(255, 0, 0, 0.15); background: rgba(255, 0, 0, 0.08); }
-.social-pill:nth-child(5):hover { color: #1877F2; border-color: rgba(24, 119, 242, 0.3); box-shadow: 0 0 16px rgba(24, 119, 242, 0.15); background: rgba(24, 119, 242, 0.08); }
+.social-pill:hover {
+  background: rgba(251, 191, 36, 0.12);
+  border-color: rgba(251, 191, 36, 0.4);
+  color: #fbbf24;
+  box-shadow: 0 0 16px rgba(251, 191, 36, 0.2);
+}
+
+.contact-email-link {
+  color: #fbbf24;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.contact-email-link:hover {
+  text-decoration: underline;
+  color: #f59e0b;
+}
 
 /* ── Footer Columns ── */
 .links-col,

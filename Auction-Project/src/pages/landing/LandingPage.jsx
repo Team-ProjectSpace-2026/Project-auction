@@ -161,46 +161,7 @@ const LandingPage = () => {
       );
     });
 
-    /* ──────────────────────────────────────────────
-       4. Stats counter animation (About section)
-       ────────────────────────────────────────────── */
-    const statItems = sections.querySelectorAll('#about .stat-item h3');
 
-    statItems.forEach((el) => {
-      const rawText = el.textContent.trim();
-      // Parse number: "1000+" -> 1000, "50K+" -> 50000, "1500+" -> 1500
-      let targetNum = 0;
-      let suffix = '';
-
-      if (rawText.includes('K')) {
-        targetNum = parseFloat(rawText.replace(/[^0-9.]/g, '')) * 1000;
-        suffix = 'K+';
-      } else {
-        targetNum = parseInt(rawText.replace(/[^0-9]/g, ''), 10);
-        suffix = rawText.includes('+') ? '+' : '';
-      }
-
-      const counter = { val: 0 };
-
-      gsap.to(counter, {
-        val: targetNum,
-        duration: 2,
-        ease: 'power2.out',
-        scrollTrigger: {
-          trigger: el,
-          start: 'top 85%',
-          once: true,
-        },
-        onUpdate: () => {
-          const v = Math.round(counter.val);
-          if (rawText.includes('K')) {
-            el.textContent = `${(v / 1000).toFixed(v >= 10000 ? 0 : 1)}K+`;
-          } else {
-            el.textContent = `${v.toLocaleString()}${suffix}`;
-          }
-        },
-      });
-    });
 
     /* ──────────────────────────────────────────────
        5. Gavel Slam Section Divider (About → Features)
@@ -305,14 +266,6 @@ const LandingPage = () => {
             <div className="shockwave-ring" />
           </div>
           <div className="divider-line" />
-        </div>
-
-        {/* ── Floating Bid Tags (absolute positioned, parallax) ── */}
-        <div className="floating-bid-tags-container" aria-hidden="true">
-          <span className="floating-bid-tag tag-1">₹18.5 CR</span>
-          <span className="floating-bid-tag tag-2">SOLD!</span>
-          <span className="floating-bid-tag tag-3">₹12 CR</span>
-          <span className="floating-bid-tag tag-4">🏏 GOING...</span>
         </div>
 
         <FeaturesSection />

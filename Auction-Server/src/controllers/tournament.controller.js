@@ -296,3 +296,25 @@ export const updateRegistrationDeadline = async (req, res, next) => {
     next(error);
   }
 };
+
+/**
+ * Public endpoint — returns dynamic real-time platform statistics from database.
+ */
+export const getPublicPlatformStats = async (req, res, next) => {
+  try {
+    const [tournamentsCount, playersCount, teamsCount] = await Promise.all([
+      Tournament.countDocuments(),
+      Player.countDocuments(),
+      Team.countDocuments(),
+    ]);
+
+    res.json({
+      tournamentsHosted: tournamentsCount,
+      playersAuctioned: playersCount,
+      teamsCreated: teamsCount,
+      uptimeGuarantee: "99.9%",
+    });
+  } catch (error) {
+    next(error);
+  }
+};

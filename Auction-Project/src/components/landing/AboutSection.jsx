@@ -1,4 +1,6 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { getPublicPlatformStats } from '../../services/tournamentService';
 import './AboutSection.css';
 
 const statCounterVariants = {
@@ -7,6 +9,27 @@ const statCounterVariants = {
 };
 
 const AboutSection = () => {
+  const [platformStats, setPlatformStats] = useState({
+    tournamentsHosted: '0+',
+    playersAuctioned: '0+',
+    teamsCreated: '0+',
+  });
+
+  useEffect(() => {
+    getPublicPlatformStats()
+      .then((res) => {
+        if (res.data) {
+          const { tournamentsHosted, playersAuctioned, teamsCreated } = res.data;
+          setPlatformStats({
+            tournamentsHosted: `${(tournamentsHosted || 0).toLocaleString()}+`,
+            playersAuctioned: playersAuctioned >= 1000 ? `${(playersAuctioned / 1000).toFixed(1)}K+` : `${playersAuctioned || 0}+`,
+            teamsCreated: `${(teamsCreated || 0).toLocaleString()}+`,
+          });
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <section id="about" className="about-section" aria-labelledby="about-title">
       <div className="section-container">
@@ -61,15 +84,15 @@ const AboutSection = () => {
             }}
           >
             <div className="stat-item">
-              <motion.h3 variants={statCounterVariants}>1000+</motion.h3>
+              <motion.h3 variants={statCounterVariants}>{platformStats.tournamentsHosted}</motion.h3>
               <motion.p variants={statCounterVariants}>Tournaments Hosted</motion.p>
             </div>
             <div className="stat-item">
-              <motion.h3 variants={statCounterVariants}>50K+</motion.h3>
+              <motion.h3 variants={statCounterVariants}>{platformStats.playersAuctioned}</motion.h3>
               <motion.p variants={statCounterVariants}>Players Auctioned</motion.p>
             </div>
             <div className="stat-item">
-              <motion.h3 variants={statCounterVariants}>1500+</motion.h3>
+              <motion.h3 variants={statCounterVariants}>{platformStats.teamsCreated}</motion.h3>
               <motion.p variants={statCounterVariants}>Teams Created</motion.p>
             </div>
           </motion.div>
