@@ -26,6 +26,7 @@ router.use(apiLimiter);
 
 // Public routes - no auth required (must be before auth middleware)
 router.get('/public/:tournamentId', sanitizeIdParams(['tournamentId']), getPublicTournament);
+router.post('/initiate/:tournamentId', sanitizeIdParams(['tournamentId']), initiatePlayerRegistration);
 router.post(
   '/register/:tournamentId',
   upload.fields([

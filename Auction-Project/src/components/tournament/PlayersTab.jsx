@@ -205,19 +205,45 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
       );
     }
     if (status === "pending_verification") {
+      const fullUtr = player.paymentDetails?.utrNumber || (utr ? `...${utr}` : "");
+      const payCode = player.paymentDetails?.paymentCode || "";
       return (
         <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
           <span style={{ padding: "4px 10px", borderRadius: "999px", fontSize: "11px", fontWeight: "700", background: "#fef3c7", color: "#b45309" }}>
             ⏳ PENDING
           </span>
-          {utr && (
-            <span style={{ fontSize: "11px", color: "#64748b", fontWeight: "600" }}>
-              UTR: ...{utr}
+          {payCode && (
+            <span style={{ fontSize: "10px", color: "#475569", fontWeight: "700" }}>
+              Code: {payCode}
             </span>
+          )}
+          {fullUtr && (
+            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+              <span style={{ fontSize: "11px", color: "#1e293b", fontWeight: "700", fontFamily: "monospace" }}>
+                UTR: {fullUtr}
+              </span>
+              {player.paymentDetails?.utrNumber && (
+                <button
+                  type="button"
+                  title="Copy 12-Digit UTR"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigator.clipboard?.writeText(player.paymentDetails.utrNumber);
+                    alert(`Copied UTR: ${player.paymentDetails.utrNumber}`);
+                  }}
+                  style={{ background: "none", border: "none", cursor: "pointer", padding: 0, fontSize: "11px" }}
+                >
+                  📋
+                </button>
+              )}
+            </div>
           )}
           {screenshot && (
             <button
-              onClick={() => setSelectedScreenshot(playerPhotoUrl(screenshot))}
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedScreenshot(playerPhotoUrl(screenshot));
+              }}
               style={{ background: "#eff6ff", border: "1px solid #93c5fd", borderRadius: "6px", padding: "2px 6px", fontSize: "10px", color: "#2563eb", fontWeight: "600", cursor: "pointer" }}
             >
               📸 View Receipt

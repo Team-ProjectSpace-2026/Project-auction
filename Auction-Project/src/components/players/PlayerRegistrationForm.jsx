@@ -284,6 +284,71 @@ const PlayerRegistrationForm = ({
   const [paymentScreenshot, setPaymentScreenshot] = useState(null);
   const [screenshotPreview, setScreenshotPreview] = useState(null);
   const [utrLast4, setUtrLast4] = useState("");
+  const [utrNumber, setUtrNumber] = useState("");
+
+  // 5-Minute Reservation Timer State
+  const [timerSeconds, setTimerSeconds] = useState(300); // 5 minutes = 300s
+  const [timerActive, setTimerActive] = useState(false);
+  const [isExpired, setIsExpired] = useState(false);
+
+  // OCR state
+  const [ocrLoading, setOcrLoading] = useState(false);
+  const [ocrSuccess, setOcrSuccess] = useState(false);
+
+  // Start timer when paid registration is shown
+  useEffect(() => {
+    if (isPaid && !timerActive && !isExpired) {
+      setTimerActive(true);
+    }
+  }, [isPaid, timerActive, isExpired]);
+
+  useEffect(() => {
+    let interval = null;
+    if (timerActive && timerSeconds > 0) {
+      interval = setInterval(() => {
+        setTimerSeconds((prev) => prev - 1);
+      }, 1000);
+    } else if (timerSeconds === 0 && timerActive) {
+      setTimerActive(false);
+      setIsExpired(true);
+      setInternalBanner({
+        type: "error",
+        message: "⏱️ 5-minute payment session has expired. Please refresh the page to start a new registration.",
+      });
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [timerActive, timerSeconds]);
+
+  const formattedTimer = useMemo(() => {
+    const mins = Math.floor(timerSeconds / 60);
+    const secs = timerSeconds % 60;
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  }, [timerSeconds]);
+
+  async function processScreenshotOcr(file) {
+    if (!file) return;
+    setOcrLoading(true);
+    setOcrSuccess(false);
+    try {
+      const { createWorker } = await import('tesseract.js');
+      const worker = await createWorker('eng');
+      const ret = await worker.recognize(file);
+      await worker.terminate();
+      const text = ret.data?.text || "";
+      const matches = text.match(/\b\d{12}\b/g);
+      if (matches && matches.length > 0) {
+        setUtrNumber(matches[0]);
+        setUtrLast4(matches[0].slice(-4));
+        setOcrSuccess(true);
+      }
+    } catch (err) {
+      console.warn("OCR recognition skipped:", err);
+    } finally {
+      setOcrLoading(false);
+    }
+  }
 
   const banner = externalBanner || internalBanner;
 
@@ -340,7 +405,7 @@ const PlayerRegistrationForm = ({
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (loading) return;
+    if (loading || isExpired) return;
     setInternalBanner(null);
 
     if (!form.playerName.trim()) return setInternalBanner({ type: "error", message: "Player name is required." });
@@ -351,8 +416,17 @@ const PlayerRegistrationForm = ({
     if (battingEnabled && !form.battingStyle) return setInternalBanner({ type: "error", message: "Please select batting style." });
     if (bowlingEnabled && !form.bowlingStyle) return setInternalBanner({ type: "error", message: "Please select bowling style." });
 
-    if (isPaid && !paymentScreenshot) {
-      return setInternalBanner({ type: "error", message: "Please upload payment screenshot proof before submitting." });
+    if (isPaid) {
+      if (isExpired) {
+        return setInternalBanner({ type: "error", message: "5-minute session expired. Please refresh the page." });
+      }
+      if (!paymentScreenshot) {
+        return setInternalBanner({ type: "error", message: "Please upload payment screenshot proof before submitting." });
+      }
+      const finalUtr = (utrNumber || utrLast4).trim();
+      if (!finalUtr || !/^\d{12}$/.test(finalUtr)) {
+        return setInternalBanner({ type: "error", message: "Enter a valid 12-digit numeric UPI UTR / Transaction ID." });
+      }
     }
 
     let croppedFile = null;
@@ -373,7 +447,11 @@ const PlayerRegistrationForm = ({
     });
     if (croppedFile) formData.append("photo", croppedFile);
     if (paymentScreenshot) formData.append("paymentScreenshot", paymentScreenshot);
-    if (utrLast4) formData.append("utrLast4", utrLast4.trim());
+    const finalUtrStr = (utrNumber || utrLast4).trim();
+    if (finalUtrStr) {
+      formData.append("utrNumber", finalUtrStr);
+      formData.append("utrLast4", finalUtrStr.slice(-4));
+    }
 
     try {
       await onSubmit(formData, form);
@@ -383,6 +461,7 @@ const PlayerRegistrationForm = ({
         setPaymentScreenshot(null);
         setScreenshotPreview(null);
         setUtrLast4("");
+        setUtrNumber("");
       }
     } catch (err) {
       const serverErrors = err?.response?.data?.errors;
@@ -822,26 +901,61 @@ const PlayerRegistrationForm = ({
 
                   </div>
 
+                  {/* 5-Minute Reservation Timer Banner */}
+                  <div style={{
+                    marginTop: "16px",
+                    background: isExpired ? "#fef2f2" : "#eff6ff",
+                    border: `1px solid ${isExpired ? "#fca5a5" : "#93c5fd"}`,
+                    borderRadius: "12px",
+                    padding: "12px 16px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    color: isExpired ? "#991b1b" : "#1e40af",
+                    fontWeight: "600",
+                    fontSize: "14px"
+                  }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <span>⏱️</span>
+                      <span>
+                        {isExpired
+                          ? "Reservation Expired (5-Minute Limit Exceeded)"
+                          : "Payment Session Reserved"}
+                      </span>
+                    </div>
+                    <div style={{
+                      background: isExpired ? "#dc2626" : "#2563eb",
+                      color: "#ffffff",
+                      padding: "4px 10px",
+                      borderRadius: "20px",
+                      fontSize: "13px",
+                      fontWeight: "700"
+                    }}>
+                      {isExpired ? "00:00" : formattedTimer}
+                    </div>
+                  </div>
+
                   {/* Payment Screenshot Upload Box */}
                   <div style={{ marginTop: "20px", paddingTop: "20px", borderTop: "1px dashed #cbd5e1" }}>
                     <label style={{ display: "block", marginBottom: "8px", fontWeight: "700", fontSize: "14px", color: "#1e293b" }}>
                       Upload Payment Screenshot <span>*</span>
                     </label>
                     <p style={{ margin: "0 0 12px", fontSize: "12px", color: "#64748b" }}>
-                      Please upload a screenshot of your successful UPI payment as proof.
+                      Please upload a screenshot of your successful UPI payment as proof. Our system will auto-extract the 12-digit UTR number!
                     </p>
 
                     {!screenshotPreview ? (
                       <div
-                        onClick={() => screenshotRef.current?.click()}
+                        onClick={() => !isExpired && screenshotRef.current?.click()}
                         style={{
                           border: "2px dashed #3b82f6",
                           borderRadius: "12px",
                           padding: "24px 16px",
                           textAlign: "center",
-                          cursor: "pointer",
-                          background: "#eff6ff",
+                          cursor: isExpired ? "not-allowed" : "pointer",
+                          background: isExpired ? "#f1f5f9" : "#eff6ff",
                           transition: "background .15s",
+                          opacity: isExpired ? 0.6 : 1
                         }}
                       >
                         <div style={{ fontSize: "28px", marginBottom: "4px" }}>📸</div>
@@ -859,15 +973,26 @@ const PlayerRegistrationForm = ({
                           alt="Payment Screenshot"
                           style={{ width: 80, height: 80, objectFit: "cover", borderRadius: "8px", border: "1px solid #cbd5e1" }}
                         />
-                        <div>
+                        <div style={{ flex: 1 }}>
                           <p style={{ margin: "0 0 4px", fontWeight: "600", fontSize: "13px", color: "#166534" }}>
                             ✓ Screenshot attached
                           </p>
+                          {ocrLoading && (
+                            <p style={{ margin: "0 0 4px", fontSize: "12px", color: "#d97706" }}>
+                              🔍 Scanning image for 12-digit UTR number...
+                            </p>
+                          )}
+                          {ocrSuccess && (
+                            <p style={{ margin: "0 0 4px", fontSize: "12px", color: "#15803d", fontWeight: "600" }}>
+                              ✨ Auto-extracted UTR: {utrNumber}
+                            </p>
+                          )}
                           <button
                             type="button"
                             onClick={() => {
                               setPaymentScreenshot(null);
                               setScreenshotPreview(null);
+                              setOcrSuccess(false);
                             }}
                             style={{
                               background: "none",
@@ -903,20 +1028,29 @@ const PlayerRegistrationForm = ({
                           }
                           setPaymentScreenshot(file);
                           setScreenshotPreview(URL.createObjectURL(file));
+                          processScreenshotOcr(file);
                         }
                       }}
                     />
                   </div>
 
-                  {/* Optional UTR Number Input */}
+                  {/* 12-Digit Mandatory UTR Input */}
                   <div style={{ marginTop: "16px" }}>
                     <InputField
-                      label="UPI Reference / UTR Number (Optional)"
-                      id="utrLast4"
-                      value={utrLast4}
-                      onChange={(e) => setUtrLast4(e.target.value)}
+                      label="12-Digit UPI Transaction ID / UTR Number *"
+                      id="utrNumber"
+                      value={utrNumber || utrLast4}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, "").slice(0, 12);
+                        setUtrNumber(val);
+                        setUtrLast4(val.slice(-4));
+                      }}
                       placeholder="e.g. 423456789012"
+                      maxLength={12}
                     />
+                    <p style={{ margin: "4px 0 0", fontSize: "11px", color: "#64748b" }}>
+                      Must be strictly 12 numeric digits from your GPay / PhonePe / Paytm payment receipt.
+                    </p>
                   </div>
                 </div>
               ) : (
