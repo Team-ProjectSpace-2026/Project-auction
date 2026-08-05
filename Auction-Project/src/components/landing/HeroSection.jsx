@@ -1,10 +1,9 @@
 import { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { FiPlay, FiChevronDown, FiArrowDown, FiX, FiZap, FiTrendingUp, FiClock, FiCheck } from 'react-icons/fi';
+import { FiPlay, FiChevronDown, FiArrowDown, FiX } from 'react-icons/fi';
 import { getPublicPlatformStats } from '../../services/tournamentService';
 import Button from '../../components/common/Button';
-import batsmanImg from '../../assets/Batsman_Logo1.png';
 import trophyImg from '../../assets/ipl_trophy_render.png';
 import './HeroSection.css';
 
