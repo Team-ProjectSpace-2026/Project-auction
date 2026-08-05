@@ -461,25 +461,23 @@ const EditTournamentPage = () => {
             ⚡ Upgrade Plan
           </button>
 
-          {tournament?.hostingPayment?.amountPaid > 0 && (
-            <button
-              type="button"
-              onClick={handleCancelSubscription}
-              disabled={cancelling}
-              style={{
-                background: 'rgba(239, 68, 68, 0.15)',
-                color: '#f87171',
-                border: '1px solid rgba(239, 68, 68, 0.4)',
-                borderRadius: '8px',
-                padding: '8px 14px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                fontSize: '13px'
-              }}
-            >
-              {cancelling ? 'Cancelling...' : '❌ Cancel & Refund'}
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={handleCancelSubscription}
+            disabled={cancelling}
+            style={{
+              background: 'rgba(239, 68, 68, 0.15)',
+              color: '#f87171',
+              border: '1px solid rgba(239, 68, 68, 0.4)',
+              borderRadius: '8px',
+              padding: '8px 14px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              fontSize: '13px'
+            }}
+          >
+            {cancelling ? 'Cancelling...' : '❌ Cancel Plan / Refund'}
+          </button>
         </>
       )}
     </div>
