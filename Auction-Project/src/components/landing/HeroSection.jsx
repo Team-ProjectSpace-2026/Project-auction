@@ -5,6 +5,7 @@ import { FiPlay, FiChevronDown, FiArrowDown, FiX, FiZap, FiTrendingUp, FiClock, 
 import { getPublicPlatformStats } from '../../services/tournamentService';
 import Button from '../../components/common/Button';
 import batsmanImg from '../../assets/Batsman_Logo1.png';
+import trophyImg from '../../assets/ipl_trophy_render.png';
 import './HeroSection.css';
 
 const particles = Array.from({ length: 20 }, (_, i) => ({
@@ -35,40 +36,11 @@ const HeroSection = forwardRef((props, ref) => {
     uptimeGuarantee: '99.9%',
   });
 
-  // Live Interactive Mini Bidding Card State
-  const [currentBid, setCurrentBid] = useState(8.50);
-  const [bidCount, setBidCount] = useState(14);
-  const [lastBidTeam, setLastBidTeam] = useState('Mumbai Indians');
-  const [isBidding, setIsBidding] = useState(false);
-  const [bidSuccessMessage, setBidSuccessMessage] = useState('');
-  const [timerSeconds, setTimerSeconds] = useState(18);
-
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
   const heroRef = useRef(null);
 
   useImperativeHandle(ref, () => heroRef.current, []);
-
-  // Timer countdown simulation
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimerSeconds((prev) => (prev > 1 ? prev - 1 : 20));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const handleQuickBid = () => {
-    setIsBidding(true);
-    const nextBid = parseFloat((currentBid + 0.25).toFixed(2));
-    setCurrentBid(nextBid);
-    setBidCount((prev) => prev + 1);
-    setLastBidTeam('Your Team (Bidder)');
-    setTimerSeconds(20);
-    setBidSuccessMessage(`Bid Placed: ₹${nextBid.toFixed(2)} CR!`);
-
-    setTimeout(() => setIsBidding(false), 500);
-    setTimeout(() => setBidSuccessMessage(''), 2500);
-  };
 
   useEffect(() => {
     getPublicPlatformStats()
@@ -406,89 +378,92 @@ const HeroSection = forwardRef((props, ref) => {
             </motion.div>
           </div>
 
-          {/* Right Column: Interactive Smart Mini Bidding Card */}
+          {/* Right Column: Decorative Rotating Trophy & Floating Stat Visual */}
           <motion.div
-            className="hero-card-col"
-            initial={{ opacity: 0, scale: 0.92, y: 30 }}
+            className="hero-trophy-col"
+            initial={{ opacity: 0, scale: 0.9, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.4, ease: 'easeOut' }}
+            transition={{ duration: 0.8, delay: 0.4, ease: 'easeOut' }}
           >
-            <div className={`mini-bidding-card ${isBidding ? 'bidding-active-pulse' : ''}`}>
-              {/* Card Header Status */}
-              <div className="card-top-bar">
-                <div className="live-status-pill">
-                  <span className="live-pulse-dot" />
-                  <span>LIVE DEMO AUCTION</span>
-                </div>
-                <div className="timer-chip">
-                  <FiClock size={12} />
-                  <span>{timerSeconds}s</span>
-                </div>
+            <div className="trophy-visual-stage">
+              {/* Soft Gold Spotlight Glow & Backlight */}
+              <div className="gold-spotlight-glow" aria-hidden="true" />
+              <div className="gold-light-ring" aria-hidden="true" />
+              <div className="gold-sparkles-container" aria-hidden="true">
+                <span className="gold-sparkle s1" />
+                <span className="gold-sparkle s2" />
+                <span className="gold-sparkle s3" />
+                <span className="gold-sparkle s4" />
               </div>
 
-              {/* Player Info Box */}
-              <div className="card-player-row">
-                <div className="player-avatar-circle">
-                  <img src={batsmanImg} alt="Star Player" />
-                  <span className="player-role-badge">ALL-ROUNDER</span>
-                </div>
-                <div className="player-meta">
-                  <h3 className="player-name">Virat Kohli (Mock)</h3>
-                  <div className="player-stats-mini">
-                    <span>Base: ₹2.00 CR</span>
-                    <span className="bullet-sep">•</span>
-                    <span>Bids: <strong>{bidCount}</strong></span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Current Bid Display Box */}
-              <div className="bid-price-box">
-                <div className="price-label">Current Highest Bid</div>
-                <div className="price-value-row">
-                  <span className="bid-currency">₹</span>
-                  <motion.span
-                    key={currentBid}
-                    className="bid-amount"
-                    initial={{ scale: 1.2, color: '#fbbf24' }}
-                    animate={{ scale: 1, color: '#ffffff' }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    {currentBid.toFixed(2)}
-                  </motion.span>
-                  <span className="bid-unit">CR</span>
-                </div>
-                <div className="highest-bidder-info">
-                  <FiTrendingUp className="trending-icon" size={14} />
-                  <span>Leading Bidder: <strong>{lastBidTeam}</strong></span>
-                </div>
-              </div>
-
-              {/* Success Notification Banner */}
-              <AnimatePresence>
-                {bidSuccessMessage && (
-                  <motion.div
-                    className="bid-success-toast"
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                  >
-                    <FiCheck size={14} /> {bidSuccessMessage}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* Interactive Quick Bid Button */}
-              <motion.button
-                className="interactive-bid-paddle-btn"
-                onClick={handleQuickBid}
-                whileHover={{ scale: 1.03, y: -2 }}
-                whileTap={{ scale: 0.96 }}
+              {/* 3D Rotating IPL-Style Trophy Visual */}
+              <motion.div 
+                className="rotating-trophy-container"
+                animate={{ 
+                  y: [0, -14, 0],
+                  rotateY: [-6, 6, -6],
+                }}
+                transition={{ 
+                  duration: 6, 
+                  repeat: Infinity, 
+                  ease: "easeInOut" 
+                }}
               >
-                <FiZap size={18} className="zap-icon" />
-                <span>⚡ Place Quick Bid (+ ₹0.25 CR)</span>
-              </motion.button>
-              <p className="card-interactive-hint">Click above to test live real-time bidding action!</p>
+                <img 
+                  src={trophyImg} 
+                  alt="IPL Championship Trophy" 
+                  className="ipl-trophy-img" 
+                />
+              </motion.div>
+
+              {/* Floating Stat Chips Surrounding the Trophy */}
+              <motion.div 
+                className="stat-chip chip-top-left"
+                animate={{ y: [0, -10, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+              >
+                <span className="chip-icon">🏆</span>
+                <div className="chip-text">
+                  <span className="chip-value">₹8.50 CR</span>
+                  <span className="chip-label">Highest Bid</span>
+                </div>
+              </motion.div>
+
+              <motion.div 
+                className="stat-chip chip-top-right"
+                animate={{ y: [0, -12, 0] }}
+                transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
+              >
+                <span className="chip-icon">🏏</span>
+                <div className="chip-text">
+                  <span className="chip-value">56+</span>
+                  <span className="chip-label">Players Sold</span>
+                </div>
+              </motion.div>
+
+              <motion.div 
+                className="stat-chip chip-bottom-left"
+                animate={{ y: [0, -8, 0] }}
+                transition={{ duration: 3.8, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+              >
+                <span className="chip-icon">🛡️</span>
+                <div className="chip-text">
+                  <span className="chip-value">30+</span>
+                  <span className="chip-label">Leagues Hosted</span>
+                </div>
+              </motion.div>
+
+              <motion.div 
+                className="stat-chip chip-bottom-right"
+                animate={{ y: [0, -11, 0] }}
+                transition={{ duration: 4.2, repeat: Infinity, ease: 'easeInOut', delay: 1.5 }}
+              >
+                <span className="chip-icon">⚡</span>
+                <div className="chip-text">
+                  <span className="chip-value">Real-Time</span>
+                  <span className="chip-label">Auction Engine</span>
+                </div>
+              </motion.div>
             </div>
           </motion.div>
         </div>

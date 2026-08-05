@@ -132,7 +132,11 @@ const CreateTournamentPage = () => {
 
         // Step 4: Verify payment on server BEFORE creating tournament
         if (result && result.paymentDetails) {
-          const verifyRes = await verifyPaymentSignature(paymentRes.orderId);
+          const verifyRes = await verifyPaymentSignature(paymentRes.orderId, {
+            numTeams: formData.numTeams,
+            tournamentName: formData.tournamentName,
+            type: 'tournament_hosting'
+          });
           if (verifyRes.success) {
             // Payment confirmed — now create tournament
             await executeTournamentCreation();
