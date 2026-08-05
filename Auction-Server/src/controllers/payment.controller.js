@@ -139,54 +139,69 @@ export const verifyPayment = async (req, res) => {
 
         // Update tournament model if tournamentId provided
         if (tournamentId && mongoose.Types.ObjectId.isValid(tournamentId)) {
-          try {
-            const tournament = await Tournament.findById(tournamentId);
-            if (tournament) {
-              const oldPaid = tournament.hostingPayment?.amountPaid || 0;
-              const oldPlan = planTiers.find(p => tournament.teams <= p.maxTeams) || { name: 'Previous Plan', price: oldPaid, maxTeams: tournament.teams };
+          const tournament = await Tournament.findById(tournamentId);
+          if (!tournament) {
+            return res.status(404).json({ success: false, message: 'Tournament not found' });
+          }
 
-              if (isUpgrade) {
-                tournament.teams = Number(newTeams || teams);
-                tournament.hostingPayment = {
-                  orderId: data.order_id,
-                  amountPaid: oldPaid + data.order_amount,
-                  planName: matchedPlan.name,
-                  maxTeams: tournament.teams,
-                  status: 'UPGRADED',
-                  paidAt: new Date()
-                };
-                await tournament.save();
+          // Verify ownership
+          if (req.user && tournament.owner.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ success: false, message: 'Unauthorized: You do not own this tournament' });
+          }
 
-                // Send Upgrade Email
-                sendOrganizerUpgradeInvoiceEmail({
-                  organizer: { name: req.user.name || 'Organizer', email: req.user.email, phone: req.user.mobile || '' },
-                  oldPlan,
-                  newPlan: matchedPlan,
-                  netPaid: data.order_amount,
-                  payment: { orderId: data.order_id, method: 'Cashfree' },
-                  tournament: { name: tournament.name }
-                }).catch(err => console.error('Upgrade invoice email error:', err));
-              } else {
-                tournament.hostingPayment = {
-                  orderId: data.order_id,
-                  amountPaid: data.order_amount,
-                  planName: matchedPlan.name,
-                  maxTeams: teams,
-                  status: 'PAID',
-                  paidAt: new Date()
-                };
-                await tournament.save();
+          // Verify orderId reuse
+          const existingOrderUse = await Tournament.findOne({ 'hostingPayment.orderId': data.order_id, _id: { $ne: tournament._id } });
+          if (existingOrderUse) {
+            return res.status(400).json({ success: false, message: 'Order ID already used for another tournament' });
+          }
 
-                sendOrganizerPackInvoiceEmail({
-                  organizer: { name: req.user.name || 'Organizer', email: req.user.email, phone: req.user.mobile || '' },
-                  plan: matchedPlan,
-                  payment: { orderId: data.order_id, transactionId: data.cf_order_id || data.order_id, method: 'Cashfree' },
-                  tournament: { name: tournamentName || tournament.name, numTeams: teams }
-                }).catch(err => console.error('Pack invoice email error:', err));
-              }
-            }
-          } catch (tErr) {
-            console.error('Error updating tournament hosting payment:', tErr);
+          const oldPaid = tournament.hostingPayment?.amountPaid || 0;
+          const expectedDiff = isUpgrade ? Math.max(0, matchedPlan.price - oldPaid) : matchedPlan.price;
+
+          // Verify amount
+          if (Number(data.order_amount) < expectedDiff) {
+            return res.status(400).json({ success: false, message: `Paid amount (₹${data.order_amount}) is less than required plan fee (₹${expectedDiff})` });
+          }
+
+          const oldPlan = planTiers.find(p => tournament.teams <= p.maxTeams) || { name: 'Previous Plan', price: oldPaid, maxTeams: tournament.teams };
+
+          if (isUpgrade) {
+            tournament.teams = matchedPlan.maxTeams;
+            tournament.hostingPayment = {
+              orderId: data.order_id,
+              amountPaid: oldPaid + Number(data.order_amount),
+              planName: matchedPlan.name,
+              maxTeams: matchedPlan.maxTeams,
+              status: 'UPGRADED',
+              paidAt: new Date()
+            };
+            await tournament.save();
+
+            sendOrganizerUpgradeInvoiceEmail({
+              organizer: { name: req.user.name || 'Organizer', email: req.user.email, phone: req.user.mobile || '' },
+              oldPlan,
+              newPlan: matchedPlan,
+              netPaid: Number(data.order_amount),
+              payment: { orderId: data.order_id, method: 'Cashfree' },
+              tournament: { name: tournament.name }
+            }).catch(err => console.error('Upgrade invoice email error:', err));
+          } else {
+            tournament.hostingPayment = {
+              orderId: data.order_id,
+              amountPaid: Number(data.order_amount),
+              planName: matchedPlan.name,
+              maxTeams: matchedPlan.maxTeams,
+              status: 'PAID',
+              paidAt: new Date()
+            };
+            await tournament.save();
+
+            sendOrganizerPackInvoiceEmail({
+              organizer: { name: req.user.name || 'Organizer', email: req.user.email, phone: req.user.mobile || '' },
+              plan: matchedPlan,
+              payment: { orderId: data.order_id, transactionId: data.cf_order_id || data.order_id, method: 'Cashfree' },
+              tournament: { name: tournamentName || tournament.name, numTeams: teams }
+            }).catch(err => console.error('Pack invoice email error:', err));
           }
         } else if (type === 'tournament_hosting' && req.user) {
           sendOrganizerPackInvoiceEmail({
@@ -392,16 +407,16 @@ export const initiateUpgradePayment = async (req, res) => {
 
     if (diffAmount <= 0) {
       // Free tier bump
-      tournament.teams = newTeams;
+      tournament.teams = targetPlan.maxTeams;
       if (!tournament.hostingPayment) tournament.hostingPayment = {};
-      tournament.hostingPayment.maxTeams = newTeams;
+      tournament.hostingPayment.maxTeams = targetPlan.maxTeams;
       tournament.hostingPayment.planName = targetPlan.name;
       await tournament.save();
       return res.status(200).json({
         success: true,
         isFree: true,
         amount: 0,
-        message: `Plan upgraded to ${targetPlan.name} (${newTeams} Teams) at no extra charge.`
+        message: `Plan upgraded to ${targetPlan.name} (${targetPlan.maxTeams} Teams) at no extra charge.`
       });
     }
 
@@ -426,7 +441,7 @@ export const initiateUpgradePayment = async (req, res) => {
       amount: diffAmount,
       currentPaid,
       targetPrice: targetPlan.price,
-      newTeams,
+      newTeams: targetPlan.maxTeams,
       env,
       message: `Upgrade session created. Pay difference of ₹${diffAmount}`
     });
@@ -471,7 +486,14 @@ export const cancelHostingSubscription = async (req, res) => {
     const orderId = paymentInfo.orderId;
     const amountToRefund = paymentInfo.amountPaid || 0;
 
-    let refundId = `ref_${Date.now()}`;
+    // Atomically mark status as CANCELLED before executing refund to prevent race conditions
+    tournament.hostingPayment.status = 'CANCELLED';
+
+    const deterministicRefundId = orderId
+      ? `ref_${orderId.replace(/[^a-zA-Z0-9_-]/g, '_')}`
+      : `ref_${tournament._id}_${Date.now()}`;
+
+    let refundId = deterministicRefundId;
     let refundStatus = 'PROCESSED';
 
     if (orderId && amountToRefund > 0) {
@@ -490,8 +512,6 @@ export const cancelHostingSubscription = async (req, res) => {
       }
     }
 
-    // Update Tournament status & hostingPayment
-    tournament.hostingPayment.status = 'CANCELLED';
     tournament.hostingPayment.cancellationDetails = {
       cancelledAt: new Date(),
       refundId,
@@ -500,19 +520,24 @@ export const cancelHostingSubscription = async (req, res) => {
     };
     await tournament.save();
 
-    // Discharging email
+    // Send Cancellation Email with accurate status
     sendOrganizerCancellationRefundEmail({
       organizer: { name: req.user.name || 'Organizer', email: req.user.email, phone: req.user.mobile || '' },
       plan: { name: paymentInfo.planName || 'Auction Hosting Plan', maxTeams: paymentInfo.maxTeams || tournament.teams, price: amountToRefund },
       refundAmount: amountToRefund,
       refundId,
+      refundStatus,
       payment: { orderId },
       tournament: { name: tournament.name }
     }).catch(err => console.error('Cancellation email error:', err));
 
+    const responseMsg = refundStatus === 'PENDING_ADMIN_REVIEW'
+      ? 'Tournament subscription plan cancelled. Refund is pending admin review.'
+      : 'Tournament subscription plan cancelled and refund initiated successfully';
+
     return res.status(200).json({
       success: true,
-      message: 'Tournament subscription plan cancelled and refund initiated successfully',
+      message: responseMsg,
       refundId,
       refundAmount: amountToRefund,
       refundStatus

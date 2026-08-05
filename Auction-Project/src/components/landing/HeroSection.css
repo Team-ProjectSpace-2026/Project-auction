@@ -167,10 +167,10 @@
   filter: blur(30px);
   pointer-events: none;
   z-index: 1;
-  animation: goldPulse 4s ease-in-out infinite alternate;
+  animation: gold-pulse 4s ease-in-out infinite alternate;
 }
 
-@keyframes goldPulse {
+@keyframes gold-pulse {
   0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.7; }
   100% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
 }
@@ -186,10 +186,10 @@
   border: 1px dashed rgba(251, 191, 36, 0.25);
   pointer-events: none;
   z-index: 1;
-  animation: ringRotate 25s linear infinite;
+  animation: ring-rotate 25s linear infinite;
 }
 
-@keyframes ringRotate {
+@keyframes ring-rotate {
   0% { transform: translate(-50%, -50%) rotate(0deg); }
   100% { transform: translate(-50%, -50%) rotate(360deg); }
 }
@@ -209,7 +209,7 @@
   border-radius: 50%;
   background: #fef08a;
   box-shadow: 0 0 10px #fbbf24;
-  animation: sparkleTwinkle 3s ease-in-out infinite alternate;
+  animation: sparkle-twinkle 3s ease-in-out infinite alternate;
 }
 
 .gold-sparkle.s1 { top: 20%; left: 25%; animation-delay: 0s; }
@@ -217,7 +217,7 @@
 .gold-sparkle.s3 { bottom: 25%; left: 20%; animation-delay: 1.5s; }
 .gold-sparkle.s4 { bottom: 35%; right: 28%; animation-delay: 2.2s; }
 
-@keyframes sparkleTwinkle {
+@keyframes sparkle-twinkle {
   0% { opacity: 0.2; transform: scale(0.6); }
   100% { opacity: 1; transform: scale(1.4); }
 }

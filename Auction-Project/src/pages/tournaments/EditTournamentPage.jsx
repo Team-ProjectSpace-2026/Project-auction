@@ -36,8 +36,9 @@ const EditTournamentPage = () => {
     const fileInputRef = useRef(null);
 
     // Subscription & Upgrade State
+    const upgradablePlans = AUCTION_PRICING_PLANS.filter(p => p.maxTeams > (tournament?.teams || 0));
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-    const [selectedTargetTeams, setSelectedTargetTeams] = useState(tournament?.teams || 6);
+    const [selectedTargetTeams, setSelectedTargetTeams] = useState(upgradablePlans[0]?.maxTeams || 30);
     const [upgrading, setUpgrading] = useState(false);
     const [cancelling, setCancelling] = useState(false);
 
@@ -60,6 +61,7 @@ const EditTournamentPage = () => {
     const navigate = useNavigate();
 
     const handleUpgradeSubmit = async () => {
+        if (!tournament?._id) return;
         if (selectedTargetTeams <= (tournament?.teams || 0)) {
             alert("Please select a higher team limit to upgrade your plan.");
             return;
@@ -111,6 +113,7 @@ const EditTournamentPage = () => {
     };
 
     const handleCancelSubscription = async () => {
+        if (!tournament?._id) return;
         const confirmMsg = currentPaidAmount > 0 
             ? `Are you sure you want to cancel your hosting subscription plan?\n\nA full refund of ₹${currentPaidAmount} will be initiated to your Cashfree payment method.`
             : `Are you sure you want to cancel your tournament hosting plan?`;
@@ -579,7 +582,7 @@ const EditTournamentPage = () => {
             borderRadius: '8px', color: '#fff', fontSize: '14px', outline: 'none'
           }}
         >
-          {AUCTION_PRICING_PLANS.filter(p => p.maxTeams > (tournament?.teams || 0)).map(plan => (
+          {upgradablePlans.map(plan => (
             <option key={plan.planNumber} value={plan.maxTeams}>
               {plan.name} — Up to {plan.maxTeams} Teams (₹{plan.price})
             </option>

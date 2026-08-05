@@ -92,23 +92,31 @@ export const createCashfreeRefund = async ({ orderId, refundAmount, refundId, re
     refund_note: remark || 'Tournament plan cancellation refund'
   };
 
-  const response = await fetch(`${baseUrl}/orders/${encodeURIComponent(orderId)}/refunds`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-version': '2023-08-01',
-      'x-client-id': appId,
-      'x-client-secret': secretKey
-    },
-    body: JSON.stringify(payload)
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-  const data = await response.json();
-  if (!response.ok) {
-    console.warn('⚠️ Cashfree Refund API response error:', data);
-    throw new Error(data.message || 'Cashfree Refund creation failed');
+  try {
+    const response = await fetch(`${baseUrl}/orders/${encodeURIComponent(orderId)}/refunds`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-version': '2023-08-01',
+        'x-client-id': appId,
+        'x-client-secret': secretKey
+      },
+      body: JSON.stringify(payload),
+      signal: controller.signal
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      console.warn('⚠️ Cashfree Refund API response error:', data);
+      throw new Error(data.message || 'Cashfree Refund creation failed');
+    }
+
+    return data;
+  } finally {
+    clearTimeout(timeoutId);
   }
-
-  return data;
 };
 

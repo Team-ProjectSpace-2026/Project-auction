@@ -130,19 +130,19 @@ const CreateTournamentPage = () => {
         // Step 3: AWAIT checkout — wait for user to pay/cancel
         const result = await cashfree.checkout(checkoutOptions);
 
-        // Step 4: Verify payment on server BEFORE creating tournament
+        // Step 4: Verify payment & create tournament
         if (result && result.paymentDetails) {
-          const verifyRes = await verifyPaymentSignature(paymentRes.orderId, {
-            numTeams: formData.numTeams,
-            tournamentName: formData.tournamentName,
-            type: 'tournament_hosting'
-          });
-          if (verifyRes.success) {
-            // Payment confirmed — now create tournament
-            await executeTournamentCreation();
-          } else {
-            alert("Payment verification failed. Your payment may be pending — please try again or contact support.");
-            setLoading(false);
+          const newTournament = await executeTournamentCreation();
+          if (newTournament && newTournament._id) {
+            const verifyRes = await verifyPaymentSignature(paymentRes.orderId, {
+              tournamentId: newTournament._id,
+              numTeams: formData.numTeams,
+              tournamentName: formData.tournamentName,
+              type: 'tournament_hosting'
+            });
+            if (!verifyRes.success) {
+              console.warn("Payment verification returned non-success status:", verifyRes);
+            }
           }
         } else {
           // User cancelled or payment failed
@@ -180,11 +180,13 @@ const CreateTournamentPage = () => {
       if (logoFile) {
         payload.append("logo", logoFile);
       }
-      await createTournament(payload);
+      const response = await createTournament(payload);
       setShowSuccess(true);
+      return response.data;
     } catch (err) {
       console.error("Failed to create tournament:", err);
       alert(err.response?.data?.message || "Failed to create tournament. Please try again.");
+      return null;
     } finally {
       setLoading(false);
     }
