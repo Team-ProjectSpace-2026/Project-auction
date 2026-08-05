@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo, useEffect } from "react";
+import { useState, useRef, useMemo, useEffect, useCallback } from "react";
 import { Check, X } from "lucide-react";
 import Cropper from "react-easy-crop";
 import InputField from "../common/InputField.jsx";
@@ -288,15 +288,22 @@ const PlayerRegistrationForm = ({
 
   // 5-Minute Reservation Timer State
   const [timerSeconds, setTimerSeconds] = useState(300); // 5 minutes = 300s
+  const [timerStarted, setTimerStarted] = useState(false);
   const [isExpired, setIsExpired] = useState(false);
 
   // OCR state
   const [ocrLoading, setOcrLoading] = useState(false);
   const [ocrSuccess, setOcrSuccess] = useState(false);
 
-  // Start timer when paid registration is shown
+  const triggerPaymentTimer = useCallback(() => {
+    if (!timerStarted && !isExpired) {
+      setTimerStarted(true);
+    }
+  }, [timerStarted, isExpired]);
+
+  // Start timer ONLY when user interacts with payment actions (Copy UPI, Download QR, Upload Screenshot, or Type UTR)
   useEffect(() => {
-    if (!isPaid || isExpired) return;
+    if (!isPaid || !timerStarted || isExpired) return;
     const interval = setInterval(() => {
       setTimerSeconds((prev) => {
         if (prev <= 1) {
@@ -312,7 +319,7 @@ const PlayerRegistrationForm = ({
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, [isPaid, isExpired]);
+  }, [isPaid, timerStarted, isExpired]);
 
   const formattedTimer = useMemo(() => {
     const mins = Math.floor(timerSeconds / 60);
@@ -851,8 +858,9 @@ const PlayerRegistrationForm = ({
                         <button
                           type="button"
                           onClick={() => {
+                            triggerPaymentTimer();
                             navigator.clipboard.writeText(payoutUpiId);
-                            alert(`UPI ID "${payoutUpiId}" copied to clipboard!`);
+                            alert(`UPI ID "${payoutUpiId}" copied to clipboard! Payment timer started.`);
                           }}
                           style={{
                             marginLeft: "auto",
@@ -886,9 +894,36 @@ const PlayerRegistrationForm = ({
                           alt="UPI QR Code"
                           style={{ width: 140, height: 140, borderRadius: "8px", display: "block", margin: "0 auto 6px" }}
                         />
-                        <div style={{ fontSize: "11px", fontWeight: "600", color: "#64748b" }}>
+                        <div style={{ fontSize: "11px", fontWeight: "600", color: "#64748b", marginBottom: "6px" }}>
                           Scan to Pay ₹{fee}
                         </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            triggerPaymentTimer();
+                            const link = document.createElement("a");
+                            link.href = qrCodeDataUrl;
+                            link.download = `UPI_QR_${payoutUpiId || "payment"}.png`;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                          }}
+                          style={{
+                            background: "#eff6ff",
+                            border: "1px solid #bfdbfe",
+                            borderRadius: "6px",
+                            padding: "4px 10px",
+                            fontSize: "11px",
+                            fontWeight: "700",
+                            color: "#2563eb",
+                            cursor: "pointer",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "4px"
+                          }}
+                        >
+                          📥 Download QR
+                        </button>
                       </div>
                     )}
 
@@ -897,14 +932,14 @@ const PlayerRegistrationForm = ({
                   {/* 5-Minute Reservation Timer Banner */}
                   <div style={{
                     marginTop: "16px",
-                    background: isExpired ? "#fef2f2" : "#eff6ff",
-                    border: `1px solid ${isExpired ? "#fca5a5" : "#93c5fd"}`,
+                    background: isExpired ? "#fef2f2" : timerStarted ? "#eff6ff" : "#f8fafc",
+                    border: `1px solid ${isExpired ? "#fca5a5" : timerStarted ? "#93c5fd" : "#cbd5e1"}`,
                     borderRadius: "12px",
                     padding: "12px 16px",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
-                    color: isExpired ? "#991b1b" : "#1e40af",
+                    color: isExpired ? "#991b1b" : timerStarted ? "#1e40af" : "#475569",
                     fontWeight: "600",
                     fontSize: "14px"
                   }}>
@@ -913,11 +948,13 @@ const PlayerRegistrationForm = ({
                       <span>
                         {isExpired
                           ? "Reservation Expired (5-Minute Limit Exceeded)"
-                          : "Payment Session Reserved"}
+                          : timerStarted
+                          ? "Payment Session Reserved"
+                          : "5-Minute Payment Timer starts when you copy UPI, download QR, or upload receipt"}
                       </span>
                     </div>
                     <div style={{
-                      background: isExpired ? "#dc2626" : "#2563eb",
+                      background: isExpired ? "#dc2626" : timerStarted ? "#2563eb" : "#64748b",
                       color: "#ffffff",
                       padding: "4px 10px",
                       borderRadius: "20px",
@@ -939,7 +976,12 @@ const PlayerRegistrationForm = ({
 
                     {!screenshotPreview ? (
                       <div
-                        onClick={() => !isExpired && screenshotRef.current?.click()}
+                        onClick={() => {
+                          if (!isExpired) {
+                            triggerPaymentTimer();
+                            screenshotRef.current?.click();
+                          }
+                        }}
                         style={{
                           border: "2px dashed #3b82f6",
                           borderRadius: "12px",
@@ -1019,6 +1061,7 @@ const PlayerRegistrationForm = ({
                             alert("File size must be under 2MB");
                             return;
                           }
+                          triggerPaymentTimer();
                           setPaymentScreenshot(file);
                           setScreenshotPreview(URL.createObjectURL(file));
                           processScreenshotOcr(file);
@@ -1034,6 +1077,7 @@ const PlayerRegistrationForm = ({
                       id="utrNumber"
                       value={utrNumber || utrLast4}
                       onChange={(e) => {
+                        triggerPaymentTimer();
                         const val = e.target.value.replace(/\D/g, "").slice(0, 12);
                         setUtrNumber(val);
                         setUtrLast4(val.slice(-4));
@@ -1041,8 +1085,8 @@ const PlayerRegistrationForm = ({
                       placeholder="e.g. 423456789012"
                       maxLength={12}
                     />
-                    <p style={{ margin: "4px 0 0", fontSize: "11px", color: "#64748b" }}>
-                      Must be strictly 12 numeric digits from your GPay / PhonePe / Paytm payment receipt.
+                    <p style={{ margin: "4px 0 0", fontSize: "12px", color: "#2563eb", fontWeight: "500" }}>
+                      ✨ UTR will auto-fill when you upload your payment screenshot! If not auto-filled, simply type your 12-digit UTR manually.
                     </p>
                   </div>
                 </div>
