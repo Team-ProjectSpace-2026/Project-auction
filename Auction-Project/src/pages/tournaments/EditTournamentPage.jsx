@@ -418,6 +418,63 @@ const EditTournamentPage = () => {
 
 </div>
 
+{/* Row 5: Direct UPI & Player Registration Fee Settings */}
+<div style={{ marginTop: "24px", paddingTop: "20px", borderTop: "1px solid #e2e8f0", marginBottom: "20px" }}>
+  <h3 style={{ fontSize: "16px", fontWeight: "700", color: "#1e293b", marginBottom: "12px" }}>
+    💰 Direct UPI Payment & Player Registration Fee Settings
+  </h3>
+
+  <div className="form-group" style={{ marginBottom: "16px" }}>
+    <label style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", fontWeight: "600" }}>
+      <input
+        type="checkbox"
+        name="isPaid"
+        checked={Boolean(formData.isPaid)}
+        onChange={handleInputChange}
+        style={{ width: "18px", height: "18px", accentColor: "#2563eb" }}
+      />
+      <span>Enable Player Registration Fee (Direct 100% UPI Transfer to Organizer)</span>
+    </label>
+  </div>
+
+  {formData.isPaid && (
+    <div className="form-row" style={{ marginTop: "12px", gap: "16px" }}>
+      <div className="form-group">
+        <label>Player Entry Fee (₹) <span>*</span></label>
+        <input
+          type="number"
+          name="registrationFee"
+          value={formData.registrationFee || ""}
+          onChange={handleInputChange}
+          placeholder="e.g. 500"
+        />
+      </div>
+
+      <div className="form-group">
+        <label>Organizer UPI ID <span>*</span></label>
+        <input
+          type="text"
+          name="payoutUpiId"
+          value={formData.payoutUpiId || ""}
+          onChange={handleInputChange}
+          placeholder="e.g. organizer@upi or 9876543210@ybl"
+        />
+      </div>
+
+      <div className="form-group">
+        <label>Organizer Name on UPI</label>
+        <input
+          type="text"
+          name="payoutUpiName"
+          value={formData.payoutUpiName || ""}
+          onChange={handleInputChange}
+          placeholder="e.g. Sunil Verma"
+        />
+      </div>
+    </div>
+  )}
+</div>
+
 {/* Row 6: Subscription & Pack Management */}
 <div style={{
   marginTop: '20px',
