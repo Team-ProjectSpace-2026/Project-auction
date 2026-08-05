@@ -234,6 +234,49 @@ export const getPublicTournament = async (req, res, next) => {
   }
 };
 
+export const initiatePlayerRegistration = async (req, res, next) => {
+  try {
+    const { tournamentId } = req.params;
+    const { mobile } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(tournamentId)) {
+      return res.status(400).json({ message: 'Invalid tournament ID format' });
+    }
+
+    const tournament = await Tournament.findById(tournamentId);
+    if (!tournament) {
+      return res.status(404).json({ message: 'Tournament not found' });
+    }
+
+    if (tournament.registrationEndDate && new Date() > new Date(tournament.registrationEndDate)) {
+      return res.status(403).json({ message: 'Registration deadline has passed' });
+    }
+
+    if (mobile) {
+      const existing = await Player.findOne({ mobile, tournamentId, deleted: false });
+      if (existing) {
+        return res.status(409).json({ message: 'This mobile number is already registered for this tournament' });
+      }
+    }
+
+    const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+    const paymentCode = `PAY-${randomSuffix}`;
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes reservation
+
+    res.json({
+      success: true,
+      paymentCode,
+      expiresAt,
+      tournamentFee: tournament.registrationFee || 0,
+      isPaid: tournament.isPaid && (tournament.registrationFee > 0),
+      organizerUpiId: tournament.payoutUpiId || "",
+      organizerUpiName: tournament.payoutUpiName || tournament.name || "Tournament Organizer"
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const registerPlayer = async (req, res, next) => {
   try {
     const tournamentId = req.params.tournamentId;
@@ -275,23 +318,69 @@ export const registerPlayer = async (req, res, next) => {
       return res.status(409).json({ message: 'This mobile number is already registered for this tournament' });
     }
 
+    // Reservation timer validation
+    const reservedAt = req.body.reservedAt ? new Date(req.body.reservedAt) : new Date();
+    const expiresAt = req.body.expiresAt ? new Date(req.body.expiresAt) : new Date(Date.now() + 5 * 60 * 1000);
+    
+    if (Date.now() > new Date(expiresAt).getTime()) {
+      return res.status(408).json({ message: 'Registration session expired (5-minute limit exceeded). Please try again.' });
+    }
+
     // Payment status tracking if tournament is paid
     let paymentStatus = 'free';
     let paymentDetailsObj = {};
 
     if (tournament.isPaid && tournament.registrationFee > 0) {
-      const utrLast4 = String(req.body.utrLast4 || "").trim();
+      const utrNumber = String(req.body.utrNumber || req.body.utrLast4 || "").trim();
+      const paymentCode = String(req.body.paymentCode || "").trim();
+
+      if (!utrNumber || !/^\d{12}$/.test(utrNumber)) {
+        return res.status(400).json({ message: 'Valid 12-digit numeric UPI UTR / Transaction ID is required for payment verification' });
+      }
+
+      // 1. Check duplicate UTR
+      const duplicateUtr = await Player.findOne({
+        "paymentDetails.utrNumber": utrNumber,
+        deleted: false
+      });
+      if (duplicateUtr) {
+        return res.status(409).json({ message: 'This UTR / Transaction ID has already been submitted for another registration' });
+      }
+
       let screenshotUrl = "";
+      let imageHash = "";
+
       if (req.files && req.files.paymentScreenshot && req.files.paymentScreenshot.length > 0) {
-        screenshotUrl = req.files.paymentScreenshot[0].path;
+        const fileObj = req.files.paymentScreenshot[0];
+        screenshotUrl = fileObj.path || "";
+        // Hash screenshot path or filename to prevent re-uploading identical file
+        const hashSeed = fileObj.path || fileObj.filename || fileObj.originalname;
+        if (hashSeed) {
+          const crypto = await import('crypto');
+          imageHash = crypto.createHash('sha256').update(hashSeed).digest('hex');
+          
+          // 2. Check duplicate image hash
+          const duplicateHash = await Player.findOne({
+            "paymentDetails.imageHash": imageHash,
+            deleted: false
+          });
+          if (duplicateHash) {
+            return res.status(409).json({ message: 'This payment screenshot image has already been submitted for another registration' });
+          }
+        }
       }
 
       paymentStatus = 'pending_verification';
       paymentDetailsObj = {
-        utrLast4: utrLast4 || "N/A",
+        paymentCode: paymentCode || `PAY-${Math.floor(1000 + Math.random() * 9000)}`,
+        utrNumber,
+        utrLast4: utrNumber.slice(-4),
         paymentScreenshot: screenshotUrl || "",
+        imageHash: imageHash || "",
         amountPaid: Number(tournament.registrationFee) || 0,
-        paidAt: new Date()
+        paidAt: new Date(),
+        reservedAt,
+        expiresAt
       };
     }
 

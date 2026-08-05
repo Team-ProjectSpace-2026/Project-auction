@@ -83,6 +83,11 @@ const tournamentSchema = new mongoose.Schema({
     trim: true,
     default: ''
   },
+  payoutUpiName: {
+    type: String,
+    trim: true,
+    default: ''
+  },
   currency: {
     type: String,
     default: 'INR'
