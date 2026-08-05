@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import { Check, X } from "lucide-react";
 import Cropper from "react-easy-crop";
 import InputField from "../common/InputField.jsx";
