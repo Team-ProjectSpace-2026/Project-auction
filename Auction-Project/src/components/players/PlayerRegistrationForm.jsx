@@ -288,7 +288,6 @@ const PlayerRegistrationForm = ({
 
   // 5-Minute Reservation Timer State
   const [timerSeconds, setTimerSeconds] = useState(300); // 5 minutes = 300s
-  const [timerActive, setTimerActive] = useState(false);
   const [isExpired, setIsExpired] = useState(false);
 
   // OCR state
@@ -297,29 +296,23 @@ const PlayerRegistrationForm = ({
 
   // Start timer when paid registration is shown
   useEffect(() => {
-    if (isPaid && !timerActive && !isExpired) {
-      setTimerActive(true);
-    }
-  }, [isPaid, timerActive, isExpired]);
-
-  useEffect(() => {
-    let interval = null;
-    if (timerActive && timerSeconds > 0) {
-      interval = setInterval(() => {
-        setTimerSeconds((prev) => prev - 1);
-      }, 1000);
-    } else if (timerSeconds === 0 && timerActive) {
-      setTimerActive(false);
-      setIsExpired(true);
-      setInternalBanner({
-        type: "error",
-        message: "⏱️ 5-minute payment session has expired. Please refresh the page to start a new registration.",
+    if (!isPaid || isExpired) return;
+    const interval = setInterval(() => {
+      setTimerSeconds((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          setIsExpired(true);
+          setInternalBanner({
+            type: "error",
+            message: "⏱️ 5-minute payment session has expired. Please refresh the page to start a new registration.",
+          });
+          return 0;
+        }
+        return prev - 1;
       });
-    }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [timerActive, timerSeconds]);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [isPaid, isExpired]);
 
   const formattedTimer = useMemo(() => {
     const mins = Math.floor(timerSeconds / 60);
