@@ -5,6 +5,7 @@ import {
   getPlayer,
   updatePlayer,
   deletePlayer,
+  initiatePlayerRegistration,
   registerPlayer,
   getRegisteredPlayers,
   getPublicTournament,
