@@ -83,9 +83,11 @@ export const createPaymentOrder = async (tournamentId) => {
 
 /**
  * Verify Cashfree Payment Status
+ * @param {string} orderId
+ * @param {Object} [extra] - Additional context (numTeams, tournamentName, type)
  */
-export const verifyPaymentSignature = async (orderId) => {
-  const response = await api.post("/payment/verify-payment", { orderId });
+export const verifyPaymentSignature = async (orderId, extra = {}) => {
+  const response = await api.post("/payment/verify-payment", { orderId, ...extra });
   return response.data;
 };
 
@@ -109,3 +111,20 @@ export const verifyPlayerPaymentPublic = async (orderId) => {
   const response = await api.post("/payment/public/verify-player-payment", { orderId });
   return response.data;
 };
+
+/**
+ * Initiate Plan Upgrade (pay difference amount)
+ */
+export const initiatePlanUpgrade = async ({ tournamentId, targetTeams }) => {
+  const response = await api.post("/payment/initiate-upgrade-payment", { tournamentId, targetTeams });
+  return response.data;
+};
+
+/**
+ * Cancel Hosting Subscription & Request Cashfree Refund
+ */
+export const cancelHostingSubscription = async (tournamentId) => {
+  const response = await api.post("/payment/cancel-hosting-subscription", { tournamentId });
+  return response.data;
+};
+

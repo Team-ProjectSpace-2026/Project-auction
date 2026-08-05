@@ -96,6 +96,20 @@ const tournamentSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     default: null
+  },
+  hostingPayment: {
+    orderId: { type: String, default: '' },
+    amountPaid: { type: Number, default: 0 },
+    planName: { type: String, default: '' },
+    maxTeams: { type: Number, default: 0 },
+    status: { type: String, enum: ['FREE', 'PAID', 'UPGRADED', 'CANCELLED'], default: 'FREE' },
+    paidAt: { type: Date, default: null },
+    cancellationDetails: {
+      cancelledAt: { type: Date, default: null },
+      refundId: { type: String, default: '' },
+      refundAmount: { type: Number, default: 0 },
+      refundStatus: { type: String, default: '' }
+    }
   }
 }, {
   timestamps: true

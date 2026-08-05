@@ -130,238 +130,240 @@
   justify-content: flex-start;
 }
 
-.hero-card-col {
+.hero-trophy-col {
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-/* Mini Bidding Card */
-.mini-bidding-card {
-  width: 100%;
-  max-width: 400px;
-  background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(251, 191, 36, 0.3);
-  border-radius: 20px;
-  padding: 24px;
-  box-shadow: 
-    0 20px 50px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
   position: relative;
-  overflow: hidden;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  width: 100%;
 }
 
-.mini-bidding-card.bidding-active-pulse {
-  border-color: #fbbf24;
-  box-shadow: 0 0 35px rgba(251, 191, 36, 0.4);
-}
-
-.card-top-bar {
+.trophy-visual-stage {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  height: 480px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  justify-content: center;
+  perspective: 1000px;
 }
 
-.live-status-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 10px;
-  border-radius: 20px;
-  background: rgba(34, 197, 94, 0.12);
-  border: 1px solid rgba(34, 197, 94, 0.3);
-  color: #4ade80;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
+/* Soft Gold Spotlight Glow & Lighting Effects */
+.gold-spotlight-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle, 
+    rgba(251, 191, 36, 0.25) 0%, 
+    rgba(245, 158, 11, 0.12) 45%, 
+    transparent 70%
+  );
+  filter: blur(30px);
+  pointer-events: none;
+  z-index: 1;
+  animation: gold-pulse 4s ease-in-out infinite alternate;
 }
 
-.live-pulse-dot {
+@keyframes gold-pulse {
+  0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.7; }
+  100% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
+}
+
+.gold-light-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  border: 1px dashed rgba(251, 191, 36, 0.25);
+  pointer-events: none;
+  z-index: 1;
+  animation: ring-rotate 25s linear infinite;
+}
+
+@keyframes ring-rotate {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Floating Sparkle Dots around Trophy */
+.gold-sparkles-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.gold-sparkle {
+  position: absolute;
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #22c55e;
-  box-shadow: 0 0 8px #22c55e;
-  animation: pulse 1.5s infinite;
+  background: #fef08a;
+  box-shadow: 0 0 10px #fbbf24;
+  animation: sparkle-twinkle 3s ease-in-out infinite alternate;
 }
 
-.timer-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.05);
-  color: #94a3b8;
-  font-size: 12px;
-  font-weight: 600;
+.gold-sparkle.s1 { top: 20%; left: 25%; animation-delay: 0s; }
+.gold-sparkle.s2 { top: 30%; right: 22%; animation-delay: 0.8s; }
+.gold-sparkle.s3 { bottom: 25%; left: 20%; animation-delay: 1.5s; }
+.gold-sparkle.s4 { bottom: 35%; right: 28%; animation-delay: 2.2s; }
+
+@keyframes sparkle-twinkle {
+  0% { opacity: 0.2; transform: scale(0.6); }
+  100% { opacity: 1; transform: scale(1.4); }
 }
 
-.card-player-row {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 20px;
-}
-
-.player-avatar-circle {
+/* 3D Rotating Trophy Container */
+.rotating-trophy-container {
   position: relative;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(30, 58, 138, 0.4));
-  border: 2px solid rgba(251, 191, 36, 0.5);
+  z-index: 3;
+  width: 320px;
+  height: 390px;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  transform-style: preserve-3d;
 }
 
-.player-avatar-circle img {
-  width: 44px;
-  height: auto;
-  object-fit: contain;
-}
-
-.player-role-badge {
-  position: absolute;
-  bottom: -6px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #fbbf24;
-  color: #000;
-  font-size: 9px;
-  font-weight: 800;
-  padding: 1px 6px;
-  border-radius: 10px;
-  white-space: nowrap;
-}
-
-.player-meta .player-name {
-  font-size: 18px;
-  font-weight: 700;
-  color: #ffffff;
-  margin: 0 0 4px;
-}
-
-.player-stats-mini {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  color: #94a3b8;
-}
-
-.bullet-sep {
-  color: #475569;
-}
-
-.bid-price-box {
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  padding: 16px;
-  margin-bottom: 16px;
-  text-align: center;
-}
-
-.price-label {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: #94a3b8;
-  font-weight: 600;
-  margin-bottom: 6px;
-}
-
-.price-value-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: 4px;
-  margin-bottom: 6px;
-}
-
-.bid-currency {
-  font-size: 20px;
-  font-weight: 700;
-  color: #fbbf24;
-}
-
-.bid-amount {
-  font-size: 34px;
-  font-weight: 900;
-  color: #ffffff;
-  letter-spacing: -0.5px;
-}
-
-.bid-unit {
-  font-size: 14px;
-  font-weight: 700;
-  color: #fbbf24;
-}
-
-.highest-bidder-info {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  font-size: 12px;
-  color: #cbd5e1;
-}
-
-.trending-icon {
-  color: #38bdf8;
-}
-
-.interactive-bid-paddle-btn {
+.ipl-trophy-img {
   width: 100%;
-  padding: 14px;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.75)) drop-shadow(0 0 30px rgba(251, 191, 36, 0.4));
   border-radius: 12px;
-  background: linear-gradient(135deg, #fbbf24, #f59e0b);
-  border: none;
-  color: #0a0e1a;
-  font-size: 15px;
+}
+
+/* Glassmorphism Floating Stat Chips */
+.stat-chip {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  border-radius: 50px;
+  box-shadow: 
+    0 10px 25px rgba(0, 0, 0, 0.4),
+    0 0 15px rgba(251, 191, 36, 0.15);
+  pointer-events: auto;
+  user-select: none;
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stat-chip:hover {
+  transform: scale(1.05) translateY(-4px) !important;
+  border-color: rgba(251, 191, 36, 0.7);
+  box-shadow: 
+    0 14px 30px rgba(0, 0, 0, 0.5),
+    0 0 25px rgba(251, 191, 36, 0.3);
+}
+
+.chip-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.chip-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.chip-value {
+  font-size: 14px;
   font-weight: 800;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  box-shadow: 0 6px 20px rgba(251, 191, 36, 0.35);
-  transition: all 0.2s ease;
+  color: #ffffff;
+  line-height: 1.1;
+  letter-spacing: -0.2px;
+  background: linear-gradient(135deg, #ffffff 30%, #fbbf24 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-.interactive-bid-paddle-btn:hover {
-  box-shadow: 0 8px 30px rgba(251, 191, 36, 0.5);
+.chip-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.card-interactive-hint {
-  font-size: 11px;
-  color: #64748b;
-  text-align: center;
-  margin: 10px 0 0;
+/* Stat Chip Position Placements */
+.chip-top-left {
+  top: 15px;
+  left: 0px;
 }
 
-.bid-success-toast {
-  background: rgba(34, 197, 94, 0.2);
-  border: 1px solid rgba(34, 197, 94, 0.4);
-  color: #4ade80;
-  font-size: 12px;
-  font-weight: 700;
-  padding: 6px 12px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  margin-bottom: 12px;
+.chip-top-right {
+  top: 40px;
+  right: -10px;
+}
+
+.chip-bottom-left {
+  bottom: 50px;
+  left: -15px;
+}
+
+.chip-bottom-right {
+  bottom: 25px;
+  right: 0px;
+}
+
+@media (max-width: 576px) {
+  .trophy-visual-stage {
+    height: 380px;
+    max-width: 340px;
+  }
+
+  .rotating-trophy-container {
+    width: 210px;
+    height: 270px;
+  }
+
+  .chip-top-left {
+    top: 0px;
+    left: -10px;
+  }
+
+  .chip-top-right {
+    top: 20px;
+    right: -15px;
+  }
+
+  .chip-bottom-left {
+    bottom: 20px;
+    left: -15px;
+  }
+
+  .chip-bottom-right {
+    bottom: 0px;
+    right: -10px;
+  }
+
+  .stat-chip {
+    padding: 8px 12px;
+    gap: 8px;
+  }
+
+  .chip-value {
+    font-size: 12px;
+  }
+
+  .chip-label {
+    font-size: 9px;
+  }
 }
 
 /* Responsive Grid for Hero Split */
