@@ -222,16 +222,63 @@
   100% { opacity: 1; transform: scale(1.4); }
 }
 
-/* 3D Rotating Trophy Container */
-.rotating-trophy-container {
+/* 3D Rotating Coin Container */
+.hero-coin-col {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  perspective: 1200px;
+}
+
+.coin-visual-stage {
+  position: relative;
+  width: 420px;
+  height: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rotating-coin-container {
   position: relative;
   z-index: 3;
-  width: 320px;
-  height: 390px;
+  width: 360px;
+  height: 360px;
   display: flex;
   align-items: center;
   justify-content: center;
   transform-style: preserve-3d;
+}
+
+.coin-face {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.coin-front {
+  transform: rotateY(0deg);
+}
+
+.coin-back {
+  transform: rotateY(180deg) scaleX(-1);
+}
+
+.cric-auction-coin-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 50%;
+  clip-path: circle(48.5% at 50% 50%);
+  filter: drop-shadow(0 0 35px rgba(251, 191, 36, 0.65));
 }
 
 .ipl-trophy-img {

@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { FiPlay, FiChevronDown, FiArrowDown, FiX } from 'react-icons/fi';
 import { getPublicPlatformStats } from '../../services/tournamentService';
 import Button from '../../components/common/Button';
-import trophyImg from '../../assets/ipl_trophy_render.png';
+import cricCoinImg from '../../assets/cric_gold_coin_clean.png';
 import './HeroSection.css';
 
 const particles = Array.from({ length: 20 }, (_, i) => ({
@@ -377,17 +377,16 @@ const HeroSection = forwardRef((props, ref) => {
             </motion.div>
           </div>
 
-          {/* Right Column: Decorative Rotating Trophy & Floating Stat Visual */}
+          {/* Right Column: 3D Turnaround Cric Auction Hub Gold Coin */}
           <motion.div
-            className="hero-trophy-col"
+            className="hero-coin-col"
             initial={{ opacity: 0, scale: 0.9, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4, ease: 'easeOut' }}
           >
-            <div className="trophy-visual-stage">
-              {/* Soft Gold Spotlight Glow & Backlight */}
+            <div className="coin-visual-stage">
+              {/* Soft Gold Spotlight Glow */}
               <div className="gold-spotlight-glow" aria-hidden="true" />
-              <div className="gold-light-ring" aria-hidden="true" />
               <div className="gold-sparkles-container" aria-hidden="true">
                 <span className="gold-sparkle s1" />
                 <span className="gold-sparkle s2" />
@@ -395,27 +394,37 @@ const HeroSection = forwardRef((props, ref) => {
                 <span className="gold-sparkle s4" />
               </div>
 
-              {/* 3D Rotating IPL-Style Trophy Visual */}
+              {/* 3D Continuous Horizontal Turnaround Coin Visual */}
               <motion.div 
-                className="rotating-trophy-container"
+                className="rotating-coin-container"
                 animate={{ 
+                  rotateY: [0, 360],
                   y: [0, -14, 0],
-                  rotateY: [-6, 6, -6],
                 }}
                 transition={{ 
-                  duration: 6, 
-                  repeat: Infinity, 
-                  ease: "easeInOut" 
+                  rotateY: { duration: 8, repeat: Infinity, ease: "linear" },
+                  y: { duration: 4, repeat: Infinity, ease: "easeInOut" }
                 }}
               >
-                <img 
-                  src={trophyImg} 
-                  alt="IPL Championship Trophy" 
-                  className="ipl-trophy-img" 
-                />
+                {/* Front Face */}
+                <div className="coin-face coin-front">
+                  <img 
+                    src={cricCoinImg} 
+                    alt="Cric Auction Hub Live Coin Front" 
+                    className="cric-auction-coin-img" 
+                  />
+                </div>
+                {/* Back Face (Un-mirrored for seamless 360 spin in one direction) */}
+                <div className="coin-face coin-back">
+                  <img 
+                    src={cricCoinImg} 
+                    alt="Cric Auction Hub Live Coin Back" 
+                    className="cric-auction-coin-img" 
+                  />
+                </div>
               </motion.div>
 
-              {/* Floating Stat Chips Surrounding the Trophy */}
+              {/* Floating Stat Chips Surrounding the Coin */}
               <motion.div 
                 className="stat-chip chip-top-left"
                 animate={{ y: [0, -10, 0] }}
@@ -465,6 +474,7 @@ const HeroSection = forwardRef((props, ref) => {
               </motion.div>
             </div>
           </motion.div>
+
         </div>
 
         {/* Trust indicators */}
