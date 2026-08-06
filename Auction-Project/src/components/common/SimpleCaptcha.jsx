@@ -7,16 +7,14 @@ const drawCaptcha = (canvas, text) => {
   const width = canvas.width;
   const height = canvas.height;
 
-  // Dark sleek gradient background matching stadium glass theme
   const grad = ctx.createLinearGradient(0, 0, width, height);
-  grad.addColorStop(0, "#0f172a");
-  grad.addColorStop(1, "#1e293b");
+  grad.addColorStop(0, "#f1f5f9");
+  grad.addColorStop(1, "#e2e8f0");
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, width, height);
 
-  // Noise lines in soft gold / blue
   for (let i = 0; i < 6; i++) {
-    ctx.strokeStyle = i % 2 === 0 ? "rgba(96, 165, 250, 0.4)" : "rgba(251, 191, 36, 0.4)";
+    ctx.strokeStyle = i % 2 === 0 ? "rgba(59, 130, 246, 0.3)" : "rgba(217, 119, 6, 0.3)";
     ctx.lineWidth = 1.5;
     ctx.beginPath();
     ctx.moveTo(Math.random() * width, Math.random() * height);
@@ -24,15 +22,13 @@ const drawCaptcha = (canvas, text) => {
     ctx.stroke();
   }
 
-  // Noise dots
   for (let i = 0; i < 40; i++) {
-    ctx.fillStyle = `rgba(255, 255, 255, ${0.1 + Math.random() * 0.3})`;
+    ctx.fillStyle = `rgba(100, 116, 139, ${0.15 + Math.random() * 0.25})`;
     ctx.beginPath();
     ctx.arc(Math.random() * width, Math.random() * height, 1 + Math.random() * 1.5, 0, Math.PI * 2);
     ctx.fill();
   }
 
-  // Draw text - bright crisp white and gold letters
   const fontSize = 24;
   ctx.font = `bold ${fontSize}px "Segoe UI", sans-serif`;
   ctx.textBaseline = "middle";
@@ -46,9 +42,9 @@ const drawCaptcha = (canvas, text) => {
     ctx.save();
     ctx.translate(x, y);
     ctx.rotate(rotation);
-    ctx.fillStyle = i % 2 === 0 ? "#ffffff" : "#fbbf24";
-    ctx.shadowColor = "rgba(0, 0, 0, 0.8)";
-    ctx.shadowBlur = 4;
+    ctx.fillStyle = i % 2 === 0 ? "#1e293b" : "#d97706";
+    ctx.shadowColor = "rgba(0, 0, 0, 0.15)";
+    ctx.shadowBlur = 3;
     ctx.fillText(text[i], -fontSize / 4, 0);
     ctx.restore();
   }
@@ -87,7 +83,6 @@ const SimpleCaptcha = forwardRef(({ onVerify, onExpire }, ref) => {
       setCaptchaText(data.text || "");
       setStatus("ready");
 
-      // Draw captcha on canvas if server provided text fallback
       if (canvasRef.current && data.text) {
         drawCaptcha(canvasRef.current, data.text);
       }
@@ -113,8 +108,7 @@ const SimpleCaptcha = forwardRef(({ onVerify, onExpire }, ref) => {
   };
 
   const handleChange = (e) => {
-    const value = e.target.value;
-    setUserInput(value);
+    setUserInput(e.target.value);
   };
 
   const handleVerify = () => {
@@ -133,32 +127,26 @@ const SimpleCaptcha = forwardRef(({ onVerify, onExpire }, ref) => {
   return (
     <div
       style={{
-        border: "1.5px solid rgba(255, 255, 255, 0.25)",
-        borderRadius: "14px",
+        border: "1px solid #e5e7eb",
+        borderRadius: "10px",
         padding: "12px 14px",
-        background: "rgba(15, 23, 42, 0.45)",
-        backdropFilter: "blur(10px)",
-        WebkitBackdropFilter: "blur(10px)",
-        marginTop: "10px",
-        marginBottom: "10px",
-        boxShadow: "0 4px 15px rgba(0, 0, 0, 0.25) inset",
+        background: "#f9fafb",
+        marginBottom: "16px",
       }}
     >
       <div
         style={{
           fontSize: "12px",
           fontWeight: "700",
-          color: "#ffffff",
+          color: "#374151",
           marginBottom: "8px",
-          textShadow: "0 1px 3px rgba(0, 0, 0, 0.6)",
-          letterSpacing: "0.4px",
         }}
       >
         Security Verification
       </div>
 
       {status === "loading" && (
-        <div style={{ fontSize: "12px", color: "#cbd5e1", padding: "14px 0", textAlign: "center" }}>
+        <div style={{ fontSize: "12px", color: "#6b7280", padding: "14px 0", textAlign: "center" }}>
           Loading security check...
         </div>
       )}
@@ -167,10 +155,10 @@ const SimpleCaptcha = forwardRef(({ onVerify, onExpire }, ref) => {
         <div
           style={{
             fontSize: "12px",
-            color: "#fecaca",
+            color: "#dc2626",
             padding: "8px 12px",
-            background: "rgba(220, 38, 38, 0.25)",
-            border: "1px solid rgba(254, 202, 202, 0.5)",
+            background: "#fef2f2",
+            border: "1px solid #fecaca",
             borderRadius: "8px",
             marginBottom: "8px",
           }}
@@ -192,7 +180,7 @@ const SimpleCaptcha = forwardRef(({ onVerify, onExpire }, ref) => {
                   display: "inline-block",
                   borderRadius: "8px",
                   overflow: "hidden",
-                  border: "1.5px solid rgba(255, 255, 255, 0.3)",
+                  border: "1px solid #e5e7eb",
                 }}
               />
             ) : (
@@ -201,10 +189,9 @@ const SimpleCaptcha = forwardRef(({ onVerify, onExpire }, ref) => {
                 width={190}
                 height={50}
                 style={{
-                  border: "1.5px solid rgba(255, 255, 255, 0.3)",
+                  border: "1px solid #e5e7eb",
                   borderRadius: "8px",
                   cursor: "pointer",
-                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.3)",
                 }}
                 onClick={handleRefresh}
                 title="Click to refresh"
@@ -215,13 +202,13 @@ const SimpleCaptcha = forwardRef(({ onVerify, onExpire }, ref) => {
               onClick={handleRefresh}
               style={{
                 padding: "8px 12px",
-                border: "1px solid rgba(255, 255, 255, 0.3)",
+                border: "1px solid #e5e7eb",
                 borderRadius: "8px",
-                background: "rgba(255, 255, 255, 0.15)",
+                background: "#ffffff",
                 cursor: "pointer",
                 fontSize: "12px",
                 fontWeight: "700",
-                color: "#ffffff",
+                color: "#374151",
                 transition: "all 0.2s ease",
               }}
             >
@@ -229,7 +216,7 @@ const SimpleCaptcha = forwardRef(({ onVerify, onExpire }, ref) => {
             </button>
           </div>
 
-          <div style={{ fontSize: "11px", color: "rgba(255, 255, 255, 0.75)", marginBottom: "8px", fontWeight: "500" }}>
+          <div style={{ fontSize: "11px", color: "#6b7280", marginBottom: "8px", fontWeight: "500" }}>
             Type the text shown in the image above
           </div>
 
@@ -243,13 +230,13 @@ const SimpleCaptcha = forwardRef(({ onVerify, onExpire }, ref) => {
               style={{
                 flex: 1,
                 padding: "8px 12px",
-                border: "1.5px solid rgba(255, 255, 255, 0.35)",
+                border: "1px solid #e5e7eb",
                 borderRadius: "8px",
                 fontSize: "13.5px",
                 fontWeight: "700",
                 letterSpacing: "3px",
-                background: "rgba(15, 23, 42, 0.6)",
-                color: "#ffffff",
+                background: "#ffffff",
+                color: "#111827",
                 outline: "none",
               }}
             />
@@ -259,14 +246,13 @@ const SimpleCaptcha = forwardRef(({ onVerify, onExpire }, ref) => {
               disabled={userInput.length === 0}
               style={{
                 padding: "8px 16px",
-                background: userInput.length > 0 ? "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)" : "rgba(255, 255, 255, 0.15)",
-                color: "#ffffff",
-                border: "1px solid rgba(255, 255, 255, 0.3)",
+                background: userInput.length > 0 ? "#1e40af" : "#e5e7eb",
+                color: userInput.length > 0 ? "#ffffff" : "#9ca3af",
+                border: "none",
                 borderRadius: "8px",
                 fontSize: "12.5px",
                 fontWeight: "700",
                 cursor: userInput.length > 0 ? "pointer" : "not-allowed",
-                boxShadow: userInput.length > 0 ? "0 4px 12px rgba(37, 99, 235, 0.4)" : "none",
                 transition: "all 0.2s ease",
               }}
             >
@@ -275,7 +261,7 @@ const SimpleCaptcha = forwardRef(({ onVerify, onExpire }, ref) => {
           </div>
 
           {status === "verified" && (
-            <div style={{ marginTop: "8px", fontSize: "12px", color: "#4ade80", fontWeight: "700", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px" }}>
+            <div style={{ marginTop: "8px", fontSize: "12px", color: "#16a34a", fontWeight: "700", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px" }}>
               <span>✓</span> Security Check Passed
             </div>
           )}
