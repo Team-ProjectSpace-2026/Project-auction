@@ -73,3 +73,50 @@ export const verifyCashfreeWebhookSignature = (signature, rawBody, timestamp) =>
 
   return expectedSignature === signature;
 };
+
+/**
+ * Create Cashfree Refund via REST API (/pg/orders/{order_id}/refunds)
+ */
+export const createCashfreeRefund = async ({ orderId, refundAmount, refundId, remark }) => {
+  const { appId, secretKey, baseUrl } = getCashfreeConfig();
+
+  if (!appId || !secretKey) {
+    throw new Error('Cashfree credentials missing in environment variables');
+  }
+
+  const generatedRefundId = refundId || `ref_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+
+  const payload = {
+    refund_amount: Number(refundAmount),
+    refund_id: generatedRefundId,
+    refund_note: remark || 'Tournament plan cancellation refund'
+  };
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+  try {
+    const response = await fetch(`${baseUrl}/orders/${encodeURIComponent(orderId)}/refunds`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-version': '2023-08-01',
+        'x-client-id': appId,
+        'x-client-secret': secretKey
+      },
+      body: JSON.stringify(payload),
+      signal: controller.signal
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      console.warn('⚠️ Cashfree Refund API response error:', data);
+      throw new Error(data.message || 'Cashfree Refund creation failed');
+    }
+
+    return data;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+};
+

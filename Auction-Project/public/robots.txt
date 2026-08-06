@@ -1,0 +1,13 @@
+# Allow all search engines to crawl public pages
+User-agent: *
+Allow: /
+
+# Prevent crawling of internal dashboard / admin pages
+Disallow: /dashboard
+Disallow: /settings
+Disallow: /create-tournament
+Disallow: /edit-tournament
+Disallow: /live-auction
+
+# Link to sitemap
+Sitemap: https://cricauctionhub.vercel.app/sitemap.xml
