@@ -8,7 +8,7 @@ import { defineConfig, globalIgnores } from "eslint/config";
 // Flat ESLint configuration for the Auction‑Project frontend.
 export default defineConfig([
   // Ignore build output directories.
-  globalIgnores(["dist"]),
+  globalIgnores(["dist", "playwright-report"]),
 
   // Base configuration applied to all JavaScript/JSX files.
   {
