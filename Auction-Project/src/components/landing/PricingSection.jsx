@@ -1,15 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AUCTION_PRICING_PLANS, getPlanForTeamCount } from '../../constants/pricing';
+import { AUCTION_PRICING_PLANS } from '../../constants/pricing';
 import { FiCheckCircle, FiZap, FiShield, FiArrowRight } from 'react-icons/fi';
 import './PricingSection.css';
 
 const PricingSection = () => {
-  const [selectedTeams, setSelectedTeams] = useState(6);
+  const [selectedPlanNumber, setSelectedPlanNumber] = useState(3);
   const navigate = useNavigate();
-
-  const currentPlanInfo = getPlanForTeamCount(selectedTeams);
-  const activePlanNumber = currentPlanInfo?.plan?.planNumber || 3;
 
   const handleCreateAuction = () => {
     navigate('/tournaments/create');
@@ -29,102 +26,50 @@ const PricingSection = () => {
           </p>
         </div>
 
-        {/* Interactive Team Count Selector Slider */}
-        <div className="pricing-slider-card">
-          <div className="slider-header">
-            <div className="slider-title-wrapper">
-              <label htmlFor="team-count-slider" className="slider-label">
-                How many teams are in your auction?
-              </label>
-              <span className="team-count-display">{selectedTeams} Teams</span>
-            </div>
-            <div className="active-tier-summary">
-              {currentPlanInfo.plan && (
-                <span className="tier-pill">
-                  {currentPlanInfo.plan.isFree
-                    ? '🎉 Free Tier'
-                    : `Active: ${currentPlanInfo.plan.name} — ₹${currentPlanInfo.plan.price}/auction`}
-                </span>
-              )}
-            </div>
-          </div>
-
-          <div className="slider-input-wrapper">
-            <input
-              id="team-count-slider"
-              type="range"
-              min="1"
-              max="30"
-              value={selectedTeams}
-              onChange={(e) => setSelectedTeams(Number(e.target.value))}
-              className="team-range-input"
-            />
-            <div className="slider-ticks">
-              <span>1 Team</span>
-              <span>4 Teams</span>
-              <span>8 Teams</span>
-              <span>12 Teams</span>
-              <span>16 Teams</span>
-              <span>20 Teams</span>
-              <span>30 Teams</span>
-            </div>
-          </div>
-        </div>
-
         {/* Pricing Cards Grid */}
         <div className="pricing-grid">
           {AUCTION_PRICING_PLANS.map((plan) => {
-            const isActive = plan.planNumber === activePlanNumber;
+            const isActive = plan.planNumber === selectedPlanNumber;
 
             return (
               <div
                 key={plan.planNumber}
-                className={`pricing-card ${isActive ? 'active-card' : ''} ${plan.planNumber === 3 ? 'popular-card' : ''}`}
-                onClick={() => setSelectedTeams(plan.maxTeams)}
+                className={`simple-pricing-card ${isActive ? 'active-card' : ''} ${plan.planNumber === 3 ? 'popular-card' : ''}`}
+                onClick={() => setSelectedPlanNumber(plan.planNumber)}
               >
                 {plan.planNumber === 3 && <div className="popular-badge">Most Popular</div>}
                 {isActive && <div className="selected-badge">Selected Match</div>}
 
-                <div className="card-header">
-                  <h3 className="card-plan-name">{plan.name}</h3>
-                  <div className="card-team-limit">Up to {plan.maxTeams} Teams</div>
-                </div>
+                <div className="simple-card-plan">{plan.name}</div>
 
-                <div className="card-price-box">
+                <h3 className="simple-card-teams">
+                  <span className="team-num-highlight">{plan.maxTeams}</span> Teams
+                </h3>
+
+                <div className="simple-card-ribbon">
                   {plan.isFree ? (
-                    <div className="price-amount free-text">FREE</div>
+                    <div className="ribbon-price-content free-ribbon">
+                      <span className="free-title">Free</span>
+                      <span className="ribbon-sparkles">✨</span>
+                    </div>
                   ) : (
-                    <div className="price-amount">
-                      <span className="currency">₹</span>
-                      <span className="amount">{plan.price}</span>
-                      <span className="period">/auction</span>
+                    <div className="ribbon-price-content">
+                      <div className="ribbon-amount">₹ {plan.price.toLocaleString('en-IN')}/-</div>
+                      <div className="ribbon-per-auction">Per Auction</div>
                     </div>
                   )}
-                  {!plan.isFree && (
-                    <div className="effective-rate">~₹{plan.effectivePerTeam} per team</div>
-                  )}
                 </div>
 
-                <p className="card-description">{plan.description}</p>
-
-                <ul className="card-features">
-                  <li>
-                    <FiCheckCircle className="pricing-check-icon" /> Full Live Auction Console
-                  </li>
-                  <li>
-                    <FiCheckCircle className="pricing-check-icon" /> Real-time Player Bidding
-                  </li>
-                  <li>
-                    <FiCheckCircle className="pricing-check-icon" /> Custom Budget & Squad Limits
-                  </li>
-                  <li>
-                    <FiCheckCircle className="pricing-check-icon" /> Automated Team Squad Exports
-                  </li>
-                </ul>
+                <div className="simple-card-footer">
+                  Total Teams - Upto {plan.maxTeams}
+                </div>
 
                 <button
-                  onClick={handleCreateAuction}
-                  className={`card-cta-btn ${isActive ? 'btn-highlight' : ''}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleCreateAuction();
+                  }}
+                  className={`simple-card-btn ${isActive ? 'btn-highlight' : ''}`}
                 >
                   Host Tournament <FiArrowRight />
                 </button>

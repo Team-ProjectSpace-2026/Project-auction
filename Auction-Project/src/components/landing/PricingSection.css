@@ -122,194 +122,221 @@
 /* Pricing Grid */
 .pricing-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 3rem;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 2rem 1.5rem;
+  margin-bottom: 3.5rem;
 }
 
-.pricing-card {
-  background: rgba(15, 23, 42, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 1rem;
-  padding: 1.25rem 1.15rem;
-  display: flex;
-  flex-direction: column;
+.simple-pricing-card {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(12px);
+  border-radius: 20px;
+  padding: 1.65rem 1.25rem 1.25rem 1.25rem;
+  text-align: center;
   position: relative;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: visible;
 }
 
-.pricing-card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(59, 130, 246, 0.4);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+.simple-pricing-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.65);
+  border-color: rgba(59, 130, 246, 0.5);
 }
 
-.pricing-card.active-card {
+.simple-pricing-card.active-card {
   border-color: #3b82f6;
-  background: linear-gradient(180deg, rgba(30, 58, 138, 0.4) 0%, rgba(15, 23, 42, 0.9) 100%);
-  box-shadow: 0 0 25px rgba(59, 130, 246, 0.35);
-  transform: scale(1.01);
+  background: linear-gradient(180deg, rgba(30, 58, 138, 0.45) 0%, rgba(15, 23, 42, 0.95) 100%);
+  box-shadow: 0 0 30px rgba(59, 130, 246, 0.4), 0 16px 40px rgba(0, 0, 0, 0.6);
+  transform: scale(1.02);
 }
 
-.pricing-card.popular-card {
-  border-color: rgba(234, 179, 8, 0.5);
+.simple-pricing-card.popular-card {
+  border-color: rgba(234, 179, 8, 0.6);
 }
 
 .popular-badge {
   position: absolute;
-  top: -11px;
-  right: 1rem;
+  top: -12px;
+  right: 1.25rem;
   background: linear-gradient(135deg, #eab308, #ca8a04);
   color: #000000;
   font-size: 0.7rem;
   font-weight: 800;
-  padding: 0.2rem 0.65rem;
+  padding: 0.25rem 0.75rem;
   border-radius: 9999px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  box-shadow: 0 4px 10px rgba(234, 179, 8, 0.4);
+  z-index: 5;
 }
 
 .selected-badge {
   position: absolute;
-  top: -11px;
-  left: 1rem;
+  top: -12px;
+  left: 1.25rem;
   background: #3b82f6;
   color: #ffffff;
   font-size: 0.7rem;
   font-weight: 700;
-  padding: 0.2rem 0.65rem;
+  padding: 0.25rem 0.75rem;
   border-radius: 9999px;
+  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.4);
+  z-index: 5;
 }
 
-.card-header {
-  margin-bottom: 0.75rem;
-}
-
-.card-plan-name {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #f1f5f9;
-  margin-bottom: 0.15rem;
-}
-
-.card-team-limit {
-  font-size: 0.85rem;
-  color: #38bdf8;
-  font-weight: 600;
-}
-
-.card-price-box {
-  margin-bottom: 0.85rem;
-  padding-bottom: 0.85rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.price-amount {
-  display: flex;
-  align-items: baseline;
-  gap: 0.2rem;
-}
-
-.price-amount.free-text {
-  font-size: 1.85rem;
-  font-weight: 900;
-  color: #4ade80;
-}
-
-.currency {
-  font-size: 1.25rem;
+/* Plan Title */
+.simple-card-plan {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 0.95rem;
   font-weight: 700;
   color: #94a3b8;
+  margin-bottom: 0.4rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
-.amount {
-  font-size: 2rem;
-  font-weight: 900;
+/* Teams Count */
+.simple-card-teams {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 2.25rem;
+  font-weight: 800;
   color: #ffffff;
+  margin: 0 0 1rem 0;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
 }
 
-.period {
-  font-size: 0.825rem;
-  color: #64748b;
-  font-weight: 500;
+.team-num-highlight {
+  color: #38bdf8;
+  font-weight: 900;
+  margin-right: 0.15rem;
 }
 
-.effective-rate {
-  font-size: 0.8rem;
-  color: #a855f7;
-  font-weight: 600;
-  margin-top: 0.2rem;
+/* Theme Gradient Ribbon Banner */
+.simple-card-ribbon {
+  position: relative;
+  width: calc(100% + 28px);
+  left: 0;
+  background: linear-gradient(135deg, #1d4ed8 0%, #6d28d9 100%);
+  color: #ffffff;
+  padding: 0.75rem 0.5rem;
+  margin: 0.25rem 0 1.25rem 0;
+  text-align: center;
+  box-shadow: 0 6px 20px rgba(29, 78, 216, 0.35);
 }
 
-.card-description {
-  font-size: 0.8rem;
-  color: #94a3b8;
-  margin-bottom: 1rem;
-  line-height: 1.4;
-  min-height: 2.2rem;
+/* 3D Fold triangles on ribbon ends */
+.simple-card-ribbon::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -9px;
+  width: 0;
+  height: 0;
+  border-top: 9px solid #0f172a;
+  border-left: 14px solid transparent;
 }
 
-.card-features {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 1.25rem 0;
+.simple-card-ribbon::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: -9px;
+  width: 0;
+  height: 0;
+  border-top: 9px solid #0f172a;
+  border-right: 14px solid transparent;
+}
+
+.ribbon-price-content {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  flex-grow: 1;
-}
-
-.card-features li {
-  display: flex;
   align-items: center;
+  justify-content: center;
+}
+
+.ribbon-price-content.free-ribbon {
+  flex-direction: row;
   gap: 0.5rem;
-  font-size: 0.8rem;
+}
+
+.free-title {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+.ribbon-sparkles {
+  font-size: 1.1rem;
+}
+
+.ribbon-amount {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+
+.ribbon-per-auction {
+  font-size: 0.725rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 0.15rem;
+}
+
+/* Card Footer */
+.simple-card-footer {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
   color: #cbd5e1;
-  line-height: 1.3;
+  margin-bottom: 1.25rem;
 }
 
-.pricing-check-icon {
-  width: 18px !important;
-  height: 18px !important;
-  min-width: 18px !important;
-  min-height: 18px !important;
-  color: #22c55e !important;
-  background: transparent !important;
-  border-radius: 0 !important;
-  margin-bottom: 0 !important;
-  flex-shrink: 0 !important;
-}
-
-.card-cta-btn {
+/* Button inside card */
+.simple-card-btn {
   width: 100%;
-  padding: 0.65rem 0.85rem;
-  border-radius: 0.65rem;
-  background: rgba(255, 255, 255, 0.06);
+  padding: 0.65rem 1rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.15);
   color: #ffffff;
   font-weight: 600;
   font-size: 0.875rem;
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   transition: all 0.2s ease;
+  margin-top: auto;
 }
 
-.card-cta-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
-}
-
-.card-cta-btn.btn-highlight {
+.simple-card-btn:hover {
   background: linear-gradient(135deg, #2563eb, #1d4ed8);
-  border: none;
-  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+  border-color: #3b82f6;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
 }
 
-.card-cta-btn.btn-highlight:hover {
-  background: linear-gradient(135deg, #1d4ed8, #1e40af);
+.simple-card-btn.btn-highlight {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  border-color: #3b82f6;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
 }
 
 /* Footer Trust Banner */
