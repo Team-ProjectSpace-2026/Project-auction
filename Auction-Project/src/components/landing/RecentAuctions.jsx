@@ -114,8 +114,17 @@ const RecentAuctions = () => {
     const fetchData = async () => {
       try {
         const res = await getPublicRecentTournaments();
-        if (!cancelled && res.data && res.data.length > 0) {
-          setAuctions(res.data);
+        const rawData = res?.data;
+        const list = Array.isArray(rawData)
+          ? rawData
+          : Array.isArray(rawData?.data)
+          ? rawData.data
+          : Array.isArray(rawData?.tournaments)
+          ? rawData.tournaments
+          : [];
+
+        if (!cancelled && list.length > 0) {
+          setAuctions(list);
           setIsFromDB(true);
         } else if (!cancelled) {
           setAuctions(mockAuctions);
@@ -135,7 +144,8 @@ const RecentAuctions = () => {
 
   /* ── GSAP horizontal scroll-pin (desktop only) ── */
   useEffect(() => {
-    if (isLoading || auctions.length === 0) return;
+    const safeAuctions = Array.isArray(auctions) ? auctions : [];
+    if (isLoading || safeAuctions.length === 0) return;
 
     const section = sectionRef.current;
     const track = trackRef.current;
@@ -236,7 +246,7 @@ const RecentAuctions = () => {
         {/* Horizontal Scroll Track */}
         <div className="horizontal-scroll-wrapper">
           <div ref={trackRef} className="auction-cards-track" role="list" aria-label="Recent auctions">
-            {auctions.map((auction, index) => (
+            {(Array.isArray(auctions) ? auctions : mockAuctions).map((auction, index) => (
               <motion.div
                 key={auction.id}
                 className="auction-card-wrapper"
