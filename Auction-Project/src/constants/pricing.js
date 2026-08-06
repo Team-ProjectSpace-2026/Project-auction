@@ -16,9 +16,9 @@ export const AUCTION_PRICING_PLANS = [
     planNumber: 2,
     name: "Plan 2",
     maxTeams: 4,
-    price: 20,
+    price: 249,
     isFree: false,
-    effectivePerTeam: 5,
+    effectivePerTeam: 62,
     description: "Ideal for 4-team leagues.",
   },
   {

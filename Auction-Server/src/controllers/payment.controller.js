@@ -21,7 +21,7 @@ export const initiatePayment = async (req, res) => {
       if (numTeams && Number(numTeams) > 0) {
         const teams = Number(numTeams);
         if (teams <= 3) cleanAmount = 0;
-        else if (teams <= 4) cleanAmount = 20; // Temporary 20 Rs live test plan
+        else if (teams <= 4) cleanAmount = 249;
         else if (teams <= 6) cleanAmount = 349;
         else if (teams <= 8) cleanAmount = 449;
         else if (teams <= 12) cleanAmount = 599;
