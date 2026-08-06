@@ -3,6 +3,19 @@ import sanitizeHtml from "sanitize-html";
 
 const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 
+// Reject NoSQL injection: if any body value is an object/array instead of a primitive, coerce it to string
+export const noSqlInjectionGuard = (req, res, next) => {
+  if (req.body && typeof req.body === "object") {
+    for (const key of Object.keys(req.body)) {
+      const val = req.body[key];
+      if (val !== null && typeof val === "object") {
+        req.body[key] = String(val);
+      }
+    }
+  }
+  next();
+};
+
 // Strip all HTML tags and dangerous content from a string to prevent XSS
 const stripHtml = (str) => {
   if (typeof str !== "string") return str;

@@ -19,7 +19,7 @@ import { validateRegister, validateLogin } from "../utils/validators.js";
 import { handleValidationErrors } from "../middleware/errorHandler.js";
 import { authLimiter } from "../middleware/rateLimiter.js";
 import auth from "../middleware/auth.middleware.js";
-import { verifyCaptcha } from "../middleware/verifyCaptcha.js";
+import { verifyCaptcha, generateCaptcha } from "../middleware/verifyCaptcha.js";
 import upload from "../middleware/upload.js";
 
 const router = express.Router();
@@ -27,6 +27,9 @@ const router = express.Router();
 // Fast2SMS Endpoints
 router.post("/send-sms-otp", authLimiter, sendSmsOtpHandler);
 router.post("/verify-sms-otp", authLimiter, verifySmsOtpHandler);
+
+// Captcha generation
+router.post("/captcha/new", authLimiter, generateCaptcha);
 
 // Public auth routes with Creative Captcha verification
 router.post(
