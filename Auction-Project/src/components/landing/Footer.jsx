@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { FiInstagram, FiMail } from 'react-icons/fi';
-import batsmanLogo from '../../assets/cricauctionlogo1.png';
+import batsmanLogo from '../../assets/cricauctionlogo1.webp';
 import './Footer.css';
 
 const Footer = () => {
@@ -18,7 +18,7 @@ const Footer = () => {
           {/* Column 1: Brand & Social Links */}
           <div className="footer-col brand-col">
             <div className="brand-logo">
-              <img src={batsmanLogo} alt="CricAuctionHub Logo" className="footer-logo-img" />
+              <img src={batsmanLogo} alt="CricAuctionHub Logo" className="footer-logo-img" width="42" height="42" decoding="async" loading="lazy" />
             </div>
             <p className="brand-description">
               The ultimate platform for organizing and participating in cricket auctions.

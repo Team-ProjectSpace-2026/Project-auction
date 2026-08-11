@@ -27,8 +27,8 @@
     <meta name="twitter:description" content="Host live cricket player auctions with real-time bidding, team purse management, and instant tournament analytics." />
     <meta name="twitter:image" content="https://cricauctionhub.vercel.app/cricauctionlogo1.png" />
 
-    <!-- Preload Cashfree JS SDK v3 for Payment Gateway Checkout -->
-    <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+    <!-- Preload Cashfree JS SDK v3 for Payment Gateway Checkout (Deferred to avoid render blocking) -->
+    <script defer src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
   </head>
   <body>
     <div id="root"></div>
