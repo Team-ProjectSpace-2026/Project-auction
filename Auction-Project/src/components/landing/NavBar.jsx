@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { FiMenu, FiX, FiHome, FiClock, FiAward, FiInfo, FiStar, FiLogIn, FiTag } from 'react-icons/fi';
-import batsmanLogo from '../../assets/cricauctionlogo1.png';
+import batsmanLogo from '../../assets/cricauctionlogo1.webp';
 import './NavBar.css';
 
 const navItems = [
@@ -51,7 +51,7 @@ const NavBar = () => {
       <div className="navbar-container">
         {/* Logo */}
         <Link to="/" className="navbar-logo" aria-label="CricAuctionHub Home">
-          <img src={batsmanLogo} alt="CricAuctionHub" className="logo-img" />
+          <img src={batsmanLogo} alt="CricAuctionHub" className="logo-img" width="38" height="38" decoding="async" />
           <span className="logo-text">Cric<span className="logo-accent">Auction</span><span className="logo-hub">Hub</span></span>
         </Link>
 

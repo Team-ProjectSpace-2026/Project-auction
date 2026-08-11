@@ -4,10 +4,12 @@ import { Link } from 'react-router-dom';
 import { FiPlay, FiChevronDown, FiArrowDown, FiX } from 'react-icons/fi';
 import { getPublicPlatformStats } from '../../services/tournamentService';
 import Button from '../../components/common/Button';
-import cricCoinImg from '../../assets/cric_gold_coin_clean.png';
+import cricCoinImg from '../../assets/cric_gold_coin_clean.webp';
 import './HeroSection.css';
 
-const particles = Array.from({ length: 20 }, (_, i) => ({
+const isMobileDevice = typeof window !== 'undefined' && window.innerWidth < 768;
+
+const particles = Array.from({ length: isMobileDevice ? 8 : 20 }, (_, i) => ({
   id: i,
   x: Math.random() * 100,
   y: Math.random() * 100,
@@ -16,7 +18,7 @@ const particles = Array.from({ length: 20 }, (_, i) => ({
   duration: Math.random() * 10 + 10,
 }));
 
-const gavels = Array.from({ length: 8 }, (_, i) => ({
+const gavels = Array.from({ length: isMobileDevice ? 3 : 8 }, (_, i) => ({
   id: i,
   x: Math.random() * 100,
   y: Math.random() * 100,
@@ -71,9 +73,9 @@ const HeroSection = forwardRef((props, ref) => {
     resize();
     window.addEventListener('resize', resize);
 
-    // Particles for the canvas animation
+    // Particles for the canvas animation (reduced count on mobile for low TBT)
     const canvasParticles = [];
-    const particleCount = 60;
+    const particleCount = window.innerWidth < 768 ? 20 : 60;
 
     for (let i = 0; i < particleCount; i++) {
       canvasParticles.push({
@@ -244,8 +246,12 @@ const HeroSection = forwardRef((props, ref) => {
       <div className="hero-bg-image-wrapper">
         <img
           className="hero-bg-image"
-          src="/assets/hero-auction-bg.png"
+          src="/assets/hero-auction-bg.webp"
           alt=""
+          width="1200"
+          height="800"
+          fetchpriority="high"
+          decoding="async"
           aria-hidden="true"
         />
         <div className="hero-overlay" />
@@ -412,6 +418,10 @@ const HeroSection = forwardRef((props, ref) => {
                     src={cricCoinImg} 
                     alt="Cric Auction Hub Live Coin Front" 
                     className="cric-auction-coin-img" 
+                    width="340"
+                    height="340"
+                    fetchpriority="high"
+                    decoding="async"
                   />
                 </div>
                 {/* Back Face (Un-mirrored for seamless 360 spin in one direction) */}
@@ -420,6 +430,9 @@ const HeroSection = forwardRef((props, ref) => {
                     src={cricCoinImg} 
                     alt="Cric Auction Hub Live Coin Back" 
                     className="cric-auction-coin-img" 
+                    width="340"
+                    height="340"
+                    decoding="async"
                   />
                 </div>
               </motion.div>

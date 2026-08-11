@@ -4,7 +4,7 @@ import Sidebar from "../../components/layout/Sidebar";
 import CricketLoader from "../../components/common/CricketLoader";
 import { getTournaments, deleteTournament } from "../../services/tournamentService";
 import { Pencil, Trash2, Trophy, Calendar, Users, MapPin, IndianRupee } from "lucide-react";
-import bgStadium from "../../assets/bgstadium2.png";
+import bgStadium from "../../assets/bgstadium2.webp";
 
 const getDynamicStatus = (date) => {
   if (!date) return "Upcoming";

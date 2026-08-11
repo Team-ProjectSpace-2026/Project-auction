@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -5,24 +6,28 @@ import {
   Navigate,
 } from "react-router-dom";
 import ProtectedRoute from "../components/common/ProtectedRoute";
-import LoginPage from "../pages/auth/LoginPage";
-import RegisterPage from "../pages/auth/RegisterPage";
-import ForgotPasswordPage from "../pages/auth/ForgotPasswordPage";
-import DashboardPage from "../pages/dashboard/DashboardPage";
-import CreateTournamentPage from "../pages/tournaments/CreateTournamentPage";
-import TournamentsListPage from "../pages/tournaments/TournamentsListPage";
-import TournamentHubPage from "../pages/tournaments/TournamentHubPage";
-import TeamDetailsPage from "../pages/tournaments/TeamDetailsPage";
-import PlayerDetailsPage from "../pages/tournaments/PlayerDetailsPage";
-import LiveAuctionPage from "../pages/auction/LiveAuctionPage";
-import ProfilePage from "../pages/profile/ProfilePage";
-import PublicRegistrationPage from "../pages/registration/PublicRegistrationPage.jsx";
-import EditTournamentPage from "../pages/tournaments/EditTournamentPage";
-import LandingPage from "../pages/landing/LandingPage";
+import CricketLoader from "../components/common/CricketLoader";
+
+// Lazy-loaded page components for fast initial load & code splitting
+const LandingPage = lazy(() => import("../pages/landing/LandingPage"));
+const LoginPage = lazy(() => import("../pages/auth/LoginPage"));
+const RegisterPage = lazy(() => import("../pages/auth/RegisterPage"));
+const ForgotPasswordPage = lazy(() => import("../pages/auth/ForgotPasswordPage"));
+const DashboardPage = lazy(() => import("../pages/dashboard/DashboardPage"));
+const CreateTournamentPage = lazy(() => import("../pages/tournaments/CreateTournamentPage"));
+const TournamentsListPage = lazy(() => import("../pages/tournaments/TournamentsListPage"));
+const TournamentHubPage = lazy(() => import("../pages/tournaments/TournamentHubPage"));
+const TeamDetailsPage = lazy(() => import("../pages/tournaments/TeamDetailsPage"));
+const PlayerDetailsPage = lazy(() => import("../pages/tournaments/PlayerDetailsPage"));
+const LiveAuctionPage = lazy(() => import("../pages/auction/LiveAuctionPage"));
+const ProfilePage = lazy(() => import("../pages/profile/ProfilePage"));
+const PublicRegistrationPage = lazy(() => import("../pages/registration/PublicRegistrationPage.jsx"));
+const EditTournamentPage = lazy(() => import("../pages/tournaments/EditTournamentPage"));
 
 const AppRouter = () => (
   <Router>
-    <Routes>
+    <Suspense fallback={<CricketLoader />}>
+      <Routes>
         {/* Public routes */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
@@ -107,7 +112,8 @@ const AppRouter = () => (
         {/* Fallback redirect to landing page */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </Router>
+    </Suspense>
+  </Router>
 );
 
 export default AppRouter;
