@@ -1,10 +1,10 @@
-import { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from 'react';
+﻿import { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { FiPlay, FiChevronDown, FiArrowDown, FiX } from 'react-icons/fi';
 import { getPublicPlatformStats } from '../../services/tournamentService';
 import Button from '../../components/common/Button';
-import cricCoinImg from '../../assets/cric_gold_coin_clean.webp';
+import cricCoinImg from '../../assets/newgoldlogo.png';
 import './HeroSection.css';
 
 const isMobileDevice = typeof window !== 'undefined' && window.innerWidth < 768;
@@ -75,7 +75,7 @@ const HeroSection = forwardRef((props, ref) => {
 
     // Particles for the canvas animation (reduced count on mobile for low TBT)
     const canvasParticles = [];
-    const particleCount = window.innerWidth < 768 ? 20 : 60;
+    const particleCount = window.innerWidth < 768 ? 8 : 30;
 
     for (let i = 0; i < particleCount; i++) {
       canvasParticles.push({
@@ -93,7 +93,8 @@ const HeroSection = forwardRef((props, ref) => {
 
     // Light beams
     const beams = [];
-    for (let i = 0; i < 5; i++) {
+    const beamCount = isMobileDevice ? 2 : 5;
+    for (let i = 0; i < beamCount; i++) {
       beams.push({
         x: Math.random() * canvas.offsetWidth,
         width: Math.random() * 150 + 50,
@@ -306,7 +307,7 @@ const HeroSection = forwardRef((props, ref) => {
               ease: 'linear',
             }}
           >
-            🔨
+            ðŸ”¨
           </motion.div>
         ))}
       </div>
@@ -327,7 +328,7 @@ const HeroSection = forwardRef((props, ref) => {
               transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' }}
             >
               <span className="badge-dot" aria-hidden="true" />
-              <span>🏏 Cricket League Auction Platform</span>
+              <span>ðŸ Cricket League Auction Platform</span>
             </motion.div>
 
             {/* Main Headline */}
@@ -411,6 +412,7 @@ const HeroSection = forwardRef((props, ref) => {
                   rotateY: { duration: 8, repeat: Infinity, ease: "linear" },
                   y: { duration: 4, repeat: Infinity, ease: "easeInOut" }
                 }}
+                style={{ width: "1440px", height: "1440px" }}
               >
                 {/* Front Face */}
                 <div className="coin-face coin-front">
@@ -418,8 +420,8 @@ const HeroSection = forwardRef((props, ref) => {
                     src={cricCoinImg} 
                     alt="Cric Auction Hub Live Coin Front" 
                     className="cric-auction-coin-img" 
-                    width="340"
-                    height="340"
+                    width="1360"
+                    height="1360"
                     fetchpriority="high"
                     decoding="async"
                   />
@@ -430,61 +432,14 @@ const HeroSection = forwardRef((props, ref) => {
                     src={cricCoinImg} 
                     alt="Cric Auction Hub Live Coin Back" 
                     className="cric-auction-coin-img" 
-                    width="340"
-                    height="340"
+                    width="1360"
+                    height="1360"
                     decoding="async"
                   />
                 </div>
               </motion.div>
 
-              {/* Floating Stat Chips Surrounding the Coin */}
-              <motion.div 
-                className="stat-chip chip-top-left"
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-              >
-                <span className="chip-icon">🏆</span>
-                <div className="chip-text">
-                  <span className="chip-value">₹8.50 CR</span>
-                  <span className="chip-label">Highest Bid</span>
-                </div>
-              </motion.div>
 
-              <motion.div 
-                className="stat-chip chip-top-right"
-                animate={{ y: [0, -12, 0] }}
-                transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
-              >
-                <span className="chip-icon">🏏</span>
-                <div className="chip-text">
-                  <span className="chip-value">56+</span>
-                  <span className="chip-label">Players Sold</span>
-                </div>
-              </motion.div>
-
-              <motion.div 
-                className="stat-chip chip-bottom-left"
-                animate={{ y: [0, -8, 0] }}
-                transition={{ duration: 3.8, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-              >
-                <span className="chip-icon">🛡️</span>
-                <div className="chip-text">
-                  <span className="chip-value">30+</span>
-                  <span className="chip-label">Leagues Hosted</span>
-                </div>
-              </motion.div>
-
-              <motion.div 
-                className="stat-chip chip-bottom-right"
-                animate={{ y: [0, -11, 0] }}
-                transition={{ duration: 4.2, repeat: Infinity, ease: 'easeInOut', delay: 1.5 }}
-              >
-                <span className="chip-icon">⚡</span>
-                <div className="chip-text">
-                  <span className="chip-value">Real-Time</span>
-                  <span className="chip-label">Auction Engine</span>
-                </div>
-              </motion.div>
             </div>
           </motion.div>
 
@@ -530,7 +485,7 @@ const HeroSection = forwardRef((props, ref) => {
         </motion.div>
       </div>
 
-      {/* ─── Video Modal ─── */}
+      {/* â”€â”€â”€ Video Modal â”€â”€â”€ */}
       <AnimatePresence>
         {showVideo && (
           <motion.div
