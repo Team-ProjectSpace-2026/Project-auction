@@ -15,8 +15,9 @@ export const errorHandler = (err, req, res, next) => {
       path: error.path,
       msg: error.message
     }));
+    const message = errors.map(e => e.msg).join('. ') || 'Validation Error';
     return res.status(400).json({
-      message: 'Validation Error',
+      message,
       errors
     });
   }
@@ -50,8 +51,9 @@ export const errorHandler = (err, req, res, next) => {
 export const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    const errorMsgs = errors.array().map(err => err.msg);
     return res.status(400).json({
-      message: 'Validation Error',
+      message: errorMsgs.join('. ') || 'Validation Error',
       errors: errors.array().map(err => ({
         path: err.path,
         msg: err.msg
