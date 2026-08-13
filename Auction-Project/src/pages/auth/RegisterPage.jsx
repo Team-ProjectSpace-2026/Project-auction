@@ -56,7 +56,9 @@ const RegisterPage = () => {
       navigate("/dashboard");
     } catch (err) {
       const message =
-        err.response?.data?.message || "Registration failed. Please try again.";
+        err.response?.data?.errors?.map((e) => e.msg).join(". ") ||
+        err.response?.data?.message ||
+        "Registration failed. Please try again.";
       setError(message);
       if (captchaRef.current?.resetCaptcha) {
         captchaRef.current.resetCaptcha();
