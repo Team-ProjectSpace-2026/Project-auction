@@ -357,13 +357,15 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
             transition={{ duration: 0.3 }}
           >
             {phase === "idle" && "Preparing..."}
-            {phase === "shuffling" && "Shuffling Players..."}
-            {phase === "selected" && `Player #${selectedPlayer?.displayNumber || "???"} Selected!`}
+            {phase === "shuffling" && (availablePlayers.length === 1 ? "Final Player Loading..." : "Shuffling Players...")}
+            {phase === "selected" && `${availablePlayers.length === 1 ? "🌟 Final Player" : "Player"} #${selectedPlayer?.displayNumber || "???"} Selected!`}
             {(phase === "flipping" || phase === "done") && "Revealing Identity..."}
           </motion.div>
           <p className="reveal-status__hint">
             {phase === "selected"
-              ? "Click the button below to reveal this player"
+              ? (availablePlayers.length === 1
+                  ? "Click below to reveal the final player of this auction!"
+                  : "Click the button below to reveal this player")
               : phase === "shuffling"
               ? "Please wait while we select the next player..."
               : ""}
@@ -382,7 +384,9 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
           }}
           transition={{ delay: 0.3, duration: 0.5, type: "spring", stiffness: 120 }}
         >
-          {phase === "selected" ? "⚡ REVEAL PLAYER" : "REVEAL PLAYER"}
+          {phase === "selected"
+            ? (availablePlayers.length === 1 ? "⚡ REVEAL FINAL PLAYER" : "⚡ REVEAL PLAYER")
+            : (availablePlayers.length === 1 ? "REVEAL FINAL PLAYER" : "REVEAL PLAYER")}
         </motion.button>
       </div>
 
