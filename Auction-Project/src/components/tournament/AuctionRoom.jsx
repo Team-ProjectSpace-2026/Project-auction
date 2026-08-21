@@ -42,19 +42,30 @@ const AuctionRoom = () => {
     return players.every((p) => p.isSold || p.isUnsold);
   }, [players]);
 
+  // Count unauctioned players
+  const unauctionedCount = useMemo(() => {
+    if (!players || players.length === 0) return 0;
+    return players.filter((p) => !p.isSold && !p.isUnsold).length;
+  }, [players]);
+
   // Check if the current player is the last available player
   const isLastPlayer = useMemo(() => {
-    if (!players || players.length === 0 || !currentPlayer) return false;
+    if (!players || players.length === 0) return false;
     const remaining = players.filter((p) => !p.isSold && !p.isUnsold);
-    // If only 1 player remains and it's the current one, it's the last
-    return remaining.length <= 1;
+    if (remaining.length === 0) return true;
+    if (remaining.length === 1 && currentPlayer && String(remaining[0]._id) === String(currentPlayer._id)) return true;
+    return false;
   }, [players, currentPlayer]);
 
   const handleRevealNext = useCallback(() => {
     clearSoldInfo();
     clearUnsoldInfo();
-    setShowRevealModal(true);
-  }, [clearSoldInfo, clearUnsoldInfo]);
+    if (isLastPlayer || allPlayersCompleted || unauctionedCount === 0) {
+      setShowConcludedModal(true);
+    } else {
+      setShowRevealModal(true);
+    }
+  }, [clearSoldInfo, clearUnsoldInfo, isLastPlayer, allPlayersCompleted, unauctionedCount]);
 
   const handleRevealContinue = useCallback(() => {
     setShowRevealModal(false);
@@ -130,55 +141,95 @@ const AuctionRoom = () => {
         </div>
       )}
 
-      {/* Auction Concluded Banner */}
-      {allPlayersCompleted && !currentPlayer && (
+      {/* Auction Concluded or Reveal Next Player Banner when no active player */}
+      {!currentPlayer && (
         <div style={{
-          background: "linear-gradient(135deg, rgba(245,158,11,0.1) 0%, rgba(37,99,235,0.08) 100%)",
-          border: "1.5px solid rgba(245,158,11,0.3)",
+          background: (allPlayersCompleted || unauctionedCount === 0)
+            ? "linear-gradient(135deg, rgba(245,158,11,0.12) 0%, rgba(37,99,235,0.08) 100%)"
+            : "linear-gradient(135deg, rgba(37,99,235,0.08) 0%, rgba(59,130,246,0.04) 100%)",
+          border: (allPlayersCompleted || unauctionedCount === 0)
+            ? "1.5px solid rgba(245,158,11,0.4)"
+            : "1.5px solid rgba(37,99,235,0.25)",
           borderRadius: "16px",
           padding: "20px 24px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           gap: "16px",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.04)",
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
             <div style={{
               width: "48px", height: "48px", borderRadius: "50%",
-              background: "linear-gradient(135deg, rgba(245,158,11,0.2), rgba(217,119,6,0.3))",
-              border: "1.5px solid rgba(245,158,11,0.5)",
+              background: (allPlayersCompleted || unauctionedCount === 0)
+                ? "linear-gradient(135deg, rgba(245,158,11,0.2), rgba(217,119,6,0.3))"
+                : "linear-gradient(135deg, rgba(37,99,235,0.2), rgba(29,78,216,0.3))",
+              border: (allPlayersCompleted || unauctionedCount === 0)
+                ? "1.5px solid rgba(245,158,11,0.5)"
+                : "1.5px solid rgba(37,99,235,0.5)",
               display: "flex", alignItems: "center", justifyContent: "center",
               fontSize: "24px",
-            }}>🏆</div>
+            }}>
+              {(allPlayersCompleted || unauctionedCount === 0) ? "🏆" : "⚡"}
+            </div>
             <div>
               <div style={{ fontSize: "16px", fontWeight: "700", color: "var(--text-primary-light)", marginBottom: "2px" }}>
-                Auction Completed!
+                {(allPlayersCompleted || unauctionedCount === 0)
+                  ? "Auction Completed!"
+                  : unauctionedCount === 1
+                  ? "1 Final Player Remaining!"
+                  : `${unauctionedCount} Players Waiting for Auction`}
               </div>
               <div style={{ fontSize: "13px", color: "var(--text-secondary-light)" }}>
-                All {players.length} players have been auctioned. View the grand finale summary.
+                {(allPlayersCompleted || unauctionedCount === 0)
+                  ? `All ${players?.length || 0} players have been auctioned. View the grand finale summary.`
+                  : "Click reveal to shuffle and bring the next player to the live auction."}
               </div>
             </div>
           </div>
-          <button
-            onClick={() => setShowConcludedModal(true)}
-            style={{
-              background: "linear-gradient(135deg, #f59e0b, #d97706)",
-              color: "#000",
-              border: "none",
-              borderRadius: "10px",
-              padding: "10px 20px",
-              fontSize: "13px",
-              fontWeight: "700",
-              cursor: "pointer",
-              whiteSpace: "nowrap",
-              textTransform: "uppercase",
-              letterSpacing: "0.03em",
-              boxShadow: "0 4px 14px rgba(245,158,11,0.3)",
-              transition: "all 0.2s ease",
-            }}
-          >
-            🏆 View Grand Finale
-          </button>
+          {(allPlayersCompleted || unauctionedCount === 0) ? (
+            <button
+              onClick={() => setShowConcludedModal(true)}
+              style={{
+                background: "linear-gradient(135deg, #f59e0b, #d97706)",
+                color: "#000",
+                border: "none",
+                borderRadius: "10px",
+                padding: "12px 24px",
+                fontSize: "14px",
+                fontWeight: "700",
+                cursor: "pointer",
+                whiteSpace: "nowrap",
+                textTransform: "uppercase",
+                letterSpacing: "0.03em",
+                boxShadow: "0 4px 14px rgba(245,158,11,0.3)",
+                transition: "all 0.2s ease",
+              }}
+            >
+              🏆 View Grand Finale
+            </button>
+          ) : (
+            <button
+              onClick={() => setShowRevealModal(true)}
+              style={{
+                background: "linear-gradient(135deg, #2563eb, #1d4ed8)",
+                color: "#fff",
+                border: "none",
+                borderRadius: "10px",
+                padding: "12px 24px",
+                fontSize: "14px",
+                fontWeight: "700",
+                cursor: "pointer",
+                whiteSpace: "nowrap",
+                textTransform: "uppercase",
+                letterSpacing: "0.03em",
+                boxShadow: "0 4px 14px rgba(37,99,235,0.3)",
+                transition: "all 0.2s ease",
+              }}
+            >
+              ⚡ {unauctionedCount === 1 ? "Reveal Final Player" : "Reveal Next Player"}
+            </button>
+          )}
         </div>
       )}
 
