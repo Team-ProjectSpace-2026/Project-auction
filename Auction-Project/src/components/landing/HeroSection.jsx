@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from 'react';
+import { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { FiPlay, FiChevronDown, FiArrowDown, FiX } from 'react-icons/fi';
@@ -251,7 +251,7 @@ const HeroSection = forwardRef((props, ref) => {
           alt=""
           width="1200"
           height="800"
-          fetchpriority="high"
+          fetchPriority="high"
           decoding="async"
           aria-hidden="true"
         />
@@ -422,7 +422,7 @@ const HeroSection = forwardRef((props, ref) => {
                     className="cric-auction-coin-img" 
                     width="1360"
                     height="1360"
-                    fetchpriority="high"
+                    fetchPriority="high"
                     decoding="async"
                   />
                 </div>
