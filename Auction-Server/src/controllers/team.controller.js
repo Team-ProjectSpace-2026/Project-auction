@@ -78,6 +78,18 @@ export const createTeam = async (req, res, next) => {
       return res.status(404).json({ message: 'Tournament not found' });
     }
 
+    // Check maximum allowed teams for this tournament/plan
+    const currentTeamCount = await Team.countDocuments({ tournamentId, deleted: false });
+    const maxAllowedTeams = (tournament.hostingPayment?.status !== 'CANCELLED' && tournament.hostingPayment?.maxTeams > 0)
+      ? tournament.hostingPayment.maxTeams
+      : (tournament.teams || 3);
+
+    if (currentTeamCount >= maxAllowedTeams) {
+      return res.status(403).json({
+        message: `Team limit reached for this tournament (${currentTeamCount}/${maxAllowedTeams} teams). Please upgrade your tournament hosting plan to add more teams.`
+      });
+    }
+
     // Automatically derive budget and maxPlayers from tournament settings
     const inputBudget = Number(req.body.totalBudget) || Number(req.body.budget) || 0;
     const finalBudget = inputBudget > 0 ? inputBudget : (tournament.budgetPerTeam || 100000);

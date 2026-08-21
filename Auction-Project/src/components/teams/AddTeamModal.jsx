@@ -37,7 +37,8 @@ const getIplColors = (name) => {
   return null;
 };
 
-const AddTeamModal = ({ isOpen, onClose, onSubmit, tournamentId }) => {
+const AddTeamModal = ({ isOpen, onClose, onSubmit, tournamentId, maxTeams = 0, currentTeamCount = 0 }) => {
+  const isLimitReached = maxTeams > 0 && currentTeamCount >= maxTeams;
   const [formData, setFormData] = useState({
     teamName: "",
     ownerName: "",
@@ -188,6 +189,29 @@ const AddTeamModal = ({ isOpen, onClose, onSubmit, tournamentId }) => {
             <FiX size={20} />
           </button>
         </div>
+
+        {isLimitReached && (
+          <div
+            style={{
+              background: "#fef2f2",
+              border: "1px solid #fca5a5",
+              borderRadius: "10px",
+              padding: "12px 16px",
+              marginBottom: "20px",
+              color: "#991b1b",
+              fontSize: "13px",
+              fontWeight: "600",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+          >
+            <span style={{ fontSize: "18px" }}>⚠️</span>
+            <div>
+              <strong>Team limit reached ({currentTeamCount}/{maxTeams} teams):</strong> Your current hosting plan allows up to {maxTeams} teams. Please upgrade your hosting plan in <em>Edit Tournament</em> to add more teams.
+            </div>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: "20px", textAlign: "center" }}>
@@ -421,19 +445,19 @@ const AddTeamModal = ({ isOpen, onClose, onSubmit, tournamentId }) => {
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isLimitReached}
               style={{
                 padding: "10px 20px",
                 borderRadius: "8px",
                 border: "none",
-                background: isSubmitting ? "var(--text-secondary-light)" : "var(--accent-light)",
+                background: (isSubmitting || isLimitReached) ? "var(--text-secondary-light)" : "var(--accent-light)",
                 color: "#fff",
                 fontWeight: "600",
-                cursor: isSubmitting ? "not-allowed" : "pointer",
+                cursor: (isSubmitting || isLimitReached) ? "not-allowed" : "pointer",
                 fontSize: "14px",
               }}
             >
-              {isSubmitting ? "Adding..." : "Add Team"}
+              {isSubmitting ? "Adding..." : isLimitReached ? "Limit Reached" : "Add Team"}
             </button>
           </div>
         </form>
