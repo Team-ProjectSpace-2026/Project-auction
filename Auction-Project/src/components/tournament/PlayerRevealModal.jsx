@@ -71,8 +71,8 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
       // No available players loaded/remaining
       return [];
     }
-    // Create enough copies to fill a long strip
-    const copies = Math.max(3, Math.ceil(50 / availablePlayers.length));
+    // ponytail: single copy, slot-machine belt is proportionate to pool size
+    const copies = 1;
     const list = [];
     for (let c = 0; c < copies; c++) {
       availablePlayers.forEach((p, i) => {
@@ -94,10 +94,10 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
     // Compute target index dynamically from current cardList
     if (!availablePlayers || availablePlayers.length === 0) {
       targetIndexRef.current = 0;
+    } else if (availablePlayers.length <= 1) {
+      targetIndexRef.current = 0;
     } else {
-      const start = availablePlayers.length;
-      const end = Math.max(start + 1, cardList.length - availablePlayers.length);
-      targetIndexRef.current = start + Math.floor(Math.random() * (end - start));
+      targetIndexRef.current = Math.floor(Math.random() * cardList.length);
     }
     const ti = targetIndexRef.current;
 
