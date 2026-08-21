@@ -5,6 +5,7 @@ import EditTeamModal from "../teams/EditTeamModal";
 import TeamCard from "../teams/TeamCard";
 import CricketLoader from "../common/CricketLoader";
 import { getTeams, createTeam, updateTeam, deleteTeam } from "../../services/teamService";
+import { getTournament } from "../../services/tournamentService";
 
 const TeamsTab = ({ tournamentId }) => {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ const TeamsTab = ({ tournamentId }) => {
   const [editTeam, setEditTeam] = useState(null);
   const [teamToDelete, setTeamToDelete] = useState(null);
   const [teams, setTeams] = useState([]);
+  const [tournament, setTournament] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -25,14 +27,27 @@ const TeamsTab = ({ tournamentId }) => {
       setLoading(true);
       setError(null);
       const start = Date.now();
-      const { data } = await getTeams(tournamentId);
+      const [teamsRes, tourRes] = await Promise.allSettled([
+        getTeams(tournamentId),
+        getTournament(tournamentId),
+      ]);
+
+      if (teamsRes.status === "fulfilled") {
+        setTeams(teamsRes.value.data || []);
+      } else {
+        throw teamsRes.reason;
+      }
+
+      if (tourRes.status === "fulfilled") {
+        setTournament(tourRes.value.data || null);
+      }
+
       // Ensure loader shows for at least 2 seconds
       const elapsed = Date.now() - start;
       const minDelay = 2000;
       if (elapsed < minDelay) {
         await new Promise((r) => setTimeout(r, minDelay - elapsed));
       }
-      setTeams(data);
     } catch (err) {
       console.error("Failed to fetch teams:", err);
       setError("Failed to load teams. Please try again.");
@@ -46,6 +61,25 @@ const TeamsTab = ({ tournamentId }) => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchTeams();
   }, [fetchTeams]);
+
+  const maxAllowedTeams = (tournament?.hostingPayment?.status !== 'CANCELLED' && tournament?.hostingPayment?.maxTeams > 0)
+    ? tournament.hostingPayment.maxTeams
+    : (tournament?.teams || 3);
+
+  const isLimitReached = teams.length >= maxAllowedTeams;
+
+  const handleOpenAddModal = () => {
+    if (isLimitReached) {
+      const shouldUpgrade = window.confirm(
+        `You have reached your limit of ${maxAllowedTeams} teams for this tournament.\n\nWould you like to go to Edit Tournament to upgrade your hosting plan?`
+      );
+      if (shouldUpgrade) {
+        navigate(`/edit-tournament/${tournamentId}`);
+      }
+      return;
+    }
+    setShowAddModal(true);
+  };
 
   const handleAddTeam = async (newTeam) => {
     try {
@@ -106,35 +140,81 @@ const TeamsTab = ({ tournamentId }) => {
           justifyContent: "space-between",
           alignItems: "center",
           marginBottom: "24px",
+          flexWrap: "wrap",
+          gap: "12px",
         }}
       >
-        <h2
-          style={{
-            fontSize: "32px",
-            fontWeight: "700",
-            margin: 0,
-          }}
-        >
-          Teams
-        </h2>
-        <button
-          onClick={() => setShowAddModal(true)}
-          style={{
-            padding: "10px 20px",
-            borderRadius: "10px",
-            border: "none",
-            background: "var(--accent-light)",
-            color: "#fff",
-            fontWeight: "600",
-            fontSize: "14px",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-          }}
-        >
-          + Add Team
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+          <h2
+            style={{
+              fontSize: "32px",
+              fontWeight: "700",
+              margin: 0,
+            }}
+          >
+            Teams ({teams.length} / {maxAllowedTeams})
+          </h2>
+          {isLimitReached && (
+            <span
+              style={{
+                padding: "4px 12px",
+                borderRadius: "20px",
+                fontSize: "12px",
+                fontWeight: "700",
+                background: "#fef3c7",
+                color: "#b45309",
+                border: "1px solid #fde68a",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "4px",
+              }}
+            >
+              🔒 Plan Limit Reached
+            </span>
+          )}
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          {isLimitReached && (
+            <button
+              onClick={() => navigate(`/edit-tournament/${tournamentId}`)}
+              style={{
+                padding: "10px 18px",
+                borderRadius: "10px",
+                border: "1px solid #f59e0b",
+                background: "#fffbeb",
+                color: "#b45309",
+                fontWeight: "700",
+                fontSize: "13px",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+              }}
+            >
+              ⚡ Upgrade Plan
+            </button>
+          )}
+
+          <button
+            onClick={handleOpenAddModal}
+            style={{
+              padding: "10px 20px",
+              borderRadius: "10px",
+              border: "none",
+              background: isLimitReached ? "#94a3b8" : "var(--accent-light)",
+              color: "#fff",
+              fontWeight: "600",
+              fontSize: "14px",
+              cursor: isLimitReached ? "not-allowed" : "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+          >
+            + Add Team
+          </button>
+        </div>
       </div>
 
       {loading && <CricketLoader text="Loading teams..." />}
@@ -191,6 +271,8 @@ const TeamsTab = ({ tournamentId }) => {
         onClose={() => setShowAddModal(false)}
         onSubmit={handleAddTeam}
         tournamentId={tournamentId}
+        maxTeams={maxAllowedTeams}
+        currentTeamCount={teams.length}
       />
 
       <EditTeamModal

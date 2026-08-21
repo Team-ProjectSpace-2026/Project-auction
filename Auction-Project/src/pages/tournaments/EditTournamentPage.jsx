@@ -135,9 +135,19 @@ const EditTournamentPage = () => {
         }
     };
 
+    const currentMaxTeams = (tournament?.hostingPayment?.status !== 'CANCELLED' && tournament?.hostingPayment?.maxTeams > 0)
+        ? tournament.hostingPayment.maxTeams
+        : (tournament?.teams || 3);
 
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
+        if (name === "numTeams") {
+            const num = Number(value);
+            if (num > currentMaxTeams) {
+                alert(`Your current plan allows a maximum of ${currentMaxTeams} teams.\n\nPlease use the "Upgrade Plan" button above to host more teams.`);
+                return;
+            }
+        }
         setFormData((prev) => ({
             ...prev,
             [name]: type === 'checkbox' ? checked : value
@@ -309,8 +319,13 @@ const EditTournamentPage = () => {
                 name="numTeams"
                 value={formData.numTeams}
                 onChange={handleInputChange}
+                max={currentMaxTeams}
+                min={1}
                 placeholder="Enter number of teams"
             />
+            <small style={{ fontSize: "12px", color: "#64748b", marginTop: "4px", display: "block" }}>
+                Current plan limit: <strong>{currentMaxTeams} teams</strong>. Use <strong>Upgrade Plan</strong> above to increase this limit.
+            </small>
         </div>
 
     </div>

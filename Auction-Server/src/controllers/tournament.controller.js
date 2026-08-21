@@ -181,6 +181,16 @@ export const updateTournament = async (req, res, next) => {
       }
     }
 
+    const maxAllowedTeams = (existing.hostingPayment?.status !== 'CANCELLED' && existing.hostingPayment?.maxTeams > 0)
+      ? existing.hostingPayment.maxTeams
+      : (existing.teams || 3);
+
+    if (teams > 0 && teams > maxAllowedTeams) {
+      return res.status(403).json({
+        message: `Your current plan supports up to ${maxAllowedTeams} teams. To host ${teams} teams, please upgrade your hosting plan.`
+      });
+    }
+
     const updateData = {
       name,
       status,
