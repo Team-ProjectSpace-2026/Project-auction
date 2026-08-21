@@ -4,8 +4,10 @@ import { Eye, Trash2, Check, X, Download } from "lucide-react";
 import pdfMake from "pdfmake/build/pdfmake.js";
 import vfsModule from "pdfmake/build/vfs_fonts.js";
 import * as playerService from "../../services/playerService";
+import { getTournament } from "../../services/tournamentService";
 import { playerPhotoUrl } from "../../utils/playerPhotoUrl";
 import CricketLoader from "../common/CricketLoader";
+import PlayerForm from "../players/PlayerForm";
 
 const pdfFonts = vfsModule?.pdfMake?.vfs ? vfsModule.pdfMake.vfs : (vfsModule?.default?.pdfMake?.vfs || vfsModule?.default || vfsModule);
 if (pdfMake) {
@@ -33,10 +35,23 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
   const { tournamentId: paramTournamentId } = useParams();
   const tournamentId = propTournamentId || paramTournamentId;
   const [players, setPlayers] = useState([]);
+  const [tournament, setTournament] = useState(null);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("All Roles");
+
+  const fetchPlayers = async () => {
+    if (!tournamentId) return;
+    try {
+      const res = await playerService.getPlayers(tournamentId);
+      setPlayers(res.data);
+      setError(null);
+    } catch (err) {
+      setError(err.response?.data?.message || err.message);
+    }
+  };
 
   useEffect(() => {
     if (!tournamentId) {
@@ -47,17 +62,20 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
     let cancelled = false;
     setLoading(true);
     const start = Date.now();
-    playerService
-      .getPlayers(tournamentId)
-      .then(async (res) => {
-        // Ensure loader shows for at least 2 seconds
+
+    Promise.all([
+      playerService.getPlayers(tournamentId),
+      getTournament(tournamentId).catch(() => ({ data: null })),
+    ])
+      .then(async ([playersRes, tournamentRes]) => {
         const elapsed = Date.now() - start;
-        const minDelay = 2000;
+        const minDelay = 1000;
         if (elapsed < minDelay) {
           await new Promise((r) => setTimeout(r, minDelay - elapsed));
         }
         if (!cancelled) {
-          setPlayers(res.data);
+          setPlayers(playersRes.data);
+          if (tournamentRes?.data) setTournament(tournamentRes.data);
           setError(null);
         }
       })
@@ -196,12 +214,20 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
     const status = player.paymentStatus || "free";
     const utr = player.paymentDetails?.utrLast4;
     const screenshot = player.paymentDetails?.paymentScreenshot;
+    const isCash = player.paymentDetails?.paymentCode === "CASH" || player.paymentDetails?.utrNumber === "CASH_PAYMENT";
 
     if (status === "verified" || status === "completed") {
       return (
-        <span style={{ padding: "4px 10px", borderRadius: "999px", fontSize: "11px", fontWeight: "700", background: "#dcfce7", color: "#15803d" }}>
-          ✓ VERIFIED
-        </span>
+        <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+          <span style={{ padding: "4px 10px", borderRadius: "999px", fontSize: "11px", fontWeight: "700", background: "#dcfce7", color: "#15803d", width: "fit-content" }}>
+            ✓ VERIFIED
+          </span>
+          {isCash && (
+            <span style={{ fontSize: "10px", color: "#047857", fontWeight: "700", paddingLeft: "2px" }}>
+              💵 Cash
+            </span>
+          )}
+        </div>
       );
     }
     if (status === "pending_verification") {
@@ -332,7 +358,7 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
             <Download size={16} /> Download PDF
           </button>
           <button
-            onClick={() => window.open(`${window.location.origin}/register/${tournamentId}`, "_blank")}
+            onClick={() => setShowAddModal(true)}
             style={{
               background: "var(--accent-light)", color: "#fff", border: "none",
               borderRadius: "12px", padding: "12px 20px", fontWeight: "600", cursor: "pointer",
@@ -491,6 +517,77 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
                 Close (Esc)
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* In-Person / Cash Add Player Modal */}
+      {showAddModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Add Player"
+          onClick={() => setShowAddModal(false)}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(15, 23, 42, 0.65)",
+            backdropFilter: "blur(6px)",
+            zIndex: 9999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "20px",
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: "var(--card-bg-light, #ffffff)",
+              borderRadius: "20px",
+              maxWidth: "850px",
+              width: "100%",
+              maxHeight: "90vh",
+              overflowY: "auto",
+              padding: "28px",
+              boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1)",
+              position: "relative",
+            }}
+          >
+            {tournament?.isPaid && tournament?.registrationFee > 0 && (
+              <div
+                style={{
+                  background: "#f0fdf4",
+                  border: "1px solid #86efac",
+                  borderRadius: "12px",
+                  padding: "14px 18px",
+                  marginBottom: "20px",
+                  color: "#166534",
+                  fontSize: "13px",
+                  fontWeight: "500",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                }}
+              >
+                <span style={{ fontSize: "22px" }}>💵</span>
+                <div>
+                  <strong>In-Person Cash Payment:</strong> Registration fee is ₹{tournament.registrationFee}.
+                  Since this player is registered directly by the organizer with cash, no QR code or payment screenshot proof is needed — payment will be automatically recorded as <strong>Paid in Cash (Verified)</strong>.
+                </div>
+              </div>
+            )}
+            <PlayerForm
+              tournamentId={tournamentId}
+              onSaved={() => {
+                setShowAddModal(false);
+                fetchPlayers();
+              }}
+              onCancel={() => setShowAddModal(false)}
+            />
           </div>
         </div>
       )}

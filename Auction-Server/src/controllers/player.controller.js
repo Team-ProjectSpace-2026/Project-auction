@@ -80,12 +80,44 @@ export const createPlayer = async (req, res, next) => {
     const jerseyName = String(req.body.jerseyName || "").trim() || undefined;
     const age = req.body.age ? Number(req.body.age) : undefined;
     const mobile = String(req.body.mobile || "").trim() || undefined;
+    const email = String(req.body.email || "").trim().toLowerCase() || undefined;
+
+    let photoUrl = req.body.photo || "";
+    if (req.file) {
+      photoUrl = req.file.path;
+    }
 
     const currentCount = await Player.countDocuments({
       tournamentId,
       deleted: false,
     });
     const registrationNumber = currentCount + 1;
+
+    // Check if tournament is paid to record cash payment
+    const tournament = await Tournament.findById(tournamentId);
+    let paymentStatus = "free";
+    let paymentDetails = {
+      paymentCode: "",
+      utrNumber: "",
+      paymentScreenshot: "",
+      amountPaid: 0,
+      paidAt: null,
+      verifiedAt: null,
+      verifiedBy: null,
+    };
+
+    if (tournament && tournament.isPaid && tournament.registrationFee > 0) {
+      paymentStatus = "verified";
+      paymentDetails = {
+        paymentCode: "CASH",
+        utrNumber: "CASH_PAYMENT",
+        paymentScreenshot: "",
+        amountPaid: tournament.registrationFee,
+        paidAt: new Date(),
+        verifiedAt: new Date(),
+        verifiedBy: req.user._id,
+      };
+    }
 
     const player = new Player({
       name,
@@ -102,6 +134,11 @@ export const createPlayer = async (req, res, next) => {
       jerseyName,
       age,
       mobile,
+      email,
+      photo: photoUrl,
+      paymentStatus,
+      paymentDetails,
+      isRegistered: false,
       createdBy: req.user._id,
     });
     await player.save();
