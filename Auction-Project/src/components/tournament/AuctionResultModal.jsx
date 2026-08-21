@@ -14,6 +14,7 @@ const AuctionResultModal = ({
   winningTeam, // { name, logo, primaryColor, secondaryColor, short }
   onClose,
   onNextPlayer,
+  isLastPlayer = false,
 }) => {
   const [isSlammed, setIsSlammed] = useState(false);
   const [countdown, setCountdown] = useState(5);
@@ -374,7 +375,7 @@ const AuctionResultModal = ({
                   if (onNextPlayer) onNextPlayer();
                 }}
               >
-                Reveal Next Player
+                {isLastPlayer ? "🎉 View Grand Finale" : "Reveal Next Player"}
               </button>
               <button
                 className="result-btn secondary-btn"
