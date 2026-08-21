@@ -44,7 +44,7 @@ router.get('/registered/:tournamentId', getRegisteredPlayers);
 router.use(auth);
 
 router.get('/', sanitizeQueryIds(['tournamentId']), getPlayers);
-router.post('/', validatePlayer, handleValidationErrors, createPlayer);
+router.post('/', upload.single('photo'), validatePlayer, handleValidationErrors, createPlayer);
 router.get('/:id', sanitizeIdParams(['id']), getPlayer);
 router.put('/:id', sanitizeIdParams(['id']), upload.single('photo'), updatePlayer);
 router.put('/:playerId/verify-payment', sanitizeIdParams(['playerId']), verifyPlayerPayment);
