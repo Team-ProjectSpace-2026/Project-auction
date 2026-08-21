@@ -44,14 +44,20 @@ const PlayerForm = ({ playerId, tournamentId, onSaved, onCancel }) => {
     }
   }, [playerId, tournamentId]);
 
-  const handleSubmit = async (formData) => {
+  const handleSubmit = async (formData, rawForm) => {
     setError(null);
     setLoading(true);
     try {
+      if (rawForm) {
+        if (!formData.has("name") && rawForm.playerName) formData.append("name", rawForm.playerName);
+        if (!formData.has("role") && rawForm.primaryRole) formData.append("role", rawForm.primaryRole);
+      }
       if (playerId) {
         await playerService.updatePlayer(playerId, formData);
       } else {
-        formData.append("tournamentId", tournamentId);
+        if (!formData.has("tournamentId")) {
+          formData.append("tournamentId", tournamentId);
+        }
         await playerService.createPlayer(formData);
       }
       if (onSaved) onSaved();
