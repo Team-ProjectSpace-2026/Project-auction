@@ -684,27 +684,9 @@ const PlayerRegistrationForm = ({
           </div>
         </Card>
 
-        {/* Admin-only: Base Price */}
-        {showBasePrice && (
-          <Card style={{ marginBottom: 24 }}>
-            <SectionHeading number={8} title="Auction Details" />
-            <div style={{ maxWidth: 300 }}>
-              <InputField
-                label="Base Price"
-                id="basePrice"
-                type="number"
-                value={basePriceValue}
-                onChange={(e) => onBasePriceChange?.(e.target.value)}
-                min={0}
-                placeholder="e.g. 50000"
-              />
-            </div>
-          </Card>
-        )}
-
         {/* Upload Photo Section */}
         <Card style={{ marginBottom: 24 }}>
-          <SectionHeading number={showBasePrice ? 9 : 8} title="Upload Player Photo" />
+          <SectionHeading number={8} title="Upload Player Photo" />
 
           {!photoPreview ? (
             <div

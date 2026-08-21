@@ -7,7 +7,6 @@ const PlayerForm = ({ playerId, tournamentId, onSaved, onCancel }) => {
   const [initialData, setInitialData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [basePrice, setBasePrice] = useState(0);
 
   useEffect(() => {
     if (playerId) {
@@ -33,7 +32,6 @@ const PlayerForm = ({ playerId, tournamentId, onSaved, onCancel }) => {
               photo:        null,
               photoPreview: p.photo ? playerPhotoUrl(p.photo) : null,
             });
-            setBasePrice(p.basePrice || 0);
           }
         })
         .catch((err) => {
@@ -50,8 +48,6 @@ const PlayerForm = ({ playerId, tournamentId, onSaved, onCancel }) => {
     setError(null);
     setLoading(true);
     try {
-      formData.append("basePrice", basePrice);
-
       if (playerId) {
         await playerService.updatePlayer(playerId, formData);
       } else {
@@ -107,9 +103,6 @@ const PlayerForm = ({ playerId, tournamentId, onSaved, onCancel }) => {
         initialData={playerId ? initialData : undefined}
         onSubmit={handleSubmit}
         submitLabel={playerId ? "Update Player" : "Add Player"}
-        showBasePrice={true}
-        basePriceValue={basePrice}
-        onBasePriceChange={setBasePrice}
         loading={loading}
         error={error}
         resetOnSubmit={!playerId}
