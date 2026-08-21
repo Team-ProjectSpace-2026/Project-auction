@@ -85,14 +85,25 @@ export const validateRegistrationDeadline = [
 
 export const validatePlayer = [
   body('name')
-    .notEmpty()
-    .withMessage('Player name is required')
-    .isLength({ max: 50 })
-    .withMessage('Player name cannot exceed 50 characters'),
+    .custom((val, { req }) => {
+      const name = req.body.name || req.body.playerName;
+      if (!name || !String(name).trim()) {
+        throw new Error('Player name is required');
+      }
+      if (String(name).trim().length > 50) {
+        throw new Error('Player name cannot exceed 50 characters');
+      }
+      return true;
+    }),
   
   body('role')
-    .isIn(['Batsman', 'Bowler', 'All Rounder', 'Wicket Keeper'])
-    .withMessage('Role must be Batsman, Bowler, All Rounder, or Wicket Keeper'),
+    .custom((val, { req }) => {
+      const role = req.body.role || req.body.primaryRole;
+      if (!role || !['Batsman', 'Bowler', 'All Rounder', 'Wicket Keeper'].includes(String(role).trim())) {
+        throw new Error('Role must be Batsman, Bowler, All Rounder, or Wicket Keeper');
+      }
+      return true;
+    }),
   
   body('style')
     .optional({ values: 'falsy' })

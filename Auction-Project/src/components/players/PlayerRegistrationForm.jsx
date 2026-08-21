@@ -441,6 +441,8 @@ const PlayerRegistrationForm = ({
     Object.entries(form).forEach(([k, v]) => {
       if (v !== null && k !== "photo") formData.append(k, v);
     });
+    if (form.playerName) formData.append("name", form.playerName);
+    if (form.primaryRole) formData.append("role", form.primaryRole);
     if (croppedFile) formData.append("photo", croppedFile);
     if (paymentScreenshot) formData.append("paymentScreenshot", paymentScreenshot);
     const finalUtrStr = (utrNumber || utrLast4).trim();
