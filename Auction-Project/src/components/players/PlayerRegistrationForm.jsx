@@ -237,7 +237,6 @@ function Banner({ type, message }) {
 }
 
 // ─── Default form state ──────────────────────────────────────────────────────
-// ─── Default form state ──────────────────────────────────────────────────────
 const DEFAULT_FORM = {
   playerName:     "",
   age:            "",
@@ -259,9 +258,6 @@ const PlayerRegistrationForm = ({
   initialData,
   onSubmit,
   submitLabel = "Submit Registration",
-  showBasePrice = false,
-  basePriceValue = 0,
-  onBasePriceChange,
   isPaid = false,
   payoutUpiId = "",
   registrationFee = 0,
@@ -411,7 +407,7 @@ const PlayerRegistrationForm = ({
     if (!form.playerName.trim()) return setInternalBanner({ type: "error", message: "Player name is required." });
     if (!form.age || +form.age < 10 || +form.age > 60) return setInternalBanner({ type: "error", message: "Enter a valid age (10-60)." });
     if (!form.mobile || form.mobile.length < 7) return setInternalBanner({ type: "error", message: "Enter a valid mobile number." });
-    if (!showBasePrice && (!form.email || !form.email.trim())) return setInternalBanner({ type: "error", message: "Email address is required for your registration confirmation." });
+    if (!form.email || !form.email.trim()) return setInternalBanner({ type: "error", message: "Email address is required for your registration confirmation." });
     if (!form.primaryRole) return setInternalBanner({ type: "error", message: "Please select a primary role." });
     if (battingEnabled && !form.battingStyle) return setInternalBanner({ type: "error", message: "Please select batting style." });
     if (bowlingEnabled && !form.bowlingStyle) return setInternalBanner({ type: "error", message: "Please select bowling style." });
@@ -808,7 +804,7 @@ const PlayerRegistrationForm = ({
 
           return (
             <Card style={{ marginBottom: 32, border: "2px solid #2563eb", background: "#ffffff", boxShadow: "0 8px 24px rgba(37,99,235,0.08)" }}>
-              <SectionHeading number={showBasePrice ? 10 : 9} title="Entry Fee & Payment Verification" />
+              <SectionHeading number={9} title="Entry Fee & Payment Verification" />
 
               {/* Payment Info Card */}
               {payoutUpiId ? (
