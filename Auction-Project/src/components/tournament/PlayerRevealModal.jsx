@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuction } from "../../context/AuctionContext";
 import { playerPhotoUrl } from "../../utils/playerPhotoUrl";
 import StadiumBackground from "../auction/StadiumBackground";
+import AuctionConcludedModal from "./AuctionConcludedModal";
 import "./reveal-screen.css";
 
 /**
@@ -42,7 +43,7 @@ const CARD_GAP = 16;
 const CARD_STEP = CARD_WIDTH + CARD_GAP;
 
 const PlayerRevealModal = ({ onClose, onContinue }) => {
-  const { players, revealPlayer } = useAuction();
+  const { players, revealPlayer, tournamentId } = useAuction();
 
   // ---- State ----
   const [phase, setPhase] = useState("idle"); // idle | shuffling | selected | flipping | done
@@ -206,92 +207,11 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
   const progressPhase = phase === "idle" ? 0 : phase === "shuffling" ? 1 : phase === "selected" ? 2 : 3;
 
   if (!players || players.length === 0 || availablePlayers.length === 0) {
-    return createPortal(
-      <div className="auction-screen">
-        <StadiumBackground />
-        <div className="reveal-modal" style={{ display: "flex", alignItems: "center", justifyContent: "center", zIndex: 99999 }}>
-          <button
-            className="reveal-modal__close"
-            onClick={onClose}
-            style={{ zIndex: 100000, background: "rgba(255,255,255,0.2)", color: "#fff" }}
-          >
-            ×
-          </button>
-          
-          <div style={{
-            background: "rgba(15, 23, 42, 0.92)",
-            backdropFilter: "blur(16px)",
-            WebkitBackdropFilter: "blur(16px)",
-            border: "1.5px solid rgba(255, 255, 255, 0.15)",
-            borderRadius: "24px",
-            padding: "40px 48px",
-            textAlign: "center",
-            maxWidth: "420px",
-            width: "90%",
-            boxShadow: "0 25px 60px rgba(0, 0, 0, 0.5)",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "16px",
-            zIndex: 99999,
-          }}>
-            <div style={{
-              width: "72px",
-              height: "72px",
-              borderRadius: "50%",
-              background: "linear-gradient(135deg, rgba(245,158,11,0.2), rgba(217,119,6,0.3))",
-              border: "1.5px solid rgba(245,158,11,0.5)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "36px",
-            }}>
-              🏏
-            </div>
-            
-            <h2 style={{
-              color: "#ffffff",
-              fontSize: "24px",
-              fontWeight: "800",
-              margin: 0,
-              letterSpacing: "0.5px",
-              textTransform: "uppercase",
-            }}>
-              No player left
-            </h2>
-
-            <p style={{
-              color: "rgba(255, 255, 255, 0.75)",
-              fontSize: "14px",
-              margin: 0,
-              lineHeight: "1.5",
-            }}>
-              No players left for this tournament. All registered players have already been auctioned.
-            </p>
-
-            <button
-              onClick={onClose}
-              style={{
-                marginTop: "12px",
-                width: "100%",
-                padding: "14px 28px",
-                background: "linear-gradient(135deg, #2563eb, #1d4ed8)",
-                color: "#ffffff",
-                border: "none",
-                borderRadius: "12px",
-                fontWeight: "700",
-                fontSize: "14px",
-                cursor: "pointer",
-                boxShadow: "0 4px 14px rgba(37, 99, 235, 0.4)",
-                transition: "all 0.2s ease",
-              }}
-            >
-              Return to Auction Room
-            </button>
-          </div>
-        </div>
-      </div>,
-      document.body
+    return (
+      <AuctionConcludedModal
+        onClose={onClose}
+        tournamentId={tournamentId}
+      />
     );
   }
 

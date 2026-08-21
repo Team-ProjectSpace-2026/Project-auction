@@ -1,9 +1,10 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useAuction } from "../../context/AuctionContext";
 import { formatCurrency } from "../../utils/formatCurrency";
 import { playerPhotoUrl } from "../../utils/playerPhotoUrl";
 import PlayerRevealModal from "./PlayerRevealModal";
 import AuctionResultModal from "./AuctionResultModal";
+import AuctionConcludedModal from "./AuctionConcludedModal";
 import BidControls from "../auction/BidControls";
 import ActivityFeed from "../auction/ActivityFeed";
 
@@ -20,17 +21,34 @@ const AuctionRoom = () => {
     currentBid,
     highestBidder,
     teams,
+    players,
     soldInfo,
     unsoldInfo,
     isConnected,
     connectionError,
     error,
+    tournamentId,
     clearSoldInfo,
     clearUnsoldInfo,
     clearError,
   } = useAuction();
 
   const [showRevealModal, setShowRevealModal] = useState(false);
+  const [showConcludedModal, setShowConcludedModal] = useState(false);
+
+  // Compute whether all players have been auctioned (sold or unsold)
+  const allPlayersCompleted = useMemo(() => {
+    if (!players || players.length === 0) return false;
+    return players.every((p) => p.isSold || p.isUnsold);
+  }, [players]);
+
+  // Check if the current player is the last available player
+  const isLastPlayer = useMemo(() => {
+    if (!players || players.length === 0 || !currentPlayer) return false;
+    const remaining = players.filter((p) => !p.isSold && !p.isUnsold);
+    // If only 1 player remains and it's the current one, it's the last
+    return remaining.length <= 1;
+  }, [players, currentPlayer]);
 
   const handleRevealNext = useCallback(() => {
     clearSoldInfo();
@@ -108,6 +126,58 @@ const AuctionRoom = () => {
             }}
           >
             Dismiss
+          </button>
+        </div>
+      )}
+
+      {/* Auction Concluded Banner */}
+      {allPlayersCompleted && !currentPlayer && (
+        <div style={{
+          background: "linear-gradient(135deg, rgba(245,158,11,0.1) 0%, rgba(37,99,235,0.08) 100%)",
+          border: "1.5px solid rgba(245,158,11,0.3)",
+          borderRadius: "16px",
+          padding: "20px 24px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "16px",
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+            <div style={{
+              width: "48px", height: "48px", borderRadius: "50%",
+              background: "linear-gradient(135deg, rgba(245,158,11,0.2), rgba(217,119,6,0.3))",
+              border: "1.5px solid rgba(245,158,11,0.5)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: "24px",
+            }}>🏆</div>
+            <div>
+              <div style={{ fontSize: "16px", fontWeight: "700", color: "var(--text-primary-light)", marginBottom: "2px" }}>
+                Auction Completed!
+              </div>
+              <div style={{ fontSize: "13px", color: "var(--text-secondary-light)" }}>
+                All {players.length} players have been auctioned. View the grand finale summary.
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowConcludedModal(true)}
+            style={{
+              background: "linear-gradient(135deg, #f59e0b, #d97706)",
+              color: "#000",
+              border: "none",
+              borderRadius: "10px",
+              padding: "10px 20px",
+              fontSize: "13px",
+              fontWeight: "700",
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+              textTransform: "uppercase",
+              letterSpacing: "0.03em",
+              boxShadow: "0 4px 14px rgba(245,158,11,0.3)",
+              transition: "all 0.2s ease",
+            }}
+          >
+            🏆 View Grand Finale
           </button>
         </div>
       )}
@@ -459,6 +529,7 @@ const AuctionRoom = () => {
             winningTeam={winningTeam}
             onClose={clearSoldInfo}
             onNextPlayer={handleRevealNext}
+            isLastPlayer={isLastPlayer}
           />
         );
       })()}
@@ -472,6 +543,13 @@ const AuctionRoom = () => {
           basePrice={currentPlayer?.basePrice}
           onClose={clearUnsoldInfo}
           onNextPlayer={handleRevealNext}
+          isLastPlayer={isLastPlayer}
+        />
+      )}
+      {showConcludedModal && (
+        <AuctionConcludedModal
+          onClose={() => setShowConcludedModal(false)}
+          tournamentId={tournamentId}
         />
       )}
     </div>
