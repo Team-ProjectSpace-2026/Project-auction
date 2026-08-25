@@ -984,7 +984,7 @@ const PlayerRegistrationForm = ({
                     ) : (
                       <div style={{ display: "flex", alignItems: "center", gap: "16px", background: "#ffffff", padding: "12px", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
                         <img
-                          src={screenshotPreview}
+                          src={typeof screenshotPreview === 'string' && screenshotPreview.startsWith('blob:') ? screenshotPreview : undefined}
                           alt="Payment Screenshot"
                           style={{ width: 80, height: 80, objectFit: "cover", borderRadius: "8px", border: "1px solid #cbd5e1" }}
                         />
