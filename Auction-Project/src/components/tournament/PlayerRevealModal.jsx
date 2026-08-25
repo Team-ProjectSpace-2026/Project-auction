@@ -71,8 +71,8 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
       // No available players loaded/remaining
       return [];
     }
-    // ponytail: single copy, slot-machine belt is proportionate to pool size
-    const copies = 1;
+    // ponytail: enough copies to fill ~2 screens of scroll, max 30 DOM nodes
+    const copies = Math.max(1, Math.ceil(30 / availablePlayers.length));
     const list = [];
     for (let c = 0; c < copies; c++) {
       availablePlayers.forEach((p, i) => {
@@ -109,21 +109,21 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
     const startOffset = centerOffset;
     const totalDistance = Math.abs(targetOffset - startOffset);
 
-    // Total duration — slower for dramatic effect
-    const TOTAL_DURATION = 6000;
+    // Fixed 4s total: 3s fast spin + 1s deceleration
+    const TOTAL_DURATION = 4000;
 
-    // 4-phase bounce easing: fast forward → overshoot → bounce back → settle
+    // 4-phase bounce easing: constant-speed spin → overshoot → bounce back → settle
     const bounceEase = (t) => {
-      if (t < 0.50) {
-        return (t / 0.50) * 0.90;
-      } else if (t < 0.68) {
-        const p = (t - 0.50) / 0.18;
+      if (t < 0.75) {
+        return (t / 0.75) * 0.90;
+      } else if (t < 0.82) {
+        const p = (t - 0.75) / 0.07;
         return 0.90 + p * 0.18;
-      } else if (t < 0.84) {
-        const p = (t - 0.68) / 0.16;
+      } else if (t < 0.92) {
+        const p = (t - 0.82) / 0.10;
         return 1.08 - p * 0.11;
       } else {
-        const p = (t - 0.84) / 0.16;
+        const p = (t - 0.92) / 0.08;
         return 0.97 + p * 0.03;
       }
     };
@@ -136,8 +136,8 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
       const currentOffset = startOffset - (totalDistance * eased);
 
       let wiggle = 0;
-      if (progress > 0.50 && progress < 0.84) {
-        wiggle = Math.sin((progress - 0.50) * 40) * 4 * (1 - (progress - 0.50) / 0.34);
+      if (progress > 0.75 && progress < 0.92) {
+        wiggle = Math.sin((progress - 0.75) * 40) * 4 * (1 - (progress - 0.75) / 0.17);
       }
 
       // Update belt transform directly via ref (no re-render per frame)
@@ -357,13 +357,15 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
             transition={{ duration: 0.3 }}
           >
             {phase === "idle" && "Preparing..."}
-            {phase === "shuffling" && "Shuffling Players..."}
-            {phase === "selected" && `Player #${selectedPlayer?.displayNumber || "???"} Selected!`}
+            {phase === "shuffling" && (availablePlayers.length === 1 ? "Final Player Loading..." : "Shuffling Players...")}
+            {phase === "selected" && `${availablePlayers.length === 1 ? "🌟 Final Player" : "Player"} #${selectedPlayer?.displayNumber || "???"} Selected!`}
             {(phase === "flipping" || phase === "done") && "Revealing Identity..."}
           </motion.div>
           <p className="reveal-status__hint">
             {phase === "selected"
-              ? "Click the button below to reveal this player"
+              ? (availablePlayers.length === 1
+                  ? "Click below to reveal the final player of this auction!"
+                  : "Click the button below to reveal this player")
               : phase === "shuffling"
               ? "Please wait while we select the next player..."
               : ""}
@@ -382,7 +384,9 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
           }}
           transition={{ delay: 0.3, duration: 0.5, type: "spring", stiffness: 120 }}
         >
-          {phase === "selected" ? "⚡ REVEAL PLAYER" : "REVEAL PLAYER"}
+          {phase === "selected"
+            ? (availablePlayers.length === 1 ? "⚡ REVEAL FINAL PLAYER" : "⚡ REVEAL PLAYER")
+            : (availablePlayers.length === 1 ? "REVEAL FINAL PLAYER" : "REVEAL PLAYER")}
         </motion.button>
       </div>
 
