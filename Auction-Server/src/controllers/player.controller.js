@@ -289,7 +289,7 @@ export const initiatePlayerRegistration = async (req, res, next) => {
       return res.status(403).json({ message: 'Registration deadline has passed' });
     }
 
-    if (mobile) {
+    if (mobile && typeof mobile === 'string') {
       const existing = await Player.findOne({ mobile, tournamentId, deleted: false });
       if (existing) {
         return res.status(409).json({ message: 'This mobile number is already registered for this tournament' });
