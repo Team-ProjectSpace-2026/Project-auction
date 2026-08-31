@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from 'react';
+﻿import { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { FiPlay, FiChevronDown, FiArrowDown, FiX } from 'react-icons/fi';
@@ -526,9 +526,10 @@ const HeroSection = forwardRef((props, ref) => {
 
               <div className="video-wrapper">
                 <video
-                  src="/DemoVideo/FinalDemoVideo.mp4"
+                  src="https://res.cloudinary.com/n7trd1nz/video/upload/v1788162789/FullDemoVideo2.mp4"
                   controls
                   autoPlay
+                  playsInline
                   className="video-iframe"
                 >
                   Your browser does not support the video tag.
