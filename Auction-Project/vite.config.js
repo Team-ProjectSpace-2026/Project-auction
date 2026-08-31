@@ -14,6 +14,7 @@ export default defineConfig({
       'pdfmake/build/pdfmake': 'pdfmake/build/pdfmake.js',
       'pdfmake/build/vfs_fonts': 'pdfmake/build/vfs_fonts.js',
       'qrcode': 'qrcode/lib/browser.js',
+      'tesseract.js': 'tesseract.js/src/index.js',
     },
   },
   build: {
