@@ -146,12 +146,22 @@ export const AuctionProvider = ({ children }) => {
         }
       };
 
+      const onUnsoldReset = () => {
+        setPlayers((prev) => prev.map((p) => (!p.isSold ? { ...p, isUnsold: false } : p)));
+        setAuctionStatus("idle");
+        setCurrentPlayer(null);
+        setCurrentBid(null);
+        setHighestBidder(null);
+        setUnsoldInfo(null);
+      };
+
       const onError = (data) => setError(data.message);
 
       socket.on("new-bid", onNewBid);
       socket.on("player-revealed", onPlayerRevealed);
       socket.on("player-sold", onPlayerSold);
       socket.on("player-unsold", onPlayerUnsold);
+      socket.on("unsold-reset", onUnsoldReset);
       socket.on("auction-started", onAuctionStarted);
       socket.on("auction-ended", onAuctionEnded);
       socket.on("auction-state", onAuctionState);
@@ -165,6 +175,7 @@ export const AuctionProvider = ({ children }) => {
         socket.off("player-revealed", onPlayerRevealed);
         socket.off("player-sold", onPlayerSold);
         socket.off("player-unsold", onPlayerUnsold);
+        socket.off("unsold-reset", onUnsoldReset);
         socket.off("auction-started", onAuctionStarted);
         socket.off("auction-ended", onAuctionEnded);
         socket.off("auction-state", onAuctionState);
@@ -261,6 +272,19 @@ export const AuctionProvider = ({ children }) => {
     emit("end-auction", { tournamentId });
   }, [emit, tournamentId]);
 
+  const reauctionUnsold = useCallback(() => {
+    setPlayers((prev) => prev.map((p) => (!p.isSold ? { ...p, isUnsold: false } : p)));
+    setAuctionStatus("idle");
+    setCurrentPlayer(null);
+    setCurrentBid(null);
+    setHighestBidder(null);
+    setUnsoldInfo(null);
+
+    if (tournamentId) {
+      emit("re-auction-unsold", { tournamentId });
+    }
+  }, [emit, tournamentId]);
+
   const clearSoldInfo = useCallback(() => setSoldInfo(null), []);
   const clearUnsoldInfo = useCallback(() => setUnsoldInfo(null), []);
   const clearError = useCallback(() => setError(null), []);
@@ -288,6 +312,7 @@ export const AuctionProvider = ({ children }) => {
     revealPlayer,
     markSold,
     markUnsold,
+    reauctionUnsold,
     startAuction,
     endAuction,
     clearSoldInfo,
@@ -301,7 +326,7 @@ export const AuctionProvider = ({ children }) => {
     tournamentId, currentPlayer, currentBid, highestBidder, auctionStatus,
     teams, bids, players, error, soldInfo, unsoldInfo, revealedPlayer, tournament,
     initTournament, joinAndListen, placeBid, revealPlayer, markSold,
-    markUnsold, startAuction, endAuction, clearSoldInfo, clearUnsoldInfo,
+    markUnsold, reauctionUnsold, startAuction, endAuction, clearSoldInfo, clearUnsoldInfo,
     clearError,
   ]);
 

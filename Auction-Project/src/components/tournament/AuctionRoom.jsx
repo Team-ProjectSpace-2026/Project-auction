@@ -32,6 +32,7 @@ const AuctionRoom = () => {
     clearUnsoldInfo,
     clearError,
     tournament,
+    reauctionUnsold,
   } = useAuction();
 
   const [showRevealModal, setShowRevealModal] = useState(false);
@@ -49,6 +50,12 @@ const AuctionRoom = () => {
     return players.filter((p) => !p.isSold && !p.isUnsold).length;
   }, [players]);
 
+  // Count unsold players available for re-auction
+  const unsoldPlayersCount = useMemo(() => {
+    if (!players || players.length === 0) return 0;
+    return players.filter((p) => !p.isSold && p.isUnsold).length;
+  }, [players]);
+
   // Check if the current player is the last available player
   const isLastPlayer = useMemo(() => {
     if (!players || players.length === 0) return false;
@@ -57,6 +64,14 @@ const AuctionRoom = () => {
     if (remaining.length === 1 && currentPlayer && String(remaining[0]._id) === String(currentPlayer._id)) return true;
     return false;
   }, [players, currentPlayer]);
+
+  const handleReauction = useCallback(() => {
+    setShowConcludedModal(false);
+    clearSoldInfo();
+    clearUnsoldInfo();
+    reauctionUnsold();
+    setShowRevealModal(true);
+  }, [clearSoldInfo, clearUnsoldInfo, reauctionUnsold]);
 
   const handleRevealNext = useCallback(() => {
     clearSoldInfo();
@@ -191,26 +206,48 @@ const AuctionRoom = () => {
             </div>
           </div>
           {(allPlayersCompleted || unauctionedCount === 0) ? (
-            <button
-              onClick={() => setShowConcludedModal(true)}
-              style={{
-                background: "linear-gradient(135deg, #f59e0b, #d97706)",
-                color: "#000",
-                border: "none",
-                borderRadius: "10px",
-                padding: "12px 24px",
-                fontSize: "14px",
-                fontWeight: "700",
-                cursor: "pointer",
-                whiteSpace: "nowrap",
-                textTransform: "uppercase",
-                letterSpacing: "0.03em",
-                boxShadow: "0 4px 14px rgba(245,158,11,0.3)",
-                transition: "all 0.2s ease",
-              }}
-            >
-              🏆 View Grand Finale
-            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+              {unsoldPlayersCount > 0 && (
+                <button
+                  onClick={handleReauction}
+                  style={{
+                    background: "linear-gradient(135deg, #f97316, #ea580c)",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "10px",
+                    padding: "12px 20px",
+                    fontSize: "14px",
+                    fontWeight: "700",
+                    cursor: "pointer",
+                    whiteSpace: "nowrap",
+                    boxShadow: "0 4px 14px rgba(234,88,12,0.3)",
+                    transition: "all 0.2s ease",
+                  }}
+                >
+                  🔄 Re-auction Unsold ({unsoldPlayersCount})
+                </button>
+              )}
+              <button
+                onClick={() => setShowConcludedModal(true)}
+                style={{
+                  background: "linear-gradient(135deg, #f59e0b, #d97706)",
+                  color: "#000",
+                  border: "none",
+                  borderRadius: "10px",
+                  padding: "12px 24px",
+                  fontSize: "14px",
+                  fontWeight: "700",
+                  cursor: "pointer",
+                  whiteSpace: "nowrap",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.03em",
+                  boxShadow: "0 4px 14px rgba(245,158,11,0.3)",
+                  transition: "all 0.2s ease",
+                }}
+              >
+                🏆 View Grand Finale
+              </button>
+            </div>
           ) : (
             <button
               onClick={() => setShowRevealModal(true)}
@@ -603,6 +640,7 @@ const AuctionRoom = () => {
       {showConcludedModal && (
         <AuctionConcludedModal
           onClose={() => setShowConcludedModal(false)}
+          onReauction={handleReauction}
           tournamentId={tournamentId}
         />
       )}

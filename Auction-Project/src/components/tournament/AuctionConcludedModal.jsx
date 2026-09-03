@@ -23,7 +23,7 @@ const TEAM_COLORS = [
   "#dc2626", "#0891b2", "#e11d48", "#4f46e5",
 ];
 
-const AuctionConcludedModal = ({ onClose, tournamentId }) => {
+const AuctionConcludedModal = ({ onClose, onReauction, tournamentId }) => {
   const navigate = useNavigate();
   const { players, teams, tournament } = useAuction();
   const canvasRef = useRef(null);
@@ -227,16 +227,16 @@ const AuctionConcludedModal = ({ onClose, tournamentId }) => {
   const handleViewSquads = useCallback(() => {
     onClose();
     if (tournamentId) {
-      navigate(`/tournament/${tournamentId}?tab=teams`);
+      navigate(`/tournament-details/${tournamentId}?tab=teams`, {
+        state: { activeTab: "teams" },
+      });
     }
   }, [onClose, navigate, tournamentId]);
 
   const handleReturnDashboard = useCallback(() => {
     onClose();
-    if (tournamentId) {
-      navigate(`/tournament/${tournamentId}`);
-    }
-  }, [onClose, navigate, tournamentId]);
+    navigate("/dashboard");
+  }, [onClose, navigate]);
 
   const getTeamColor = (idx) => TEAM_COLORS[idx % TEAM_COLORS.length];
 
@@ -413,7 +413,16 @@ const AuctionConcludedModal = ({ onClose, tournamentId }) => {
       {/* ─── Action Buttons ─── */}
       <div className="concluded-actions">
         {hasUnsold && (
-          <button className="concluded-btn concluded-btn--primary" onClick={onClose}>
+          <button
+            className="concluded-btn concluded-btn--primary"
+            onClick={() => {
+              if (onReauction) {
+                onReauction();
+              } else {
+                onClose();
+              }
+            }}
+          >
             🔄 Re-auction Unsold Players ({stats.unsold})
           </button>
         )}
