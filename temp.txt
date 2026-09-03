@@ -75,7 +75,7 @@ const HeroSection = forwardRef((props, ref) => {
 
     // Particles for the canvas animation (reduced count on mobile for low TBT)
     const canvasParticles = [];
-    const particleCount = window.innerWidth < 768 ? 8 : 30;
+    const particleCount = window.innerWidth < 768 ? 20 : 60;
 
     for (let i = 0; i < particleCount; i++) {
       canvasParticles.push({
@@ -93,8 +93,7 @@ const HeroSection = forwardRef((props, ref) => {
 
     // Light beams
     const beams = [];
-    const beamCount = isMobileDevice ? 2 : 5;
-    for (let i = 0; i < beamCount; i++) {
+    for (let i = 0; i < 5; i++) {
       beams.push({
         x: Math.random() * canvas.offsetWidth,
         width: Math.random() * 150 + 50,
@@ -251,7 +250,7 @@ const HeroSection = forwardRef((props, ref) => {
           alt=""
           width="1200"
           height="800"
-          fetchPriority="high"
+          fetchpriority="high"
           decoding="async"
           aria-hidden="true"
         />
@@ -412,7 +411,7 @@ const HeroSection = forwardRef((props, ref) => {
                   rotateY: { duration: 8, repeat: Infinity, ease: "linear" },
                   y: { duration: 4, repeat: Infinity, ease: "easeInOut" }
                 }}
-                style={{ width: "1440px", height: "1440px" }}
+                style={{ width: "720px", height: "720px" }}
               >
                 {/* Front Face */}
                 <div className="coin-face coin-front">
@@ -420,9 +419,9 @@ const HeroSection = forwardRef((props, ref) => {
                     src={cricCoinImg} 
                     alt="Cric Auction Hub Live Coin Front" 
                     className="cric-auction-coin-img" 
-                    width="1360"
-                    height="1360"
-                    fetchPriority="high"
+                    width="680"
+                    height="680"
+                    fetchpriority="high"
                     decoding="async"
                   />
                 </div>
@@ -432,14 +431,61 @@ const HeroSection = forwardRef((props, ref) => {
                     src={cricCoinImg} 
                     alt="Cric Auction Hub Live Coin Back" 
                     className="cric-auction-coin-img" 
-                    width="1360"
-                    height="1360"
+                    width="680"
+                    height="680"
                     decoding="async"
                   />
                 </div>
               </motion.div>
 
+              {/* Floating Stat Chips Surrounding the Coin */}
+              <motion.div 
+                className="stat-chip chip-top-left"
+                animate={{ y: [0, -10, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+              >
+                <span className="chip-icon">ðŸ†</span>
+                <div className="chip-text">
+                  <span className="chip-value">â‚¹8.50 CR</span>
+                  <span className="chip-label">Highest Bid</span>
+                </div>
+              </motion.div>
 
+              <motion.div 
+                className="stat-chip chip-top-right"
+                animate={{ y: [0, -12, 0] }}
+                transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
+              >
+                <span className="chip-icon">ðŸ</span>
+                <div className="chip-text">
+                  <span className="chip-value">56+</span>
+                  <span className="chip-label">Players Sold</span>
+                </div>
+              </motion.div>
+
+              <motion.div 
+                className="stat-chip chip-bottom-left"
+                animate={{ y: [0, -8, 0] }}
+                transition={{ duration: 3.8, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+              >
+                <span className="chip-icon">ðŸ›¡ï¸</span>
+                <div className="chip-text">
+                  <span className="chip-value">30+</span>
+                  <span className="chip-label">Leagues Hosted</span>
+                </div>
+              </motion.div>
+
+              <motion.div 
+                className="stat-chip chip-bottom-right"
+                animate={{ y: [0, -11, 0] }}
+                transition={{ duration: 4.2, repeat: Infinity, ease: 'easeInOut', delay: 1.5 }}
+              >
+                <span className="chip-icon">âš¡</span>
+                <div className="chip-text">
+                  <span className="chip-value">Real-Time</span>
+                  <span className="chip-label">Auction Engine</span>
+                </div>
+              </motion-div>
             </div>
           </motion.div>
 
@@ -525,15 +571,13 @@ const HeroSection = forwardRef((props, ref) => {
               <div className="video-glow" aria-hidden="true" />
 
               <div className="video-wrapper">
-                <video
-                  src="https://res.cloudinary.com/n7trd1nz/video/upload/v1788162789/FullDemoVideo2.mp4"
-                  controls
-                  autoPlay
-                  playsInline
+                <iframe
+                  src="https://www.youtube.com/embed/q4vrzGTbEBs?autoplay=1&rel=0&modestbranding=1&showinfo=0"
+                  title="Platform Demo Video"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
                   className="video-iframe"
-                >
-                  Your browser does not support the video tag.
-                </video>
+                />
               </div>
 
               {/* Video info bar */}

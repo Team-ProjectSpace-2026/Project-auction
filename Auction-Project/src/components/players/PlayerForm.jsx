@@ -3,7 +3,7 @@ import * as playerService from "../../services/playerService";
 import { playerPhotoUrl } from "../../utils/playerPhotoUrl";
 import PlayerRegistrationForm from "./PlayerRegistrationForm.jsx";
 
-const PlayerForm = ({ playerId, tournamentId, onSaved, onCancel }) => {
+const PlayerForm = ({ playerId, tournamentId, defaultBasePrice, onSaved, onCancel }) => {
   const [initialData, setInitialData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -24,6 +24,7 @@ const PlayerForm = ({ playerId, tournamentId, onSaved, onCancel }) => {
               jerseyNumber: p.jerseyNumber ?? "",
               jerseySize:   p.jerseySize || "",
               jerseyName:   p.jerseyName || "",
+              basePrice:    p.basePrice ?? (defaultBasePrice || ""),
               primaryRole:  p.role || "",
               battingStyle: p.battingStyle || "",
               bowlingStyle: p.bowlingStyle || "",
@@ -42,7 +43,7 @@ const PlayerForm = ({ playerId, tournamentId, onSaved, onCancel }) => {
         });
       return () => { cancelled = true; };
     }
-  }, [playerId, tournamentId]);
+  }, [playerId, tournamentId, defaultBasePrice]);
 
   const handleSubmit = async (formData, rawForm) => {
     setError(null);
@@ -51,6 +52,9 @@ const PlayerForm = ({ playerId, tournamentId, onSaved, onCancel }) => {
       if (rawForm) {
         if (!formData.has("name") && rawForm.playerName) formData.append("name", rawForm.playerName);
         if (!formData.has("role") && rawForm.primaryRole) formData.append("role", rawForm.primaryRole);
+        if (!formData.has("basePrice") && rawForm.basePrice !== undefined && rawForm.basePrice !== "") {
+          formData.append("basePrice", rawForm.basePrice);
+        }
       }
       if (playerId) {
         await playerService.updatePlayer(playerId, formData);
@@ -106,7 +110,9 @@ const PlayerForm = ({ playerId, tournamentId, onSaved, onCancel }) => {
 
       <PlayerRegistrationForm
         key={playerId || "new"}
-        initialData={playerId ? initialData : undefined}
+        initialData={playerId ? initialData : (defaultBasePrice ? { basePrice: defaultBasePrice } : undefined)}
+        showBasePriceField={true}
+        defaultBasePrice={defaultBasePrice}
         onSubmit={handleSubmit}
         submitLabel={playerId ? "Update Player" : "Add Player"}
         loading={loading}

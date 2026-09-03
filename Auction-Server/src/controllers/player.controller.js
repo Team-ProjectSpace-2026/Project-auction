@@ -34,6 +34,18 @@ export const getPlayers = async (req, res, next) => {
 
     if (tournamentId) {
       filter.tournamentId = tournamentId;
+      // Auto-heal any existing players in this tournament who have basePrice 0 or null
+      const tourney = await Tournament.findById(tournamentId).select("playerBasePrice");
+      if (tourney && tourney.playerBasePrice > 0) {
+        await Player.updateMany(
+          {
+            tournamentId,
+            deleted: false,
+            $or: [{ basePrice: { $exists: false } }, { basePrice: 0 }, { basePrice: null }],
+          },
+          { $set: { basePrice: tourney.playerBasePrice } }
+        );
+      }
     } else {
       // Without tournamentId scope, only show own players for safety
       filter.$or = [{ createdBy: req.user._id }];
@@ -73,8 +85,15 @@ export const createPlayer = async (req, res, next) => {
     }
 
     const keeper = req.body.keeper === "true" || req.body.keeper === true || req.body.isKeeper === "Yes";
-    const basePrice = Number(req.body.basePrice) || 0;
     const tournamentId = String(req.body.tournamentId || "");
+
+    const tournament = await Tournament.findById(tournamentId);
+
+    const customBasePrice = req.body.basePrice !== undefined && req.body.basePrice !== "" ? Number(req.body.basePrice) : NaN;
+    const basePrice = (!isNaN(customBasePrice) && customBasePrice > 0)
+      ? customBasePrice
+      : (tournament?.playerBasePrice || 0);
+
     const jerseyNumber = req.body.jerseyNumber ? Number(req.body.jerseyNumber) : undefined;
     const jerseySize = String(req.body.jerseySize || "").trim() || undefined;
     const jerseyName = String(req.body.jerseyName || "").trim() || undefined;
@@ -93,8 +112,6 @@ export const createPlayer = async (req, res, next) => {
     });
     const registrationNumber = currentCount + 1;
 
-    // Check if tournament is paid to record cash payment
-    const tournament = await Tournament.findById(tournamentId);
     let paymentStatus = "free";
     let paymentDetails = {
       paymentCode: "",
@@ -187,7 +204,12 @@ export const updatePlayer = async (req, res, next) => {
     if (req.body.keeper !== undefined || req.body.isKeeper !== undefined) {
       updateData.keeper = req.body.keeper === "true" || req.body.keeper === true || req.body.isKeeper === "Yes";
     }
-    if (req.body.basePrice !== undefined) updateData.basePrice = Number(req.body.basePrice) || 0;
+    if (req.body.basePrice !== undefined && req.body.basePrice !== "") {
+      const parsedBasePrice = Number(req.body.basePrice);
+      if (!isNaN(parsedBasePrice) && parsedBasePrice >= 0) {
+        updateData.basePrice = parsedBasePrice;
+      }
+    }
     if (req.body.age !== undefined) updateData.age = Number(req.body.age) || undefined;
     if (req.body.mobile !== undefined) updateData.mobile = String(req.body.mobile);
     if (req.body.countryCode !== undefined) updateData.countryCode = String(req.body.countryCode);
@@ -289,7 +311,7 @@ export const initiatePlayerRegistration = async (req, res, next) => {
       return res.status(403).json({ message: 'Registration deadline has passed' });
     }
 
-    if (mobile) {
+    if (mobile && typeof mobile === 'string') {
       const existing = await Player.findOne({ mobile, tournamentId, deleted: false });
       if (existing) {
         return res.status(409).json({ message: 'This mobile number is already registered for this tournament' });

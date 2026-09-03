@@ -31,6 +31,7 @@ const AuctionRoom = () => {
     clearSoldInfo,
     clearUnsoldInfo,
     clearError,
+    tournament,
   } = useAuction();
 
   const [showRevealModal, setShowRevealModal] = useState(false);
@@ -76,7 +77,9 @@ const AuctionRoom = () => {
   const currentPlayerName = currentPlayer?.name || "No Player Selected";
   const currentPlayerRole = currentPlayer?.role || "";
   const currentAmount = currentBid?.amount || 0;
-  const basePrice = currentPlayer?.basePrice || 0;
+  const playerBasePrice = currentPlayer?.basePrice || 0;
+  const tournamentBasePrice = tournament?.playerBasePrice || 0;
+  const basePrice = playerBasePrice > 0 ? playerBasePrice : tournamentBasePrice;
 
   const getTeamColor = (idx) => TEAM_COLORS[idx % TEAM_COLORS.length];
 
@@ -591,7 +594,7 @@ const AuctionRoom = () => {
           playerName={unsoldInfo.playerName}
           playerRole={currentPlayer?.role}
           playerPhoto={currentPlayer?.photo}
-          basePrice={currentPlayer?.basePrice}
+          basePrice={basePrice}
           onClose={clearUnsoldInfo}
           onNextPlayer={handleRevealNext}
           isLastPlayer={isLastPlayer}

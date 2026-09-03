@@ -31,6 +31,18 @@ dist-ssr
 
 .mimocode
 
+<<<<<<< HEAD
 # Personal notes & learning roadmaps
 PROJECT_LEARNING_ROADMAP.md
 ROADMAP*.md
+=======
+# Demo videos
+DemoVideo/
+
+# Demo videos
+DemoVideo/
+
+# Playwright generated reports
+**/playwright-report/
+
+>>>>>>> d8a06d5223299b44b4c0871f443d6cbbce443043

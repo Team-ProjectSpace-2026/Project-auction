@@ -7,7 +7,7 @@ const TEAM_COLORS = [
 ];
 
 const BidControls = () => {
-  const { currentBid, currentPlayer, teams, placeBid, markSold, markUnsold, auctionStatus } = useAuction();
+  const { currentBid, currentPlayer, teams, placeBid, markSold, markUnsold, auctionStatus, tournament } = useAuction();
   const [customAmount, setCustomAmount] = useState("");
   const [selectedTeamId, setSelectedTeamId] = useState(null);
   const [isCooldown, setIsCooldown] = useState(false);
@@ -41,8 +41,10 @@ const BidControls = () => {
   const handleRaiseBid = () => {
     if (isCooldown) return;
     if (!selectedTeamId || !currentPlayer) return;
-    const basePrice = currentPlayer.basePrice || 0;
-    const increment = basePrice > 0 ? basePrice : 1000;
+    const playerBasePrice = currentPlayer.basePrice || 0;
+    const tournamentBasePrice = tournament?.playerBasePrice || 0;
+    const effectiveBasePrice = playerBasePrice > 0 ? playerBasePrice : tournamentBasePrice;
+    const increment = effectiveBasePrice > 0 ? effectiveBasePrice : 1000;
     const raiseAmount = currentAmount > 0 ? currentAmount + increment : increment;
     triggerCooldown(600);
     placeBid(raiseAmount, selectedTeamId, currentPlayer._id);

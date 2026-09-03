@@ -111,7 +111,7 @@ export const validatePlayer = [
     .withMessage('Playing style cannot exceed 100 characters'),
   
   body('basePrice')
-    .optional()
+    .optional({ values: 'falsy' })
     .isFloat({ min: 0 })
     .withMessage('Base price must be a positive number'),
 
