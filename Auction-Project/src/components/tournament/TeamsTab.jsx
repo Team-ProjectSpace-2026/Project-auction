@@ -273,6 +273,7 @@ const TeamsTab = ({ tournamentId }) => {
         tournamentId={tournamentId}
         maxTeams={maxAllowedTeams}
         currentTeamCount={teams.length}
+        defaultMaxPlayers={tournament?.maxPlayersPerTeam}
       />
 
       <EditTeamModal
@@ -280,6 +281,7 @@ const TeamsTab = ({ tournamentId }) => {
         onClose={() => setEditTeam(null)}
         onSubmit={handleEditTeam}
         team={editTeam}
+        defaultMaxPlayers={tournament?.maxPlayersPerTeam}
       />
 
       {teamToDelete && (

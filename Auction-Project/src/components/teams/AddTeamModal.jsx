@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { FiX, FiUpload } from "react-icons/fi";
 
 const IPL_PRESETS = {
@@ -37,28 +37,48 @@ const getIplColors = (name) => {
   return null;
 };
 
-const AddTeamModal = ({ isOpen, onClose, onSubmit, tournamentId, maxTeams = 0, currentTeamCount = 0 }) => {
+const AddTeamModal = ({
+  isOpen,
+  onClose,
+  onSubmit,
+  tournamentId,
+  maxTeams = 0,
+  currentTeamCount = 0,
+  defaultMaxPlayers,
+}) => {
   const isLimitReached = maxTeams > 0 && currentTeamCount >= maxTeams;
+  const initialMaxPlayers = defaultMaxPlayers ? String(defaultMaxPlayers) : "18";
+
   const [formData, setFormData] = useState({
     teamName: "",
     ownerName: "",
-    maxPlayers: "18",
+    maxPlayers: initialMaxPlayers,
     primaryColor: "#1e3a8a",
   });
   const [logoPreview, setLogoPreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef(null);
 
+  useEffect(() => {
+    if (isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setFormData((prev) => ({
+        ...prev,
+        maxPlayers: defaultMaxPlayers ? String(defaultMaxPlayers) : (prev.maxPlayers || "18"),
+      }));
+    }
+  }, [isOpen, defaultMaxPlayers]);
+
   const handleClose = useCallback(() => {
     setFormData({
       teamName: "",
       ownerName: "",
-      maxPlayers: "18",
+      maxPlayers: defaultMaxPlayers ? String(defaultMaxPlayers) : "18",
       primaryColor: "#1e3a8a",
     });
     setLogoPreview(null);
     onClose();
-  }, [onClose]);
+  }, [onClose, defaultMaxPlayers]);
 
   if (!isOpen) return null;
 
@@ -133,7 +153,7 @@ const AddTeamModal = ({ isOpen, onClose, onSubmit, tournamentId, maxTeams = 0, c
       setFormData({
         teamName: "",
         ownerName: "",
-        maxPlayers: "18",
+        maxPlayers: defaultMaxPlayers ? String(defaultMaxPlayers) : "18",
         primaryColor: "#1e3a8a",
       });
       setLogoPreview(null);
@@ -354,7 +374,7 @@ const AddTeamModal = ({ isOpen, onClose, onSubmit, tournamentId, maxTeams = 0, c
                 name="maxPlayers"
                 value={formData.maxPlayers}
                 onChange={handleInputChange}
-                placeholder="18"
+                placeholder={defaultMaxPlayers ? String(defaultMaxPlayers) : "18"}
                 min="1"
                 style={{
                   width: "100%",
