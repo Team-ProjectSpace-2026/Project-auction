@@ -37,7 +37,7 @@ const getIplColors = (name) => {
   return null;
 };
 
-const EditTeamModal = ({ isOpen, onClose, onSubmit, team }) => {
+const EditTeamModal = ({ isOpen, onClose, onSubmit, team, defaultMaxPlayers }) => {
   const [formData, setFormData] = useState({
     teamName: "",
     ownerName: "",
@@ -54,12 +54,12 @@ const EditTeamModal = ({ isOpen, onClose, onSubmit, team }) => {
       setFormData({
         teamName: team.name || "",
         ownerName: team.ownerName || "",
-        maxPlayers: (team.maxPlayers || 18).toString(),
+        maxPlayers: (team.maxPlayers || defaultMaxPlayers || 18).toString(),
         primaryColor: team.primaryColor || "#1e3a8a",
       });
       setLogoPreview(team.logo || null);
     }
-  }, [team, isOpen]);
+  }, [team, isOpen, defaultMaxPlayers]);
 
   const handleClose = useCallback(() => {
     onClose();
