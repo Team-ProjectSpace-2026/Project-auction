@@ -61,6 +61,7 @@ const AddTeamModal = ({
 
   useEffect(() => {
     if (isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData((prev) => ({
         ...prev,
         maxPlayers: defaultMaxPlayers ? String(defaultMaxPlayers) : (prev.maxPlayers || "18"),
