@@ -12,6 +12,18 @@ export const getAuctionState = async (req, res, next) => {
     // Get tournament info for playerBasePrice
     const tournament = await Tournament.findById(tournamentId).select('playerBasePrice');
 
+    // Auto-heal any players in this tournament who have basePrice 0 or missing
+    if (tournament && tournament.playerBasePrice > 0) {
+      await Player.updateMany(
+        {
+          tournamentId,
+          deleted: false,
+          $or: [{ basePrice: { $exists: false } }, { basePrice: 0 }, { basePrice: null }],
+        },
+        { $set: { basePrice: tournament.playerBasePrice } }
+      );
+    }
+
     // Get all players for this tournament
     const players = await Player.find({ tournamentId });
     

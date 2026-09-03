@@ -183,11 +183,21 @@ export const initializeSocket = (server) => {
         let currentPlayerObj = null;
         if (tournament.currentPlayerId) {
           currentPlayerObj = await Player.findById(tournament.currentPlayerId).lean();
+          if (currentPlayerObj && (!currentPlayerObj.basePrice || currentPlayerObj.basePrice === 0) && tournament.playerBasePrice > 0) {
+            currentPlayerObj.basePrice = tournament.playerBasePrice;
+          }
         }
+
+        const resolvedPlayers = (players || []).map((p) => {
+          if ((!p.basePrice || p.basePrice === 0) && tournament.playerBasePrice > 0) {
+            return { ...p, basePrice: tournament.playerBasePrice };
+          }
+          return p;
+        });
 
         socket.emit("auction-state", {
           teams,
-          players,
+          players: resolvedPlayers,
           currentPlayer: currentPlayerObj,
           currentBid,
           highestBidder,
@@ -389,6 +399,10 @@ export const initializeSocket = (server) => {
         await tournament.save();
 
         const populatedPlayer = await Player.findById(sanitizedPlayerId);
+        if (populatedPlayer && (!populatedPlayer.basePrice || populatedPlayer.basePrice === 0) && tournament.playerBasePrice > 0) {
+          populatedPlayer.basePrice = tournament.playerBasePrice;
+          await Player.updateOne({ _id: sanitizedPlayerId }, { $set: { basePrice: tournament.playerBasePrice } });
+        }
         io.to(`tournament-${tournamentId}`).emit("player-revealed", {
           playerId: sanitizedPlayerId,
           player: populatedPlayer,
@@ -644,8 +658,14 @@ export const initializeSocket = (server) => {
           }
         }
 
+        let currentPlayerObj = tournament.currentPlayerId;
+        if (currentPlayerObj && (!currentPlayerObj.basePrice || currentPlayerObj.basePrice === 0) && tournament.playerBasePrice > 0) {
+          if (currentPlayerObj.toObject) currentPlayerObj = currentPlayerObj.toObject();
+          currentPlayerObj.basePrice = tournament.playerBasePrice;
+        }
+
         socket.emit("auction-state", {
-          currentPlayer: tournament.currentPlayerId,
+          currentPlayer: currentPlayerObj,
           currentBid,
           highestBidder,
           auctionStatus: tournament.auctionStatus,

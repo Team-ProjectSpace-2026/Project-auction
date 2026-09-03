@@ -470,7 +470,14 @@ const LiveAuctionTab = ({ tournamentId: propTournamentId, tournament }) => {
           >
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "14px" }}>
               <span style={{ color: "var(--text-secondary-light)", transition: "color 0.2s ease" }}>Base Price</span>
-              <span style={{ color: "var(--text-primary-light)", transition: "color 0.2s ease" }}>{currentPlayer?.basePrice ? `₹${currentPlayer.basePrice.toLocaleString("en-IN")}` : "-"}</span>
+              <span style={{ color: "var(--text-primary-light)", transition: "color 0.2s ease" }}>
+                {(() => {
+                  const bp = (currentPlayer?.basePrice && currentPlayer.basePrice > 0)
+                    ? currentPlayer.basePrice
+                    : (tournament?.playerBasePrice || 0);
+                  return bp ? `₹${bp.toLocaleString("en-IN")}` : "-";
+                })()}
+              </span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "14px" }}>
               <span style={{ color: "var(--text-secondary-light)", transition: "color 0.2s ease" }}>Current Bid</span>

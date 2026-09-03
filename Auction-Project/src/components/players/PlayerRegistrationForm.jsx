@@ -245,6 +245,7 @@ const DEFAULT_FORM = {
   jerseyNumber:   "",
   jerseySize:     "",
   jerseyName:     "",
+  basePrice:      "",
   primaryRole:    "",
   battingStyle:   "",
   bowlingStyle:   "",
@@ -266,6 +267,8 @@ const PlayerRegistrationForm = ({
   error: externalError = null,
   banner: externalBanner = null,
   resetOnSubmit = true,
+  showBasePriceField = false,
+  defaultBasePrice = 0,
 }) => {
   const [form, setForm] = useState(() => ({ ...DEFAULT_FORM, ...initialData }));
   const [photoPreview, setPhotoPreview] = useState(initialData?.photoPreview || null);
@@ -572,6 +575,17 @@ const PlayerRegistrationForm = ({
               onChange={set("jerseyName")}
               placeholder="e.g. VIRAT"
             />
+            {showBasePriceField && (
+              <InputField
+                label="Base Price (₹)"
+                id="basePrice"
+                type="number"
+                min={0}
+                value={form.basePrice}
+                onChange={set("basePrice")}
+                placeholder={defaultBasePrice ? `Default: ₹${Number(defaultBasePrice).toLocaleString("en-IN")}` : "e.g. 50000"}
+              />
+            )}
           </div>
         </Card>
 

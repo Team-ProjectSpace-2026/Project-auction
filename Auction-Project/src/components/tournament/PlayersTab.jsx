@@ -582,6 +582,7 @@ const PlayersTab = ({ tournamentId: propTournamentId }) => {
             )}
             <PlayerForm
               tournamentId={tournamentId}
+              defaultBasePrice={tournament?.playerBasePrice}
               onSaved={() => {
                 setShowAddModal(false);
                 fetchPlayers();
