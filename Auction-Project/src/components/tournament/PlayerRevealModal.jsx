@@ -43,7 +43,7 @@ const CARD_GAP = 16;
 const CARD_STEP = CARD_WIDTH + CARD_GAP;
 
 const PlayerRevealModal = ({ onClose, onContinue }) => {
-  const { players, revealPlayer, tournamentId } = useAuction();
+  const { players, revealPlayer, tournamentId, reauctionUnsold } = useAuction();
 
   // ---- State ----
   const [phase, setPhase] = useState("idle"); // idle | shuffling | selected | flipping | done
@@ -210,6 +210,9 @@ const PlayerRevealModal = ({ onClose, onContinue }) => {
     return (
       <AuctionConcludedModal
         onClose={onClose}
+        onReauction={() => {
+          if (reauctionUnsold) reauctionUnsold();
+        }}
         tournamentId={tournamentId}
       />
     );

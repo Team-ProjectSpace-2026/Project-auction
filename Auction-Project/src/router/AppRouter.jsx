@@ -69,6 +69,14 @@ const AppRouter = () => (
           }
         />
         <Route
+          path="/tournament/:tournamentId?"
+          element={
+            <ProtectedRoute>
+              <TournamentHubPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/team-details/:teamId?"
           element={
             <ProtectedRoute>

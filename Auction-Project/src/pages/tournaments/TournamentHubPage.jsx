@@ -23,11 +23,20 @@ const TournamentHubPage = () => {
   const urlParams = useParams();
   const [tournament, setTournament] = useState(location.state?.tournament || null);
   const tournamentId = tournament?._id || urlParams.tournamentId;
+  const tabFromQuery = new URLSearchParams(location.search).get("tab");
   const [activeTab, setActiveTab] = useState(
-  location.state?.activeTab || "overview"
+    tabFromQuery || location.state?.activeTab || "overview"
   );
   const [teamsCount, setTeamsCount] = useState(0);
   const [playersCount, setPlayersCount] = useState(0);
+
+  useEffect(() => {
+    const tab = new URLSearchParams(location.search).get("tab") || location.state?.activeTab;
+    if (tab) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setActiveTab(tab);
+    }
+  }, [location.search, location.state]);
 
   useEffect(() => {
     if (tournamentId) {

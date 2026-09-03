@@ -196,7 +196,7 @@ const BidControls = () => {
       </div>
 
       {/* Team Selection */}
-      {isBidding && (
+      {(isBidding || (teams && teams.length > 0)) && (
         <div style={{ marginTop: "16px", borderTop: "1px solid var(--border-light)", paddingTop: "16px" }}>
           <h3 style={{ fontSize: "14px", fontWeight: "700", color: "var(--text-primary-light)", margin: 0, textTransform: "uppercase", letterSpacing: "0.3px" }}>
             All Teams <span style={{ fontWeight: "400", color: "var(--text-secondary-light)", textTransform: "none", fontSize: "12px" }}>(Click to bid for a team)</span>

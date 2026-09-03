@@ -484,6 +484,40 @@ export const initializeSocket = (server) => {
       }
     });
 
+    // --- re-auction-unsold (organizer-only action) ---
+    socket.on("re-auction-unsold", async (data) => {
+      try {
+        if (!eventRateLimiter()) {
+          socket.emit("rate-limited", { message: "Too many requests." });
+          return;
+        }
+
+        const { tournamentId } = data || {};
+        const sanitizedTournamentId = sanitizeId(tournamentId);
+        if (!sanitizedTournamentId) {
+          socket.emit("reauction-error", { message: "Invalid tournament ID" });
+          return;
+        }
+
+        const tournament = await Tournament.findById(sanitizedTournamentId);
+        if (!tournament) {
+          socket.emit("reauction-error", { message: "Tournament not found" });
+          return;
+        }
+
+        tournament.unsoldPlayerIds = [];
+        tournament.auctionStatus = "idle";
+        tournament.currentPlayerId = null;
+        await tournament.save();
+
+        io.to(`tournament-${tournamentId}`).emit("unsold-reset", {
+          tournamentId,
+        });
+      } catch (error) {
+        socket.emit("reauction-error", { message: "Failed to reset unsold players" });
+      }
+    });
+
     // --- mark-sold (organizer-only action) ---
     socket.on("mark-sold", async (data) => {
       try {
