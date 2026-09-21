@@ -1,51 +1,53 @@
 import multer from "multer";
-import { createRequire } from "module";
 import { v2 as cloudinary } from "cloudinary";
 
-const require = createRequire(import.meta.url);
-const cloudinaryStoragePkg = require("multer-storage-cloudinary");
+/**
+ * Native Cloudinary Multer Storage Engine.
+ * Directly streams uploads to Cloudinary v2, eliminating fragile external wrappers
+ * and peer-dependency version conflicts.
+ */
+class CloudinaryStorageEngine {
+  _handleFile(req, file, cb) {
+    const folder = req.originalUrl.includes("/tournaments")
+      ? "cricauction/tournaments"
+      : req.originalUrl.includes("/profile")
+        ? "cricauction/profile"
+        : "cricauction/players";
 
-// Handle both v4 class constructor and v2 function export
-const StorageConstructor =
-  cloudinaryStoragePkg?.CloudinaryStorage ||
-  (typeof cloudinaryStoragePkg === "function" ? cloudinaryStoragePkg : null) ||
-  cloudinaryStoragePkg?.default ||
-  cloudinaryStoragePkg;
-
-let storage;
-try {
-  // Try v4 class constructor
-  storage = new StorageConstructor({
-    cloudinary,
-    params: (req, file) => ({
-      folder: req.originalUrl.includes("/tournaments")
-        ? "cricauction/tournaments"
-        : req.originalUrl.includes("/profile")
-          ? "cricauction/profile"
-          : "cricauction/players",
-      allowed_formats: ["jpg", "jpeg", "png"],
-      resource_type: "image",
-      transformation: [{ width: 800, height: 1067, crop: "limit" }],
-    }),
-  });
-} catch {
-  // Fallback to v2 function call
-  storage = StorageConstructor({
-    cloudinary,
-    params: (req, _file, cb) => {
-      cb(null, {
-        folder: req.originalUrl.includes("/tournaments")
-          ? "cricauction/tournaments"
-          : req.originalUrl.includes("/profile")
-            ? "cricauction/profile"
-            : "cricauction/players",
-        allowed_formats: ["jpg", "jpeg", "png"],
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder,
         resource_type: "image",
+        allowed_formats: ["jpg", "jpeg", "png"],
         transformation: [{ width: 800, height: 1067, crop: "limit" }],
-      });
-    },
-  });
+      },
+      (error, result) => {
+        if (error) return cb(error);
+        cb(null, {
+          path: result.secure_url,
+          filename: result.public_id,
+          public_id: result.public_id,
+          size: result.bytes,
+          format: result.format,
+          url: result.secure_url,
+          secure_url: result.secure_url,
+        });
+      }
+    );
+
+    file.stream.pipe(uploadStream);
+  }
+
+  _removeFile(req, file, cb) {
+    if (file && file.public_id) {
+      cloudinary.uploader.destroy(file.public_id, (err) => cb(err));
+    } else {
+      cb(null);
+    }
+  }
 }
+
+const storage = new CloudinaryStorageEngine();
 
 const fileFilter = (req, file, cb) => {
   if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
