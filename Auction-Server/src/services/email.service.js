@@ -24,7 +24,10 @@ const createTransporter = () => {
     auth: {
       user,
       pass
-    }
+    },
+    connectionTimeout: 5000,
+    greetingTimeout: 5000,
+    socketTimeout: 5000
   });
 };
 
@@ -298,7 +301,37 @@ export const sendPlayerRegistrationEmail = async ({ player, tournament }) => {
       }
     }
 
-    // 2. Fallback: Nodemailer SMTP
+    // 2. Secondary: Resend REST API (Cloud HTTP API)
+    const resendApiKey = process.env.RESEND_API_KEY?.trim();
+    if (resendApiKey) {
+      try {
+        console.log(`✉️ Attempting registration email dispatch via Resend REST API to ${player.email}...`);
+        const response = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${resendApiKey}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            from: "CricAuction Hub <onboarding@resend.dev>",
+            to: [player.email],
+            subject: `🎉 Registration Confirmed: ${tournamentName} (Pass #${regNo})`,
+            html: htmlContent
+          })
+        });
+        const data = await response.json();
+        if (response.ok) {
+          console.log(`✅ Registration email sent via Resend to ${player.email}. ID: ${data.id}`);
+          return data;
+        } else {
+          console.warn(`⚠️ Resend API returned error:`, data);
+        }
+      } catch (resendErr) {
+        console.error(`⚠️ Resend REST API dispatch error:`, resendErr);
+      }
+    }
+
+    // 3. Fallback: Nodemailer SMTP
     const transporter = createTransporter();
     const mailOptions = {
       from: `"CricAuction Hub" <${fromEmail}>`,
