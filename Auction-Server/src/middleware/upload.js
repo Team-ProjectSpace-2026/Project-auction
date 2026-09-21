@@ -1,21 +1,22 @@
 import multer from "multer";
-import cloudinaryFull from "cloudinary";
-import cloudinaryStorage from "multer-storage-cloudinary";
+import { createRequire } from "module";
+import { v2 as cloudinary } from "cloudinary";
 
-const storage = cloudinaryStorage({
-  cloudinary: cloudinaryFull,
-  params: (req, _file, cb) => {
-    cb(null, {
-      folder: req.originalUrl.includes("/tournaments")
-        ? "cricauction/tournaments"
-        : req.originalUrl.includes("/profile")
-          ? "cricauction/profile"
-          : "cricauction/players",
-      allowed_formats: ["jpg", "jpeg", "png"],
-      resource_type: "image",
-      transformation: [{ width: 800, height: 1067, crop: "limit" }],
-    });
-  },
+const require = createRequire(import.meta.url);
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: (req, file) => ({
+    folder: req.originalUrl.includes("/tournaments")
+      ? "cricauction/tournaments"
+      : req.originalUrl.includes("/profile")
+        ? "cricauction/profile"
+        : "cricauction/players",
+    allowed_formats: ["jpg", "jpeg", "png"],
+    resource_type: "image",
+    transformation: [{ width: 800, height: 1067, crop: "limit" }],
+  }),
 });
 
 const fileFilter = (req, file, cb) => {

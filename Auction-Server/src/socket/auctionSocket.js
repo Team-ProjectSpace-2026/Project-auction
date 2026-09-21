@@ -80,7 +80,7 @@ const broadcastEligibility = async (tournamentId, currentBidAmount = 0, currentP
 
     const teams = await Team.find({ tournamentId: sanitizedTournamentId }).lean();
     const tournamentRules = {
-      minSquadSize: tournament.tournamentRules?.minSquadSize ?? 15,
+      minSquadSize: tournament.tournamentRules?.minSquadSize ?? tournament.maxPlayersPerTeam ?? 15,
       maxSquadSize: tournament.tournamentRules?.maxSquadSize ?? tournament.maxPlayersPerTeam ?? 18,
       minReservePerSlot: tournament.tournamentRules?.minReservePerSlot ?? tournament.playerBasePrice ?? 100,
       maxOverseas: tournament.tournamentRules?.maxOverseas ?? 8,
@@ -241,7 +241,7 @@ export const initializeSocket = (server) => {
         if (currentPlayerObj && tournament.auctionStatus === "bidding") {
           const currentBidAmount = currentBid?.amount || 0;
           const tournamentRules = {
-            minSquadSize: tournament.tournamentRules?.minSquadSize ?? 15,
+            minSquadSize: tournament.tournamentRules?.minSquadSize ?? tournament.maxPlayersPerTeam ?? 15,
             maxSquadSize: tournament.tournamentRules?.maxSquadSize ?? tournament.maxPlayersPerTeam ?? 18,
             minReservePerSlot: tournament.tournamentRules?.minReservePerSlot ?? tournament.playerBasePrice ?? 100,
             maxOverseas: tournament.tournamentRules?.maxOverseas ?? 8,
@@ -782,7 +782,7 @@ export const initializeSocket = (server) => {
           const currentBidAmount = currentBid?.amount || 0;
           const teams = await Team.find({ tournamentId: sanitizedTournamentId }).lean();
           const tournamentRules = {
-            minSquadSize: tournament.tournamentRules?.minSquadSize ?? 15,
+            minSquadSize: tournament.tournamentRules?.minSquadSize ?? tournament.maxPlayersPerTeam ?? 15,
             maxSquadSize: tournament.tournamentRules?.maxSquadSize ?? tournament.maxPlayersPerTeam ?? 18,
             minReservePerSlot: tournament.tournamentRules?.minReservePerSlot ?? tournament.playerBasePrice ?? 100,
             maxOverseas: tournament.tournamentRules?.maxOverseas ?? 8,
