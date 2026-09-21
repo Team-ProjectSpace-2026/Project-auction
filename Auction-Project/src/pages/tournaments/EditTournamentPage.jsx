@@ -57,6 +57,9 @@ const EditTournamentPage = () => {
         isPaid: tournament?.isPaid || false,
         registrationFee: tournament?.registrationFee || "",
         payoutUpiId: tournament?.payoutUpiId || "",
+        minSquadSize: tournament?.tournamentRules?.minSquadSize || 15,
+        minReservePerSlot: tournament?.tournamentRules?.minReservePerSlot || tournament?.playerBasePrice || "",
+        maxOverseas: tournament?.tournamentRules?.maxOverseas || 8,
     });
     const navigate = useNavigate();
 
@@ -187,6 +190,9 @@ const EditTournamentPage = () => {
             payload.append("budgetPerTeam", Number(formData.budgetPerTeam));
             payload.append("maxPlayersPerTeam", Number(formData.maxPlayersPerTeam));
             payload.append("playerBasePrice", Number(formData.playerBasePrice));
+            payload.append("minSquadSize", Number(formData.minSquadSize) || 15);
+            payload.append("minReservePerSlot", Number(formData.minReservePerSlot) || Number(formData.playerBasePrice) || 100);
+            payload.append("maxOverseas", Number(formData.maxOverseas) || 8);
             payload.append("venue", formData.venue);
             payload.append("date", toISOWithOffset(formData.auctionDateTime));
             payload.append("isPaid", formData.isPaid);
@@ -405,6 +411,46 @@ const EditTournamentPage = () => {
             />
         </div>
 
+    </div>
+
+    {/* Tournament Rules & Max-Bid Cap Controls */}
+    <div className="form-row" style={{ background: "color-mix(in srgb, var(--accent-light, #2563eb) 4%, transparent)", padding: "14px", borderRadius: "10px", border: "1px solid var(--border-light)" }}>
+        <div className="form-group">
+            <label>
+                Minimum Squad Size (Mandatory Slots)
+            </label>
+            <input
+                type="number"
+                name="minSquadSize"
+                value={formData.minSquadSize}
+                onChange={handleInputChange}
+                placeholder="e.g. 15"
+            />
+        </div>
+        <div className="form-group">
+            <label>
+                Min Reserve Per Slot (₹)
+            </label>
+            <input
+                type="number"
+                name="minReservePerSlot"
+                value={formData.minReservePerSlot}
+                onChange={handleInputChange}
+                placeholder={formData.playerBasePrice ? `Default: ₹${formData.playerBasePrice}` : "e.g. 100"}
+            />
+        </div>
+        <div className="form-group">
+            <label>
+                Max Overseas Players Allowed
+            </label>
+            <input
+                type="number"
+                name="maxOverseas"
+                value={formData.maxOverseas}
+                onChange={handleInputChange}
+                placeholder="e.g. 8"
+            />
+        </div>
     </div>
 
 {/* Row 4 */}

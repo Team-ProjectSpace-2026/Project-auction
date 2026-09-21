@@ -42,6 +42,33 @@ const tournamentSchema = new mongoose.Schema({
     required: [true, 'Player base price is required'],
     min: [0, 'Player base price cannot be negative']
   },
+  tournamentRules: {
+    minSquadSize: {
+      type: Number,
+      default: 15,
+      min: [1, 'Minimum squad size must be at least 1']
+    },
+    maxSquadSize: {
+      type: Number,
+      default: 18,
+      min: [1, 'Maximum squad size must be at least 1']
+    },
+    minReservePerSlot: {
+      type: Number,
+      default: 100,
+      min: [0, 'Min reserve per slot cannot be negative']
+    },
+    maxOverseas: {
+      type: Number,
+      default: 8,
+      min: [0, 'Max overseas players cannot be negative']
+    },
+    roleRequirements: {
+      type: Map,
+      of: Number,
+      default: {}
+    }
+  },
   description: {
     type: String,
     trim: true,

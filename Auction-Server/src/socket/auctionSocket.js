@@ -11,6 +11,7 @@ import {
   getWinningBid,
   processWinningBid,
   cancelActiveBids,
+  calculateAllTeamsEligibility,
 } from "../utils/bidValidator.js";
 
 let io;
@@ -66,6 +67,47 @@ const checkPlayerInTournament = async (playerId, tournamentId) => {
   const player = await Player.findById(new mongoose.Types.ObjectId(playerId));
   if (!player || player.tournamentId.toString() !== tournamentId.toString()) return null;
   return player;
+};
+
+const broadcastEligibility = async (tournamentId, currentBidAmount = 0, currentPlayer = null) => {
+  try {
+    if (!tournamentId || !io) return {};
+    const sanitizedTournamentId = isValidObjectId(tournamentId) ? new mongoose.Types.ObjectId(tournamentId) : null;
+    if (!sanitizedTournamentId) return {};
+
+    const tournament = await Tournament.findById(sanitizedTournamentId).lean();
+    if (!tournament) return {};
+
+    const teams = await Team.find({ tournamentId: sanitizedTournamentId }).lean();
+    const tournamentRules = {
+      minSquadSize: tournament.tournamentRules?.minSquadSize ?? 15,
+      maxSquadSize: tournament.tournamentRules?.maxSquadSize ?? tournament.maxPlayersPerTeam ?? 18,
+      minReservePerSlot: tournament.tournamentRules?.minReservePerSlot ?? tournament.playerBasePrice ?? 100,
+      maxOverseas: tournament.tournamentRules?.maxOverseas ?? 8,
+      roleRequirements: tournament.tournamentRules?.roleRequirements || {},
+      playerBasePrice: tournament.playerBasePrice || 0,
+    };
+
+    const eligibility = calculateAllTeamsEligibility(
+      teams,
+      currentBidAmount,
+      0,
+      currentPlayer,
+      tournamentRules
+    );
+
+    io.to(`tournament-${tournamentId}`).emit("bidding-eligibility", {
+      tournamentId: String(tournamentId),
+      eligibility,
+      currentBidAmount,
+      currentPlayerId: currentPlayer?._id ? String(currentPlayer._id) : null,
+    });
+
+    return eligibility;
+  } catch (err) {
+    console.error("Error in broadcastEligibility:", err);
+    return {};
+  }
 };
 
 export const initializeSocket = (server) => {
@@ -195,6 +237,26 @@ export const initializeSocket = (server) => {
           return p;
         });
 
+        let eligibility = {};
+        if (currentPlayerObj && tournament.auctionStatus === "bidding") {
+          const currentBidAmount = currentBid?.amount || 0;
+          const tournamentRules = {
+            minSquadSize: tournament.tournamentRules?.minSquadSize ?? 15,
+            maxSquadSize: tournament.tournamentRules?.maxSquadSize ?? tournament.maxPlayersPerTeam ?? 18,
+            minReservePerSlot: tournament.tournamentRules?.minReservePerSlot ?? tournament.playerBasePrice ?? 100,
+            maxOverseas: tournament.tournamentRules?.maxOverseas ?? 8,
+            roleRequirements: tournament.tournamentRules?.roleRequirements || {},
+            playerBasePrice: tournament.playerBasePrice || 0,
+          };
+          eligibility = calculateAllTeamsEligibility(
+            teams,
+            currentBidAmount,
+            0,
+            currentPlayerObj,
+            tournamentRules
+          );
+        }
+
         socket.emit("auction-state", {
           teams,
           players: resolvedPlayers,
@@ -202,7 +264,12 @@ export const initializeSocket = (server) => {
           currentBid,
           highestBidder,
           auctionStatus: tournament.auctionStatus,
-          tournament: { playerBasePrice: tournament.playerBasePrice || 0 },
+          tournament: {
+            playerBasePrice: tournament.playerBasePrice || 0,
+            maxPlayersPerTeam: tournament.maxPlayersPerTeam || 18,
+            tournamentRules: tournament.tournamentRules || {},
+          },
+          eligibility,
         });
       } catch (error) {
         socket.emit("join-error", { message: "Failed to join tournament" });
@@ -329,6 +396,10 @@ export const initializeSocket = (server) => {
           newBidId = bid._id;
         }
 
+        // Recompute and broadcast eligibility state for all connected teams
+        const player = await Player.findById(sanitizedPlayerId).lean();
+        const eligibility = await broadcastEligibility(tournamentId, sanitizedAmount, player);
+
         // Broadcast bid to all clients in tournament room
         const populatedBid = await Bid.findById(newBidId)
           .populate("playerId", "name")
@@ -337,12 +408,14 @@ export const initializeSocket = (server) => {
         io.to(`tournament-${tournamentId}`).emit("new-bid", {
           bid: populatedBid,
           isWinningBid: true,
+          eligibility,
         });
 
         socket.emit("bid-success", {
           message: "Bid placed successfully",
           bid: populatedBid,
           isWinningBid: true,
+          eligibility,
         });
       } catch (error) {
         socket.emit("bid-error", { message: error.message || "Failed to place bid" });
@@ -407,6 +480,8 @@ export const initializeSocket = (server) => {
           playerId: sanitizedPlayerId,
           player: populatedPlayer,
         });
+
+        await broadcastEligibility(tournamentId, 0, populatedPlayer);
       } catch (error) {
         socket.emit("reveal-error", { message: "Failed to reveal player" });
       }
@@ -584,6 +659,8 @@ export const initializeSocket = (server) => {
           soldPrice: populatedBid.amount,
         });
 
+        await broadcastEligibility(tournamentId, 0, null);
+
         socket.emit("mark-sold-success", {
           message: "Player marked as sold",
           bid: populatedBid,
@@ -651,6 +728,8 @@ export const initializeSocket = (server) => {
           cancelledBids: cancelledCount,
         });
 
+        await broadcastEligibility(tournamentId, 0, null);
+
         socket.emit("mark-unsold-success", {
           message: "Player marked as unsold",
           cancelledBids: cancelledCount,
@@ -698,13 +777,39 @@ export const initializeSocket = (server) => {
           currentPlayerObj.basePrice = tournament.playerBasePrice;
         }
 
+        let eligibility = {};
+        if (currentPlayerObj && tournament.auctionStatus === "bidding") {
+          const currentBidAmount = currentBid?.amount || 0;
+          const teams = await Team.find({ tournamentId: sanitizedTournamentId }).lean();
+          const tournamentRules = {
+            minSquadSize: tournament.tournamentRules?.minSquadSize ?? 15,
+            maxSquadSize: tournament.tournamentRules?.maxSquadSize ?? tournament.maxPlayersPerTeam ?? 18,
+            minReservePerSlot: tournament.tournamentRules?.minReservePerSlot ?? tournament.playerBasePrice ?? 100,
+            maxOverseas: tournament.tournamentRules?.maxOverseas ?? 8,
+            roleRequirements: tournament.tournamentRules?.roleRequirements || {},
+            playerBasePrice: tournament.playerBasePrice || 0,
+          };
+          eligibility = calculateAllTeamsEligibility(
+            teams,
+            currentBidAmount,
+            0,
+            currentPlayerObj,
+            tournamentRules
+          );
+        }
+
         socket.emit("auction-state", {
           currentPlayer: currentPlayerObj,
           currentBid,
           highestBidder,
           auctionStatus: tournament.auctionStatus,
           unsoldPlayerIds: tournament.unsoldPlayerIds || [],
-          tournament: { playerBasePrice: tournament.playerBasePrice || 0 },
+          tournament: {
+            playerBasePrice: tournament.playerBasePrice || 0,
+            maxPlayersPerTeam: tournament.maxPlayersPerTeam || 18,
+            tournamentRules: tournament.tournamentRules || {},
+          },
+          eligibility,
         });
       } catch (error) {
         socket.emit("auction-state-error", { message: "Failed to get auction state" });

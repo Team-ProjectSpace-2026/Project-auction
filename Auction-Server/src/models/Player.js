@@ -23,6 +23,10 @@ const playerSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isOverseas: {
+      type: Boolean,
+      default: false,
+    },
     basePrice: {
       type: Number,
       default: 0,
