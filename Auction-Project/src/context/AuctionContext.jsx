@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback, useMemo } from "react";
 import { useSocket } from "../hooks/useSocket";
 import { getAuctionState } from "../services/auctionService";
+import { calculateAllTeamsEligibility } from "../utils/auctionBidValidator";
 
 const AuctionContext = createContext(null);
 
@@ -26,6 +27,7 @@ export const AuctionProvider = ({ children }) => {
   const [unsoldInfo, setUnsoldInfo] = useState(null);
   const [revealedPlayer, setRevealedPlayer] = useState(null);
   const [tournament, setTournament] = useState(null);
+  const [teamEligibility, setTeamEligibility] = useState({});
 
   const initTournament = useCallback(async (id) => {
     setTournamentId(id);
@@ -61,9 +63,10 @@ export const AuctionProvider = ({ children }) => {
       joinTournament(id);
 
       const onNewBid = (data) => {
-        const { bid } = data;
+        const { bid, eligibility } = data;
         setCurrentBid(bid);
         if (bid.teamId) setHighestBidder(bid.teamId);
+        if (eligibility) setTeamEligibility(eligibility);
         setBids((prev) => {
           const exists = prev.find((b) => b._id === bid._id);
           if (exists) return prev;
@@ -131,7 +134,7 @@ export const AuctionProvider = ({ children }) => {
       };
 
       const onAuctionState = (data) => {
-        const { currentPlayer: cp, currentBid: cb, highestBidder: hb, auctionStatus: status, teams, players, tournament, unsoldPlayerIds } = data;
+        const { currentPlayer: cp, currentBid: cb, highestBidder: hb, auctionStatus: status, teams, players, tournament, unsoldPlayerIds, eligibility } = data;
         if (cp) setCurrentPlayer(cp);
         if (cb) setCurrentBid(cb);
         if (hb) setHighestBidder(hb);
@@ -139,10 +142,17 @@ export const AuctionProvider = ({ children }) => {
         if (teams) setTeams(teams);
         if (players) setPlayers(players);
         if (tournament) setTournament(tournament);
+        if (eligibility) setTeamEligibility(eligibility);
         if (unsoldPlayerIds && unsoldPlayerIds.length > 0) {
           setPlayers(prev => prev.map(p =>
             unsoldPlayerIds.includes(p._id) ? { ...p, isUnsold: true } : p
           ));
+        }
+      };
+
+      const onBiddingEligibility = (data) => {
+        if (data?.eligibility) {
+          setTeamEligibility(data.eligibility);
         }
       };
 
@@ -165,6 +175,7 @@ export const AuctionProvider = ({ children }) => {
       socket.on("auction-started", onAuctionStarted);
       socket.on("auction-ended", onAuctionEnded);
       socket.on("auction-state", onAuctionState);
+      socket.on("bidding-eligibility", onBiddingEligibility);
       socket.on("bid-error", onError);
       socket.on("reveal-error", onError);
       socket.on("mark-sold-error", onError);
@@ -179,6 +190,7 @@ export const AuctionProvider = ({ children }) => {
         socket.off("auction-started", onAuctionStarted);
         socket.off("auction-ended", onAuctionEnded);
         socket.off("auction-state", onAuctionState);
+        socket.off("bidding-eligibility", onBiddingEligibility);
         socket.off("bid-error", onError);
         socket.off("reveal-error", onError);
         socket.off("mark-sold-error", onError);
@@ -289,6 +301,28 @@ export const AuctionProvider = ({ children }) => {
   const clearUnsoldInfo = useCallback(() => setUnsoldInfo(null), []);
   const clearError = useCallback(() => setError(null), []);
 
+  // Compute reactive client-side eligibility merged with server pushes
+  const liveEligibility = useMemo(() => {
+    if (!teams || teams.length === 0 || !currentPlayer) {
+      return teamEligibility || {};
+    }
+    const currentBidAmount = currentBid?.amount || 0;
+    const tournamentRules = tournament?.tournamentRules || {
+      minSquadSize: 15,
+      maxSquadSize: tournament?.maxPlayersPerTeam || 18,
+      minReservePerSlot: tournament?.playerBasePrice || 100,
+      maxOverseas: 8,
+    };
+    const localCalc = calculateAllTeamsEligibility(
+      teams,
+      currentBidAmount,
+      0,
+      currentPlayer,
+      tournamentRules
+    );
+    return { ...localCalc, ...teamEligibility };
+  }, [teams, currentPlayer, currentBid, tournament, teamEligibility]);
+
   // Memoize context value to prevent unnecessary re-renders of consumers
   const value = useMemo(() => ({
     isConnected,
@@ -306,6 +340,7 @@ export const AuctionProvider = ({ children }) => {
     unsoldInfo,
     revealedPlayer,
     tournament,
+    teamEligibility: liveEligibility,
     initTournament,
     joinAndListen,
     placeBid,
@@ -325,6 +360,7 @@ export const AuctionProvider = ({ children }) => {
     isConnected, connectionError,
     tournamentId, currentPlayer, currentBid, highestBidder, auctionStatus,
     teams, bids, players, error, soldInfo, unsoldInfo, revealedPlayer, tournament,
+    liveEligibility,
     initTournament, joinAndListen, placeBid, revealPlayer, markSold,
     markUnsold, reauctionUnsold, startAuction, endAuction, clearSoldInfo, clearUnsoldInfo,
     clearError,

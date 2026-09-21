@@ -112,6 +112,14 @@ export const createTournament = async (req, res, next) => {
         return res.status(400).json({ message: "Auction date must be in the future" });
       }
     }
+    const tournamentRules = {
+      minSquadSize: Number(req.body.minSquadSize || req.body.tournamentRules?.minSquadSize) || 15,
+      maxSquadSize: Number(req.body.maxSquadSize || req.body.tournamentRules?.maxSquadSize) || maxPlayersPerTeam || 18,
+      minReservePerSlot: Number(req.body.minReservePerSlot || req.body.tournamentRules?.minReservePerSlot) || playerBasePrice || 100,
+      maxOverseas: Number(req.body.maxOverseas || req.body.tournamentRules?.maxOverseas) || 8,
+      roleRequirements: req.body.roleRequirements || req.body.tournamentRules?.roleRequirements || {}
+    };
+
     const tournament = new Tournament({
       name,
       status,
@@ -121,6 +129,7 @@ export const createTournament = async (req, res, next) => {
       budgetPerTeam,
       maxPlayersPerTeam,
       playerBasePrice,
+      tournamentRules,
       description,
       isPaid,
       registrationFee,
@@ -206,6 +215,15 @@ export const updateTournament = async (req, res, next) => {
       payoutUpiId,
       currency
     };
+    if (req.body.tournamentRules || req.body.minSquadSize || req.body.minReservePerSlot || req.body.maxOverseas || req.body.maxSquadSize) {
+      updateData.tournamentRules = {
+        minSquadSize: Number(req.body.minSquadSize || req.body.tournamentRules?.minSquadSize) || existing.tournamentRules?.minSquadSize || 15,
+        maxSquadSize: Number(req.body.maxSquadSize || req.body.tournamentRules?.maxSquadSize) || maxPlayersPerTeam || existing.tournamentRules?.maxSquadSize || 18,
+        minReservePerSlot: Number(req.body.minReservePerSlot || req.body.tournamentRules?.minReservePerSlot) || playerBasePrice || existing.tournamentRules?.minReservePerSlot || 100,
+        maxOverseas: Number(req.body.maxOverseas || req.body.tournamentRules?.maxOverseas) || existing.tournamentRules?.maxOverseas || 8,
+        roleRequirements: req.body.roleRequirements || req.body.tournamentRules?.roleRequirements || existing.tournamentRules?.roleRequirements || {}
+      };
+    }
     if (req.body.registrationEndDate !== undefined) {
       updateData.registrationEndDate = req.body.registrationEndDate ? new Date(req.body.registrationEndDate) : null;
     }
