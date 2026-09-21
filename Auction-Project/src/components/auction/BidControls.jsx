@@ -51,6 +51,12 @@ const BidControls = () => {
     ? (selectedTeamEligibility.reason || "Team cannot bid")
     : null;
 
+  const selectedTeam = selectedTeamId ? teams?.find((t) => t._id === selectedTeamId) : null;
+  const targetSquad = tournament?.maxPlayersPerTeam || 15;
+  const currentSquadCount = selectedTeam ? (selectedTeam.squad?.length || selectedTeam.players?.length || 0) : 0;
+  const slotsNeededAfterThis = Math.max(0, targetSquad - currentSquadCount - 1);
+  const reserveNeeded = slotsNeededAfterThis * (effectiveBasePrice > 0 ? effectiveBasePrice : 100);
+
   const customNum = parseInt(customAmount, 10);
   const isCustomExceedingCap = Boolean(
     customNum && maxBidForSelectedTeam !== null && customNum > maxBidForSelectedTeam
@@ -200,56 +206,98 @@ const BidControls = () => {
         <button
           onClick={handleRaiseBid}
           disabled={!isBidding || !selectedTeamId || isCooldown || !canSelectedTeamBid}
-          title={disqualificationReason || (maxBidForSelectedTeam != null ? `Max bid cap: ₹${maxBidForSelectedTeam.toLocaleString("en-IN")}` : "")}
+          title={disqualificationReason || (maxBidForSelectedTeam != null ? `Max legal bid: ₹${maxBidForSelectedTeam.toLocaleString("en-IN")}` : "")}
           style={{
-            background: (!canSelectedTeamBid && selectedTeamId) ? "#94a3b8" : (isCooldown ? "#64748b" : "#2563eb"),
+            background: (!canSelectedTeamBid && selectedTeamId)
+              ? "linear-gradient(135deg, #475569, #334155)"
+              : (isCooldown ? "#64748b" : "linear-gradient(135deg, #2563eb, #1d4ed8)"),
             color: "#fff",
             border: "none",
             borderRadius: "10px",
             padding: "12px",
             cursor: (!isBidding || !selectedTeamId || isCooldown || !canSelectedTeamBid) ? "not-allowed" : "pointer",
-            opacity: (!isBidding || !selectedTeamId || isCooldown || !canSelectedTeamBid) ? 0.6 : 1,
+            opacity: (!isBidding || !selectedTeamId || isCooldown) ? 0.6 : 1,
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
             gap: "4px",
             transition: "all 0.2s ease",
+            boxShadow: canSelectedTeamBid && selectedTeamId ? "0 4px 12px rgba(37,99,235,0.2)" : "none",
           }}
         >
-          <div style={{ fontSize: "20px" }}>{!canSelectedTeamBid && selectedTeamId ? "⛔" : (isCooldown ? "⏳" : "🔨")}</div>
+          <div style={{ fontSize: "20px" }}>{!canSelectedTeamBid && selectedTeamId ? "🔒" : (isCooldown ? "⏳" : "🔨")}</div>
           <div style={{ fontSize: "13px", fontWeight: "800", letterSpacing: "0.5px" }}>
             {!selectedTeamId
               ? "SELECT TEAM"
               : (!canSelectedTeamBid
-                ? "BID CAPPED"
+                ? "LIMIT REACHED"
                 : (isCooldown ? "WAIT..." : `RAISE TO ₹${raiseAmount.toLocaleString("en-IN")}`))}
           </div>
           <div style={{ fontSize: "9px", fontWeight: "500", opacity: 0.9, textAlign: "center", maxWidth: "100%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {!canSelectedTeamBid && selectedTeamId
-              ? disqualificationReason
+              ? (maxBidForSelectedTeam != null ? `Cap: ₹${maxBidForSelectedTeam.toLocaleString("en-IN")}` : "Purse limit")
               : (isCooldown ? "Cooldown active" : (maxBidForSelectedTeam != null ? `Cap: ₹${maxBidForSelectedTeam.toLocaleString("en-IN")}` : "Increase the bid"))}
           </div>
         </button>
       </div>
 
-      {/* Disqualification / Cap Alert Banner */}
-      {selectedTeamId && disqualificationReason && (
+      {/* Idea 1: IPL Broadcast "Purse Tracker" Pill */}
+      {selectedTeam && (
         <div style={{
-          background: "#fef2f2",
-          border: "1px solid #fecaca",
-          borderRadius: "8px",
-          padding: "8px 12px",
-          fontSize: "12px",
-          color: "#b91c1c",
           display: "flex",
           alignItems: "center",
-          gap: "8px",
+          flexWrap: "wrap",
+          gap: "8px 12px",
+          background: !canSelectedTeamBid
+            ? "color-mix(in srgb, #f59e0b 8%, var(--card-bg-light))"
+            : "color-mix(in srgb, var(--accent-light, #2563eb) 6%, var(--card-bg-light))",
+          border: !canSelectedTeamBid ? "1.5px solid #f59e0b" : "1px solid var(--border-light)",
+          borderRadius: "12px",
+          padding: "9px 14px",
           marginBottom: "14px",
-          fontWeight: "500",
+          fontSize: "12px",
+          boxShadow: "0 1px 3px rgba(0,0,0,0.03)",
         }}>
-          <span style={{ fontSize: "15px" }}>⚠️</span>
-          <span><strong>{disqualificationReason}</strong> (Budget safety constraint active).</span>
+          <div style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "5px",
+            background: !canSelectedTeamBid
+              ? "linear-gradient(135deg, #d97706, #b45309)"
+              : "linear-gradient(135deg, #2563eb, #1d4ed8)",
+            color: "#fff",
+            padding: "2px 8px",
+            borderRadius: "6px",
+            fontWeight: "800",
+            fontSize: "10px",
+            letterSpacing: "0.5px",
+            textTransform: "uppercase",
+          }}>
+            <span>{!canSelectedTeamBid ? "🛡️ PURSE CAP" : "⚡ PURSE INFO"}</span>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--text-primary-light)", fontWeight: "600" }}>
+            <span>{selectedTeam.name}</span>
+            <span style={{ color: "var(--text-secondary-light)", fontWeight: "400" }}>•</span>
+            <span>
+              Max Legal Bid: <strong style={{ color: !canSelectedTeamBid ? "#d97706" : "#2563eb", fontWeight: "800" }}>
+                ₹{maxBidForSelectedTeam != null ? maxBidForSelectedTeam.toLocaleString("en-IN") : "—"}
+              </strong>
+            </span>
+          </div>
+
+          {slotsNeededAfterThis > 0 && (
+            <div style={{ color: "var(--text-secondary-light)", fontSize: "11px", display: "flex", alignItems: "center", gap: "4px", marginLeft: "auto" }}>
+              <span>🔒 ₹{reserveNeeded.toLocaleString("en-IN")} held for {slotsNeededAfterThis} remaining slot{slotsNeededAfterThis > 1 ? 's' : ''}</span>
+            </div>
+          )}
+
+          {!canSelectedTeamBid && disqualificationReason && (
+            <div style={{ width: "100%", fontSize: "11px", color: "#b45309", fontWeight: "500", borderTop: "1px dashed #fcd34d", paddingTop: "5px", marginTop: "2px" }}>
+              ℹ️ {disqualificationReason}
+            </div>
+          )}
         </div>
       )}
 

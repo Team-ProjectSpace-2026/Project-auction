@@ -307,11 +307,15 @@ export const AuctionProvider = ({ children }) => {
       return teamEligibility || {};
     }
     const currentBidAmount = currentBid?.amount || 0;
-    const tournamentRules = tournament?.tournamentRules || {
-      minSquadSize: 15,
-      maxSquadSize: tournament?.maxPlayersPerTeam || 18,
-      minReservePerSlot: tournament?.playerBasePrice || 100,
-      maxOverseas: 8,
+    const targetSquad = tournament?.maxPlayersPerTeam || tournament?.tournamentRules?.minSquadSize || 15;
+    const basePrice = tournament?.playerBasePrice || tournament?.tournamentRules?.minReservePerSlot || 100;
+    const tournamentRules = {
+      minSquadSize: targetSquad,
+      maxSquadSize: targetSquad,
+      minReservePerSlot: basePrice,
+      maxOverseas: tournament?.tournamentRules?.maxOverseas || 8,
+      playerBasePrice: basePrice,
+      roleRequirements: tournament?.tournamentRules?.roleRequirements || {},
     };
     const localCalc = calculateAllTeamsEligibility(
       teams,

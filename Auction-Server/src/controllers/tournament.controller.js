@@ -113,7 +113,7 @@ export const createTournament = async (req, res, next) => {
       }
     }
     const tournamentRules = {
-      minSquadSize: Number(req.body.minSquadSize || req.body.tournamentRules?.minSquadSize) || 15,
+      minSquadSize: Number(req.body.minSquadSize || req.body.tournamentRules?.minSquadSize) || maxPlayersPerTeam || 15,
       maxSquadSize: Number(req.body.maxSquadSize || req.body.tournamentRules?.maxSquadSize) || maxPlayersPerTeam || 18,
       minReservePerSlot: Number(req.body.minReservePerSlot || req.body.tournamentRules?.minReservePerSlot) || playerBasePrice || 100,
       maxOverseas: Number(req.body.maxOverseas || req.body.tournamentRules?.maxOverseas) || 8,
@@ -215,15 +215,15 @@ export const updateTournament = async (req, res, next) => {
       payoutUpiId,
       currency
     };
-    if (req.body.tournamentRules || req.body.minSquadSize || req.body.minReservePerSlot || req.body.maxOverseas || req.body.maxSquadSize) {
-      updateData.tournamentRules = {
-        minSquadSize: Number(req.body.minSquadSize || req.body.tournamentRules?.minSquadSize) || existing.tournamentRules?.minSquadSize || 15,
-        maxSquadSize: Number(req.body.maxSquadSize || req.body.tournamentRules?.maxSquadSize) || maxPlayersPerTeam || existing.tournamentRules?.maxSquadSize || 18,
-        minReservePerSlot: Number(req.body.minReservePerSlot || req.body.tournamentRules?.minReservePerSlot) || playerBasePrice || existing.tournamentRules?.minReservePerSlot || 100,
-        maxOverseas: Number(req.body.maxOverseas || req.body.tournamentRules?.maxOverseas) || existing.tournamentRules?.maxOverseas || 8,
-        roleRequirements: req.body.roleRequirements || req.body.tournamentRules?.roleRequirements || existing.tournamentRules?.roleRequirements || {}
-      };
-    }
+    const effectiveSquadSize = maxPlayersPerTeam || existing.maxPlayersPerTeam || 15;
+    const effectiveBasePrice = playerBasePrice || existing.playerBasePrice || 100;
+    updateData.tournamentRules = {
+      minSquadSize: Number(req.body.minSquadSize || req.body.tournamentRules?.minSquadSize) || effectiveSquadSize,
+      maxSquadSize: Number(req.body.maxSquadSize || req.body.tournamentRules?.maxSquadSize) || effectiveSquadSize,
+      minReservePerSlot: Number(req.body.minReservePerSlot || req.body.tournamentRules?.minReservePerSlot) || effectiveBasePrice,
+      maxOverseas: Number(req.body.maxOverseas || req.body.tournamentRules?.maxOverseas) || existing.tournamentRules?.maxOverseas || 8,
+      roleRequirements: req.body.roleRequirements || req.body.tournamentRules?.roleRequirements || existing.tournamentRules?.roleRequirements || {}
+    };
     if (req.body.registrationEndDate !== undefined) {
       updateData.registrationEndDate = req.body.registrationEndDate ? new Date(req.body.registrationEndDate) : null;
     }
