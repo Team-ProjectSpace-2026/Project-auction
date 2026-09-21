@@ -306,6 +306,7 @@ export const AuctionProvider = ({ children }) => {
     if (!teams || teams.length === 0 || !currentPlayer) {
       return teamEligibility || {};
     }
+    const currentBidAmount = currentBid?.amount || 0;
     const targetSquad = tournament?.maxPlayersPerTeam || tournament?.tournamentRules?.minSquadSize || 15;
     const basePrice = tournament?.playerBasePrice || tournament?.tournamentRules?.minReservePerSlot || 100;
     const tournamentRules = {
