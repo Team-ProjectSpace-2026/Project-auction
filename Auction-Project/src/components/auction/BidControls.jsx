@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useAuction } from "../../context/AuctionContext";
+import { getTeamPlayersCount } from "../../utils/auctionBidValidator";
 
 const TEAM_COLORS = [
   "#2563eb", "#16a34a", "#7c3aed", "#d97706",
@@ -52,10 +53,19 @@ const BidControls = () => {
     : null;
 
   const selectedTeam = selectedTeamId ? teams?.find((t) => t._id === selectedTeamId) : null;
-  const targetSquad = tournament?.maxPlayersPerTeam || 15;
-  const currentSquadCount = selectedTeam ? (selectedTeam.squad?.length || selectedTeam.players?.length || 0) : 0;
+  const targetSquad = selectedTeam?.maxPlayers
+    || tournament?.tournamentRules?.minSquadSize
+    || tournament?.minSquadSize
+    || tournament?.maxPlayersPerTeam
+    || 15;
+  const currentSquadCount = getTeamPlayersCount(selectedTeam);
   const slotsNeededAfterThis = Math.max(0, targetSquad - currentSquadCount - 1);
-  const reserveNeeded = slotsNeededAfterThis * (effectiveBasePrice > 0 ? effectiveBasePrice : 100);
+  const slotReserveCost = tournament?.tournamentRules?.playerBasePrice
+    || tournament?.playerBasePrice
+    || 100;
+  const reserveNeeded = (maxBidForSelectedTeam != null && selectedTeam?.remainingBudget != null && selectedTeam.remainingBudget > maxBidForSelectedTeam)
+    ? Math.max(0, selectedTeam.remainingBudget - maxBidForSelectedTeam)
+    : (slotsNeededAfterThis * slotReserveCost);
 
   const customNum = parseInt(customAmount, 10);
   const isCustomExceedingCap = Boolean(
