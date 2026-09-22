@@ -62,7 +62,9 @@ export const getMaxBid = (team, tournamentRules = {}, options = {}) => {
 
   const minSquadSize = typeof tournamentRules?.minSquadSize === 'number'
     ? tournamentRules.minSquadSize
-    : (typeof tournamentRules?.maxPlayersPerTeam === 'number' ? tournamentRules.maxPlayersPerTeam : 15);
+    : (typeof tournamentRules?.maxPlayersPerTeam === 'number'
+        ? tournamentRules.maxPlayersPerTeam
+        : (typeof team?.maxPlayers === 'number' ? team.maxPlayers : 15));
 
   const minReservePerSlot = typeof tournamentRules?.minReservePerSlot === 'number'
     ? tournamentRules.minReservePerSlot
@@ -140,7 +142,9 @@ export const getTeamBidStatus = (
 
   const maxSquadSize = typeof tournamentRules?.maxSquadSize === 'number'
     ? tournamentRules.maxSquadSize
-    : (typeof tournamentRules?.maxPlayersPerTeam === 'number' ? tournamentRules.maxPlayersPerTeam : 18);
+    : (typeof tournamentRules?.maxPlayersPerTeam === 'number'
+        ? tournamentRules.maxPlayersPerTeam
+        : (typeof team?.maxPlayers === 'number' ? team.maxPlayers : 18));
 
   const maxOverseas = typeof tournamentRules?.maxOverseas === 'number'
     ? tournamentRules.maxOverseas
